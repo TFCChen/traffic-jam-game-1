@@ -3,7 +3,7 @@
   "difficulty": "Intermediate",
   "cars": [
     { "id": "target", "color": "#e53935", "row": 2, "col": 0, "len": 2, "dir": "H" },
-    { "id": "car1", "color": "#8b5cf6", "row": 0, "col": 0, "len": 3, "dir": "V" },
+    { "id": "car1", "color": "#8b5cf6", "row": 0, "col": 0, "len": 2, "dir": "V" },
     { "id": "car2", "color": "#22c55e", "row": 0, "col": 1, "len": 2, "dir": "H" },
     { "id": "car3", "color": "#ec4899", "row": 1, "col": 2, "len": 3, "dir": "V" },
     { "id": "car4", "color": "#f59e0b", "row": 0, "col": 5, "len": 3, "dir": "V" },
