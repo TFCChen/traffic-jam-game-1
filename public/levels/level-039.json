@@ -2,38 +2,16 @@
   "id": 39,
   "difficulty": "Expert",
   "cars": [
-    {
-      "id": "target",
-      "color": "#e53935",
-      "row": 2,
-      "col": 1,
-      "len": 2,
-      "dir": "H"
-    },
-    {
-      "id": "yellowBus",
-      "color": "#fdd835",
-      "row": 0,
-      "col": 4,
-      "len": 3,
-      "dir": "V"
-    },
-    {
-      "id": "blue",
-      "color": "#1e88e5",
-      "row": 0,
-      "col": 1,
-      "len": 2,
-      "dir": "V"
-    },
-    {
-      "id": "green",
-      "color": "#43a047",
-      "row": 4,
-      "col": 0,
-      "len": 2,
-      "dir": "H"
-    }
+    { "id": "target", "color": "#e53935", "row": 2, "col": 1, "len": 2, "dir": "H" },
+    { "id": "green", "color": "#43a047", "row": 0, "col": 1, "len": 2, "dir": "H" },
+    { "id": "orange", "color": "#fb8c00", "row": 0, "col": 3, "len": 2, "dir": "V" },
+    { "id": "yellowBus", "color": "#fdd835", "row": 0, "col": 5, "len": 3, "dir": "V" },
+    { "id": "pink", "color": "#ec4899", "row": 1, "col": 0, "len": 2, "dir": "H" },
+    { "id": "purpleBus", "color": "#9333ea", "row": 2, "col": 0, "len": 3, "dir": "V" },
+    { "id": "blueBus", "color": "#2563eb", "row": 3, "col": 1, "len": 3, "dir": "H" },
+    { "id": "purple", "color": "#7e22ce", "row": 4, "col": 3, "len": 2, "dir": "V" },
+    { "id": "green2", "color": "#15803d", "row": 4, "col": 4, "len": 2, "dir": "H" },
+    { "id": "black", "color": "#262626", "row": 5, "col": 0, "len": 2, "dir": "H" }
   ],
   "file": "level-039.json"
 }
