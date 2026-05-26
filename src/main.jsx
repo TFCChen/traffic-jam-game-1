@@ -174,21 +174,6 @@ function Car({ car, dragging, dragPixels, down, move, up }) {
   const width = car.dir === "H" ? car.len * CELL - 12 : CELL - 12;
   const height = car.dir === "V" ? car.len * CELL - 12 : CELL - 12;
   const transform = car.dir === "H" ? `translate3d(${dragPixels}px,0,0)` : `translate3d(0,${dragPixels}px,0)`;
-  const loadLevel = async (id) => {
-    try {
-      const response = await fetch(`/levels/level-${String(id).padStart(3, "0")}.json`);
-      const level = await response.json();
-      if (level?.cars?.length) {
-        setCars(level.cars);
-      } else {
-        setCars(SAMPLE_LEVELS[id] || DEFAULT);
-      }
-      setCurrentLevel(id);
-    } catch {
-      setCars(SAMPLE_LEVELS[id] || DEFAULT);
-      setCurrentLevel(id);
-    }
-  };
 
 return (
     <button
@@ -219,21 +204,6 @@ function Wall({ className = "" }) {
 
 function Board(props) {
   const { cars, drag, mode, draft, boardMove, boardClick, carDown, dragMove, dragEnd, removeCar } = props;
-  const loadLevel = async (id) => {
-    try {
-      const response = await fetch(`/levels/level-${String(id).padStart(3, "0")}.json`);
-      const level = await response.json();
-      if (level?.cars?.length) {
-        setCars(level.cars);
-      } else {
-        setCars(SAMPLE_LEVELS[id] || DEFAULT);
-      }
-      setCurrentLevel(id);
-    } catch {
-      setCars(SAMPLE_LEVELS[id] || DEFAULT);
-      setCurrentLevel(id);
-    }
-  };
 
 return (
     <div className="board-shell">
@@ -257,22 +227,7 @@ return (
 }
 
 function Particles({ particles }) {
-  const loadLevel = async (id) => {
-    try {
-      const response = await fetch(`/levels/level-${String(id).padStart(3, "0")}.json`);
-      const level = await response.json();
-      if (level?.cars?.length) {
-        setCars(level.cars);
-      } else {
-        setCars(SAMPLE_LEVELS[id] || DEFAULT);
-      }
-      setCurrentLevel(id);
-    } catch {
-      setCars(SAMPLE_LEVELS[id] || DEFAULT);
-      setCurrentLevel(id);
-    }
-  };
-
+ 
 return (
     <div className="particle-layer">
       {particles.map((p) => <span key={p.id} className="particle" style={{ left: p.x, top: p.y, width: p.size, height: p.size, background: p.color, boxShadow: `0 0 ${p.size * 3}px ${p.color},0 0 ${p.size * 8}px rgba(255,210,80,.55)`, "--dx": `${p.dx}px`, "--dy": `${p.dy}px` }} />)}
@@ -290,21 +245,7 @@ function LevelSelector({ levels, currentLevel, onLoad }) {
     return grouped;
   }, [levels]);
 
-  const loadLevel = async (id) => {
-    try {
-      const response = await fetch(`/levels/level-${String(id).padStart(3, "0")}.json`);
-      const level = await response.json();
-      if (level?.cars?.length) {
-        setCars(level.cars);
-      } else {
-        setCars(SAMPLE_LEVELS[id] || DEFAULT);
-      }
-      setCurrentLevel(id);
-    } catch {
-      setCars(SAMPLE_LEVELS[id] || DEFAULT);
-      setCurrentLevel(id);
-    }
-  };
+
 
 return (
     <div className="level-panel">
@@ -371,21 +312,6 @@ function App() {
     }
 
     boot();
-    const loadLevel = async (id) => {
-    try {
-      const response = await fetch(`/levels/level-${String(id).padStart(3, "0")}.json`);
-      const level = await response.json();
-      if (level?.cars?.length) {
-        setCars(level.cars);
-      } else {
-        setCars(SAMPLE_LEVELS[id] || DEFAULT);
-      }
-      setCurrentLevel(id);
-    } catch {
-      setCars(SAMPLE_LEVELS[id] || DEFAULT);
-      setCurrentLevel(id);
-    }
-  };
 
 return () => {
       cancelled = true;
@@ -503,23 +429,32 @@ return () => {
     setMode("play");
     reset(level);
   }
+  const loadLevel = async (id, customIndex = levelIndex) => {
+    const meta = customIndex.find((item) => item.id === id);
+    if (!meta) return;
 
-  const loadLevel = async (id) => {
     try {
-      const response = await fetch(`/levels/level-${String(id).padStart(3, "0")}.json`);
-      const level = await response.json();
-      if (level?.cars?.length) {
-        setCars(level.cars);
-      } else {
-        setCars(SAMPLE_LEVELS[id] || DEFAULT);
-      }
-      setCurrentLevel(id);
+      const response = await fetch(`/levels/${meta.file}`);
+      const data = await response.json();
+      const normalized = normalizeLevel(data, meta);
+
+      setCurrentLevel(normalized);
+      setLevel(clone(normalized.cars));
+      setCars(clone(normalized.cars));
+      setMoves(0);
+      setDrag(null);
+      setParticles([]);
     } catch {
-      setCars(SAMPLE_LEVELS[id] || DEFAULT);
-      setCurrentLevel(id);
+      const fallback = normalizeLevel({ cars: DEFAULT }, meta);
+
+      setCurrentLevel(fallback);
+      setLevel(clone(DEFAULT));
+      setCars(clone(DEFAULT));
+      setMoves(0);
+      setDrag(null);
+      setParticles([]);
     }
   };
-
 return (
     <div className="app">
       <Particles particles={particles} />
