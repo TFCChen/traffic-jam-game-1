@@ -2,22 +2,12 @@
   "id": 3,
   "difficulty": "Beginner",
   "cars": [
-    {
-      "id": "target",
-      "color": "#e53935",
-      "row": 2,
-      "col": 2,
-      "len": 2,
-      "dir": "H"
-    },
-    {
-      "id": "purple",
-      "color": "#8e24aa",
-      "row": 0,
-      "col": 1,
-      "len": 3,
-      "dir": "V"
-    }
+    { "id": "target", "color": "#e53935", "row": 2, "col": 1, "len": 2, "dir": "H" },
+    { "id": "yellowBus", "color": "#fdd835", "row": 2, "col": 3, "len": 3, "dir": "V" },
+    { "id": "orange", "color": "#fb8c00", "row": 4, "col": 1, "len": 2, "dir": "V" },
+    { "id": "sky", "color": "#38bdf8", "row": 5, "col": 2, "len": 2, "dir": "H" },
+    { "id": "purpleBus", "color": "#c084fc", "row": 3, "col": 5, "len": 3, "dir": "V" },
+    { "id": "green", "color": "#43a047", "row": 3, "col": 1, "len": 2, "dir": "H" }
   ],
   "file": "level-003.json"
 }
