@@ -2,17 +2,18 @@
   "id": 14,
   "difficulty": "Intermediate",
   "cars": [
-    { "id": "target", "color": "#e53935", "row": 2, "col": 1, "len": 2, "dir": "H" },
-    { "id": "green", "color": "#43a047", "row": 0, "col": 0, "len": 2, "dir": "H" },
-    { "id": "orange", "color": "#fb8c00", "row": 0, "col": 2, "len": 2, "dir": "V" },
-    { "id": "sky", "color": "#38bdf8", "row": 1, "col": 4, "len": 2, "dir": "H" },
-    { "id": "pink", "color": "#ec4899", "row": 2, "col": 0, "len": 2, "dir": "V" },
-    { "id": "purple", "color": "#7e22ce", "row": 3, "col": 1, "len": 2, "dir": "V" },
-    { "id": "tan", "color": "#d6a77a", "row": 3, "col": 2, "len": 2, "dir": "H" },
-    { "id": "green2", "color": "#15803d", "row": 3, "col": 4, "len": 2, "dir": "V" },
-    { "id": "black", "color": "#262626", "row": 5, "col": 0, "len": 2, "dir": "H" },
-    { "id": "yellow", "color": "#fde047", "row": 5, "col": 2, "len": 2, "dir": "V" },
-    { "id": "brown", "color": "#7c2d12", "row": 4, "col": 4, "len": 2, "dir": "H" }
+    { "id": "target", "color": "#e53935", "row": 2, "col": 2, "len": 2, "dir": "H" },
+    { "id": "car1", "color": "#8b5cf6", "row": 0, "col": 0, "len": 2, "dir": "H" },
+    { "id": "car2", "color": "#22c55e", "row": 0, "col": 2, "len": 2, "dir": "V" },
+    { "id": "car3", "color": "#f59e0b", "row": 1, "col": 4, "len": 2, "dir": "H" },
+    { "id": "car4", "color": "#ec4899", "row": 2, "col": 0, "len": 2, "dir": "V" },
+    { "id": "car5", "color": "#3b82f6", "row": 2, "col": 1, "len": 2, "dir": "V" },
+    { "id": "car6", "color": "#14b8a6", "row": 2, "col": 4, "len": 2, "dir": "V" },
+    { "id": "car7", "color": "#84cc16", "row": 2, "col": 5, "len": 2, "dir": "V" },
+    { "id": "car8", "color": "#f97316", "row": 3, "col": 2, "len": 2, "dir": "H" },
+    { "id": "car9", "color": "#06b6d4", "row": 4, "col": 2, "len": 2, "dir": "V" },
+    { "id": "car10", "color": "#a855f7", "row": 4, "col": 4, "len": 2, "dir": "H" },
+    { "id": "car11", "color": "#10b981", "row": 5, "col": 0, "len": 2, "dir": "H" }
   ],
   "file": "level-014.json"
 }
