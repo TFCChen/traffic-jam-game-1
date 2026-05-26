@@ -1,1 +1,39 @@
-{"id": 29, "difficulty": "Beginner", "cars": [{"id": "target", "color": "#e53935", "row": 2, "col": 1, "len": 2, "dir": "H"}, {"id": "yellowBus", "color": "#fdd835", "row": 0, "col": 4, "len": 3, "dir": "V"}, {"id": "blue", "color": "#1e88e5", "row": 0, "col": 1, "len": 2, "dir": "V"}, {"id": "green", "color": "#43a047", "row": 4, "col": 0, "len": 2, "dir": "H"}]}
+{
+  "id": 29,
+  "difficulty": "Advanced",
+  "cars": [
+    {
+      "id": "target",
+      "color": "#e53935",
+      "row": 2,
+      "col": 1,
+      "len": 2,
+      "dir": "H"
+    },
+    {
+      "id": "yellowBus",
+      "color": "#fdd835",
+      "row": 0,
+      "col": 4,
+      "len": 3,
+      "dir": "V"
+    },
+    {
+      "id": "blue",
+      "color": "#1e88e5",
+      "row": 0,
+      "col": 1,
+      "len": 2,
+      "dir": "V"
+    },
+    {
+      "id": "green",
+      "color": "#43a047",
+      "row": 4,
+      "col": 0,
+      "len": 2,
+      "dir": "H"
+    }
+  ],
+  "file": "level-029.json"
+}

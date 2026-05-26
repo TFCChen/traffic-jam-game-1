@@ -1,1 +1,23 @@
-{"id": 3, "difficulty": "Beginner", "cars": [{"id": "target", "color": "#e53935", "row": 2, "col": 2, "len": 2, "dir": "H"}, {"id": "purple", "color": "#8e24aa", "row": 0, "col": 1, "len": 3, "dir": "V"}]}
+{
+  "id": 3,
+  "difficulty": "Beginner",
+  "cars": [
+    {
+      "id": "target",
+      "color": "#e53935",
+      "row": 2,
+      "col": 2,
+      "len": 2,
+      "dir": "H"
+    },
+    {
+      "id": "purple",
+      "color": "#8e24aa",
+      "row": 0,
+      "col": 1,
+      "len": 3,
+      "dir": "V"
+    }
+  ],
+  "file": "level-003.json"
+}

@@ -1,1 +1,202 @@
-[{"id": 1, "difficulty": "Beginner", "file": "level-001.json"}, {"id": 2, "difficulty": "Beginner", "file": "level-002.json"}, {"id": 3, "difficulty": "Beginner", "file": "level-003.json"}, {"id": 4, "difficulty": "Beginner", "file": "level-004.json"}, {"id": 5, "difficulty": "Beginner", "file": "level-005.json"}, {"id": 6, "difficulty": "Beginner", "file": "level-006.json"}, {"id": 7, "difficulty": "Beginner", "file": "level-007.json"}, {"id": 8, "difficulty": "Beginner", "file": "level-008.json"}, {"id": 9, "difficulty": "Beginner", "file": "level-009.json"}, {"id": 10, "difficulty": "Beginner", "file": "level-010.json"}, {"id": 11, "difficulty": "Beginner", "file": "level-011.json"}, {"id": 12, "difficulty": "Beginner", "file": "level-012.json"}, {"id": 13, "difficulty": "Beginner", "file": "level-013.json"}, {"id": 14, "difficulty": "Beginner", "file": "level-014.json"}, {"id": 15, "difficulty": "Beginner", "file": "level-015.json"}, {"id": 16, "difficulty": "Beginner", "file": "level-016.json"}, {"id": 17, "difficulty": "Beginner", "file": "level-017.json"}, {"id": 18, "difficulty": "Beginner", "file": "level-018.json"}, {"id": 19, "difficulty": "Beginner", "file": "level-019.json"}, {"id": 20, "difficulty": "Beginner", "file": "level-020.json"}, {"id": 21, "difficulty": "Beginner", "file": "level-021.json"}, {"id": 22, "difficulty": "Beginner", "file": "level-022.json"}, {"id": 23, "difficulty": "Beginner", "file": "level-023.json"}, {"id": 24, "difficulty": "Beginner", "file": "level-024.json"}, {"id": 25, "difficulty": "Beginner", "file": "level-025.json"}, {"id": 26, "difficulty": "Beginner", "file": "level-026.json"}, {"id": 27, "difficulty": "Beginner", "file": "level-027.json"}, {"id": 28, "difficulty": "Beginner", "file": "level-028.json"}, {"id": 29, "difficulty": "Beginner", "file": "level-029.json"}, {"id": 30, "difficulty": "Beginner", "file": "level-030.json"}, {"id": 31, "difficulty": "Beginner", "file": "level-031.json"}, {"id": 32, "difficulty": "Beginner", "file": "level-032.json"}, {"id": 33, "difficulty": "Beginner", "file": "level-033.json"}, {"id": 34, "difficulty": "Beginner", "file": "level-034.json"}, {"id": 35, "difficulty": "Beginner", "file": "level-035.json"}, {"id": 36, "difficulty": "Beginner", "file": "level-036.json"}, {"id": 37, "difficulty": "Beginner", "file": "level-037.json"}, {"id": 38, "difficulty": "Beginner", "file": "level-038.json"}, {"id": 39, "difficulty": "Beginner", "file": "level-039.json"}, {"id": 40, "difficulty": "Beginner", "file": "level-040.json"}]
+[
+  {
+    "id": 1,
+    "difficulty": "Beginner",
+    "file": "level-001.json"
+  },
+  {
+    "id": 2,
+    "difficulty": "Beginner",
+    "file": "level-002.json"
+  },
+  {
+    "id": 3,
+    "difficulty": "Beginner",
+    "file": "level-003.json"
+  },
+  {
+    "id": 4,
+    "difficulty": "Beginner",
+    "file": "level-004.json"
+  },
+  {
+    "id": 5,
+    "difficulty": "Beginner",
+    "file": "level-005.json"
+  },
+  {
+    "id": 6,
+    "difficulty": "Beginner",
+    "file": "level-006.json"
+  },
+  {
+    "id": 7,
+    "difficulty": "Beginner",
+    "file": "level-007.json"
+  },
+  {
+    "id": 8,
+    "difficulty": "Beginner",
+    "file": "level-008.json"
+  },
+  {
+    "id": 9,
+    "difficulty": "Beginner",
+    "file": "level-009.json"
+  },
+  {
+    "id": 10,
+    "difficulty": "Beginner",
+    "file": "level-010.json"
+  },
+  {
+    "id": 11,
+    "difficulty": "Intermediate",
+    "file": "level-011.json"
+  },
+  {
+    "id": 12,
+    "difficulty": "Intermediate",
+    "file": "level-012.json"
+  },
+  {
+    "id": 13,
+    "difficulty": "Intermediate",
+    "file": "level-013.json"
+  },
+  {
+    "id": 14,
+    "difficulty": "Intermediate",
+    "file": "level-014.json"
+  },
+  {
+    "id": 15,
+    "difficulty": "Intermediate",
+    "file": "level-015.json"
+  },
+  {
+    "id": 16,
+    "difficulty": "Intermediate",
+    "file": "level-016.json"
+  },
+  {
+    "id": 17,
+    "difficulty": "Intermediate",
+    "file": "level-017.json"
+  },
+  {
+    "id": 18,
+    "difficulty": "Intermediate",
+    "file": "level-018.json"
+  },
+  {
+    "id": 19,
+    "difficulty": "Intermediate",
+    "file": "level-019.json"
+  },
+  {
+    "id": 20,
+    "difficulty": "Intermediate",
+    "file": "level-020.json"
+  },
+  {
+    "id": 21,
+    "difficulty": "Advanced",
+    "file": "level-021.json"
+  },
+  {
+    "id": 22,
+    "difficulty": "Advanced",
+    "file": "level-022.json"
+  },
+  {
+    "id": 23,
+    "difficulty": "Advanced",
+    "file": "level-023.json"
+  },
+  {
+    "id": 24,
+    "difficulty": "Advanced",
+    "file": "level-024.json"
+  },
+  {
+    "id": 25,
+    "difficulty": "Advanced",
+    "file": "level-025.json"
+  },
+  {
+    "id": 26,
+    "difficulty": "Advanced",
+    "file": "level-026.json"
+  },
+  {
+    "id": 27,
+    "difficulty": "Advanced",
+    "file": "level-027.json"
+  },
+  {
+    "id": 28,
+    "difficulty": "Advanced",
+    "file": "level-028.json"
+  },
+  {
+    "id": 29,
+    "difficulty": "Advanced",
+    "file": "level-029.json"
+  },
+  {
+    "id": 30,
+    "difficulty": "Advanced",
+    "file": "level-030.json"
+  },
+  {
+    "id": 31,
+    "difficulty": "Expert",
+    "file": "level-031.json"
+  },
+  {
+    "id": 32,
+    "difficulty": "Expert",
+    "file": "level-032.json"
+  },
+  {
+    "id": 33,
+    "difficulty": "Expert",
+    "file": "level-033.json"
+  },
+  {
+    "id": 34,
+    "difficulty": "Expert",
+    "file": "level-034.json"
+  },
+  {
+    "id": 35,
+    "difficulty": "Expert",
+    "file": "level-035.json"
+  },
+  {
+    "id": 36,
+    "difficulty": "Expert",
+    "file": "level-036.json"
+  },
+  {
+    "id": 37,
+    "difficulty": "Expert",
+    "file": "level-037.json"
+  },
+  {
+    "id": 38,
+    "difficulty": "Expert",
+    "file": "level-038.json"
+  },
+  {
+    "id": 39,
+    "difficulty": "Expert",
+    "file": "level-039.json"
+  },
+  {
+    "id": 40,
+    "difficulty": "Expert",
+    "file": "level-040.json"
+  }
+]
