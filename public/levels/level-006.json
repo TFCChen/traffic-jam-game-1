@@ -11,7 +11,7 @@
     { "id": "pink", "color": "#ec4899", "row": 3, "col": 0, "len": 2, "dir": "H" },
     { "id": "purple", "color": "#7e22ce", "row": 3, "col": 2, "len": 2, "dir": "V" },
     { "id": "green2", "color": "#15803d", "row": 4, "col": 0, "len": 2, "dir": "V" },
-    { "id": "blueBus", "color": "#2563eb", "row": 3, "col": 3, "len": 3, "dir": "V" },
+    { "id": "blueBus", "color": "#2563eb", "row": 2, "col": 3, "len": 3, "dir": "V" },
     { "id": "tealBus", "color": "#059669", "row": 5, "col": 3, "len": 3, "dir": "H" }
   ],
   "file": "level-006.json"
