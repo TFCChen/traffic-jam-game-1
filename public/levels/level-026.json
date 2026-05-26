@@ -2,38 +2,19 @@
   "id": 26,
   "difficulty": "Advanced",
   "cars": [
-    {
-      "id": "target",
-      "color": "#e53935",
-      "row": 2,
-      "col": 1,
-      "len": 2,
-      "dir": "H"
-    },
-    {
-      "id": "yellowBus",
-      "color": "#fdd835",
-      "row": 0,
-      "col": 4,
-      "len": 3,
-      "dir": "V"
-    },
-    {
-      "id": "blue",
-      "color": "#1e88e5",
-      "row": 0,
-      "col": 1,
-      "len": 2,
-      "dir": "V"
-    },
-    {
-      "id": "green",
-      "color": "#43a047",
-      "row": 4,
-      "col": 0,
-      "len": 2,
-      "dir": "H"
-    }
+    { "id": "target", "color": "#e53935", "row": 2, "col": 1, "len": 2, "dir": "H" },
+    { "id": "green", "color": "#43a047", "row": 0, "col": 0, "len": 2, "dir": "V" },
+    { "id": "yellowBus", "color": "#fdd835", "row": 0, "col": 3, "len": 3, "dir": "H" },
+    { "id": "orange", "color": "#fb8c00", "row": 1, "col": 0, "len": 2, "dir": "V" },
+    { "id": "green2", "color": "#65a30d", "row": 1, "col": 1, "len": 2, "dir": "V" },
+    { "id": "sky", "color": "#38bdf8", "row": 1, "col": 2, "len": 2, "dir": "V" },
+    { "id": "purpleBus", "color": "#9333ea", "row": 1, "col": 3, "len": 3, "dir": "V" },
+    { "id": "pink", "color": "#ec4899", "row": 2, "col": 4, "len": 2, "dir": "V" },
+    { "id": "purple", "color": "#7e22ce", "row": 3, "col": 0, "len": 2, "dir": "V" },
+    { "id": "greenBus", "color": "#059669", "row": 3, "col": 1, "len": 3, "dir": "H" },
+    { "id": "green3", "color": "#15803d", "row": 4, "col": 2, "len": 2, "dir": "V" },
+    { "id": "black", "color": "#262626", "row": 4, "col": 5, "len": 2, "dir": "V" },
+    { "id": "tan", "color": "#d6a77a", "row": 5, "col": 3, "len": 2, "dir": "H" }
   ],
   "file": "level-026.json"
 }
