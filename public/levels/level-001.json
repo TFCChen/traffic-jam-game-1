@@ -2,38 +2,14 @@
   "id": 1,
   "difficulty": "Beginner",
   "cars": [
-    {
-      "id": "target",
-      "color": "#e53935",
-      "row": 2,
-      "col": 1,
-      "len": 2,
-      "dir": "H"
-    },
-    {
-      "id": "yellowBus",
-      "color": "#fdd835",
-      "row": 0,
-      "col": 4,
-      "len": 3,
-      "dir": "V"
-    },
-    {
-      "id": "blue",
-      "color": "#1e88e5",
-      "row": 0,
-      "col": 1,
-      "len": 2,
-      "dir": "V"
-    },
-    {
-      "id": "green",
-      "color": "#43a047",
-      "row": 4,
-      "col": 0,
-      "len": 2,
-      "dir": "H"
-    }
+    { "id": "green", "color": "#43a047", "row": 0, "col": 0, "len": 2, "dir": "H" },
+    { "id": "purpleBus", "color": "#9333ea", "row": 1, "col": 0, "len": 3, "dir": "V" },
+    { "id": "yellowBus", "color": "#fdd835", "row": 0, "col": 5, "len": 3, "dir": "V" },
+    { "id": "target", "color": "#e53935", "row": 2, "col": 1, "len": 2, "dir": "H" },
+    { "id": "blueBus", "color": "#2563eb", "row": 1, "col": 3, "len": 3, "dir": "V" },
+    { "id": "sky", "color": "#38bdf8", "row": 3, "col": 4, "len": 2, "dir": "H" },
+    { "id": "orange", "color": "#fb8c00", "row": 4, "col": 0, "len": 2, "dir": "V" },
+    { "id": "tealBus", "color": "#059669", "row": 5, "col": 1, "len": 3, "dir": "H" }
   ],
   "file": "level-001.json"
 }
