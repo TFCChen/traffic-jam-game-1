@@ -65,3 +65,5 @@
   background:rgba(255,255,255,.26);
   box-shadow:0 0 18px rgba(125,211,252,.35);
 }
+
+.level-panel{display:flex;flex-wrap:wrap;gap:8px;max-width:520px;justify-content:center;margin-bottom:16px}.level-btn{width:42px;height:42px;border:none;border-radius:12px;background:#1e293b;color:#fff;font-weight:700}.level-btn.active{background:#0ea5e9}

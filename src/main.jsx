@@ -13,6 +13,36 @@ const DEFAULT = [
   { id: "purple", color: "#8e24aa", row: 4, col: 3, len: 2, dir: "H" },
 ];
 
+
+const LEVEL_INDEX = Array.from({ length: 40 }, (_, index) => ({
+  id: index + 1,
+  difficulty:
+    index < 10 ? "Beginner" :
+    index < 20 ? "Intermediate" :
+    index < 30 ? "Advanced" : "Expert",
+}));
+
+const SAMPLE_LEVELS = {
+  1: [
+    { id: "target", color: "#e53935", row: 2, col: 1, len: 2, dir: "H" },
+    { id: "yellowBus", color: "#fdd835", row: 0, col: 4, len: 3, dir: "V" },
+    { id: "blue", color: "#1e88e5", row: 0, col: 1, len: 2, dir: "V" },
+    { id: "green", color: "#43a047", row: 4, col: 0, len: 2, dir: "H" },
+  ],
+  2: [
+    { id: "target", color: "#e53935", row: 2, col: 0, len: 2, dir: "H" },
+    { id: "bus", color: "#fdd835", row: 0, col: 3, len: 3, dir: "V" },
+    { id: "blue", color: "#1e88e5", row: 0, col: 0, len: 2, dir: "V" },
+    { id: "green", color: "#43a047", row: 4, col: 2, len: 2, dir: "H" },
+  ],
+  3: [
+    { id: "target", color: "#e53935", row: 2, col: 2, len: 2, dir: "H" },
+    { id: "bus", color: "#fdd835", row: 1, col: 5, len: 3, dir: "V" },
+    { id: "purple", color: "#8e24aa", row: 0, col: 1, len: 3, dir: "V" },
+    { id: "green", color: "#43a047", row: 5, col: 0, len: 2, dir: "H" },
+  ]
+};
+
 const PALETTE = [
   { key: "target", label: "紅車", color: "#e53935", len: 2 },
   { key: "car2", label: "2格車", color: "#1e88e5", len: 2 },
@@ -144,7 +174,23 @@ function Car({ car, dragging, dragPixels, down, move, up }) {
   const width = car.dir === "H" ? car.len * CELL - 12 : CELL - 12;
   const height = car.dir === "V" ? car.len * CELL - 12 : CELL - 12;
   const transform = car.dir === "H" ? `translate3d(${dragPixels}px,0,0)` : `translate3d(0,${dragPixels}px,0)`;
-  return (
+  const loadLevel = async (id) => {
+    try {
+      const response = await fetch(`/levels/level-${String(id).padStart(3, "0")}.json`);
+      const level = await response.json();
+      if (level?.cars?.length) {
+        setCars(level.cars);
+      } else {
+        setCars(SAMPLE_LEVELS[id] || DEFAULT);
+      }
+      setCurrentLevel(id);
+    } catch {
+      setCars(SAMPLE_LEVELS[id] || DEFAULT);
+      setCurrentLevel(id);
+    }
+  };
+
+return (
     <button
       type="button" tabIndex={-1} className="car-button"
       onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
@@ -173,7 +219,23 @@ function Wall({ className = "" }) {
 
 function Board(props) {
   const { cars, drag, mode, draft, boardMove, boardClick, carDown, dragMove, dragEnd, removeCar } = props;
-  return (
+  const loadLevel = async (id) => {
+    try {
+      const response = await fetch(`/levels/level-${String(id).padStart(3, "0")}.json`);
+      const level = await response.json();
+      if (level?.cars?.length) {
+        setCars(level.cars);
+      } else {
+        setCars(SAMPLE_LEVELS[id] || DEFAULT);
+      }
+      setCurrentLevel(id);
+    } catch {
+      setCars(SAMPLE_LEVELS[id] || DEFAULT);
+      setCurrentLevel(id);
+    }
+  };
+
+return (
     <div className="board-shell">
       <div className="board-backplate" />
       <Wall className="wall-left" /><Wall className="wall-top" /><Wall className="wall-bottom" />
@@ -195,7 +257,23 @@ function Board(props) {
 }
 
 function Particles({ particles }) {
-  return (
+  const loadLevel = async (id) => {
+    try {
+      const response = await fetch(`/levels/level-${String(id).padStart(3, "0")}.json`);
+      const level = await response.json();
+      if (level?.cars?.length) {
+        setCars(level.cars);
+      } else {
+        setCars(SAMPLE_LEVELS[id] || DEFAULT);
+      }
+      setCurrentLevel(id);
+    } catch {
+      setCars(SAMPLE_LEVELS[id] || DEFAULT);
+      setCurrentLevel(id);
+    }
+  };
+
+return (
     <div className="particle-layer">
       {particles.map((p) => <span key={p.id} className="particle" style={{ left: p.x, top: p.y, width: p.size, height: p.size, background: p.color, boxShadow: `0 0 ${p.size * 3}px ${p.color},0 0 ${p.size * 8}px rgba(255,210,80,.55)`, "--dx": `${p.dx}px`, "--dy": `${p.dy}px` }} />)}
     </div>
@@ -212,7 +290,23 @@ function LevelSelector({ levels, currentLevel, onLoad }) {
     return grouped;
   }, [levels]);
 
-  return (
+  const loadLevel = async (id) => {
+    try {
+      const response = await fetch(`/levels/level-${String(id).padStart(3, "0")}.json`);
+      const level = await response.json();
+      if (level?.cars?.length) {
+        setCars(level.cars);
+      } else {
+        setCars(SAMPLE_LEVELS[id] || DEFAULT);
+      }
+      setCurrentLevel(id);
+    } catch {
+      setCars(SAMPLE_LEVELS[id] || DEFAULT);
+      setCurrentLevel(id);
+    }
+  };
+
+return (
     <div className="level-panel">
       {DIFFICULTIES.map((difficulty) => (
         <section key={difficulty} className="level-section">
@@ -277,7 +371,23 @@ function App() {
     }
 
     boot();
-    return () => {
+    const loadLevel = async (id) => {
+    try {
+      const response = await fetch(`/levels/level-${String(id).padStart(3, "0")}.json`);
+      const level = await response.json();
+      if (level?.cars?.length) {
+        setCars(level.cars);
+      } else {
+        setCars(SAMPLE_LEVELS[id] || DEFAULT);
+      }
+      setCurrentLevel(id);
+    } catch {
+      setCars(SAMPLE_LEVELS[id] || DEFAULT);
+      setCurrentLevel(id);
+    }
+  };
+
+return () => {
       cancelled = true;
     };
   }, []);
@@ -394,7 +504,23 @@ function App() {
     reset(level);
   }
 
-  return (
+  const loadLevel = async (id) => {
+    try {
+      const response = await fetch(`/levels/level-${String(id).padStart(3, "0")}.json`);
+      const level = await response.json();
+      if (level?.cars?.length) {
+        setCars(level.cars);
+      } else {
+        setCars(SAMPLE_LEVELS[id] || DEFAULT);
+      }
+      setCurrentLevel(id);
+    } catch {
+      setCars(SAMPLE_LEVELS[id] || DEFAULT);
+      setCurrentLevel(id);
+    }
+  };
+
+return (
     <div className="app">
       <Particles particles={particles} />
       <main className="game-layout">
