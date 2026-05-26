@@ -2,16 +2,14 @@
   "id": 12,
   "difficulty": "Intermediate",
   "cars": [
-    { "id": "green", "color": "#43a047", "row": 0, "col": 1, "len": 2, "dir": "H" },
-    { "id": "orange", "color": "#fb8c00", "row": 0, "col": 3, "len": 2, "dir": "V" },
-    { "id": "yellowBus", "color": "#fdd835", "row": 0, "col": 5, "len": 3, "dir": "V" },
-    { "id": "pink", "color": "#ec4899", "row": 1, "col": 0, "len": 2, "dir": "H" },
-    { "id": "target", "color": "#e53935", "row": 2, "col": 1, "len": 2, "dir": "H" },
-    { "id": "purpleBus", "color": "#9333ea", "row": 2, "col": 0, "len": 3, "dir": "V" },
-    { "id": "blueBus", "color": "#2563eb", "row": 3, "col": 1, "len": 3, "dir": "H" },
-    { "id": "purple", "color": "#7e22ce", "row": 4, "col": 3, "len": 2, "dir": "V" },
-    { "id": "green2", "color": "#15803d", "row": 4, "col": 4, "len": 2, "dir": "H" },
-    { "id": "tan", "color": "#d6a77a", "row": 5, "col": 0, "len": 2, "dir": "H" }
+    { "id": "target", "color": "#e53935", "row": 2, "col": 0, "len": 2, "dir": "H" },
+    { "id": "car1", "color": "#8b5cf6", "row": 0, "col": 0, "len": 3, "dir": "V" },
+    { "id": "car2", "color": "#22c55e", "row": 0, "col": 1, "len": 2, "dir": "H" },
+    { "id": "car3", "color": "#ec4899", "row": 1, "col": 2, "len": 3, "dir": "V" },
+    { "id": "car4", "color": "#f59e0b", "row": 0, "col": 5, "len": 3, "dir": "V" },
+    { "id": "car5", "color": "#3b82f6", "row": 3, "col": 3, "len": 3, "dir": "H" },
+    { "id": "car6", "color": "#14b8a6", "row": 4, "col": 4, "len": 2, "dir": "V" },
+    { "id": "car7", "color": "#84cc16", "row": 5, "col": 0, "len": 3, "dir": "H" }
   ],
   "file": "level-012.json"
 }
