@@ -1,0 +1,47 @@
+{
+  "id": 7,
+  "difficulty": "Beginner",
+  "title": "Beginner 7",
+  "cars": [
+    {
+      "id": "target",
+      "color": "#e53935",
+      "row": 2,
+      "col": 1,
+      "len": 2,
+      "dir": "H"
+    },
+    {
+      "id": "yellowBus",
+      "color": "#fdd835",
+      "row": 0,
+      "col": 4,
+      "len": 3,
+      "dir": "V"
+    },
+    {
+      "id": "blue",
+      "color": "#1e88e5",
+      "row": 0,
+      "col": 1,
+      "len": 2,
+      "dir": "V"
+    },
+    {
+      "id": "green",
+      "color": "#43a047",
+      "row": 4,
+      "col": 0,
+      "len": 2,
+      "dir": "H"
+    },
+    {
+      "id": "purple",
+      "color": "#8e24aa",
+      "row": 4,
+      "col": 3,
+      "len": 2,
+      "dir": "H"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 
@@ -22,11 +22,47 @@ const PALETTE = [
   { key: "bus3b", label: "3格車", color: "#ec9fca", len: 3 },
 ];
 
-const clone = (level) => level.map((car) => ({ ...car }));
+const DIFFICULTIES = ["Beginner", "Intermediate", "Advanced", "Expert"];
+
+function makeFallbackIndex() {
+  return Array.from({ length: 40 }, (_, index) => {
+    const id = index + 1;
+    const difficulty = id <= 10 ? "Beginner" : id <= 20 ? "Intermediate" : id <= 30 ? "Advanced" : "Expert";
+    return {
+      id,
+      difficulty,
+      title: `${difficulty} ${id}`,
+      file: `level-${String(id).padStart(3, "0")}.json`,
+    };
+  });
+}
+
+const FALLBACK_INDEX = makeFallbackIndex();
+
+const clone = (level) => (Array.isArray(level) ? level.map((car) => ({ ...car })) : []);
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-const exited = (car) => car.id === "target" && car.row === EXIT_ROW && car.col + car.len > GRID - 1;
+const exited = (car) => Boolean(car && car.id === "target" && car.row === EXIT_ROW && car.col + car.len > GRID - 1);
+
+function normalizeLevel(raw, meta) {
+  const fallbackMeta = meta || FALLBACK_INDEX[0];
+  const cars = Array.isArray(raw?.cars) && raw.cars.length > 0 ? raw.cars : DEFAULT;
+  return {
+    id: raw?.id ?? fallbackMeta.id,
+    difficulty: raw?.difficulty ?? fallbackMeta.difficulty,
+    title: raw?.title ?? fallbackMeta.title ?? `Level ${fallbackMeta.id}`,
+    file: raw?.file ?? fallbackMeta.file,
+    cars: clone(cars),
+  };
+}
+
+async function fetchJson(path) {
+  const response = await fetch(path, { cache: "no-store" });
+  if (!response.ok) throw new Error(`Failed to load ${path}`);
+  return response.json();
+}
 
 function cells(car) {
+  if (!car) return [];
   return Array.from({ length: car.len }, (_, i) => ({
     row: car.row + (car.dir === "V" ? i : 0),
     col: car.col + (car.dir === "H" ? i : 0),
@@ -43,7 +79,7 @@ function overlaps(test, cars, allowExit = true) {
     if (allowExit && test.id === "target" && test.row === EXIT_ROW && c.col >= GRID) continue;
     if (c.col < 0 || c.col >= GRID) return true;
     for (const car of cars) {
-      if (car.id === test.id || exited(car)) continue;
+      if (!car || car.id === test.id || exited(car)) continue;
       if (cells(car).some((x) => x.row === c.row && x.col === c.col)) return true;
     }
   }
@@ -52,17 +88,21 @@ function overlaps(test, cars, allowExit = true) {
 
 function limits(car, cars) {
   let min = 0, max = 0;
+  if (!car) return { min, max };
+
   for (let d = -1; d >= -GRID; d--) {
     const t = { ...car, row: car.row + (car.dir === "V" ? d : 0), col: car.col + (car.dir === "H" ? d : 0) };
     if (overlaps(t, cars)) break;
     min = d;
   }
+
   const positiveLimit = car.id === "target" && car.row === EXIT_ROW ? EXIT_COL - car.col : GRID;
   for (let d = 1; d <= positiveLimit; d++) {
     const t = { ...car, row: car.row + (car.dir === "V" ? d : 0), col: car.col + (car.dir === "H" ? d : 0) };
     if (overlaps(t, cars)) break;
     max = d;
   }
+
   return { min, max };
 }
 
@@ -84,7 +124,23 @@ function makeParticles(rect, color) {
   });
 }
 
+function runLogicTests() {
+  const target = DEFAULT.find((car) => car.id === "target");
+  const index = makeFallbackIndex();
+  console.assert(index.length === 40, "fallback index should generate 40 levels");
+  console.assert(index[0].file === "level-001.json", "level 1 should map to level-001.json");
+  console.assert(Boolean(target), "default level should include target");
+  console.assert(limits(target, DEFAULT).max > 0, "target should be movable");
+  console.assert(exited({ id: "target", row: EXIT_ROW, col: GRID - 1, len: 2, dir: "H" }), "target should win when front passes exit");
+  console.assert(inside({ id: "x", color: "#fff", row: 0, col: 0, len: 3, dir: "H" }), "editor placement should validate bounds");
+}
+if (typeof window !== "undefined" && !window.__TRAFFIC_JAM_TESTED__) {
+  window.__TRAFFIC_JAM_TESTED__ = true;
+  runLogicTests();
+}
+
 function Car({ car, dragging, dragPixels, down, move, up }) {
+  if (!car) return null;
   const width = car.dir === "H" ? car.len * CELL - 12 : CELL - 12;
   const height = car.dir === "V" ? car.len * CELL - 12 : CELL - 12;
   const transform = car.dir === "H" ? `translate3d(${dragPixels}px,0,0)` : `translate3d(0,${dragPixels}px,0)`;
@@ -146,7 +202,42 @@ function Particles({ particles }) {
   );
 }
 
+function LevelSelector({ levels, currentLevel, onLoad }) {
+  const groups = useMemo(() => {
+    const grouped = { Beginner: [], Intermediate: [], Advanced: [], Expert: [] };
+    levels.forEach((level) => {
+      const key = grouped[level.difficulty] ? level.difficulty : "Beginner";
+      grouped[key].push(level);
+    });
+    return grouped;
+  }, [levels]);
+
+  return (
+    <div className="level-panel">
+      {DIFFICULTIES.map((difficulty) => (
+        <section key={difficulty} className="level-section">
+          <div className="level-title">{difficulty}</div>
+          <div className="level-grid">
+            {groups[difficulty].map((level) => (
+              <button
+                key={level.id}
+                type="button"
+                onClick={() => onLoad(level.id)}
+                className={`level-button ${currentLevel?.id === level.id ? "active" : ""}`}
+              >
+                {level.id}
+              </button>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+}
+
 function App() {
+  const [levelIndex, setLevelIndex] = useState(FALLBACK_INDEX);
+  const [currentLevel, setCurrentLevel] = useState(() => normalizeLevel({ cars: DEFAULT }, FALLBACK_INDEX[0]));
   const [level, setLevel] = useState(() => clone(DEFAULT));
   const [cars, setCars] = useState(() => clone(DEFAULT));
   const [mode, setMode] = useState("play");
@@ -156,13 +247,77 @@ function App() {
   const [template, setTemplate] = useState(PALETTE[0]);
   const [dir, setDir] = useState("H");
   const [draft, setDraft] = useState(null);
+  const [loadMessage, setLoadMessage] = useState("");
   const lastParticle = useRef(0);
 
-  const target = cars.find((car) => car.id === "target");
+  const target = cars.find((car) => car?.id === "target");
   const won = Boolean(target && exited(target));
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function boot() {
+      try {
+        const index = await fetchJson("/levels/index.json");
+        if (cancelled) return;
+        if (Array.isArray(index) && index.length > 0) {
+          setLevelIndex(index);
+          await loadLevel(index[0].id, index);
+          setLoadMessage("");
+          return;
+        }
+      } catch {
+        // Fall back to generated level buttons and built-in default level.
+      }
+
+      if (!cancelled) {
+        setLevelIndex(FALLBACK_INDEX);
+        setLoadMessage("目前使用內建預設關卡；加入 public/levels 後會自動讀取。");
+      }
+    }
+
+    boot();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   function reset(next = level) {
-    setCars(clone(next)); setMoves(0); setDrag(null); setParticles([]); lastParticle.current = 0;
+    setCars(clone(next));
+    setMoves(0);
+    setDrag(null);
+    setParticles([]);
+    lastParticle.current = 0;
+  }
+
+  async function loadLevel(levelId, sourceIndex = levelIndex) {
+    const meta = sourceIndex.find((item) => Number(item.id) === Number(levelId)) || sourceIndex[0] || FALLBACK_INDEX[0];
+    let data;
+
+    try {
+      data = await fetchJson(`/levels/${meta.file}`);
+    } catch {
+      data = { ...meta, cars: DEFAULT };
+      setLoadMessage(`找不到 ${meta.file}，暫時使用預設關卡。`);
+    }
+
+    const normalized = normalizeLevel(data, meta);
+    setCurrentLevel(normalized);
+    setLevel(clone(normalized.cars));
+    setMode("play");
+    reset(normalized.cars);
+  }
+
+  function loadNextLevel() {
+    const currentIndex = levelIndex.findIndex((item) => Number(item.id) === Number(currentLevel.id));
+    const next = levelIndex[(currentIndex + 1 + levelIndex.length) % levelIndex.length] || levelIndex[0];
+    loadLevel(next.id);
+  }
+
+  function loadPreviousLevel() {
+    const currentIndex = levelIndex.findIndex((item) => Number(item.id) === Number(currentLevel.id));
+    const previous = levelIndex[(currentIndex - 1 + levelIndex.length) % levelIndex.length] || levelIndex[0];
+    loadLevel(previous.id);
   }
 
   function addParticles(el, color, throttle = 0) {
@@ -176,7 +331,8 @@ function App() {
 
   function startDrag(e, car) {
     if (won) return;
-    e.preventDefault(); e.currentTarget.setPointerCapture?.(e.pointerId);
+    e.preventDefault();
+    e.currentTarget.setPointerCapture?.(e.pointerId);
     addParticles(e.currentTarget, car.color);
     const lim = limits(car, cars);
     setDrag({ id: car.id, startX: e.clientX, startY: e.clientY, startRow: car.row, startCol: car.col, min: lim.min, max: lim.max, pixels: 0 });
@@ -232,7 +388,10 @@ function App() {
 
   function playCustom() {
     if (!level.some((car) => car.id === "target")) return;
-    setMode("play"); reset(level);
+    const customLevel = { id: "custom", difficulty: "Custom", title: "Custom", file: null, cars: clone(level) };
+    setCurrentLevel(customLevel);
+    setMode("play");
+    reset(level);
   }
 
   return (
@@ -240,31 +399,37 @@ function App() {
       <Particles particles={particles} />
       <main className="game-layout">
         <div className="top-panel">
-          <span className="panel-title">{mode === "edit" ? "自訂關卡" : "步數"}</span>
+          <span className="panel-title">{mode === "edit" ? "自訂關卡" : `${currentLevel.difficulty} ${currentLevel.id}`}</span>
           {mode === "play" && <span className="moves">{moves}</span>}
           {won && <span className="win-badge">通關</span>}
           {mode === "play" ? (
             <>
-              <button onClick={() => reset()} className="ui-button">重置</button>
-              <button onClick={enterEditor} className="ui-button accent">自訂關卡</button>
+              <button type="button" onClick={loadPreviousLevel} className="ui-button">上一關</button>
+              <button type="button" onClick={loadNextLevel} className="ui-button">下一關</button>
+              <button type="button" onClick={() => reset()} className="ui-button">重置</button>
+              <button type="button" onClick={enterEditor} className="ui-button accent">自訂關卡</button>
             </>
           ) : (
             <>
-              <button onClick={playCustom} className="ui-button success">開始測試</button>
-              <button onClick={() => setLevel([])} className="ui-button">清空</button>
-              <button onClick={() => setLevel(clone(DEFAULT))} className="ui-button">載入範例</button>
+              <button type="button" onClick={playCustom} className="ui-button success">開始測試</button>
+              <button type="button" onClick={() => setLevel([])} className="ui-button">清空</button>
+              <button type="button" onClick={() => setLevel(clone(currentLevel.cars || DEFAULT))} className="ui-button">載入目前關卡</button>
             </>
           )}
         </div>
 
+        {loadMessage && <div className="load-message">{loadMessage}</div>}
+
+        {mode === "play" && <LevelSelector levels={levelIndex} currentLevel={currentLevel} onLoad={loadLevel} />}
+
         {mode === "edit" && (
           <div className="editor-panel">
             {PALETTE.map((item) => (
-              <button key={item.key} onClick={() => setTemplate(item)} className={`palette-button ${template.key === item.key ? "active" : ""}`}>
+              <button key={item.key} type="button" onClick={() => setTemplate(item)} className={`palette-button ${template.key === item.key ? "active" : ""}`}>
                 <span className="palette-dot" style={{ background: item.color }} />{item.label}
               </button>
             ))}
-            <button onClick={() => setDir((x) => x === "H" ? "V" : "H")} className="ui-button warning">方向：{dir === "H" ? "橫向" : "直向"}</button>
+            <button type="button" onClick={() => setDir((x) => x === "H" ? "V" : "H")} className="ui-button warning">方向：{dir === "H" ? "橫向" : "直向"}</button>
           </div>
         )}
 
