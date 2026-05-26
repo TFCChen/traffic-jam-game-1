@@ -24,7 +24,7 @@ const PALETTE = [
 
 const clone = (level) => level.map((car) => ({ ...car }));
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-const exited = (car) => car.id === "target" && car.row === EXIT_ROW && car.col >= GRID;
+const exited = (car) => car.id === "target" && car.row === EXIT_ROW && car.col + car.len > GRID - 1;
 
 function cells(car) {
   return Array.from({ length: car.len }, (_, i) => ({
