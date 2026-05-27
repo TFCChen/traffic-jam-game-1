@@ -1,0 +1,111 @@
+{
+  "id": 40,
+  "difficulty": "Expert",
+  "cars": [
+    {
+      "id": "target",
+      "color": "#e53935",
+      "row": 2,
+      "col": 3,
+      "len": 2,
+      "dir": "H"
+    },
+    {
+      "id": "car1",
+      "color": "#43a047",
+      "row": 0,
+      "col": 4,
+      "len": 2,
+      "dir": "V"
+    },
+    {
+      "id": "car2",
+      "color": "#fdd835",
+      "row": 1,
+      "col": 5,
+      "len": 3,
+      "dir": "V"
+    },
+    {
+      "id": "car3",
+      "color": "#8e24aa",
+      "row": 3,
+      "col": 3,
+      "len": 2,
+      "dir": "V"
+    },
+    {
+      "id": "car4",
+      "color": "#fb8c00",
+      "row": 4,
+      "col": 4,
+      "len": 2,
+      "dir": "H"
+    },
+    {
+      "id": "car5",
+      "color": "#00acc1",
+      "row": 5,
+      "col": 3,
+      "len": 2,
+      "dir": "H"
+    },
+    {
+      "id": "car6",
+      "color": "#ec407a",
+      "row": 4,
+      "col": 2,
+      "len": 2,
+      "dir": "V"
+    },
+    {
+      "id": "car7",
+      "color": "#8d6e63",
+      "row": 5,
+      "col": 0,
+      "len": 2,
+      "dir": "H"
+    },
+    {
+      "id": "car8",
+      "color": "#3949ab",
+      "row": 3,
+      "col": 0,
+      "len": 3,
+      "dir": "H"
+    },
+    {
+      "id": "car9",
+      "color": "#7cb342",
+      "row": 1,
+      "col": 2,
+      "len": 2,
+      "dir": "V"
+    },
+    {
+      "id": "car10",
+      "color": "#f4511e",
+      "row": 1,
+      "col": 1,
+      "len": 2,
+      "dir": "V"
+    },
+    {
+      "id": "car11",
+      "color": "#546e7a",
+      "row": 0,
+      "col": 1,
+      "len": 2,
+      "dir": "H"
+    },
+    {
+      "id": "car12",
+      "color": "#1e88e5",
+      "row": 0,
+      "col": 0,
+      "len": 3,
+      "dir": "V"
+    }
+  ],
+  "file": "level-040.json"
+}
