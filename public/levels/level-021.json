@@ -2,13 +2,62 @@
   "id": 21,
   "difficulty": "Advanced",
   "cars": [
-    { "id": "green", "color": "#43a047", "row": 0, "col": 2, "len": 2, "dir": "V" },
-    { "id": "orange", "color": "#fb8c00", "row": 0, "col": 3, "len": 2, "dir": "H" },
-    { "id": "yellowBus", "color": "#fdd835", "row": 0, "col": 4, "len": 3, "dir": "V" },
-    { "id": "purpleBus", "color": "#9333ea", "row": 2, "col": 0, "len": 3, "dir": "V" },
-    { "id": "target", "color": "#e53935", "row": 2, "col": 1, "len": 2, "dir": "H" },
-    { "id": "blueBus", "color": "#2563eb", "row": 3, "col": 1, "len": 3, "dir": "H" },
-    { "id": "greenBus", "color": "#059669", "row": 5, "col": 3, "len": 3, "dir": "H" }
+    {
+      "id": "target",
+      "color": "#e53935",
+      "row": 2,
+      "col": 1,
+      "len": 2,
+      "dir": "H"
+    },
+    {
+      "id": "car1",
+      "color": "#43a047",
+      "row": 0,
+      "col": 0,
+      "len": 2,
+      "dir": "H"
+    },
+    {
+      "id": "car2",
+      "color": "#fdd835",
+      "row": 0,
+      "col": 2,
+      "len": 2,
+      "dir": "V"
+    },
+    {
+      "id": "car3",
+      "color": "#8e24aa",
+      "row": 0,
+      "col": 3,
+      "len": 3,
+      "dir": "V"
+    },
+    {
+      "id": "car4",
+      "color": "#fb8c00",
+      "row": 1,
+      "col": 0,
+      "len": 3,
+      "dir": "V"
+    },
+    {
+      "id": "car5",
+      "color": "#00acc1",
+      "row": 3,
+      "col": 1,
+      "len": 3,
+      "dir": "H"
+    },
+    {
+      "id": "car6",
+      "color": "#ec407a",
+      "row": 5,
+      "col": 3,
+      "len": 3,
+      "dir": "H"
+    }
   ],
   "file": "level-021.json"
 }

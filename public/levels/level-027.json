@@ -6,32 +6,80 @@
       "id": "target",
       "color": "#e53935",
       "row": 2,
+      "col": 0,
+      "len": 2,
+      "dir": "H"
+    },
+    {
+      "id": "car1",
+      "color": "#43a047",
+      "row": 0,
+      "col": 0,
+      "len": 2,
+      "dir": "V"
+    },
+    {
+      "id": "car2",
+      "color": "#fdd835",
+      "row": 0,
       "col": 1,
       "len": 2,
       "dir": "H"
     },
     {
-      "id": "yellowBus",
-      "color": "#fdd835",
+      "id": "car3",
+      "color": "#8e24aa",
+      "row": 1,
+      "col": 1,
+      "len": 2,
+      "dir": "H"
+    },
+    {
+      "id": "car4",
+      "color": "#fb8c00",
       "row": 0,
-      "col": 4,
+      "col": 3,
       "len": 3,
       "dir": "V"
     },
     {
-      "id": "blue",
-      "color": "#1e88e5",
-      "row": 0,
-      "col": 1,
+      "id": "car5",
+      "color": "#00acc1",
+      "row": 2,
+      "col": 2,
       "len": 2,
       "dir": "V"
     },
     {
-      "id": "green",
-      "color": "#43a047",
-      "row": 4,
-      "col": 0,
+      "id": "car6",
+      "color": "#ec407a",
+      "row": 3,
+      "col": 3,
       "len": 2,
+      "dir": "H"
+    },
+    {
+      "id": "car7",
+      "color": "#8d6e63",
+      "row": 2,
+      "col": 5,
+      "len": 3,
+      "dir": "V"
+    },
+    {
+      "id": "car8",
+      "color": "#3949ab",
+      "row": 4,
+      "col": 2,
+      "len": 2,
+      "dir": "V"
+    },
+    {
+      "id": "car9",
+      "color": "#7cb342",
+      "row": 5,
+      "col": 3,
+      "len": 3,
       "dir": "H"
     }
   ],
