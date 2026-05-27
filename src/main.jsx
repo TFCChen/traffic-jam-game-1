@@ -342,6 +342,7 @@ function App() {
   const [dir, setDir] = useState("H");
   const [draft, setDraft] = useState(null);
   const [loadMessage, setLoadMessage] = useState("");
+  const [levelsOpen, setLevelsOpen] = useState(false);
   const lastParticle = useRef(0);
 
   const target = cars.find((car) => car?.id === "target");
@@ -361,6 +362,7 @@ function App() {
       setDrag(null);
       setParticles([]);
       setLoadMessage("");
+      setLevelsOpen(false);
     } catch {
       const fallback = normalizeLevel({ cars: DEFAULT }, meta);
       setCurrentLevel(fallback);
@@ -370,6 +372,7 @@ function App() {
       setDrag(null);
       setParticles([]);
       setLoadMessage(`讀不到 ${meta.file}，目前顯示預設關卡。`);
+      setLevelsOpen(false);
     }
   };
 
@@ -523,6 +526,7 @@ function App() {
 
   function enterEditor() {
     setMode("edit");
+    setLevelsOpen(false);
     setLevel(clone(cars.filter((car) => !exited(car))));
     setDraft(null);
   }
@@ -556,6 +560,9 @@ function App() {
           {mode === "play" ? (
             <>
               <button type="button" onClick={() => reset()} className="ui-button">重置</button>
+              <button type="button" onClick={() => setLevelsOpen((open) => !open)} className="ui-button level-toggle">
+                {levelsOpen ? "收起關卡" : "選擇關卡"}
+              </button>
               <button type="button" onClick={enterEditor} className="ui-button accent">自訂關卡</button>
             </>
           ) : (
@@ -569,7 +576,9 @@ function App() {
 
         {loadMessage && <div className="load-message">{loadMessage}</div>}
 
-        {mode === "play" && <LevelSelector levels={levelIndex} currentLevel={currentLevel} onLoad={loadLevel} />}
+        {mode === "play" && levelsOpen && (
+          <LevelSelector levels={levelIndex} currentLevel={currentLevel} onLoad={loadLevel} />
+        )}
 
         {mode === "edit" && (
           <div className="editor-panel">
