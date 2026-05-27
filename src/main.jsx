@@ -329,6 +329,25 @@ function LevelSelector({ levels, currentLevel, onLoad }) {
   );
 }
 
+function WinModal({ level, moves, onRetry, onNext }) {
+  return (
+    <div className="win-overlay" role="dialog" aria-modal="true" aria-label="通關完成">
+      <div className="win-modal">
+        <div className="win-spark">★</div>
+        <div className="win-title">通關成功！</div>
+        <div className="win-subtitle">
+          {level?.id === "custom" ? "自訂關卡完成" : `${level?.difficulty ?? "Level"} ${level?.id ?? ""}`}
+        </div>
+        <div className="win-stat">Moves：{moves}</div>
+        <div className="win-actions">
+          <button type="button" className="ui-button" onClick={onRetry}>重來一次</button>
+          <button type="button" className="ui-button success" onClick={onNext}>下一關</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [levelIndex, setLevelIndex] = useState(FALLBACK_INDEX);
   const [currentLevel, setCurrentLevel] = useState(() => normalizeLevel({ cars: DEFAULT }, FALLBACK_INDEX[0]));
@@ -413,6 +432,20 @@ function App() {
     setDrag(null);
     setParticles([]);
     lastParticle.current = 0;
+  }
+
+  function goNextLevel() {
+    const sorted = [...(levelIndex || FALLBACK_INDEX)].sort((a, b) => a.id - b.id);
+    const firstId = sorted[0]?.id ?? 1;
+
+    if (currentLevel?.id === "custom") {
+      loadLevel(firstId, sorted);
+      return;
+    }
+
+    const currentIndex = sorted.findIndex((item) => item.id === currentLevel?.id);
+    const nextId = currentIndex >= 0 && currentIndex < sorted.length - 1 ? sorted[currentIndex + 1].id : firstId;
+    loadLevel(nextId, sorted);
   }
 
   function addParticles(el, color, throttle = 0) {
@@ -612,6 +645,10 @@ function App() {
           removeCar={(id) => setLevel((cur) => cur.filter((car) => car.id !== id))}
         />
       </main>
+
+      {mode === "play" && won && (
+        <WinModal level={currentLevel} moves={moves} onRetry={() => reset()} onNext={goNextLevel} />
+      )}
     </div>
   );
 }
