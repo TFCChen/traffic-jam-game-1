@@ -24,21 +24,14 @@ const COLORS = {
   teal: "#059669",
 };
 
+const EDITOR_COLORS = ["#8b5cf6", "#22c55e", "#f59e0b", "#ec4899", "#3b82f6", "#14b8a6", "#84cc16", "#f97316", "#06b6d4", "#a855f7", "#10b981", "#eab308"];
+
 const DEFAULT = [
   { id: "target", color: COLORS.red, row: 2, col: 1, len: 2, dir: "H" },
   { id: "yellowBus", color: COLORS.yellow, row: 0, col: 4, len: 3, dir: "V" },
   { id: "blue", color: COLORS.blue, row: 0, col: 1, len: 2, dir: "V" },
   { id: "green", color: COLORS.green, row: 4, col: 0, len: 2, dir: "H" },
   { id: "purple", color: COLORS.purple, row: 4, col: 3, len: 2, dir: "H" },
-];
-
-const PALETTE = [
-  { key: "target", label: "紅車", color: COLORS.red, len: 2 },
-  { key: "car2", label: "2格車", color: COLORS.blue, len: 2 },
-  { key: "car2b", label: "2格車", color: COLORS.green, len: 2 },
-  { key: "car2c", label: "2格車", color: COLORS.purple, len: 2 },
-  { key: "bus3", label: "3格車", color: COLORS.yellow, len: 3 },
-  { key: "bus3b", label: "3格車", color: COLORS.pink, len: 3 },
 ];
 
 const FALLBACK_INDEX = Array.from({ length: 40 }, (_, index) => {
@@ -155,22 +148,13 @@ function Car({ car, dragging, dragPixels, down, move, up }) {
       onPointerMove={move}
       onPointerUp={up}
       onPointerCancel={up}
-      style={{
-        left: car.col * CELL + 6,
-        top: car.row * CELL + 6,
-        width,
-        height,
-        transform,
-        zIndex: dragging || exited(car) ? 30 : 10,
-      }}
+      style={{ left: car.col * CELL + 6, top: car.row * CELL + 6, width, height, transform, zIndex: dragging || exited(car) ? 30 : 10 }}
     >
       <div
         className="car-block"
         style={{
           background: `linear-gradient(145deg,rgba(255,255,255,.95) 0%,${car.color} 13%,${car.color} 48%,rgba(0,0,0,.42) 100%)`,
-          boxShadow: dragging
-            ? "0 24px 30px rgba(0,0,0,.5), inset 0 7px 10px rgba(255,255,255,.48), inset 0 -13px 18px rgba(0,0,0,.34)"
-            : "0 14px 22px rgba(0,0,0,.4), inset 0 6px 9px rgba(255,255,255,.4), inset 0 -11px 16px rgba(0,0,0,.3)",
+          boxShadow: dragging ? "0 24px 30px rgba(0,0,0,.5), inset 0 7px 10px rgba(255,255,255,.48), inset 0 -13px 18px rgba(0,0,0,.34)" : "0 14px 22px rgba(0,0,0,.4), inset 0 6px 9px rgba(255,255,255,.4), inset 0 -11px 16px rgba(0,0,0,.3)",
         }}
       >
         <div className="car-inner" />
@@ -183,31 +167,14 @@ function Ghost({ draft }) {
   if (!draft) return null;
   const width = draft.dir === "H" ? draft.len * CELL - 12 : CELL - 12;
   const height = draft.dir === "V" ? draft.len * CELL - 12 : CELL - 12;
-
-  return (
-    <div
-      className="ghost"
-      style={{
-        left: draft.col * CELL + 6,
-        top: draft.row * CELL + 6,
-        width,
-        height,
-        background: draft.valid ? `${draft.color}88` : "rgba(255,0,0,.35)",
-      }}
-    />
-  );
+  return <div className="ghost" style={{ left: draft.col * CELL + 6, top: draft.row * CELL + 6, width, height, background: draft.valid ? `${draft.color}88` : "rgba(255,0,0,.35)" }} />;
 }
 
 function Wall({ className = "" }) {
-  return (
-    <div className={`wall ${className}`}>
-      <div className="wall-glow" />
-      <div className="wall-aura" />
-    </div>
-  );
+  return <div className={`wall ${className}`}><div className="wall-glow" /><div className="wall-aura" /></div>;
 }
 
-function Board({ cars, drag, mode, draft, boardMove, boardClick, carDown, dragMove, dragEnd, removeCar }) {
+function Board({ cars, drag, mode, draft, editorStart, boardMove, boardClick, carDown, dragMove, dragEnd, removeCar }) {
   return (
     <div className="board-shell">
       <div className="board-backplate" />
@@ -220,80 +187,28 @@ function Board({ cars, drag, mode, draft, boardMove, boardClick, carDown, dragMo
       <div className="exit-stripe top" />
       <div className="exit-stripe bottom" />
 
-      <div
-        className="board"
-        onPointerMove={mode === "edit" ? boardMove : undefined}
-        onClick={mode === "edit" ? boardClick : undefined}
-        style={{ width: BOARD, height: BOARD }}
-      >
+      <div className="board" onPointerMove={mode === "edit" ? boardMove : undefined} onClick={mode === "edit" ? boardClick : undefined} style={{ width: BOARD, height: BOARD }}>
         {Array.from({ length: GRID * GRID }, (_, i) => (
-          <div
-            key={i}
-            className="grid-cell"
-            style={{
-              left: (i % GRID) * CELL + 4,
-              top: Math.floor(i / GRID) * CELL + 4,
-              width: CELL - 8,
-              height: CELL - 8,
-            }}
-          />
+          <div key={i} className="grid-cell" style={{ left: (i % GRID) * CELL + 4, top: Math.floor(i / GRID) * CELL + 4, width: CELL - 8, height: CELL - 8 }} />
         ))}
 
+        {mode === "edit" && editorStart && <div className="editor-start" style={{ left: editorStart.col * CELL + 4, top: editorStart.row * CELL + 4, width: CELL - 8, height: CELL - 8 }} />}
         <Ghost draft={mode === "edit" ? draft : null} />
 
         {(cars || []).map((car) => (
-          <Car
-            key={car.id}
-            car={car}
-            dragging={drag?.id === car.id}
-            dragPixels={drag?.id === car.id ? drag.pixels : 0}
-            down={(e) => (mode === "play" ? carDown(e, car) : e.stopPropagation())}
-            move={mode === "play" ? dragMove : undefined}
-            up={mode === "play" ? dragEnd : undefined}
-          />
+          <Car key={car.id} car={car} dragging={drag?.id === car.id} dragPixels={drag?.id === car.id ? drag.pixels : 0} down={(e) => (mode === "play" ? carDown(e, car) : e.stopPropagation())} move={mode === "play" ? dragMove : undefined} up={mode === "play" ? dragEnd : undefined} />
         ))}
 
-        {mode === "edit" &&
-          (cars || []).map((car) => (
-            <button
-              key={`rm-${car.id}`}
-              type="button"
-              className="remove-car"
-              style={{ left: car.col * CELL + 2, top: car.row * CELL + 2 }}
-              onClick={(e) => {
-                e.stopPropagation();
-                removeCar(car.id);
-              }}
-            >
-              ×
-            </button>
-          ))}
+        {mode === "edit" && (cars || []).map((car) => (
+          <button key={`rm-${car.id}`} type="button" className="remove-car" style={{ left: car.col * CELL + 2, top: car.row * CELL + 2 }} onClick={(e) => { e.stopPropagation(); removeCar(car.id); }}>×</button>
+        ))}
       </div>
     </div>
   );
 }
 
 function Particles({ particles }) {
-  return (
-    <div className="particle-layer">
-      {(particles || []).map((p) => (
-        <span
-          key={p.id}
-          className="particle"
-          style={{
-            left: p.x,
-            top: p.y,
-            width: p.size,
-            height: p.size,
-            background: p.color,
-            boxShadow: `0 0 ${p.size * 3}px ${p.color},0 0 ${p.size * 8}px rgba(255,210,80,.55)`,
-            "--dx": `${p.dx}px`,
-            "--dy": `${p.dy}px`,
-          }}
-        />
-      ))}
-    </div>
-  );
+  return <div className="particle-layer">{(particles || []).map((p) => <span key={p.id} className="particle" style={{ left: p.x, top: p.y, width: p.size, height: p.size, background: p.color, boxShadow: `0 0 ${p.size * 3}px ${p.color},0 0 ${p.size * 8}px rgba(255,210,80,.55)`, "--dx": `${p.dx}px`, "--dy": `${p.dy}px` }} />)}</div>;
 }
 
 function LevelSelector({ levels, currentLevel, onLoad }) {
@@ -312,16 +227,7 @@ function LevelSelector({ levels, currentLevel, onLoad }) {
         <section key={difficulty} className="level-section">
           <div className="level-title">{difficulty}</div>
           <div className="level-grid">
-            {groups[difficulty].map((level) => (
-              <button
-                key={level.id}
-                type="button"
-                onClick={() => onLoad(level.id)}
-                className={`level-button ${currentLevel?.id === level.id ? "active" : ""}`}
-              >
-                {level.id}
-              </button>
-            ))}
+            {groups[difficulty].map((level) => <button key={level.id} type="button" onClick={() => onLoad(level.id)} className={`level-button ${currentLevel?.id === level.id ? "active" : ""}`}>{level.id}</button>)}
           </div>
         </section>
       ))}
@@ -335,9 +241,7 @@ function WinModal({ level, moves, onRetry, onNext }) {
       <div className="win-modal">
         <div className="win-spark">★</div>
         <div className="win-title">通關成功！</div>
-        <div className="win-subtitle">
-          {level?.id === "custom" ? "自訂關卡完成" : `${level?.difficulty ?? "Level"} ${level?.id ?? ""}`}
-        </div>
+        <div className="win-subtitle">{level?.id === "custom" ? "自訂關卡完成" : `${level?.difficulty ?? "Level"} ${level?.id ?? ""}`}</div>
         <div className="win-stat">Moves：{moves}</div>
         <div className="win-actions">
           <button type="button" className="ui-button" onClick={onRetry}>重來一次</button>
@@ -357,9 +261,8 @@ function App() {
   const [moves, setMoves] = useState(0);
   const [drag, setDrag] = useState(null);
   const [particles, setParticles] = useState([]);
-  const [template, setTemplate] = useState(PALETTE[0]);
-  const [dir, setDir] = useState("H");
   const [draft, setDraft] = useState(null);
+  const [editorStart, setEditorStart] = useState(null);
   const [loadMessage, setLoadMessage] = useState("");
   const [levelsOpen, setLevelsOpen] = useState(false);
   const lastParticle = useRef(0);
@@ -370,79 +273,49 @@ function App() {
   const loadLevel = async (id, customIndex = levelIndex) => {
     const meta = customIndex.find((item) => item.id === id);
     if (!meta) return;
-
     try {
       const data = await fetchJson(`/levels/${meta.file}`);
       const normalized = normalizeLevel(data, meta);
       setCurrentLevel(normalized);
       setLevel(clone(normalized.cars));
       setCars(clone(normalized.cars));
-      setMoves(0);
-      setDrag(null);
-      setParticles([]);
-      setLoadMessage("");
-      setLevelsOpen(false);
+      setMoves(0); setDrag(null); setParticles([]); setDraft(null); setEditorStart(null); setLoadMessage(""); setLevelsOpen(false);
     } catch {
       const fallback = normalizeLevel({ cars: DEFAULT }, meta);
       setCurrentLevel(fallback);
       setLevel(clone(DEFAULT));
       setCars(clone(DEFAULT));
-      setMoves(0);
-      setDrag(null);
-      setParticles([]);
-      setLoadMessage(`讀不到 ${meta.file}，目前顯示預設關卡。`);
-      setLevelsOpen(false);
+      setMoves(0); setDrag(null); setParticles([]); setDraft(null); setEditorStart(null); setLoadMessage(`讀不到 ${meta.file}，目前顯示預設關卡。`); setLevelsOpen(false);
     }
   };
 
   useEffect(() => {
     let cancelled = false;
-
     async function boot() {
       try {
         const index = await fetchJson("/levels/index.json");
         if (cancelled) return;
-
         if (Array.isArray(index) && index.length > 0) {
           const sorted = [...index].sort((a, b) => a.id - b.id);
           setLevelIndex(sorted);
           await loadLevel(sorted[0].id, sorted);
           return;
         }
-      } catch {
-        // Use fallback generated buttons.
-      }
-
-      if (!cancelled) {
-        setLevelIndex(FALLBACK_INDEX);
-        setLoadMessage("讀不到 public/levels/index.json，使用內建關卡按鈕。");
-      }
+      } catch {}
+      if (!cancelled) { setLevelIndex(FALLBACK_INDEX); setLoadMessage("讀不到 public/levels/index.json，使用內建關卡按鈕。"); }
     }
-
     boot();
-
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   function reset(next = level) {
-    setCars(clone(next));
-    setMoves(0);
-    setDrag(null);
-    setParticles([]);
-    lastParticle.current = 0;
+    setCars(clone(next)); setMoves(0); setDrag(null); setParticles([]); lastParticle.current = 0;
   }
 
   function goNextLevel() {
     const sorted = [...(levelIndex || FALLBACK_INDEX)].sort((a, b) => a.id - b.id);
     const firstId = sorted[0]?.id ?? 1;
-
-    if (currentLevel?.id === "custom") {
-      loadLevel(firstId, sorted);
-      return;
-    }
-
+    if (currentLevel?.id === "custom") { loadLevel(firstId, sorted); return; }
     const currentIndex = sorted.findIndex((item) => item.id === currentLevel?.id);
     const nextId = currentIndex >= 0 && currentIndex < sorted.length - 1 ? sorted[currentIndex + 1].id : firstId;
     loadLevel(nextId, sorted);
@@ -452,38 +325,22 @@ function App() {
     const now = Date.now();
     if (throttle && now - lastParticle.current < throttle) return;
     lastParticle.current = now;
-
     const burst = makeParticles(el.getBoundingClientRect(), color);
     setParticles((cur) => [...cur, ...burst]);
-    window.setTimeout(() => {
-      setParticles((cur) => cur.filter((p) => !burst.some((b) => b.id === p.id)));
-    }, LIFE);
+    window.setTimeout(() => setParticles((cur) => cur.filter((p) => !burst.some((b) => b.id === p.id))), LIFE);
   }
 
   function startDrag(e, car) {
     if (won || !car) return;
-    e.preventDefault();
-    e.currentTarget.setPointerCapture?.(e.pointerId);
-    addParticles(e.currentTarget, car.color);
-
+    e.preventDefault(); e.currentTarget.setPointerCapture?.(e.pointerId); addParticles(e.currentTarget, car.color);
     const lim = limits(car, cars);
-    setDrag({
-      id: car.id,
-      startX: e.clientX,
-      startY: e.clientY,
-      startRow: car.row,
-      startCol: car.col,
-      min: lim.min,
-      max: lim.max,
-      pixels: 0,
-    });
+    setDrag({ id: car.id, startX: e.clientX, startY: e.clientY, startRow: car.row, startCol: car.col, min: lim.min, max: lim.max, pixels: 0 });
   }
 
   function moveDrag(e) {
     if (!drag || won) return;
     const car = cars.find((x) => x.id === drag.id);
     if (!car) return;
-
     addParticles(e.currentTarget, car.color, 75);
     const raw = car.dir === "H" ? e.clientX - drag.startX : e.clientY - drag.startY;
     setDrag((cur) => (cur ? { ...cur, pixels: clamp(raw, drag.min * CELL, drag.max * CELL) } : cur));
@@ -491,164 +348,101 @@ function App() {
 
   function endDrag() {
     if (!drag) return;
-
     const delta = clamp(Math.round(drag.pixels / CELL), drag.min, drag.max);
-
     if (delta !== 0) {
-      setCars((cur) =>
-        cur.map((car) =>
-          car.id === drag.id
-            ? {
-                ...car,
-                row: drag.startRow + (car.dir === "V" ? delta : 0),
-                col: drag.startCol + (car.dir === "H" ? delta : 0),
-              }
-            : car
-        )
-      );
+      setCars((cur) => cur.map((car) => car.id === drag.id ? { ...car, row: drag.startRow + (car.dir === "V" ? delta : 0), col: drag.startCol + (car.dir === "H" ? delta : 0) } : car));
       setMoves((v) => v + 1);
     }
-
     setDrag(null);
   }
 
   function gridPos(e) {
     const r = e.currentTarget.getBoundingClientRect();
-    return {
-      col: Math.floor((e.clientX - r.left) / CELL),
-      row: Math.floor((e.clientY - r.top) / CELL),
-    };
+    return { col: Math.floor((e.clientX - r.left) / CELL), row: Math.floor((e.clientY - r.top) / CELL) };
   }
 
-  function makeDraft(row, col) {
-    const d = {
-      id: template.key === "target" ? "target" : `${template.key}-${Date.now()}`,
-      color: template.color,
-      row,
-      col,
-      len: template.len,
-      dir,
+  function carFromPoints(start, end) {
+    if (!start || !end) return null;
+    const sameRow = start.row === end.row;
+    const sameCol = start.col === end.col;
+    if (!sameRow && !sameCol) return null;
+    const len = sameRow ? Math.abs(end.col - start.col) + 1 : Math.abs(end.row - start.row) + 1;
+    if (len !== 2 && len !== 3) return null;
+    const isTarget = !level.some((car) => car.id === "target");
+    const car = {
+      id: isTarget ? "target" : `car-${Date.now()}`,
+      color: isTarget ? COLORS.red : EDITOR_COLORS[level.length % EDITOR_COLORS.length],
+      row: sameRow ? start.row : Math.min(start.row, end.row),
+      col: sameRow ? Math.min(start.col, end.col) : start.col,
+      len,
+      dir: sameRow ? "H" : "V",
     };
-    const others = level.filter((car) => car.id !== d.id && !(d.id === "target" && car.id === "target"));
-    return { ...d, valid: inside(d) && !overlaps(d, others, false) };
+    return { ...car, valid: inside(car) && !overlaps(car, level, false) };
   }
 
   function editorMove(e) {
+    if (!editorStart) return;
     const p = gridPos(e);
-    if (p.row < 0 || p.row >= GRID || p.col < 0 || p.col >= GRID) {
-      setDraft(null);
-      return;
-    }
-    setDraft(makeDraft(p.row, p.col));
+    if (p.row < 0 || p.row >= GRID || p.col < 0 || p.col >= GRID) { setDraft(null); return; }
+    setDraft(carFromPoints(editorStart, p));
   }
 
-  function place() {
-    if (!draft?.valid) return;
-
-    const car = {
-      id: draft.id,
-      color: draft.color,
-      row: draft.row,
-      col: draft.col,
-      len: draft.len,
-      dir: draft.dir,
-    };
-
-    setLevel((cur) => [...(car.id === "target" ? cur.filter((x) => x.id !== "target") : cur), car]);
+  function editorClick(e) {
+    const p = gridPos(e);
+    if (p.row < 0 || p.row >= GRID || p.col < 0 || p.col >= GRID) return;
+    if (!editorStart) {
+      setEditorStart(p); setDraft(null); setLoadMessage(level.some((car) => car.id === "target") ? "已選起點，請點第 2 格或第 3 格作為車尾。" : "已選 Target 起點，請點第 2 格或第 3 格作為車尾。"); return;
+    }
+    const car = carFromPoints(editorStart, p);
+    if (car?.valid) {
+      const { valid, ...nextCar } = car;
+      setLevel((cur) => [...cur, nextCar]);
+      setLoadMessage(car.id === "target" ? "Target 已放置，接下來會自動建立一般車輛。" : "車輛已放置。");
+    } else {
+      setLoadMessage("放置失敗：只能直線 2 或 3 格，且不能重疊或超出棋盤。");
+    }
+    setEditorStart(null); setDraft(null);
   }
 
   function enterEditor() {
-    setMode("edit");
-    setLevelsOpen(false);
-    setLevel(clone(cars.filter((car) => !exited(car))));
-    setDraft(null);
+    setMode("edit"); setLevelsOpen(false); setLevel(clone(cars.filter((car) => !exited(car)))); setDraft(null); setEditorStart(null); setLoadMessage("自訂關卡：先點起點，再點車尾。第一台車會自動成為 Target。");
   }
 
   function playCustom() {
-    if (!level.some((car) => car.id === "target")) return;
-
-    const customLevel = {
-      id: "custom",
-      difficulty: "Custom",
-      title: "Custom",
-      file: null,
-      cars: clone(level),
-    };
-
-    setCurrentLevel(customLevel);
-    setMode("play");
-    reset(level);
+    if (!level.some((car) => car.id === "target")) { setLoadMessage("請先放置 Target 紅車。"); return; }
+    const customLevel = { id: "custom", difficulty: "Custom", title: "Custom", file: null, cars: clone(level) };
+    setCurrentLevel(customLevel); setMode("play"); setDraft(null); setEditorStart(null); setLoadMessage(""); reset(level);
   }
+
+  function clearEditor() { setLevel([]); setDraft(null); setEditorStart(null); setLoadMessage("已清空。下一台車會自動成為 Target。"); }
+  function reloadCurrentForEditor() { setLevel(clone(currentLevel.cars || DEFAULT)); setDraft(null); setEditorStart(null); setLoadMessage("已載入目前關卡，可點車左上角 × 移除後重新放置。"); }
 
   return (
     <div className="app">
       <Particles particles={particles} />
-
       <main className="game-layout">
         <div className="top-panel">
           <span className="panel-title">{mode === "edit" ? "自訂關卡" : `${currentLevel.difficulty} ${currentLevel.id}`}</span>
           {mode === "play" && <span className="moves">{moves}</span>}
           {won && <span className="win-badge">通關</span>}
-
-          {mode === "play" ? (
-            <>
-              <button type="button" onClick={() => reset()} className="ui-button">重置</button>
-              <button type="button" onClick={() => setLevelsOpen((open) => !open)} className="ui-button level-toggle">
-                {levelsOpen ? "收起關卡" : "選擇關卡"}
-              </button>
-              <button type="button" onClick={enterEditor} className="ui-button accent">自訂關卡</button>
-            </>
-          ) : (
-            <>
-              <button type="button" onClick={playCustom} className="ui-button success">開始測試</button>
-              <button type="button" onClick={() => setLevel([])} className="ui-button">清空</button>
-              <button type="button" onClick={() => setLevel(clone(currentLevel.cars || DEFAULT))} className="ui-button">載入目前關卡</button>
-            </>
-          )}
+          {mode === "play" ? <>
+            <button type="button" onClick={() => reset()} className="ui-button">重置</button>
+            <button type="button" onClick={() => setLevelsOpen((open) => !open)} className="ui-button level-toggle">{levelsOpen ? "收起關卡" : "選擇關卡"}</button>
+            <button type="button" onClick={enterEditor} className="ui-button accent">自訂關卡</button>
+          </> : <>
+            <button type="button" onClick={playCustom} className="ui-button success">開始測試</button>
+            <button type="button" onClick={clearEditor} className="ui-button">清空</button>
+            <button type="button" onClick={reloadCurrentForEditor} className="ui-button">載入目前關卡</button>
+          </>}
         </div>
 
         {loadMessage && <div className="load-message">{loadMessage}</div>}
+        {mode === "play" && levelsOpen && <LevelSelector levels={levelIndex} currentLevel={currentLevel} onLoad={loadLevel} />}
+        {mode === "edit" && <div className="editor-panel"><span className="editor-hint">點第 1 下：起點；點第 2 下：車尾。只能建立 2 或 3 格直線車。</span><span className="editor-hint strong">{level.some((car) => car.id === "target") ? "目前模式：一般車輛" : "下一台：Target 紅車"}</span></div>}
 
-        {mode === "play" && levelsOpen && (
-          <LevelSelector levels={levelIndex} currentLevel={currentLevel} onLoad={loadLevel} />
-        )}
-
-        {mode === "edit" && (
-          <div className="editor-panel">
-            {PALETTE.map((item) => (
-              <button
-                key={item.key}
-                type="button"
-                onClick={() => setTemplate(item)}
-                className={`palette-button ${template.key === item.key ? "active" : ""}`}
-              >
-                <span className="palette-dot" style={{ background: item.color }} />
-                {item.label}
-              </button>
-            ))}
-            <button type="button" onClick={() => setDir((x) => (x === "H" ? "V" : "H"))} className="ui-button warning">
-              方向：{dir === "H" ? "橫向" : "直向"}
-            </button>
-          </div>
-        )}
-
-        <Board
-          cars={mode === "edit" ? level : cars}
-          drag={drag}
-          mode={mode}
-          draft={draft}
-          boardMove={editorMove}
-          boardClick={place}
-          carDown={startDrag}
-          dragMove={moveDrag}
-          dragEnd={endDrag}
-          removeCar={(id) => setLevel((cur) => cur.filter((car) => car.id !== id))}
-        />
+        <Board cars={mode === "edit" ? level : cars} drag={drag} mode={mode} draft={draft} editorStart={editorStart} boardMove={editorMove} boardClick={editorClick} carDown={startDrag} dragMove={moveDrag} dragEnd={endDrag} removeCar={(id) => setLevel((cur) => cur.filter((car) => car.id !== id))} />
       </main>
-
-      {mode === "play" && won && (
-        <WinModal level={currentLevel} moves={moves} onRetry={() => reset()} onNext={goNextLevel} />
-      )}
+      {mode === "play" && won && <WinModal level={currentLevel} moves={moves} onRetry={() => reset()} onNext={goNextLevel} />}
     </div>
   );
 }
