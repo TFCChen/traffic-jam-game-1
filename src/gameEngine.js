@@ -127,14 +127,43 @@ export function solveLevel(cars, { maxStates = 120000 } = {}) {
   return { solvable: false, reason: seen.size > maxStates ? "搜尋範圍過大。" : "找不到解法。", moves: [], explored: seen.size };
 }
 
-export function analyzeDifficulty(cars, solution = solveLevel(cars)) {
-  if (!solution.solvable) return { label: "Unsolvable", score: 0, optimalMoves: null, blockers: 0 };
+export function estimatedDifficultyFromOptimalMoves(optimalMoves) {
+  if (!Number.isFinite(optimalMoves)) return "Unsolvable";
+  if (optimalMoves <= 10) return "Beginner";
+  if (optimalMoves <= 20) return "Intermediate";
+  if (optimalMoves <= 30) return "Advanced";
+  return "Expert";
+}
+
+export function analyzeDifficulty(cars, solution = solveLevel(cars), { officialDifficulty = null } = {}) {
+  if (!solution.solvable) {
+    return {
+      label: "Unsolvable",
+      estimatedLabel: "Unsolvable",
+      classificationSource: "estimated",
+      score: 0,
+      optimalMoves: null,
+      blockers: 0,
+      explored: solution.explored,
+    };
+  }
+
   const target = cars.find((car) => car.id === TARGET_ID);
   const blockers = cars.filter((car) => car.id !== TARGET_ID && cells(car).some((cell) => cell.row === EXIT_ROW && cell.col >= target.col + target.len)).length;
   const uniqueCars = new Set(solution.moves.map((move) => move.carId)).size;
-  const score = solution.moves.length * 3 + uniqueCars * 2 + blockers * 4 + Math.min(20, Math.floor(solution.explored / 250));
-  const label = score < 22 ? "Beginner" : score < 40 ? "Intermediate" : score < 64 ? "Advanced" : "Expert";
-  return { label, score, optimalMoves: solution.moves.length, blockers, explored: solution.explored };
+  const estimatedLabel = estimatedDifficultyFromOptimalMoves(solution.moves.length);
+  const score = solution.moves.length * 3 + uniqueCars * 2 + blockers * 2;
+
+  return {
+    label: officialDifficulty || estimatedLabel,
+    officialDifficulty: officialDifficulty || null,
+    estimatedLabel,
+    classificationSource: officialDifficulty ? "official" : "estimated",
+    score,
+    optimalMoves: solution.moves.length,
+    blockers,
+    explored: solution.explored,
+  };
 }
 
 export function starsForPerformance(moves, optimalMoves) {
