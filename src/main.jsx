@@ -1,233 +1,118 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
+import {
+  GRID,
+  EXIT_ROW,
+  analyzeDifficulty,
+  applyMove,
+  cloneCars,
+  isWon,
+  legalMovesForCar,
+  solveLevel,
+  starsForPerformance,
+  validateLevel,
+} from "./gameEngine.js";
+import { loadCustomLevels, loadProgress, saveCustomLevels, saveProgress } from "./storage.js";
 
-const GRID = 6;
-const CELL = 56;
-const BOARD = GRID * CELL;
-const EXIT_ROW = 2;
-const EXIT_COL = 8;
-const PARTICLES = 10;
-const LIFE = 520;
 const DIFFICULTIES = ["Beginner", "Intermediate", "Advanced", "Expert"];
-
-const COLORS = {
-  red: "#e53935",
-  yellow: "#fdd835",
-  blue: "#1e88e5",
-  green: "#43a047",
-  purple: "#8e24aa",
-  orange: "#fb8c00",
-  sky: "#38bdf8",
-  pink: "#ec4899",
-  black: "#262626",
-  teal: "#059669",
+const CELL = 58;
+const COLORS = ["#8b5cf6", "#22c55e", "#f59e0b", "#ec4899", "#3b82f6", "#14b8a6", "#84cc16", "#f97316"];
+const DEFAULT_LEVEL = {
+  id: 1,
+  difficulty: "Beginner",
+  file: "level-001.json",
+  cars: [
+    { id: "target", color: "#e53935", row: 2, col: 0, len: 2, dir: "H" },
+    { id: "block", color: "#43a047", row: 1, col: 2, len: 2, dir: "V" },
+  ],
 };
 
-const EDITOR_COLORS = ["#8b5cf6", "#22c55e", "#f59e0b", "#ec4899", "#3b82f6", "#14b8a6", "#84cc16", "#f97316", "#06b6d4", "#a855f7", "#10b981", "#eab308"];
-
-const DEFAULT = [
-  { id: "target", color: COLORS.red, row: 2, col: 1, len: 2, dir: "H" },
-  { id: "yellowBus", color: COLORS.yellow, row: 0, col: 4, len: 3, dir: "V" },
-  { id: "blue", color: COLORS.blue, row: 0, col: 1, len: 2, dir: "V" },
-  { id: "green", color: COLORS.green, row: 4, col: 0, len: 2, dir: "H" },
-  { id: "purple", color: COLORS.purple, row: 4, col: 3, len: 2, dir: "H" },
-];
-
-const FALLBACK_INDEX = Array.from({ length: 40 }, (_, index) => {
-  const id = index + 1;
-  const difficulty = id <= 10 ? "Beginner" : id <= 20 ? "Intermediate" : id <= 30 ? "Advanced" : "Expert";
-  return { id, difficulty, title: `${difficulty} ${id}`, file: `level-${String(id).padStart(3, "0")}.json` };
-});
-
-const clone = (level) => (Array.isArray(level) ? level.map((car) => ({ ...car })) : []);
-const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-
-function normalizeLevel(raw, meta = FALLBACK_INDEX[0]) {
-  const cars = Array.isArray(raw?.cars) && raw.cars.length > 0 ? raw.cars : DEFAULT;
-  return {
-    id: raw?.id ?? meta.id,
-    difficulty: raw?.difficulty ?? meta.difficulty ?? "Beginner",
-    title: raw?.title ?? meta.title ?? `Level ${meta.id}`,
-    file: raw?.file ?? meta.file,
-    cars: clone(cars),
-  };
-}
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+const levelKey = (level) => String(level.id);
 
 async function fetchJson(path) {
   const response = await fetch(path, { cache: "no-store" });
-  if (!response.ok) throw new Error(`Failed to load ${path}`);
+  if (!response.ok) throw new Error(`Unable to load ${path}`);
   return response.json();
 }
 
-function exited(car) {
-  return car?.id === "target" && car.row === EXIT_ROW && car.col + car.len > GRID;
-}
+function Board({ cars, onMove, highlightedCar, editor, onCellClick, onRemove }) {
+  const [drag, setDrag] = useState(null);
 
-function cells(car) {
-  if (!car) return [];
-  return Array.from({ length: car.len }, (_, i) => ({
-    row: car.row + (car.dir === "V" ? i : 0),
-    col: car.col + (car.dir === "H" ? i : 0),
-  }));
-}
+  function startDrag(event, car) {
+    if (editor) return;
+    event.preventDefault();
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    const legal = legalMovesForCar(cars, car.id);
+    setDrag({ car, startX: event.clientX, startY: event.clientY, legal, pixels: 0 });
+  }
 
-function inside(car) {
-  return cells(car).every((c) => c.row >= 0 && c.row < GRID && c.col >= 0 && c.col < GRID);
-}
+  function moveDrag(event) {
+    if (!drag) return;
+    const raw = drag.car.dir === "H" ? event.clientX - drag.startX : event.clientY - drag.startY;
+    const deltas = drag.legal.map((move) => move.delta);
+    const min = Math.min(0, ...deltas) * CELL;
+    const max = Math.max(0, ...deltas) * CELL;
+    setDrag((current) => ({ ...current, pixels: clamp(raw, min, max) }));
+  }
 
-function overlaps(test, cars, allowExit = true) {
-  for (const c of cells(test)) {
-    if (c.row < 0 || c.row >= GRID) return true;
-    if (allowExit && test.id === "target" && test.row === EXIT_ROW && c.col >= GRID) continue;
-    if (c.col < 0 || c.col >= GRID) return true;
-
-    for (const car of cars || []) {
-      if (!car || car.id === test.id || exited(car)) continue;
-      if (cells(car).some((x) => x.row === c.row && x.col === c.col)) return true;
+  function endDrag() {
+    if (!drag) return;
+    const desired = Math.round(drag.pixels / CELL);
+    if (desired !== 0) {
+      const legal = drag.legal.find((move) => move.delta === desired);
+      if (legal) onMove(legal);
     }
-  }
-  return false;
-}
-
-function limits(car, cars) {
-  let min = 0;
-  let max = 0;
-
-  for (let d = -1; d >= -GRID; d -= 1) {
-    const t = { ...car, row: car.row + (car.dir === "V" ? d : 0), col: car.col + (car.dir === "H" ? d : 0) };
-    if (overlaps(t, cars)) break;
-    min = d;
+    setDrag(null);
   }
 
-  const positiveLimit = car.id === "target" && car.row === EXIT_ROW ? EXIT_COL - car.col : GRID;
-
-  for (let d = 1; d <= positiveLimit; d += 1) {
-    const t = { ...car, row: car.row + (car.dir === "V" ? d : 0), col: car.col + (car.dir === "H" ? d : 0) };
-    if (overlaps(t, cars)) break;
-    max = d;
+  function boardClick(event) {
+    if (!editor) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const col = Math.floor((event.clientX - rect.left) / CELL);
+    const row = Math.floor((event.clientY - rect.top) / CELL);
+    if (row >= 0 && row < GRID && col >= 0 && col < GRID) onCellClick({ row, col });
   }
-
-  return { min, max };
-}
-
-function makeParticles(rect, color) {
-  const cx = rect.left + rect.width / 2;
-  const cy = rect.top + rect.height / 2;
-  const rx = rect.width / 2 + 8;
-  const ry = rect.height / 2 + 8;
-  const stamp = Date.now();
-
-  return Array.from({ length: PARTICLES }, (_, i) => {
-    const angle = (Math.PI * 2 * i) / PARTICLES + Math.random() * 0.2;
-    const distance = 14 + Math.random() * 24;
-    return {
-      id: `${stamp}-${i}-${Math.random().toString(36).slice(2)}`,
-      x: cx + Math.cos(angle) * rx,
-      y: cy + Math.sin(angle) * ry,
-      dx: Math.cos(angle) * distance,
-      dy: Math.sin(angle) * distance,
-      size: 2.5 + Math.random() * 4,
-      color,
-    };
-  });
-}
-
-function Car({ car, dragging, dragPixels, down, move, up }) {
-  if (!car) return null;
-  const width = car.dir === "H" ? car.len * CELL - 12 : CELL - 12;
-  const height = car.dir === "V" ? car.len * CELL - 12 : CELL - 12;
-  const transform = car.dir === "H" ? `translate3d(${dragPixels}px,0,0)` : `translate3d(0,${dragPixels}px,0)`;
 
   return (
-    <button
-      type="button"
-      tabIndex={-1}
-      className="car-button"
-      onPointerDown={down}
-      onPointerMove={move}
-      onPointerUp={up}
-      onPointerCancel={up}
-      style={{ left: car.col * CELL + 6, top: car.row * CELL + 6, width, height, transform, zIndex: dragging || exited(car) ? 30 : 10 }}
-    >
-      <div
-        className="car-block"
-        style={{
-          background: `linear-gradient(145deg,rgba(255,255,255,.95) 0%,${car.color} 13%,${car.color} 48%,rgba(0,0,0,.42) 100%)`,
-          boxShadow: dragging ? "0 24px 30px rgba(0,0,0,.5), inset 0 7px 10px rgba(255,255,255,.48), inset 0 -13px 18px rgba(0,0,0,.34)" : "0 14px 22px rgba(0,0,0,.4), inset 0 6px 9px rgba(255,255,255,.4), inset 0 -11px 16px rgba(0,0,0,.3)",
-        }}
-      >
-        <div className="car-inner" />
-      </div>
-    </button>
-  );
-}
-
-function Ghost({ draft }) {
-  if (!draft) return null;
-  const width = draft.dir === "H" ? draft.len * CELL - 12 : CELL - 12;
-  const height = draft.dir === "V" ? draft.len * CELL - 12 : CELL - 12;
-  return <div className="ghost" style={{ left: draft.col * CELL + 6, top: draft.row * CELL + 6, width, height, background: draft.valid ? `${draft.color}88` : "rgba(255,0,0,.35)" }} />;
-}
-
-function Wall({ className = "" }) {
-  return <div className={`wall ${className}`}><div className="wall-glow" /><div className="wall-aura" /></div>;
-}
-
-function Board({ cars, drag, mode, draft, editorStart, boardMove, boardClick, carDown, dragMove, dragEnd, removeCar }) {
-  return (
-    <div className="board-shell">
-      <div className="board-backplate" />
-      <Wall className="wall-left" />
-      <Wall className="wall-top" />
-      <Wall className="wall-bottom" />
-      <Wall className="wall-right-top" />
-      <Wall className="wall-right-bottom" />
-      <div className="exit-tunnel">→</div>
-      <div className="exit-stripe top" />
-      <div className="exit-stripe bottom" />
-
-      <div className="board" onPointerMove={mode === "edit" ? boardMove : undefined} onClick={mode === "edit" ? boardClick : undefined} style={{ width: BOARD, height: BOARD }}>
-        {Array.from({ length: GRID * GRID }, (_, i) => (
-          <div key={i} className="grid-cell" style={{ left: (i % GRID) * CELL + 4, top: Math.floor(i / GRID) * CELL + 4, width: CELL - 8, height: CELL - 8 }} />
+    <div className="board-frame">
+      <div className="exit-label">EXIT →</div>
+      <div className="board" style={{ width: GRID * CELL, height: GRID * CELL }} onClick={boardClick}>
+        {Array.from({ length: GRID * GRID }, (_, index) => (
+          <span key={index} className="cell" style={{ left: (index % GRID) * CELL, top: Math.floor(index / GRID) * CELL, width: CELL, height: CELL }} />
         ))}
-
-        {mode === "edit" && editorStart && <div className="editor-start" style={{ left: editorStart.col * CELL + 4, top: editorStart.row * CELL + 4, width: CELL - 8, height: CELL - 8 }} />}
-        <Ghost draft={mode === "edit" ? draft : null} />
-
-        {(cars || []).map((car) => (
-          <Car key={car.id} car={car} dragging={drag?.id === car.id} dragPixels={drag?.id === car.id ? drag.pixels : 0} down={(e) => (mode === "play" ? carDown(e, car) : e.stopPropagation())} move={mode === "play" ? dragMove : undefined} up={mode === "play" ? dragEnd : undefined} />
-        ))}
-
-        {mode === "edit" && (cars || []).map((car) => (
-          <button key={`rm-${car.id}`} type="button" className="remove-car" style={{ left: car.col * CELL + 2, top: car.row * CELL + 2 }} onClick={(e) => { e.stopPropagation(); removeCar(car.id); }}>×</button>
-        ))}
+        {cars.map((car) => {
+          const dragging = drag?.car.id === car.id;
+          const left = car.col * CELL;
+          const top = car.row * CELL;
+          const width = (car.dir === "H" ? car.len : 1) * CELL - 8;
+          const height = (car.dir === "V" ? car.len : 1) * CELL - 8;
+          const transform = dragging ? (car.dir === "H" ? `translateX(${drag.pixels}px)` : `translateY(${drag.pixels}px)`) : undefined;
+          return (
+            <div key={car.id} className={`vehicle ${car.id === "target" ? "target" : ""} ${highlightedCar === car.id ? "hinted" : ""}`} style={{ left: left + 4, top: top + 4, width, height, background: car.color, transform }} onPointerDown={(event) => startDrag(event, car)} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag}>
+              <span>{car.id === "target" ? "GO" : car.len === 3 ? "BUS" : ""}</span>
+              {editor && <button className="remove" onClick={(event) => { event.stopPropagation(); onRemove(car.id); }}>×</button>}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
 
-function Particles({ particles }) {
-  return <div className="particle-layer">{(particles || []).map((p) => <span key={p.id} className="particle" style={{ left: p.x, top: p.y, width: p.size, height: p.size, background: p.color, boxShadow: `0 0 ${p.size * 3}px ${p.color},0 0 ${p.size * 8}px rgba(255,210,80,.55)`, "--dx": `${p.dx}px`, "--dy": `${p.dy}px` }} />)}</div>;
-}
-
-function LevelSelector({ levels, currentLevel, onLoad }) {
-  const groups = useMemo(() => {
-    const grouped = { Beginner: [], Intermediate: [], Advanced: [], Expert: [] };
-    (levels || []).forEach((level) => {
-      const key = grouped[level.difficulty] ? level.difficulty : "Beginner";
-      grouped[key].push(level);
-    });
-    return grouped;
-  }, [levels]);
-
+function LevelBrowser({ levels, current, progress, onSelect }) {
+  const groups = useMemo(() => Object.fromEntries(DIFFICULTIES.map((name) => [name, levels.filter((level) => level.difficulty === name)])), [levels]);
   return (
-    <div className="level-panel">
+    <div className="level-browser">
       {DIFFICULTIES.map((difficulty) => (
-        <section key={difficulty} className="level-section">
-          <div className="level-title">{difficulty}</div>
+        <section key={difficulty}>
+          <h3>{difficulty}</h3>
           <div className="level-grid">
-            {groups[difficulty].map((level) => <button key={level.id} type="button" onClick={() => onLoad(level.id)} className={`level-button ${currentLevel?.id === level.id ? "active" : ""}`}>{level.id}</button>)}
+            {groups[difficulty].map((level) => {
+              const result = progress[levelKey(level)];
+              return <button key={level.id} className={current?.id === level.id ? "active" : ""} onClick={() => onSelect(level)}><b>{level.id}</b><small>{result ? "★".repeat(result.stars) : "—"}</small></button>;
+            })}
           </div>
         </section>
       ))}
@@ -235,214 +120,190 @@ function LevelSelector({ levels, currentLevel, onLoad }) {
   );
 }
 
-function WinModal({ level, moves, onRetry, onNext }) {
-  return (
-    <div className="win-overlay" role="dialog" aria-modal="true" aria-label="通關完成">
-      <div className="win-modal">
-        <div className="win-spark">★</div>
-        <div className="win-title">通關成功！</div>
-        <div className="win-subtitle">{level?.id === "custom" ? "自訂關卡完成" : `${level?.difficulty ?? "Level"} ${level?.id ?? ""}`}</div>
-        <div className="win-stat">Moves：{moves}</div>
-        <div className="win-actions">
-          <button type="button" className="ui-button" onClick={onRetry}>重來一次</button>
-          <button type="button" className="ui-button success" onClick={onNext}>下一關</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function App() {
-  const [levelIndex, setLevelIndex] = useState(FALLBACK_INDEX);
-  const [currentLevel, setCurrentLevel] = useState(() => normalizeLevel({ cars: DEFAULT }, FALLBACK_INDEX[0]));
-  const [level, setLevel] = useState(() => clone(DEFAULT));
-  const [cars, setCars] = useState(() => clone(DEFAULT));
-  const [mode, setMode] = useState("play");
+  const [levels, setLevels] = useState([]);
+  const [current, setCurrent] = useState(DEFAULT_LEVEL);
+  const [startCars, setStartCars] = useState(cloneCars(DEFAULT_LEVEL.cars));
+  const [cars, setCars] = useState(cloneCars(DEFAULT_LEVEL.cars));
+  const [history, setHistory] = useState([]);
   const [moves, setMoves] = useState(0);
-  const [drag, setDrag] = useState(null);
-  const [particles, setParticles] = useState([]);
-  const [draft, setDraft] = useState(null);
+  const [progress, setProgress] = useState(loadProgress);
+  const [customLevels, setCustomLevels] = useState(loadCustomLevels);
+  const [mode, setMode] = useState("play");
+  const [panel, setPanel] = useState("levels");
+  const [analysis, setAnalysis] = useState(null);
+  const [hint, setHint] = useState(null);
+  const [message, setMessage] = useState("");
+  const [editorCars, setEditorCars] = useState([]);
   const [editorStart, setEditorStart] = useState(null);
-  const [loadMessage, setLoadMessage] = useState("");
-  const [levelsOpen, setLevelsOpen] = useState(false);
-  const lastParticle = useRef(0);
-
-  const target = cars.find((car) => car?.id === "target");
-  const won = Boolean(target && exited(target));
-
-  const loadLevel = async (id, customIndex = levelIndex) => {
-    const meta = customIndex.find((item) => item.id === id);
-    if (!meta) return;
-    try {
-      const data = await fetchJson(`/levels/${meta.file}`);
-      const normalized = normalizeLevel(data, meta);
-      setCurrentLevel(normalized);
-      setLevel(clone(normalized.cars));
-      setCars(clone(normalized.cars));
-      setMoves(0); setDrag(null); setParticles([]); setDraft(null); setEditorStart(null); setLoadMessage(""); setLevelsOpen(false);
-    } catch {
-      const fallback = normalizeLevel({ cars: DEFAULT }, meta);
-      setCurrentLevel(fallback);
-      setLevel(clone(DEFAULT));
-      setCars(clone(DEFAULT));
-      setMoves(0); setDrag(null); setParticles([]); setDraft(null); setEditorStart(null); setLoadMessage(`讀不到 ${meta.file}，目前顯示預設關卡。`); setLevelsOpen(false);
-    }
-  };
+  const solverCache = useRef(new Map());
+  const won = isWon(cars);
 
   useEffect(() => {
-    let cancelled = false;
-    async function boot() {
+    (async () => {
       try {
         const index = await fetchJson("/levels/index.json");
-        if (cancelled) return;
-        if (Array.isArray(index) && index.length > 0) {
-          const sorted = [...index].sort((a, b) => a.id - b.id);
-          setLevelIndex(sorted);
-          await loadLevel(sorted[0].id, sorted);
-          return;
-        }
-      } catch {}
-      if (!cancelled) { setLevelIndex(FALLBACK_INDEX); setLoadMessage("讀不到 public/levels/index.json，使用內建關卡按鈕。"); }
-    }
-    boot();
-    return () => { cancelled = true; };
+        const normalized = index.map((item) => ({ ...item, id: Number(item.id) }));
+        setLevels(normalized);
+        await loadLevel(normalized[0]);
+      } catch {
+        setLevels([DEFAULT_LEVEL]);
+        setMessage("無法讀取關卡索引，已載入內建示範關卡。");
+      }
+    })();
   }, []);
 
-  function reset(next = level) {
-    setCars(clone(next)); setMoves(0); setDrag(null); setParticles([]); lastParticle.current = 0;
-  }
+  useEffect(() => {
+    if (!won || current.id === "editor") return;
+    const optimal = analysis?.optimalMoves;
+    const stars = starsForPerformance(moves, optimal);
+    setProgress((previous) => {
+      const key = levelKey(current);
+      const old = previous[key];
+      const next = { ...previous, [key]: { stars: Math.max(old?.stars || 0, stars), bestMoves: Math.min(old?.bestMoves ?? Infinity, moves), completed: true } };
+      saveProgress(next);
+      return next;
+    });
+  }, [won]);
 
-  function goNextLevel() {
-    const sorted = [...(levelIndex || FALLBACK_INDEX)].sort((a, b) => a.id - b.id);
-    const firstId = sorted[0]?.id ?? 1;
-    if (currentLevel?.id === "custom") { loadLevel(firstId, sorted); return; }
-    const currentIndex = sorted.findIndex((item) => item.id === currentLevel?.id);
-    const nextId = currentIndex >= 0 && currentIndex < sorted.length - 1 ? sorted[currentIndex + 1].id : firstId;
-    loadLevel(nextId, sorted);
-  }
-
-  function addParticles(el, color, throttle = 0) {
-    const now = Date.now();
-    if (throttle && now - lastParticle.current < throttle) return;
-    lastParticle.current = now;
-    const burst = makeParticles(el.getBoundingClientRect(), color);
-    setParticles((cur) => [...cur, ...burst]);
-    window.setTimeout(() => setParticles((cur) => cur.filter((p) => !burst.some((b) => b.id === p.id))), LIFE);
-  }
-
-  function startDrag(e, car) {
-    if (won || !car) return;
-    e.preventDefault(); e.currentTarget.setPointerCapture?.(e.pointerId); addParticles(e.currentTarget, car.color);
-    const lim = limits(car, cars);
-    setDrag({ id: car.id, startX: e.clientX, startY: e.clientY, startRow: car.row, startCol: car.col, min: lim.min, max: lim.max, pixels: 0 });
-  }
-
-  function moveDrag(e) {
-    if (!drag || won) return;
-    const car = cars.find((x) => x.id === drag.id);
-    if (!car) return;
-    addParticles(e.currentTarget, car.color, 75);
-    const raw = car.dir === "H" ? e.clientX - drag.startX : e.clientY - drag.startY;
-    setDrag((cur) => (cur ? { ...cur, pixels: clamp(raw, drag.min * CELL, drag.max * CELL) } : cur));
-  }
-
-  function endDrag() {
-    if (!drag) return;
-    const delta = clamp(Math.round(drag.pixels / CELL), drag.min, drag.max);
-    if (delta !== 0) {
-      setCars((cur) => cur.map((car) => car.id === drag.id ? { ...car, row: drag.startRow + (car.dir === "V" ? delta : 0), col: drag.startCol + (car.dir === "H" ? delta : 0) } : car));
-      setMoves((v) => v + 1);
+  async function loadLevel(meta) {
+    try {
+      const raw = meta.cars ? meta : await fetchJson(`/levels/${meta.file}`);
+      const level = { ...meta, ...raw, cars: cloneCars(raw.cars) };
+      setCurrent(level);
+      setStartCars(cloneCars(level.cars));
+      setCars(cloneCars(level.cars));
+      setHistory([]); setMoves(0); setHint(null); setMode("play"); setMessage("");
+      analyze(level);
+    } catch {
+      setMessage(`無法載入 ${meta.file}。`);
     }
-    setDrag(null);
   }
 
-  function gridPos(e) {
-    const r = e.currentTarget.getBoundingClientRect();
-    return { col: Math.floor((e.clientX - r.left) / CELL), row: Math.floor((e.clientY - r.top) / CELL) };
-  }
-
-  function carFromPoints(start, end) {
-    if (!start || !end) return null;
-    const sameRow = start.row === end.row;
-    const sameCol = start.col === end.col;
-    if (!sameRow && !sameCol) return null;
-    const len = sameRow ? Math.abs(end.col - start.col) + 1 : Math.abs(end.row - start.row) + 1;
-    if (len !== 2 && len !== 3) return null;
-    const isTarget = !level.some((car) => car.id === "target");
-    const car = {
-      id: isTarget ? "target" : `car-${Date.now()}`,
-      color: isTarget ? COLORS.red : EDITOR_COLORS[level.length % EDITOR_COLORS.length],
-      row: sameRow ? start.row : Math.min(start.row, end.row),
-      col: sameRow ? Math.min(start.col, end.col) : start.col,
-      len,
-      dir: sameRow ? "H" : "V",
-    };
-    return { ...car, valid: inside(car) && !overlaps(car, level, false) };
-  }
-
-  function editorMove(e) {
-    if (!editorStart) return;
-    const p = gridPos(e);
-    if (p.row < 0 || p.row >= GRID || p.col < 0 || p.col >= GRID) { setDraft(null); return; }
-    setDraft(carFromPoints(editorStart, p));
-  }
-
-  function editorClick(e) {
-    const p = gridPos(e);
-    if (p.row < 0 || p.row >= GRID || p.col < 0 || p.col >= GRID) return;
-    if (!editorStart) {
-      setEditorStart(p); setDraft(null); setLoadMessage(level.some((car) => car.id === "target") ? "已選起點，請點第 2 格或第 3 格作為車尾。" : "已選 Target 起點，請點第 2 格或第 3 格作為車尾。"); return;
+  function analyze(level = current) {
+    const key = `${level.id}:${JSON.stringify(level.cars)}`;
+    let result = solverCache.current.get(key);
+    if (!result) {
+      const solution = solveLevel(level.cars);
+      result = { solution, ...analyzeDifficulty(level.cars, solution) };
+      solverCache.current.set(key, result);
     }
-    const car = carFromPoints(editorStart, p);
-    if (car?.valid) {
-      const { valid, ...nextCar } = car;
-      setLevel((cur) => [...cur, nextCar]);
-      setLoadMessage(car.id === "target" ? "Target 已放置，接下來會自動建立一般車輛。" : "車輛已放置。");
-    } else {
-      setLoadMessage("放置失敗：只能直線 2 或 3 格，且不能重疊或超出棋盤。");
+    setAnalysis(result);
+    return result;
+  }
+
+  function commitMove(move) {
+    setHistory((items) => [...items, cloneCars(cars)]);
+    setCars((items) => applyMove(items, move));
+    setMoves((count) => count + 1);
+    setHint(null);
+  }
+
+  function undo() {
+    setHistory((items) => {
+      if (!items.length) return items;
+      setCars(cloneCars(items.at(-1)));
+      setMoves((count) => Math.max(0, count - 1));
+      return items.slice(0, -1);
+    });
+  }
+
+  function reset() {
+    setCars(cloneCars(startCars)); setHistory([]); setMoves(0); setHint(null);
+  }
+
+  function showHint() {
+    const solution = solveLevel(cars);
+    if (!solution.solvable || !solution.moves.length) {
+      setMessage(solution.reason || "目前狀態不需要提示。");
+      return;
     }
-    setEditorStart(null); setDraft(null);
+    setHint(solution.moves[0]);
+    setMessage(`提示：移動 ${solution.moves[0].carId} ${Math.abs(solution.moves[0].delta)} 格。`);
+  }
+
+  function nextLevel() {
+    const index = levels.findIndex((level) => level.id === current.id);
+    if (index >= 0 && index < levels.length - 1) loadLevel(levels[index + 1]);
   }
 
   function enterEditor() {
-    setMode("edit"); setLevelsOpen(false); setLevel(clone(cars.filter((car) => !exited(car)))); setDraft(null); setEditorStart(null); setLoadMessage("自訂關卡：先點起點，再點車尾。第一台車會自動成為 Target。");
+    setMode("editor"); setPanel("editor"); setEditorCars(cloneCars(current.cars)); setEditorStart(null); setMessage("點選起點與終點，建立長度 2 或 3 的車輛。Target 必須位於第 3 列。");
   }
 
-  function playCustom() {
-    if (!level.some((car) => car.id === "target")) { setLoadMessage("請先放置 Target 紅車。"); return; }
-    const customLevel = { id: "custom", difficulty: "Custom", title: "Custom", file: null, cars: clone(level) };
-    setCurrentLevel(customLevel); setMode("play"); setDraft(null); setEditorStart(null); setLoadMessage(""); reset(level);
+  function editorCell(point) {
+    if (!editorStart) { setEditorStart(point); return; }
+    const sameRow = point.row === editorStart.row;
+    const sameCol = point.col === editorStart.col;
+    const len = sameRow ? Math.abs(point.col - editorStart.col) + 1 : sameCol ? Math.abs(point.row - editorStart.row) + 1 : 0;
+    if (![2, 3].includes(len)) { setMessage("車輛只能是水平或垂直的 2–3 格。"); setEditorStart(null); return; }
+    const targetExists = editorCars.some((car) => car.id === "target");
+    const car = {
+      id: targetExists ? `car-${Date.now()}` : "target",
+      color: targetExists ? COLORS[editorCars.length % COLORS.length] : "#e53935",
+      row: sameRow ? point.row : Math.min(point.row, editorStart.row),
+      col: sameRow ? Math.min(point.col, editorStart.col) : point.col,
+      len,
+      dir: sameRow ? "H" : "V",
+    };
+    const validation = validateLevel([...editorCars, car]);
+    const overlapOnly = validation.errors.filter((error) => !error.includes("必須恰好") && !error.includes("Target 必須"));
+    if (overlapOnly.length) setMessage(overlapOnly[0]);
+    else if (!targetExists && (car.row !== EXIT_ROW || car.dir !== "H" || car.len !== 2)) setMessage("第一台 Target 必須是第 3 列的水平 2 格車。");
+    else setEditorCars((items) => [...items, car]);
+    setEditorStart(null);
   }
 
-  function clearEditor() { setLevel([]); setDraft(null); setEditorStart(null); setLoadMessage("已清空。下一台車會自動成為 Target。"); }
-  function reloadCurrentForEditor() { setLevel(clone(currentLevel.cars || DEFAULT)); setDraft(null); setEditorStart(null); setLoadMessage("已載入目前關卡，可點車左上角 × 移除後重新放置。"); }
+  function validateAndPlay() {
+    const validation = validateLevel(editorCars);
+    if (!validation.valid) { setMessage(validation.errors[0]); return; }
+    const solution = solveLevel(editorCars);
+    if (!solution.solvable) { setMessage(`關卡無解：${solution.reason}`); return; }
+    const difficulty = analyzeDifficulty(editorCars, solution);
+    const custom = { id: `custom-${Date.now()}`, difficulty: difficulty.label, title: "自製關卡", cars: cloneCars(editorCars), analysis: difficulty };
+    setCurrent(custom); setStartCars(cloneCars(editorCars)); setCars(cloneCars(editorCars)); setHistory([]); setMoves(0); setAnalysis({ solution, ...difficulty }); setMode("play"); setPanel("levels"); setMessage(`驗證完成：${difficulty.label}，最佳 ${solution.moves.length} 步。`);
+  }
+
+  function saveCustom() {
+    const validation = validateLevel(editorCars);
+    if (!validation.valid) { setMessage(validation.errors[0]); return; }
+    const solution = solveLevel(editorCars);
+    if (!solution.solvable) { setMessage("無法儲存無解關卡。"); return; }
+    const difficulty = analyzeDifficulty(editorCars, solution);
+    const level = { id: `custom-${Date.now()}`, title: `自製關卡 ${customLevels.length + 1}`, difficulty: difficulty.label, cars: cloneCars(editorCars), optimalMoves: solution.moves.length };
+    const next = [...customLevels, level];
+    setCustomLevels(next); saveCustomLevels(next); setMessage("自製關卡已儲存在此裝置。");
+  }
 
   return (
-    <div className="app">
-      <Particles particles={particles} />
-      <main className="game-layout">
-        <div className="top-panel">
-          <span className="panel-title">{mode === "edit" ? "自訂關卡" : `${currentLevel.difficulty} ${currentLevel.id}`}</span>
-          {mode === "play" && <span className="moves">{moves}</span>}
-          {won && <span className="win-badge">通關</span>}
-          {mode === "play" ? <>
-            <button type="button" onClick={() => reset()} className="ui-button">重置</button>
-            <button type="button" onClick={() => setLevelsOpen((open) => !open)} className="ui-button level-toggle">{levelsOpen ? "收起關卡" : "選擇關卡"}</button>
-            <button type="button" onClick={enterEditor} className="ui-button accent">自訂關卡</button>
-          </> : <>
-            <button type="button" onClick={playCustom} className="ui-button success">開始測試</button>
-            <button type="button" onClick={clearEditor} className="ui-button">清空</button>
-            <button type="button" onClick={reloadCurrentForEditor} className="ui-button">載入目前關卡</button>
-          </>}
-        </div>
+    <div className="app-shell">
+      <header className="hero">
+        <div><p className="eyebrow">PUZZLE GARAGE</p><h1>Traffic Jam</h1><p>把紅色車輛移到出口。每一次拖曳都算一步。</p></div>
+        <div className="stats"><span><b>{moves}</b>步數</span><span><b>{analysis?.optimalMoves ?? "—"}</b>最佳</span><span><b>{analysis?.label ?? current.difficulty}</b>難度</span></div>
+      </header>
 
-        {loadMessage && <div className="load-message">{loadMessage}</div>}
-        {mode === "play" && levelsOpen && <LevelSelector levels={levelIndex} currentLevel={currentLevel} onLoad={loadLevel} />}
-        {mode === "edit" && <div className="editor-panel"><span className="editor-hint">點第 1 下：起點；點第 2 下：車尾。只能建立 2 或 3 格直線車。</span><span className="editor-hint strong">{level.some((car) => car.id === "target") ? "目前模式：一般車輛" : "下一台：Target 紅車"}</span></div>}
+      <main className="workspace">
+        <section className="game-column">
+          <div className="toolbar">
+            <button onClick={undo} disabled={!history.length || mode !== "play"}>復原</button>
+            <button onClick={reset} disabled={mode !== "play"}>重置</button>
+            <button onClick={showHint} disabled={mode !== "play"}>提示</button>
+            <button onClick={() => setPanel(panel === "levels" ? "none" : "levels")}>關卡</button>
+            <button className="accent" onClick={enterEditor}>編輯器</button>
+          </div>
+          {message && <div className="message">{message}</div>}
+          <Board cars={mode === "editor" ? editorCars : cars} onMove={commitMove} highlightedCar={hint?.carId} editor={mode === "editor"} onCellClick={editorCell} onRemove={(id) => setEditorCars((items) => items.filter((car) => car.id !== id))} />
+          {mode === "editor" && <div className="editor-actions"><button onClick={() => setEditorCars([])}>清空</button><button onClick={saveCustom}>儲存</button><button className="accent" onClick={validateAndPlay}>驗證並試玩</button></div>}
+          {won && <div className="win-card"><h2>道路暢通！</h2><p>{moves} 步完成 · {"★".repeat(starsForPerformance(moves, analysis?.optimalMoves))}</p><div><button onClick={reset}>再玩一次</button><button className="accent" onClick={nextLevel}>下一關</button></div></div>}
+        </section>
 
-        <Board cars={mode === "edit" ? level : cars} drag={drag} mode={mode} draft={draft} editorStart={editorStart} boardMove={editorMove} boardClick={editorClick} carDown={startDrag} dragMove={moveDrag} dragEnd={endDrag} removeCar={(id) => setLevel((cur) => cur.filter((car) => car.id !== id))} />
+        <aside className="side-panel">
+          <div className="tabs"><button className={panel === "levels" ? "active" : ""} onClick={() => setPanel("levels")}>正式關卡</button><button className={panel === "custom" ? "active" : ""} onClick={() => setPanel("custom")}>我的關卡</button><button className={panel === "analysis" ? "active" : ""} onClick={() => setPanel("analysis")}>分析</button></div>
+          {panel === "levels" && <LevelBrowser levels={levels} current={current} progress={progress} onSelect={loadLevel} />}
+          {panel === "custom" && <div className="custom-list">{customLevels.length ? customLevels.map((level) => <button key={level.id} onClick={() => loadLevel(level)}><b>{level.title}</b><span>{level.difficulty} · 最佳 {level.optimalMoves} 步</span></button>) : <p>尚未儲存自製關卡。</p>}</div>}
+          {panel === "analysis" && <div className="analysis-card"><h3>關卡分析</h3><dl><div><dt>演算法難度</dt><dd>{analysis?.label ?? "—"}</dd></div><div><dt>最佳解</dt><dd>{analysis?.optimalMoves ?? "—"} 步</dd></div><div><dt>主要阻擋車</dt><dd>{analysis?.blockers ?? "—"}</dd></div><div><dt>搜尋狀態</dt><dd>{analysis?.explored?.toLocaleString() ?? "—"}</dd></div></dl><p>難度依最短解長度、參與車輛、出口阻擋與搜尋空間計算。</p></div>}
+        </aside>
       </main>
-      {mode === "play" && won && <WinModal level={currentLevel} moves={moves} onRetry={() => reset()} onNext={goNextLevel} />}
     </div>
   );
 }
