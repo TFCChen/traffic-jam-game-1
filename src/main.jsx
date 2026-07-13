@@ -206,6 +206,7 @@ function App() {
   const [editorCars, setEditorCars] = useState([]);
   const [editorStart, setEditorStart] = useState(null);
   const [editingCustomId, setEditingCustomId] = useState(null);
+  const [editorValidation, setEditorValidation] = useState(null);
   const solverCache = useRef(new Map());
   const won = isWon(cars);
 
@@ -256,6 +257,7 @@ function App() {
       setMode("play");
       setMessage("");
       setEditingCustomId(null);
+      setEditorValidation(null);
       analyze(level);
     } catch {
       setMessage(`無法載入 ${meta.file}。`);
@@ -321,6 +323,7 @@ function App() {
     setEditorCars(cloneCars(level.cars));
     setEditorStart(null);
     setEditingCustomId(savedCustom?.id ?? null);
+    setEditorValidation(null);
     setMessage(
       savedCustom
         ? `正在編輯「${savedCustom.title}」。修改後請按「更新關卡」。`
@@ -339,6 +342,7 @@ function App() {
         setMessage("這一格已有車輛，不能作為新車的起點。請選擇空白格。");
         return;
       }
+      setEditorValidation(null);
       setEditorStart(point);
       setMessage(`已選起點：第 ${point.row + 1} 列、第 ${point.col + 1} 格。請再點同列或同欄的第 2／3 格。`);
       return;
@@ -373,11 +377,13 @@ function App() {
       (error) => !error.includes("必須恰好") && !error.includes("Target 必須"),
     );
 
-    if (overlapOnly.length) setMessage(overlapOnly[0]);
-    else if (!targetExists && (car.row !== EXIT_ROW || car.dir !== "H" || car.len !== 2)) {
+    if (overlapOnly.length) {
+      setMessage(overlapOnly[0]);
+    } else if (!targetExists && (car.row !== EXIT_ROW || car.dir !== "H" || car.len !== 2)) {
       setMessage("第一台 Target 必須是第 3 列的水平 2 格車。");
     } else {
       setEditorCars((items) => [...items, car]);
+      setEditorValidation(null);
       setMessage(
         car.id === "target"
           ? "Target 已放置。請繼續選擇其他車輛的起點。"
@@ -387,48 +393,62 @@ function App() {
     setEditorStart(null);
   }
 
-  function validateAndPlay() {
+  function validateCustom() {
     const validation = validateLevel(editorCars);
     if (!validation.valid) {
-      setMessage(validation.errors[0]);
+      setEditorValidation({
+        valid: false,
+        solvable: false,
+        reason: validation.errors[0],
+      });
+      setMessage(`驗證失敗：${validation.errors[0]}`);
       return;
     }
+
     const solution = solveLevel(editorCars);
     if (!solution.solvable) {
-      setMessage(`關卡無解：${solution.reason}`);
+      setEditorValidation({
+        valid: true,
+        solvable: false,
+        reason: solution.reason || "找不到可行解。",
+        explored: solution.explored,
+      });
+      setMessage("驗證完成：目前關卡無解。");
       return;
     }
+
     const difficulty = analyzeDifficulty(editorCars, solution);
-    const existing = customLevels.find((level) => level.id === editingCustomId);
-    const custom = {
-      id: `preview-${Date.now()}`,
-      difficulty: difficulty.label,
-      title: existing?.title ?? "自製關卡預覽",
-      cars: cloneCars(editorCars),
-      analysis: difficulty,
-    };
-    setCurrent(custom);
-    setStartCars(cloneCars(editorCars));
-    setCars(cloneCars(editorCars));
-    setHistory([]);
-    setMoves(0);
-    setAnalysis({ solution, ...difficulty });
-    setMode("play");
-    setPanel("custom");
-    setMessage(`驗證完成：推估 ${difficulty.label}，最佳 ${solution.moves.length} 步。這是試玩版本，未自動儲存。`);
+    setEditorValidation({
+      valid: true,
+      solvable: true,
+      label: difficulty.label,
+      optimalMoves: solution.moves.length,
+      blockers: difficulty.blockers,
+      explored: difficulty.explored,
+    });
+    setMessage(`驗證完成：此關卡有解，最佳 ${solution.moves.length} 步，推估難度 ${difficulty.label}。`);
   }
 
   function saveCustom() {
     const validation = validateLevel(editorCars);
     if (!validation.valid) {
+      setEditorValidation({ valid: false, solvable: false, reason: validation.errors[0] });
       setMessage(validation.errors[0]);
       return;
     }
+
     const solution = solveLevel(editorCars);
     if (!solution.solvable) {
+      setEditorValidation({
+        valid: true,
+        solvable: false,
+        reason: solution.reason || "找不到可行解。",
+        explored: solution.explored,
+      });
       setMessage("無法儲存無解關卡。");
       return;
     }
+
     const difficulty = analyzeDifficulty(editorCars, solution);
     const existing = customLevels.find((level) => level.id === editingCustomId);
     const level = existing
@@ -443,9 +463,18 @@ function App() {
     const next = existing
       ? customLevels.map((item) => (item.id === existing.id ? level : item))
       : [...customLevels, level];
+
     setCustomLevels(next);
     saveCustomLevels(next);
     setEditingCustomId(level.id);
+    setEditorValidation({
+      valid: true,
+      solvable: true,
+      label: difficulty.label,
+      optimalMoves: solution.moves.length,
+      blockers: difficulty.blockers,
+      explored: difficulty.explored,
+    });
     solverCache.current.delete(`${level.id}:${JSON.stringify(existing?.cars ?? [])}`);
     setMessage(existing ? `「${level.title}」已更新。` : `「${level.title}」已儲存在此裝置。`);
   }
@@ -458,10 +487,24 @@ function App() {
     if (editingCustomId === level.id) {
       setEditingCustomId(null);
       setEditorStart(null);
+      setEditorValidation(null);
       setMode("play");
     }
     if (current.id === level.id) loadLevel(levels[0] ?? DEFAULT_LEVEL);
     setMessage(`「${level.title}」已刪除。`);
+  }
+
+  function removeEditorCar(id) {
+    setEditorCars((items) => items.filter((car) => car.id !== id));
+    setEditorStart(null);
+    setEditorValidation(null);
+  }
+
+  function clearEditor() {
+    setEditorCars([]);
+    setEditorStart(null);
+    setEditorValidation(null);
+    setMessage("已清空。請點選 Target 的起點。");
   }
 
   return (
@@ -498,27 +541,41 @@ function App() {
             editor={mode === "editor"}
             editorStart={editorStart}
             onCellClick={editorCell}
-            onRemove={(id) => {
-              setEditorCars((items) => items.filter((car) => car.id !== id));
-              setEditorStart(null);
-            }}
+            onRemove={removeEditorCar}
           />
 
           {mode === "editor" && (
-            <div className="editor-actions">
-              {editorStart && <button onClick={cancelEditorStart}>取消選點</button>}
-              <button
-                onClick={() => {
-                  setEditorCars([]);
-                  setEditorStart(null);
-                  setMessage("已清空。請點選 Target 的起點。");
-                }}
-              >
-                清空
-              </button>
-              <button onClick={saveCustom}>{editingCustomId ? "更新關卡" : "儲存"}</button>
-              <button className="accent" onClick={validateAndPlay}>驗證並試玩</button>
-            </div>
+            <>
+              <div className="editor-actions">
+                {editorStart && <button onClick={cancelEditorStart}>取消選點</button>}
+                <button onClick={clearEditor}>清空</button>
+                <button onClick={saveCustom}>{editingCustomId ? "更新關卡" : "儲存"}</button>
+                <button className="accent" onClick={validateCustom}>驗證</button>
+              </div>
+
+              {editorValidation && (
+                <section className="analysis-card editor-validation" aria-live="polite">
+                  <h3>
+                    {editorValidation.solvable
+                      ? "✓ 關卡有解"
+                      : editorValidation.valid
+                        ? "關卡無解"
+                        : "設定不完整"}
+                  </h3>
+
+                  {editorValidation.solvable ? (
+                    <dl>
+                      <div><dt>最佳解</dt><dd>{editorValidation.optimalMoves} 步</dd></div>
+                      <div><dt>推估難度</dt><dd>{editorValidation.label}</dd></div>
+                      <div><dt>主要阻擋車</dt><dd>{editorValidation.blockers ?? "—"}</dd></div>
+                      <div><dt>搜尋狀態</dt><dd>{editorValidation.explored?.toLocaleString() ?? "—"}</dd></div>
+                    </dl>
+                  ) : (
+                    <p>{editorValidation.reason}</p>
+                  )}
+                </section>
+              )}
+            </>
           )}
 
           {won && (
