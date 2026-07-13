@@ -37,7 +37,7 @@ async function fetchJson(path) {
   return response.json();
 }
 
-function Board({ cars, onMove, highlightedCar, editor, onCellClick, onRemove }) {
+function Board({ cars, onMove, highlightedCar, editor, editorStart, onCellClick, onRemove }) {
   const [drag, setDrag] = useState(null);
 
   function startDrag(event, car) {
@@ -82,6 +82,13 @@ function Board({ cars, onMove, highlightedCar, editor, onCellClick, onRemove }) 
         {Array.from({ length: GRID * GRID }, (_, index) => (
           <span key={index} className="cell" style={{ left: (index % GRID) * CELL, top: Math.floor(index / GRID) * CELL, width: CELL, height: CELL }} />
         ))}
+        {editor && editorStart && (
+          <span
+            className="editor-start-marker"
+            aria-label="已選取的車輛起點"
+            style={{ left: editorStart.col * CELL + 4, top: editorStart.row * CELL + 4, width: CELL - 8, height: CELL - 8 }}
+          />
+        )}
         {cars.map((car) => {
           const dragging = drag?.car.id === car.id;
           const left = car.col * CELL;
@@ -91,7 +98,7 @@ function Board({ cars, onMove, highlightedCar, editor, onCellClick, onRemove }) 
           const transform = dragging ? (car.dir === "H" ? `translateX(${drag.pixels}px)` : `translateY(${drag.pixels}px)`) : undefined;
           return (
             <div key={car.id} className={`vehicle ${car.id === "target" ? "target" : ""} ${highlightedCar === car.id ? "hinted" : ""}`} style={{ left: left + 4, top: top + 4, width, height, background: car.color, transform }} onPointerDown={(event) => startDrag(event, car)} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag}>
-              <span>{car.id === "target" ? "GO" : car.len === 3 ? "BUS" : ""}</span>
+              {car.id === "target" && <span>GO</span>}
               {editor && <button className="remove" onClick={(event) => { event.stopPropagation(); onRemove(car.id); }}>×</button>}
             </div>
           );
@@ -185,7 +192,8 @@ function App() {
     let result = solverCache.current.get(key);
     if (!result) {
       const solution = solveLevel(level.cars);
-      result = { solution, ...analyzeDifficulty(level.cars, solution) };
+      const officialDifficulty = typeof level.id === "number" && DIFFICULTIES.includes(level.difficulty) ? level.difficulty : null;
+      result = { solution, ...analyzeDifficulty(level.cars, solution, { officialDifficulty }) };
       solverCache.current.set(key, result);
     }
     setAnalysis(result);
@@ -232,11 +240,18 @@ function App() {
   }
 
   function editorCell(point) {
-    if (!editorStart) { setEditorStart(point); return; }
+    if (!editorStart) {
+      setEditorStart(point);
+      setMessage(`已選起點：第 ${point.row + 1} 列、第 ${point.col + 1} 格。請再點同列或同欄的第 2／3 格。`);
+      return;
+    }
     const sameRow = point.row === editorStart.row;
     const sameCol = point.col === editorStart.col;
     const len = sameRow ? Math.abs(point.col - editorStart.col) + 1 : sameCol ? Math.abs(point.row - editorStart.row) + 1 : 0;
-    if (![2, 3].includes(len)) { setMessage("車輛只能是水平或垂直的 2–3 格。"); setEditorStart(null); return; }
+    if (![2, 3].includes(len)) {
+      setMessage("終點無效：請點同列或同欄、距離起點 1–2 格的位置。起點仍保留。");
+      return;
+    }
     const targetExists = editorCars.some((car) => car.id === "target");
     const car = {
       id: targetExists ? `car-${Date.now()}` : "target",
@@ -250,7 +265,10 @@ function App() {
     const overlapOnly = validation.errors.filter((error) => !error.includes("必須恰好") && !error.includes("Target 必須"));
     if (overlapOnly.length) setMessage(overlapOnly[0]);
     else if (!targetExists && (car.row !== EXIT_ROW || car.dir !== "H" || car.len !== 2)) setMessage("第一台 Target 必須是第 3 列的水平 2 格車。");
-    else setEditorCars((items) => [...items, car]);
+    else {
+      setEditorCars((items) => [...items, car]);
+      setMessage(car.id === "target" ? "Target 已放置。請繼續選擇其他車輛的起點。" : "車輛已放置。請選擇下一台車的起點。");
+    }
     setEditorStart(null);
   }
 
@@ -261,7 +279,7 @@ function App() {
     if (!solution.solvable) { setMessage(`關卡無解：${solution.reason}`); return; }
     const difficulty = analyzeDifficulty(editorCars, solution);
     const custom = { id: `custom-${Date.now()}`, difficulty: difficulty.label, title: "自製關卡", cars: cloneCars(editorCars), analysis: difficulty };
-    setCurrent(custom); setStartCars(cloneCars(editorCars)); setCars(cloneCars(editorCars)); setHistory([]); setMoves(0); setAnalysis({ solution, ...difficulty }); setMode("play"); setPanel("levels"); setMessage(`驗證完成：${difficulty.label}，最佳 ${solution.moves.length} 步。`);
+    setCurrent(custom); setStartCars(cloneCars(editorCars)); setCars(cloneCars(editorCars)); setHistory([]); setMoves(0); setAnalysis({ solution, ...difficulty }); setMode("play"); setPanel("levels"); setMessage(`驗證完成：推估 ${difficulty.label}，最佳 ${solution.moves.length} 步。`);
   }
 
   function saveCustom() {
@@ -292,16 +310,16 @@ function App() {
             <button className="accent" onClick={enterEditor}>編輯器</button>
           </div>
           {message && <div className="message">{message}</div>}
-          <Board cars={mode === "editor" ? editorCars : cars} onMove={commitMove} highlightedCar={hint?.carId} editor={mode === "editor"} onCellClick={editorCell} onRemove={(id) => setEditorCars((items) => items.filter((car) => car.id !== id))} />
-          {mode === "editor" && <div className="editor-actions"><button onClick={() => setEditorCars([])}>清空</button><button onClick={saveCustom}>儲存</button><button className="accent" onClick={validateAndPlay}>驗證並試玩</button></div>}
+          <Board cars={mode === "editor" ? editorCars : cars} onMove={commitMove} highlightedCar={hint?.carId} editor={mode === "editor"} editorStart={editorStart} onCellClick={editorCell} onRemove={(id) => setEditorCars((items) => items.filter((car) => car.id !== id))} />
+          {mode === "editor" && <div className="editor-actions"><button onClick={() => { setEditorCars([]); setEditorStart(null); setMessage("已清空。請點選 Target 的起點。"); }}>清空</button><button onClick={saveCustom}>儲存</button><button className="accent" onClick={validateAndPlay}>驗證並試玩</button></div>}
           {won && <div className="win-card"><h2>道路暢通！</h2><p>{moves} 步完成 · {"★".repeat(starsForPerformance(moves, analysis?.optimalMoves))}</p><div><button onClick={reset}>再玩一次</button><button className="accent" onClick={nextLevel}>下一關</button></div></div>}
         </section>
 
         <aside className="side-panel">
           <div className="tabs"><button className={panel === "levels" ? "active" : ""} onClick={() => setPanel("levels")}>正式關卡</button><button className={panel === "custom" ? "active" : ""} onClick={() => setPanel("custom")}>我的關卡</button><button className={panel === "analysis" ? "active" : ""} onClick={() => setPanel("analysis")}>分析</button></div>
           {panel === "levels" && <LevelBrowser levels={levels} current={current} progress={progress} onSelect={loadLevel} />}
-          {panel === "custom" && <div className="custom-list">{customLevels.length ? customLevels.map((level) => <button key={level.id} onClick={() => loadLevel(level)}><b>{level.title}</b><span>{level.difficulty} · 最佳 {level.optimalMoves} 步</span></button>) : <p>尚未儲存自製關卡。</p>}</div>}
-          {panel === "analysis" && <div className="analysis-card"><h3>關卡分析</h3><dl><div><dt>演算法難度</dt><dd>{analysis?.label ?? "—"}</dd></div><div><dt>最佳解</dt><dd>{analysis?.optimalMoves ?? "—"} 步</dd></div><div><dt>主要阻擋車</dt><dd>{analysis?.blockers ?? "—"}</dd></div><div><dt>搜尋狀態</dt><dd>{analysis?.explored?.toLocaleString() ?? "—"}</dd></div></dl><p>難度依最短解長度、參與車輛、出口阻擋與搜尋空間計算。</p></div>}
+          {panel === "custom" && <div className="custom-list">{customLevels.length ? customLevels.map((level) => <button key={level.id} onClick={() => loadLevel(level)}><b>{level.title}</b><span>推估 {level.difficulty} · 最佳 {level.optimalMoves} 步</span></button>) : <p>尚未儲存自製關卡。</p>}</div>}
+          {panel === "analysis" && <div className="analysis-card"><h3>關卡分析</h3><dl><div><dt>{analysis?.classificationSource === "official" ? "官方難度" : "推估難度"}</dt><dd>{analysis?.label ?? "—"}</dd></div><div><dt>最佳解</dt><dd>{analysis?.optimalMoves ?? "—"} 步</dd></div><div><dt>主要阻擋車</dt><dd>{analysis?.blockers ?? "—"}</dd></div><div><dt>搜尋狀態</dt><dd>{analysis?.explored?.toLocaleString() ?? "—"}</dd></div></dl><p>{analysis?.classificationSource === "official" ? "正式關卡沿用實體挑戰卡的原始分級；解題資料只用於最佳步數與提示，不會覆蓋官方難度。" : "自製關卡沒有官方卡片分級，因此依最短解步數推估，僅供參考。"}</p></div>}
         </aside>
       </main>
     </div>
