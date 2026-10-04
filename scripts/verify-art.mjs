@@ -13,7 +13,10 @@ const saved=await evaluate("Object.fromEntries(['traffic-jam-progress-v2','traff
 try{
   for(const spec of [{name:'day-oblique',theme:'day',pitch:55,yaw:25,width:1280,height:900},
     {name:'sunset-oblique',theme:'sunset',pitch:55,yaw:-20,width:1280,height:900},
-    {name:'neon-mobile',theme:'neon',pitch:60,yaw:15,width:375,height:800}]){
+    {name:'neon-mobile',theme:'neon',pitch:60,yaw:15,width:375,height:800},
+    {name:'day-mobile-default',theme:'day',pitch:60,yaw:-12,width:375,height:800},
+    {name:'mobile-low-angle',theme:'day',pitch:45,yaw:35,width:320,height:700},
+    {name:'mobile-high-angle',theme:'day',pitch:80,yaw:-35,width:320,height:700}]){
     await send('Emulation.setDeviceMetricsOverride',{width:spec.width,height:spec.height,deviceScaleFactor:1,mobile:spec.width<500});
     await evaluate(`localStorage.setItem('traffic-jam-progress-v2',JSON.stringify(Object.fromEntries(Array.from({length:20},(_,i)=>[i+1,{completed:true}]))));localStorage.setItem('traffic-jam-scene',JSON.stringify({pitch:${spec.pitch},yaw:${spec.yaw},light:-40,intensity:3,shadows:true,theme:'${spec.theme}',quality:'high',motion:1.2}));location.reload()`);
     await sleep(400);let ready=false;
@@ -21,6 +24,8 @@ try{
     assert.ok(ready);await sleep(1500);
     const result=await evaluate(`(()=>{const a=document.querySelector('.garage-canvas').garageInspection,failures=[];for(const car of a.snapshot().cars){const [x,,z]=car.position;for(const offset of [-.25,0,.25]){const p=a.project(x+(car.dir==='H'?offset:0),.55,z+(car.dir==='V'?offset:0));if(a.pick(p.x,p.y)!==car.id)failures.push(car.id);}}return {failures,overflow:document.documentElement.scrollWidth>innerWidth,settings:a.snapshot().settings};})()`);
     assert.deepEqual(result.failures,[],`${spec.name}: rendered car must remain selectable`);assert.equal(result.overflow,false);
+    const fits=await evaluate("(()=>{const canvas=document.querySelector('.garage-canvas'),a=canvas.garageInspection,r=canvas.getBoundingClientRect();return [0,6].every(x=>[0,6].every(z=>{const p=a.project(x,.055,z);return p.x>=r.left&&p.x<=r.right&&p.y>=r.top&&p.y<=r.bottom;}));})()");
+    assert.equal(fits,true,`${spec.name}: all four puzzle corners remain in frame`);
     await writeFile(new URL(`../.browser-checks/art-${spec.name}.png`,import.meta.url),Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
     console.log(`${spec.name}: 24 car hit samples and no horizontal overflow passed; screenshot saved.`);
   }

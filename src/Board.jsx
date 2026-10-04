@@ -5,12 +5,12 @@ import { SCENE_THEMES, completedOfficialLevels, availableTheme } from './sceneTh
 import { QUALITY } from './gamePreferences.js';
 import { Icon, Sheet } from './GameUI.jsx';
 
-const DEFAULT = { pitch: 65, yaw: 0, light: -40, intensity: 3, shadows: true, theme:'day',quality:'standard',motion:1.2 };
+const DEFAULT = { pitch: 60, yaw: -12, light: -40, intensity: 3, shadows: true, theme:'day',quality:'standard',motion:1.2 };
 function readSettings() {
   try {
     const value=JSON.parse(localStorage.getItem('traffic-jam-scene') || 'null');
     if(!value)return DEFAULT;
-    return { pitch: Math.max(45,Math.min(80,Number(value.pitch)||65)), yaw: Math.max(-35,Math.min(35,Number(value.yaw)||0)), light: Math.max(-180,Math.min(180,(Number.isFinite(Number(value.light)) ? Number(value.light) : -40))), intensity: Math.max(.5,Math.min(5,Number(value.intensity)||3)), shadows: value.shadows!==false,theme:value.theme??'day',quality:QUALITY[value.quality]?value.quality:'standard',motion:Number.isFinite(Number(value.motion))?Math.max(0,Math.min(1.5,Number(value.motion))):1.2 };
+    return { pitch: Math.max(45,Math.min(80,Number(value.pitch)||DEFAULT.pitch)), yaw: Math.max(-35,Math.min(35,Number.isFinite(Number(value.yaw))?Number(value.yaw):DEFAULT.yaw)), light: Math.max(-180,Math.min(180,(Number.isFinite(Number(value.light)) ? Number(value.light) : -40))), intensity: Math.max(.5,Math.min(5,Number(value.intensity)||3)), shadows: value.shadows!==false,theme:value.theme??'day',quality:QUALITY[value.quality]?value.quality:'standard',motion:Number.isFinite(Number(value.motion))?Math.max(0,Math.min(1.5,Number(value.motion))):1.2 };
   } catch { return DEFAULT; }
 }
 

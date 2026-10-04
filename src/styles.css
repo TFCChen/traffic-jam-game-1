@@ -455,7 +455,8 @@ button.selected, .tabs button.active { color: #246656; border-color: #9abfae; ba
   .game-column { min-height:calc(100dvh - max(8px,env(safe-area-inset-top)) - max(8px,env(safe-area-inset-bottom))); }
   .game-hud { padding:10px 2px 15px; gap:8px; }.game-hud .stage-kicker { display:block; font-size:7px; letter-spacing:.13em; }.game-hud .stage-heading h2 { font-size:20px; }
   .game-hud .stats span { display:block; min-width:0; padding:0 9px; font-size:9px; }.game-hud .stats b { font-size:21px; }.game-hud .stats span:last-child b { font-size:12px; line-height:2.2; }
-  .garage-canvas-wrap { width:100%; margin:0; min-height:260px; border-radius:4px; }.scene-tools button { padding:8px; font-size:10px; }.scene-options-bar > span { font-size:10px; }
+  .garage-3d { flex:0; margin-block:auto; }
+  .garage-canvas-wrap { flex:none; aspect-ratio:1; width:100%; margin:0; min-height:260px; border-radius:4px; }.scene-tools button { padding:8px; font-size:10px; }.scene-options-bar > span { font-size:10px; }
   .toolbar { gap:5px; }.toolbar button { min-height:62px; font-size:10px; gap:7px; }.toolbar button svg { width:19px; height:19px; }
   .game-sheet { border-radius:12px 12px 0 0; }.board-footer { font-size:9px; }
 }

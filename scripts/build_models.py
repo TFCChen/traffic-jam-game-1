@@ -132,7 +132,7 @@ def shaped_cabin(name,position,size,material,taper=.68):
 def coachwork(kind, length, material):
     # Lofted cross-sections: a curved bonnet, shoulders and tapered nose instead of a box.
     profiles = {
-        'racer': [(-.92,.30,.29),(-.72,.40,.36),(-.35,.41,.37),(.25,.40,.36),(.68,.36,.33),(.92,.29,.25)],
+        'racer': [(-.92,.31,.28),(-.76,.42,.35),(-.40,.42,.365),(.18,.40,.35),(.48,.385,.32),(.73,.35,.29),(.92,.30,.23)],
         'compact': [(-.92,.29,.31),(-.67,.40,.39),(-.22,.41,.39),(.35,.39,.37),(.72,.34,.32),(.92,.26,.25)],
         'taxi': [(-.92,.30,.30),(-.7,.40,.36),(-.25,.41,.38),(.35,.40,.36),(.72,.35,.32),(.92,.29,.26)],
         'jeep': [(-.92,.35,.33),(-.70,.41,.39),(-.25,.41,.40),(.35,.41,.39),(.72,.40,.36),(.92,.34,.31)],
@@ -180,10 +180,22 @@ def car(kind, length, colour):
     tall = kind in ('schoolbus', 'coach', 'camper', 'delivery')
     coachwork(kind,length,paint)
     if kind == 'racer':
-        shaped_cabin('Sloped sporty glass', (-.12,0,.47), (.9,.67,.32), glass)
-        cube('Sport roof', (-.2,0,.65), (.43,.62,.04), paint, .025)
-        cube('Rear spoiler', (-length/2+.2,0,.45), (.12,.92,.055), white, .025)
-        for y in (-.12,.12): cube('Racing stripe', (.6,y,.355), (.5,.055,.012), white, .005)
+        shaped_cabin('Swept coupe glass', (-.13,0,.465), (.86,.65,.30), glass,.62)
+        roof=cube('Coupe roof', (-.24,0,.616), (.42,.55,.045), paint, .025)
+        for vertex in roof.data.vertices:
+            if vertex.co.x>0:vertex.co.y*=.88
+        roof.data.update()
+        cube('Roof racing accent',(-.24,0,.642),(.35,.092,.006),cream,.002)
+        cube('Rear ducktail', (-.78,0,.377), (.105,.75,.045), paint, .018)
+        for y in (-.29,.29):cube('Rear spoiler support',(-.78,y,.341),(.04,.033,.042),rubber,.006)
+        # Follow the sculpted bonnet instead of laying flat bars above it.
+        for x,z,angle,size in [(.37,.335,.10,.33),(.60,.310,.12,.25),(.825,.265,.306,.18)]:
+            stripe=cube('Bonnet centre stripe',(x,0,z),(size,.095,.006),cream,.001)
+            stripe.rotation_euler.y=angle
+        for y in (-.31,.31):
+            lamp_housing=cube('Recessed headlamp pod',(.77,y,.284),(.19,.13,.027),rubber,.012)
+            lamp_housing.rotation_euler.y=.20
+            led=cube('LED blade',(.78,y,.302),(.11,.073,.010),lamp,.004);led.rotation_euler.y=.20
     elif kind == 'pickup':
         shaped_cabin('Sloped pickup glass', (.39,0,.49), (.62,.69,.38), glass)
         cube('Cab roof', (.3,0,.7), (.46,.73,.055), paint)
@@ -235,12 +247,12 @@ def car(kind, length, colour):
         cube('Dashboard',(cabin_x+.27,0,.45),(.12,.52,.06),rubber,.014)
         steering=cylinder('Steering wheel',(cabin_x+.18,-.15,.50),.055,.013,rubber,'X')
         steering.rotation_euler.y+=.35
-    mirror_x = .82 if tall else .28
+    mirror_x = .82 if tall else .13 if kind=='racer' else .28
     for y in (-.41,.41):
         cube('Lower rocker trim',(0,y,.145),(length-.46,.032,.05),rubber,.01)
     if kind not in ('delivery','camper'):
-        front_x=length/2-(.35 if tall else .58)
-        for y in (-.16,.16):cube('Windshield wiper',(front_x,y,.77 if tall else .57),(.06,.21,.022),rubber,.005)
+        front_x=.18 if kind=='racer' else length/2-(.35 if tall else .58)
+        for y in (-.16,.16):cube('Windshield wiper',(front_x,y,.532 if kind=='racer' else .77 if tall else .57),(.025,.19,.015),rubber,.003)
     for y in (-.47,.47):
         cube('Side mirror', (mirror_x,y,.59 if tall else .49), (.16,.085,.075), chrome, .018)
         cube('Door handle', (.15,y*.89,.43), (.12,.023,.025), chrome, .008)
@@ -248,8 +260,12 @@ def car(kind, length, colour):
         for y in (-.417,.417):
             cube('Door seam', (-.36,y,.33), (.015,.015,.16), rubber, .003)
         if kind == 'racer':
-            for y in (-.19,.19): cube('Hood vent', (.64,y,.367), (.22,.07,.016), rubber, .008)
-            cube('Front splitter', (.91,0,.125), (.13,.76,.035), rubber, .01)
+            for y in (-.20,.20):
+                vent=cube('Flush bonnet vent', (.47,y,.329), (.15,.06,.009), rubber, .004);vent.rotation_euler.y=.10
+                for x in (.43,.48,.53):
+                    fin=cube('Bonnet vent blade',(x,y,.337-(x-.47)*.10),(.011,.044,.004),chrome,0)
+            cube('Front splitter', (.90,0,.115), (.13,.71,.025), rubber, .008)
+            for y in (-.4,.4):cube('Sculpted side skirt',(-.07,y,.17),(.93,.035,.045),paint,.012)
         elif kind == 'jeep':
             for y in (-.18,-.09,0,.09,.18): cube('Jeep grille', (.927,y,.32), (.02,.036,.13), rubber, .005)
         elif kind == 'pickup':
@@ -286,8 +302,6 @@ def car(kind, length, colour):
             pillar=cube('Cabin pillar',(-.22,y,.52),(.042,.035,.29),paint,.008)
             pillar.rotation_euler.y=-.1 if kind=='racer' else .05
     if kind=='racer':
-        for y in (-.32,.32):
-            cube('Sport bonnet shoulder',(.57,y,.31),(.38,.045,.035),paint,.012)
         cube('Front intake',(.925,0,.22),(.018,.32,.075),rubber,.012)
         for y in (-.10,0,.10):cube('Intake fin',(.938,y,.22),(.009,.014,.059),chrome,.002)
     elif kind=='compact':
@@ -314,9 +328,9 @@ def car(kind, length, colour):
                 part=cube('Tyre tread',(x+math.cos(angle)*.178,y,.19+math.sin(angle)*.178),(.019,.105,.012),bed,0)
                 part.rotation_euler.y=math.pi/2-angle;wheel_colourize(part,bed)
     for y in (-.26,.26):
-        cube('Headlight', (length/2-.065,y,.3), (.022,.15,.09), lamp, .02)
-        cube('Taillight', (-length/2+.065,y,.3), (.022,.13,.07), redlamp, .018)
-    cube('Front bumper', (length/2-.06,0,.18), (.055,.57,.08), chrome, .025)
+        if kind!='racer':cube('Headlight', (length/2-.065,y,.3), (.022,.15,.09), lamp, .02)
+        cube('Taillight', (-length/2+.065,y,.28 if kind=='racer' else .3), (.022,.18 if kind=='racer' else .13,.035 if kind=='racer' else .07), redlamp, .012)
+    if kind!='racer':cube('Front bumper', (length/2-.06,0,.18), (.055,.57,.08), chrome, .025)
     exported = export(kind)
     return exported
 

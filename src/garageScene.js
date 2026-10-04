@@ -50,7 +50,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
   const sceneryLamps=[];
   const stats = { frames: 0, shadowUpdates: 0 };
   const scratchPosition = new THREE.Vector3(), scratchDirection = new THREE.Vector3();
-  const settings = { pitch: 65, yaw: 0, light: -40, intensity: 3, shadows: true,theme:'day',quality:'standard' };
+  const settings = { pitch: 60, yaw: -12, light: -40, intensity: 3, shadows: true,theme:'day',quality:'standard' };
   let quality=QUALITY.standard;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const motionChanged=()=>{dirty=true;settlingUntil=performance.now()+450;};
@@ -141,13 +141,20 @@ export function createGarageScene(canvas, getProps, callbacks) {
     camera.position.set(aim.x+Math.sin(yaw)*Math.cos(pitch)*14, aim.y+Math.sin(pitch)*14, aim.z+Math.cos(yaw)*Math.cos(pitch)*14);
     camera.lookAt(aim); camera.updateMatrixWorld();
     const rect=canvas.getBoundingClientRect(),aspect=rect.width/Math.max(1,rect.height);
-    let halfWidth=0,halfHeight=0;
-    for(const x of [-1.2,7.7])for(const y of [-.48,1.4])for(const z of [-.55,6.4]){
+    // Fit the occupied height ranges, rather than an oversized empty bounding cube.
+    // Portrait framing prioritizes the puzzle; peripheral street edges may leave the shot.
+    const portrait=rect.width<560&&aspect<1.15;
+    const bounds=portrait?
+      [[[-.18,6.62],[-.40,.08],[-.18,6.18]],[[0,6],[.08,1.3],[0,6]]]:
+      [[[-1.15,7.7],[-.48,.2],[-.4,6.4]],[[0,6],[.08,1.3],[0,6]],[[-.9,6.9],[.2,1.4],[.1,6]]];
+    let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+    for(const [xs,ys,zs]of bounds)for(const x of xs)for(const y of ys)for(const z of zs){
       const point=new THREE.Vector3(x,y,z).applyMatrix4(camera.matrixWorldInverse);
-      halfWidth=Math.max(halfWidth,Math.abs(point.x)+.35);halfHeight=Math.max(halfHeight,Math.abs(point.y)+.35);
+      minX=Math.min(minX,point.x);maxX=Math.max(maxX,point.x);minY=Math.min(minY,point.y);maxY=Math.max(maxY,point.y);
     }
-    halfWidth=Math.max(halfWidth,halfHeight*aspect);halfHeight=halfWidth/aspect;
-    camera.left=-halfWidth;camera.right=halfWidth;camera.top=halfHeight;camera.bottom=-halfHeight;camera.updateProjectionMatrix();
+    const padding=portrait?.16:.22,centerX=(minX+maxX)/2,centerY=(minY+maxY)/2;
+    const halfWidth=Math.max((maxX-minX)/2+padding,((maxY-minY)/2+padding)*aspect),halfHeight=halfWidth/aspect;
+    camera.left=centerX-halfWidth;camera.right=centerX+halfWidth;camera.top=centerY+halfHeight;camera.bottom=centerY-halfHeight;camera.updateProjectionMatrix();
     const angle=THREE.MathUtils.degToRad(settings.light);
     sun.position.set(aim.x+Math.sin(angle)*8, 10, aim.z+Math.cos(angle)*8);
     const theme=SCENE_THEMES.find(t=>t.id===settings.theme)??SCENE_THEMES[0];
