@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
+import Board from "./Board.jsx";
+import { Icon, WinDialog } from "./GameUI.jsx";
 import {
   GRID,
   EXIT_ROW,
@@ -9,11 +11,11 @@ import {
   cloneCars,
   isWon,
   legalMovesForCar,
-  solveLevel,
   starsForPerformance,
   validateLevel,
 } from "./gameEngine.js";
 import { loadCustomLevels, loadProgress, saveCustomLevels, saveProgress } from "./storage.js";
+import { solveInBackground } from "./solverClient.js";
 
 const DIFFICULTIES = ["Beginner", "Intermediate", "Advanced", "Expert"];
 const CELL = 58;
@@ -28,8 +30,8 @@ const DEFAULT_LEVEL = {
   ],
 };
 
-const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const levelKey = (level) => String(level.id);
+const DIFFICULTY_LABELS = { Beginner: "初級", Intermediate: "中級", Advanced: "進階", Expert: "專家" };
 
 async function fetchJson(path) {
   const response = await fetch(path, { cache: "no-store" });
@@ -46,131 +48,6 @@ function isPointOccupied(cars, point) {
   });
 }
 
-function Board({ cars, onMove, highlightedCar, editor, editorStart, onCellClick, onRemove }) {
-  const [drag, setDrag] = useState(null);
-  const viewport = useRef(null);
-  const [boardScale, setBoardScale] = useState(1);
-
-  useEffect(() => {
-    const observer = new ResizeObserver(([entry]) => {
-      setBoardScale(Math.min(1, entry.contentRect.width / 478));
-    });
-    observer.observe(viewport.current);
-    return () => observer.disconnect();
-  }, []);
-
-  function startDrag(event, car) {
-    if (editor) return;
-    event.preventDefault();
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-    const legal = legalMovesForCar(cars, car.id);
-    const board = event.currentTarget.closest(".board");
-    const scale = board.getBoundingClientRect().width / (GRID * CELL);
-    setDrag({ car, startX: event.clientX, startY: event.clientY, legal, pixels: 0, scale });
-  }
-
-  function moveDrag(event) {
-    if (!drag) return;
-    const raw = (drag.car.dir === "H" ? event.clientX - drag.startX : event.clientY - drag.startY) / drag.scale;
-    const deltas = drag.legal.map((move) => move.delta);
-    const min = Math.min(0, ...deltas) * CELL;
-    const max = Math.max(0, ...deltas) * CELL;
-    setDrag((current) => ({ ...current, pixels: clamp(raw, min, max) }));
-  }
-
-  function endDrag() {
-    if (!drag) return;
-    const desired = Math.round(drag.pixels / CELL);
-    if (desired !== 0) {
-      const legal = drag.legal.find((move) => move.delta === desired);
-      if (legal) onMove(legal);
-    }
-    setDrag(null);
-  }
-
-  function boardClick(event) {
-    if (!editor) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const col = Math.floor((event.clientX - rect.left) / (rect.width / GRID));
-    const row = Math.floor((event.clientY - rect.top) / (rect.height / GRID));
-    if (row >= 0 && row < GRID && col >= 0 && col < GRID) onCellClick({ row, col });
-  }
-
-  return (
-    <div ref={viewport} className="board-viewport" style={{ height: 386 * boardScale }}>
-      <div className="board-frame" style={{ transform: `scale(${boardScale})` }}>
-        <div className="exit-label">EXIT →</div>
-        <div className="board" style={{ width: GRID * CELL, height: GRID * CELL }} onClick={boardClick}>
-          {Array.from({ length: GRID * GRID }, (_, index) => (
-            <span
-              key={index}
-              className="cell"
-              style={{
-                left: (index % GRID) * CELL,
-                top: Math.floor(index / GRID) * CELL,
-                width: CELL,
-                height: CELL,
-              }}
-            />
-          ))}
-
-          {editor && editorStart && (
-            <span
-              className="editor-start-marker"
-              aria-label="已選取的車輛起點"
-              style={{
-                left: editorStart.col * CELL + 4,
-                top: editorStart.row * CELL + 4,
-                width: CELL - 8,
-                height: CELL - 8,
-              }}
-            />
-          )}
-
-          {cars.map((car) => {
-            const dragging = drag?.car.id === car.id;
-            const left = car.col * CELL;
-            const top = car.row * CELL;
-            const width = (car.dir === "H" ? car.len : 1) * CELL - 8;
-            const height = (car.dir === "V" ? car.len : 1) * CELL - 8;
-            const transform = dragging
-              ? car.dir === "H"
-                ? `translateX(${drag.pixels}px)`
-                : `translateY(${drag.pixels}px)`
-              : undefined;
-
-            return (
-              <div
-                key={car.id}
-                className={`vehicle ${car.id === "target" ? "target" : ""} ${highlightedCar === car.id ? "hinted" : ""}`}
-                style={{ left: left + 4, top: top + 4, width, height, background: car.color, transform }}
-                onPointerDown={(event) => startDrag(event, car)}
-                onPointerMove={moveDrag}
-                onPointerUp={endDrag}
-                onPointerCancel={() => setDrag(null)}
-              >
-                {car.id === "target" && <span>GO</span>}
-                {editor && (
-                  <button
-                    className="remove"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      onRemove(car.id);
-                    }}
-                    aria-label={`移除 ${car.id}`}
-                  >
-                    ×
-                  </button>
-                )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-    </div>
-  );
-}
-
 function LevelBrowser({ levels, current, progress, onSelect }) {
   const groups = useMemo(
     () => Object.fromEntries(DIFFICULTIES.map((name) => [name, levels.filter((level) => level.difficulty === name)])),
@@ -181,7 +58,7 @@ function LevelBrowser({ levels, current, progress, onSelect }) {
     <div className="level-browser">
       {DIFFICULTIES.map((difficulty) => (
         <section key={difficulty}>
-          <h3>{difficulty}</h3>
+          <h3><span>{DIFFICULTY_LABELS[difficulty]}</span><small>{difficulty}</small></h3>
           <div className="level-grid">
             {groups[difficulty].map((level) => {
               const result = progress[levelKey(level)];
@@ -189,6 +66,8 @@ function LevelBrowser({ levels, current, progress, onSelect }) {
                 <button
                   key={level.id}
                   className={current?.id === level.id ? "active" : ""}
+                  aria-label={`第 ${level.id} 關${result ? `，已獲得 ${result.stars} 顆星` : ""}`}
+                  aria-current={current?.id === level.id ? "true" : undefined}
                   onClick={() => onSelect(level)}
                 >
                   <b>{level.id}</b>
@@ -213,7 +92,10 @@ function App() {
   const [progress, setProgress] = useState(loadProgress);
   const [customLevels, setCustomLevels] = useState(loadCustomLevels);
   const [mode, setMode] = useState("play");
-  const [panel, setPanel] = useState("levels");
+  const [panel, setPanel] = useState(() => window.matchMedia("(min-width: 921px)").matches ? "levels" : "none");
+  const [winReady, setWinReady] = useState(false);
+  const [winOpen, setWinOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState(null);
   const [hint, setHint] = useState(null);
   const [message, setMessage] = useState("");
@@ -222,7 +104,55 @@ function App() {
   const [editingCustomId, setEditingCustomId] = useState(null);
   const [editorValidation, setEditorValidation] = useState(null);
   const solverCache = useRef(new Map());
+  const solverAbort = useRef(null);
+  const taskVersion = useRef(0);
+  const loadVersion = useRef(0);
   const won = isWon(cars);
+  const hasNext = levels.some((level, index) => level.id === current.id && index < levels.length - 1);
+  const currentTitle = typeof current.id === "number" ? `第 ${String(current.id).padStart(2, "0")} 關` : current.title;
+  const savedEditorLevel = customLevels.find(level => level.id === editingCustomId);
+  const editorHasChanges = savedEditorLevel && JSON.stringify(savedEditorLevel.cars) !== JSON.stringify(editorCars);
+
+  function cancelPending() {
+    taskVersion.current += 1;
+    loadVersion.current += 1;
+    solverAbort.current?.abort();
+    setLoading(false);
+  }
+
+  async function solveForUI(nextCars, label) {
+    const version = ++taskVersion.current;
+    solverAbort.current?.abort();
+    const controller = new AbortController();
+    solverAbort.current = controller;
+    setLoading(true);
+    setMessage(label);
+    try {
+      const solution = await solveInBackground(nextCars, controller.signal);
+      return version === taskVersion.current ? solution : null;
+    } catch (error) {
+      if (error.name !== "AbortError") setMessage(error.message);
+      return null;
+    } finally {
+      if (version === taskVersion.current) setLoading(false);
+    }
+  }
+
+  useEffect(() => () => solverAbort.current?.abort(), []);
+
+  useEffect(() => {
+    if (panel === "none" || !window.matchMedia("(max-width: 920px)").matches) return;
+    document.getElementById("game-panels")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+  }, [panel]);
+
+  useEffect(() => {
+    setWinReady(false);
+    setWinOpen(false);
+    if (!won || mode !== "play") return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const timer = setTimeout(() => { setWinReady(true); setWinOpen(true); }, reduced ? 120 : 950);
+    return () => clearTimeout(timer);
+  }, [won, mode, current.id]);
 
   useEffect(() => {
     (async () => {
@@ -259,8 +189,12 @@ function App() {
   }, [won]);
 
   async function loadLevel(meta) {
+    cancelPending();
+    const version = loadVersion.current;
+    setLoading(true);
     try {
       const raw = meta.cars ? meta : await fetchJson(`/levels/${meta.file}`);
+      if (version !== loadVersion.current) return;
       const level = { ...meta, ...raw, cars: cloneCars(raw.cars) };
       setCurrent(level);
       setStartCars(cloneCars(level.cars));
@@ -272,70 +206,83 @@ function App() {
       setMessage("");
       setEditingCustomId(null);
       setEditorValidation(null);
-      analyze(level);
+      setAnalysis(null);
+      if (window.matchMedia("(max-width: 920px)").matches) setPanel("none");
+      await analyze(level);
     } catch {
-      setMessage(`無法載入 ${meta.file}。`);
-    }
+      if (version === loadVersion.current) setMessage(`無法載入 ${meta.file}。`);
+    } finally { if (version === loadVersion.current) setLoading(false); }
   }
 
-  function analyze(level = current) {
+  async function analyze(level = current) {
     const key = `${level.id}:${JSON.stringify(level.cars)}`;
     let result = solverCache.current.get(key);
     if (!result) {
-      const solution = solveLevel(level.cars);
+      const solution = await solveForUI(level.cars, "停車場已就緒，正在尋找最佳路線…");
+      if (!solution) return;
       const officialDifficulty =
         typeof level.id === "number" && DIFFICULTIES.includes(level.difficulty) ? level.difficulty : null;
       result = { solution, ...analyzeDifficulty(level.cars, solution, { officialDifficulty }) };
       solverCache.current.set(key, result);
     }
     setAnalysis(result);
+    setMessage("");
     return result;
   }
 
   function commitMove(move) {
-    if (won) return;
+    if (won || loading) return;
     setHistory((items) => [...items, cloneCars(cars)]);
     setCars((items) => applyMove(items, move));
     setMoves((count) => count + 1);
     setHint(null);
+    setMessage("");
   }
 
   function undo() {
     setHint(null);
-    setHistory((items) => {
-      if (!items.length) return items;
-      setCars(cloneCars(items.at(-1)));
-      setMoves((count) => Math.max(0, count - 1));
-      return items.slice(0, -1);
-    });
+    if (!history.length) return;
+    setCars(cloneCars(history.at(-1)));
+    setHistory(history.slice(0, -1));
+    setMoves(count => Math.max(0, count - 1));
+    setMessage("");
   }
 
   function reset() {
+    setWinOpen(false);
     setCars(cloneCars(startCars));
     setHistory([]);
     setMoves(0);
     setHint(null);
+    setMessage("");
   }
 
-  function showHint() {
-    const solution = solveLevel(cars);
+  async function showHint() {
+    const solution = await solveForUI(cars, "正在幫你找下一步…");
+    if (!solution) return;
     if (!solution.solvable || !solution.moves.length) {
       setMessage(solution.reason || "目前狀態不需要提示。");
       return;
     }
     setHint(solution.moves[0]);
-    setMessage(`提示：移動 ${solution.moves[0].carId} ${Math.abs(solution.moves[0].delta)} 格。`);
+    const move = solution.moves[0];
+    const car = cars.find(item => item.id === move.carId);
+    const direction = car.dir === "H" ? (move.delta > 0 ? "右" : "左") : (move.delta > 0 ? "下" : "上");
+    setMessage(`將發光的車輛往${direction}移動 ${Math.abs(move.delta)} 格。`);
   }
 
   function nextLevel() {
+    setWinOpen(false);
     const index = levels.findIndex((level) => level.id === current.id);
     if (index >= 0 && index < levels.length - 1) loadLevel(levels[index + 1]);
+    else setPanel("levels");
   }
 
   function enterEditor(level = current) {
+    cancelPending();
     const savedCustom = customLevels.find((item) => item.id === level.id);
     setMode("editor");
-    setPanel(savedCustom ? "custom" : "editor");
+    setPanel(savedCustom ? "custom" : "none");
     setEditorCars(cloneCars(level.cars));
     setEditorStart(null);
     setEditingCustomId(savedCustom?.id ?? null);
@@ -353,6 +300,7 @@ function App() {
   }
 
   function editorCell(point) {
+    if (loading) return;
     if (!editorStart) {
       if (isPointOccupied(editorCars, point)) {
         setMessage("這一格已有車輛，不能作為新車的起點。請選擇空白格。");
@@ -409,7 +357,7 @@ function App() {
     setEditorStart(null);
   }
 
-  function validateCustom() {
+  async function validateCustom() {
     const validation = validateLevel(editorCars);
     if (!validation.valid) {
       setEditorValidation({
@@ -421,7 +369,8 @@ function App() {
       return;
     }
 
-    const solution = solveLevel(editorCars);
+    const solution = await solveForUI(editorCars, "正在驗證你的停車場…");
+    if (!solution) return;
     if (!solution.solvable) {
       setEditorValidation({
         valid: true,
@@ -445,7 +394,7 @@ function App() {
     setMessage(`驗證完成：此關卡有解，最佳 ${solution.moves.length} 步，推估難度 ${difficulty.label}。`);
   }
 
-  function saveCustom() {
+  async function saveCustom() {
     const validation = validateLevel(editorCars);
     if (!validation.valid) {
       setEditorValidation({ valid: false, solvable: false, reason: validation.errors[0] });
@@ -453,7 +402,8 @@ function App() {
       return;
     }
 
-    const solution = solveLevel(editorCars);
+    const solution = await solveForUI(editorCars, "正在確認路線並儲存關卡…");
+    if (!solution) return;
     if (!solution.solvable) {
       setEditorValidation({
         valid: true,
@@ -523,37 +473,51 @@ function App() {
     setMessage("已清空。請點選 Target 的起點。");
   }
 
+  function newCustom() {
+    enterEditor();
+    setEditorCars([]);
+    setEditingCustomId(null);
+    setMessage("先在第 3 列放一台水平 2 格紅車，再加入其他車輛。");
+  }
+
   return (
     <div className="app-shell">
-      <header className="hero">
+      <div className="ambient-scene" aria-hidden="true"><i /><i /><i /><span /></div>
+      <header className="hero" inert={winOpen}>
         <div>
-          <p className="eyebrow">PUZZLE GARAGE</p>
+          <p className="eyebrow"><Icon name="garage" /> 小小解謎車庫</p>
           <h1>Traffic Jam</h1>
-          <p>把紅色車輛移到出口。每一次拖曳都算一步。</p>
+          <p>挪一挪，為紅車開出一條路。</p>
         </div>
         <div className="stats">
-          <span><b>{moves}</b>步數</span>
-          <span><b>{analysis?.optimalMoves ?? "—"}</b>最佳</span>
-          <span><b>{analysis?.label ?? current.difficulty}</b>難度</span>
+          <span><b>{mode === "editor" ? editorCars.length : moves}</b>{mode === "editor" ? "車輛" : "步數"}</span>
+          <span><b>{mode === "editor" ? editorValidation?.optimalMoves ?? "—" : analysis?.optimalMoves ?? "—"}</b>最佳</span>
+          <span><b>{mode === "editor" ? DIFFICULTY_LABELS[editorValidation?.label] ?? "待驗證" : DIFFICULTY_LABELS[analysis?.label ?? current.difficulty] ?? "自訂"}</b>難度</span>
         </div>
       </header>
 
-      <main className="workspace">
-        <section className="game-column">
+      <main className={`workspace ${panel === "none" ? "panel-hidden" : ""}`} inert={winOpen}>
+        <section className={`game-column ${mode === "editor" ? "editing" : ""}`} aria-busy={loading}>
+          <div className="stage-heading"><div><span className="stage-kicker">{mode === "editor" ? "設計你的停車場" : "準備出發"}</span><h2>{mode === "editor" ? "關卡工作台" : currentTitle}</h2></div><span className={`stage-badge ${won ? "cleared" : ""}`}>{mode === "editor" ? `${editorCars.length} 台車` : won ? "✓ 已通關" : "紅車 → 出口"}</span></div>
           <div className="toolbar">
-            <button onClick={undo} disabled={!history.length || mode !== "play"}>復原</button>
-            <button onClick={reset} disabled={mode !== "play"}>重置</button>
-            <button onClick={showHint} disabled={mode !== "play"}>提示</button>
-            <button onClick={() => setPanel(panel === "levels" ? "none" : "levels")}>關卡</button>
-            <button className="accent" onClick={() => enterEditor()}>編輯器</button>
+            {mode === "play" ? <>
+              <button onClick={undo} disabled={!history.length || loading}><Icon name="undo" />復原</button>
+              <button onClick={reset} disabled={loading}><Icon name="reset" />重來</button>
+              <button onClick={showHint} disabled={won || loading}><Icon name="hint" />提示</button>
+            </> : <button onClick={() => { cancelPending(); setMode("play"); setMessage(""); }}><Icon name="undo" />返回遊戲</button>}
+            <button className={panel === "levels" ? "selected" : ""} onClick={() => setPanel(panel === "levels" ? "none" : "levels")} aria-expanded={panel === "levels"} aria-controls="game-panels"><Icon name="levels" />關卡</button>
+            <button className={mode === "editor" ? "selected" : ""} onClick={() => enterEditor()} disabled={mode === "editor" || loading}><Icon name="edit" />編輯器</button>
           </div>
 
-          {message && <div className="message">{message}</div>}
+          <div className={`instruction ${loading ? "loading" : ""}`} role="status" aria-live="polite">{loading && <span className="loading-dot" />}{message || (loading ? "正在準備停車場…" : mode === "editor" ? "點起點，再點車尾，放置 2 或 3 格車輛。" : won ? "道路暢通，紅車出發了！" : "沿著車身方向拖曳，放手就會停入格位。")}</div>
 
           <Board
+            key={`${current.id}-${mode}`}
             cars={mode === "editor" ? editorCars : cars}
             onMove={commitMove}
-            highlightedCar={hint?.carId}
+            hint={hint}
+            won={mode === "play" && won}
+            disabled={loading}
             editor={mode === "editor"}
             editorStart={editorStart}
             onCellClick={editorCell}
@@ -564,9 +528,10 @@ function App() {
             <>
               <div className="editor-actions">
                 {editorStart && <button onClick={cancelEditorStart}>取消選點</button>}
-                <button onClick={clearEditor}>清空</button>
-                <button onClick={saveCustom}>{editingCustomId ? "更新關卡" : "儲存"}</button>
-                <button className="accent" onClick={validateCustom}>驗證</button>
+                <button onClick={clearEditor} disabled={loading}>清空</button>
+                <button onClick={saveCustom} disabled={loading}>{editingCustomId ? "更新關卡" : "儲存"}</button>
+                <button className="accent" onClick={validateCustom} disabled={loading}>{loading ? "分析中…" : "驗證"}</button>
+                <button onClick={() => loadLevel(savedEditorLevel)} disabled={loading || !savedEditorLevel || editorHasChanges} title="儲存最新變更後即可試玩"><Icon name="arrow" />試玩</button>
               </div>
 
               {editorValidation && (
@@ -594,19 +559,11 @@ function App() {
             </>
           )}
 
-          {mode === "play" && won && (
-            <div className="win-card">
-              <h2>道路暢通！</h2>
-              <p>{moves} 步完成 · {"★".repeat(starsForPerformance(moves, analysis?.optimalMoves))}</p>
-              <div>
-                <button onClick={reset}>再玩一次</button>
-                <button className="accent" onClick={nextLevel} disabled={!levels.some((level, index) => level.id === current.id && index < levels.length - 1)}>下一關</button>
-              </div>
-            </div>
-          )}
+          {mode === "play" && <div className="board-footer"><span className="status-dot" /><span>{won ? "停車場已解鎖" : "一次有效移動算一步"}</span>{won && winReady && <button onClick={() => setWinOpen(true)}>查看通關結果 <Icon name="arrow" /></button>}</div>}
         </section>
 
-        <aside className="side-panel">
+        {panel !== "none" && <aside className="side-panel" id="game-panels">
+          <div className="panel-heading"><h2>{panel === "custom" ? "我的創作" : panel === "analysis" ? "解謎筆記" : "選一個挑戰"}</h2><button onClick={() => setPanel("none")} aria-label="收起面板"><Icon name="close" /></button></div>
           <div className="tabs">
             <button className={panel === "levels" ? "active" : ""} onClick={() => setPanel("levels")}>正式關卡</button>
             <button className={panel === "custom" ? "active" : ""} onClick={() => setPanel("custom")}>我的關卡</button>
@@ -647,7 +604,7 @@ function App() {
                   </div>
                 ))
               ) : (
-                <p>尚未儲存自製關卡。</p>
+                <div className="empty-state"><Icon name="garage" /><h3>你的車庫還是空的</h3><p>把自己的點子變成一個移車挑戰。</p><button className="accent" onClick={newCustom}><Icon name="edit" />建立第一關</button></div>
               )}
             </div>
           )}
@@ -671,8 +628,9 @@ function App() {
               </p>
             </div>
           )}
-        </aside>
+        </aside>}
       </main>
+      {winOpen && mode === "play" && won && <WinDialog moves={moves} stars={starsForPerformance(moves, analysis?.optimalMoves)} best={analysis?.optimalMoves} title={currentTitle} onClose={() => setWinOpen(false)} onRetry={reset} onNext={nextLevel} hasNext={hasNext} />}
     </div>
   );
 }
