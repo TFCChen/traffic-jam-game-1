@@ -171,9 +171,17 @@ button:disabled {
   text-align: center;
 }
 
+.board-viewport {
+  position: relative;
+  width: min(478px, 100%);
+  margin: 18px 0 22px;
+  flex-shrink: 0;
+}
+
 .board-frame {
   position: relative;
-  margin: 18px 52px 22px 0;
+  width: max-content;
+  transform-origin: top left;
   padding: 18px;
   border-radius: 26px;
   background: linear-gradient(145deg, #334155, #111827);
@@ -490,8 +498,7 @@ button:disabled {
 }
 
 .win-card {
-  position: absolute;
-  inset: auto 20px 20px 20px;
+  width: 100%;
   z-index: 20;
   padding: 18px;
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -523,6 +530,10 @@ button:disabled {
     max-height: none;
   }
 
+  .game-column {
+    min-height: 0;
+  }
+
   .hero {
     align-items: flex-start;
     flex-direction: column;
@@ -541,12 +552,6 @@ button:disabled {
   .game-column {
     padding: 12px;
     overflow: hidden;
-  }
-
-  .board-frame {
-    transform: scale(0.86);
-    margin-top: -8px;
-    margin-bottom: -8px;
   }
 
   .toolbar button {
@@ -568,12 +573,6 @@ button:disabled {
 }
 
 @media (max-width: 390px) {
-  .board-frame {
-    transform: scale(0.78);
-    margin-top: -24px;
-    margin-bottom: -24px;
-  }
-
   .app-shell {
     padding-inline: 8px;
   }

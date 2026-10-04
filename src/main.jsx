@@ -48,18 +48,30 @@ function isPointOccupied(cars, point) {
 
 function Board({ cars, onMove, highlightedCar, editor, editorStart, onCellClick, onRemove }) {
   const [drag, setDrag] = useState(null);
+  const viewport = useRef(null);
+  const [boardScale, setBoardScale] = useState(1);
+
+  useEffect(() => {
+    const observer = new ResizeObserver(([entry]) => {
+      setBoardScale(Math.min(1, entry.contentRect.width / 478));
+    });
+    observer.observe(viewport.current);
+    return () => observer.disconnect();
+  }, []);
 
   function startDrag(event, car) {
     if (editor) return;
     event.preventDefault();
     event.currentTarget.setPointerCapture?.(event.pointerId);
     const legal = legalMovesForCar(cars, car.id);
-    setDrag({ car, startX: event.clientX, startY: event.clientY, legal, pixels: 0 });
+    const board = event.currentTarget.closest(".board");
+    const scale = board.getBoundingClientRect().width / (GRID * CELL);
+    setDrag({ car, startX: event.clientX, startY: event.clientY, legal, pixels: 0, scale });
   }
 
   function moveDrag(event) {
     if (!drag) return;
-    const raw = drag.car.dir === "H" ? event.clientX - drag.startX : event.clientY - drag.startY;
+    const raw = (drag.car.dir === "H" ? event.clientX - drag.startX : event.clientY - drag.startY) / drag.scale;
     const deltas = drag.legal.map((move) => move.delta);
     const min = Math.min(0, ...deltas) * CELL;
     const max = Math.max(0, ...deltas) * CELL;
@@ -79,80 +91,82 @@ function Board({ cars, onMove, highlightedCar, editor, editorStart, onCellClick,
   function boardClick(event) {
     if (!editor) return;
     const rect = event.currentTarget.getBoundingClientRect();
-    const col = Math.floor((event.clientX - rect.left) / CELL);
-    const row = Math.floor((event.clientY - rect.top) / CELL);
+    const col = Math.floor((event.clientX - rect.left) / (rect.width / GRID));
+    const row = Math.floor((event.clientY - rect.top) / (rect.height / GRID));
     if (row >= 0 && row < GRID && col >= 0 && col < GRID) onCellClick({ row, col });
   }
 
   return (
-    <div className="board-frame">
-      <div className="exit-label">EXIT →</div>
-      <div className="board" style={{ width: GRID * CELL, height: GRID * CELL }} onClick={boardClick}>
-        {Array.from({ length: GRID * GRID }, (_, index) => (
-          <span
-            key={index}
-            className="cell"
-            style={{
-              left: (index % GRID) * CELL,
-              top: Math.floor(index / GRID) * CELL,
-              width: CELL,
-              height: CELL,
-            }}
-          />
-        ))}
+    <div ref={viewport} className="board-viewport" style={{ height: 386 * boardScale }}>
+      <div className="board-frame" style={{ transform: `scale(${boardScale})` }}>
+        <div className="exit-label">EXIT →</div>
+        <div className="board" style={{ width: GRID * CELL, height: GRID * CELL }} onClick={boardClick}>
+          {Array.from({ length: GRID * GRID }, (_, index) => (
+            <span
+              key={index}
+              className="cell"
+              style={{
+                left: (index % GRID) * CELL,
+                top: Math.floor(index / GRID) * CELL,
+                width: CELL,
+                height: CELL,
+              }}
+            />
+          ))}
 
-        {editor && editorStart && (
-          <span
-            className="editor-start-marker"
-            aria-label="已選取的車輛起點"
-            style={{
-              left: editorStart.col * CELL + 4,
-              top: editorStart.row * CELL + 4,
-              width: CELL - 8,
-              height: CELL - 8,
-            }}
-          />
-        )}
+          {editor && editorStart && (
+            <span
+              className="editor-start-marker"
+              aria-label="已選取的車輛起點"
+              style={{
+                left: editorStart.col * CELL + 4,
+                top: editorStart.row * CELL + 4,
+                width: CELL - 8,
+                height: CELL - 8,
+              }}
+            />
+          )}
 
-        {cars.map((car) => {
-          const dragging = drag?.car.id === car.id;
-          const left = car.col * CELL;
-          const top = car.row * CELL;
-          const width = (car.dir === "H" ? car.len : 1) * CELL - 8;
-          const height = (car.dir === "V" ? car.len : 1) * CELL - 8;
-          const transform = dragging
-            ? car.dir === "H"
-              ? `translateX(${drag.pixels}px)`
-              : `translateY(${drag.pixels}px)`
-            : undefined;
+          {cars.map((car) => {
+            const dragging = drag?.car.id === car.id;
+            const left = car.col * CELL;
+            const top = car.row * CELL;
+            const width = (car.dir === "H" ? car.len : 1) * CELL - 8;
+            const height = (car.dir === "V" ? car.len : 1) * CELL - 8;
+            const transform = dragging
+              ? car.dir === "H"
+                ? `translateX(${drag.pixels}px)`
+                : `translateY(${drag.pixels}px)`
+              : undefined;
 
-          return (
-            <div
-              key={car.id}
-              className={`vehicle ${car.id === "target" ? "target" : ""} ${highlightedCar === car.id ? "hinted" : ""}`}
-              style={{ left: left + 4, top: top + 4, width, height, background: car.color, transform }}
-              onPointerDown={(event) => startDrag(event, car)}
-              onPointerMove={moveDrag}
-              onPointerUp={endDrag}
-              onPointerCancel={endDrag}
-            >
-              {car.id === "target" && <span>GO</span>}
-              {editor && (
-                <button
-                  className="remove"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onRemove(car.id);
-                  }}
-                  aria-label={`移除 ${car.id}`}
-                >
-                  ×
-                </button>
-              )}
+            return (
+              <div
+                key={car.id}
+                className={`vehicle ${car.id === "target" ? "target" : ""} ${highlightedCar === car.id ? "hinted" : ""}`}
+                style={{ left: left + 4, top: top + 4, width, height, background: car.color, transform }}
+                onPointerDown={(event) => startDrag(event, car)}
+                onPointerMove={moveDrag}
+                onPointerUp={endDrag}
+                onPointerCancel={() => setDrag(null)}
+              >
+                {car.id === "target" && <span>GO</span>}
+                {editor && (
+                  <button
+                    className="remove"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onRemove(car.id);
+                    }}
+                    aria-label={`移除 ${car.id}`}
+                  >
+                    ×
+                  </button>
+                )}
             </div>
           );
         })}
       </div>
+    </div>
     </div>
   );
 }
@@ -279,6 +293,7 @@ function App() {
   }
 
   function commitMove(move) {
+    if (won) return;
     setHistory((items) => [...items, cloneCars(cars)]);
     setCars((items) => applyMove(items, move));
     setMoves((count) => count + 1);
@@ -286,6 +301,7 @@ function App() {
   }
 
   function undo() {
+    setHint(null);
     setHistory((items) => {
       if (!items.length) return items;
       setCars(cloneCars(items.at(-1)));
@@ -578,13 +594,13 @@ function App() {
             </>
           )}
 
-          {won && (
+          {mode === "play" && won && (
             <div className="win-card">
               <h2>道路暢通！</h2>
               <p>{moves} 步完成 · {"★".repeat(starsForPerformance(moves, analysis?.optimalMoves))}</p>
               <div>
                 <button onClick={reset}>再玩一次</button>
-                <button className="accent" onClick={nextLevel}>下一關</button>
+                <button className="accent" onClick={nextLevel} disabled={!levels.some((level, index) => level.id === current.id && index < levels.length - 1)}>下一關</button>
               </div>
             </div>
           )}
