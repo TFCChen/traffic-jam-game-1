@@ -16,6 +16,15 @@ for(const [name,length]of Object.entries(lengths)){
   assert.ok(bounds.min.x>=-length/2-.12&&bounds.max.x<=length/2+.12,`${name}: vehicle must remain centred on its lane`);
   assert.ok(bounds.min.z>=-.54&&bounds.max.z<=.54,`${name}: vehicle must fit within one lane`);
   assert.ok(bounds.min.y>=-.001&&bounds.max.y>.5&&bounds.max.y<1.3,`${name}: GLB must use the correct up axis and rest on its tyres`);
+  if(['racer','compact','jeep'].includes(name)){
+    asset.scene.updateMatrixWorld(true);
+    const paint=[];asset.scene.traverse(o=>{if(o.isMesh&&o.material.name.startsWith('Paint'))paint.push(o);});
+    for(const x of [.49,.66,.79]){
+      const heights=[-.25,0,.25].map(z=>new Raycaster(new Vector3(x,2,z),new Vector3(0,-1,0)).intersectObjects(paint,true)[0]?.point.y);
+      assert.ok(heights.every(Number.isFinite),`${name}: continuous bonnet across its width`);
+      assert.ok(heights[1]>=Math.max(heights[0],heights[2])-.006,`${name}: bonnet centre must not sink between raised fenders`);
+    }
+  }
   if(name==='compact'||name==='jeep'){
     asset.scene.updateMatrixWorld(true);
     for(const x of [.45,.65,.85]){

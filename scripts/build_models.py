@@ -163,18 +163,22 @@ def coachwork(kind, length, material):
 
 def wheel_arch(x,y,material,body=None):
     # An open semicircular fender, not a solid disc covering the tyre.
-    vertices=[];faces=[]
+    vertices=[];faces=[];attached=[]
     for i in range(13):
         angle=math.pi*i/12
         for r in (.209 if body else .204,.239):
             vx,vz=x+math.cos(angle)*r,.19+math.sin(angle)*r
             vy=y
+            hit=True
             if body:
                 side=1 if y>0 else -1
                 hit,point,normal,index=body.ray_cast(Vector((vx,side*2,vz)),Vector((0,-side,0)))
                 if hit:vy=point.y+side*.007
             vertices.append((vx,vy,vz))
-    for i in range(12):faces.append((i*2,i*2+1,i*2+3,i*2+2))
+            attached.append(hit)
+    for i in range(12):
+        face=(i*2,i*2+1,i*2+3,i*2+2)
+        if all(attached[j] for j in face):faces.append(face)
     mesh=bpy.data.meshes.new('Fender arc');mesh.from_pydata(vertices,[],faces);mesh.update()
     obj=bpy.data.objects.new('Wheel arch',mesh);bpy.context.collection.objects.link(obj);mesh.materials.append(material)
     objects.append(obj);bpy.context.view_layer.objects.active=obj
@@ -215,6 +219,11 @@ def midengine_coupe(paint):
     for x,w,crown in sections:
         shoulder=crown+.17*math.exp(-((x+.67)/.24)**2)+.25*math.exp(-((x-.66)/.23)**2)
         inner_shoulder=crown+.013+(shoulder-crown)*.62
+        if x>0:
+            # A gently crowned bonnet connects both fenders; no central trough.
+            crown+=.16*math.exp(-((x-.66)/.28)**2)
+            shoulder=crown-.010
+            inner_shoulder=crown-.003
         vertices.extend([(x,-w*.84,.105),(x,-w,.15),(x,-w,.27 if x<.82 else .20),
                          (x,-w*.93,shoulder),(x,-w*.61,inner_shoulder),(x,0,crown),
                          (x,w*.61,inner_shoulder),(x,w*.93,shoulder),(x,w,.27 if x<.82 else .20),
@@ -272,6 +281,10 @@ def passenger_car(kind,paint):
         crown=(.445 if suv else .375)-(.035 if x>.65 else 0)
         shoulder=crown+(.11 if suv else .16)*math.exp(-((abs(x)-.66)/.24)**2)
         inner_shoulder=crown+.013+(shoulder-crown)*.62
+        if x>.12:
+            crown+=(.055 if suv else .09)*math.exp(-((x-.66)/.30)**2)
+            shoulder=crown-.010
+            inner_shoulder=crown-.003
         vertices.extend([(x,-w*.90,.115),(x,-w,.19),(x,-w,.32),
                          (x,-w*.92,shoulder),(x,-w*.60,inner_shoulder),(x,0,crown),
                          (x,w*.60,inner_shoulder),(x,w*.92,shoulder),(x,w,.32),
