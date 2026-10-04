@@ -150,7 +150,7 @@ function App() {
     setWinOpen(false);
     if (!won || mode !== "play") return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const timer = setTimeout(() => { setWinReady(true); setWinOpen(true); }, reduced ? 120 : 950);
+    const timer = setTimeout(() => { setWinReady(true); setWinOpen(true); }, reduced ? 120 : 1550);
     return () => clearTimeout(timer);
   }, [won, mode, current.id]);
 
@@ -514,6 +514,8 @@ function App() {
           <Board
             key={`${current.id}-${mode}`}
             cars={mode === "editor" ? editorCars : cars}
+            progress={progress}
+            perfect={mode==='play' && analysis?.optimalMoves!=null && moves<=analysis.optimalMoves}
             onMove={commitMove}
             hint={hint}
             won={mode === "play" && won}

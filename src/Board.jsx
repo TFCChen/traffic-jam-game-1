@@ -1,13 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Board2D from './Board2D.jsx';
 import { vehicleModel } from './vehicleModels.js';
+import { SCENE_THEMES, completedOfficialLevels, availableTheme } from './sceneThemes.js';
 
-const DEFAULT = { pitch: 65, yaw: 0, light: -40, intensity: 3, shadows: true };
+const DEFAULT = { pitch: 65, yaw: 0, light: -40, intensity: 3, shadows: true, theme:'day' };
 function readSettings() {
   try {
     const value=JSON.parse(localStorage.getItem('traffic-jam-scene') || 'null');
     if(!value)return DEFAULT;
-    return { pitch: Math.max(45,Math.min(80,Number(value.pitch)||65)), yaw: Math.max(-35,Math.min(35,Number(value.yaw)||0)), light: Math.max(-180,Math.min(180,(Number.isFinite(Number(value.light)) ? Number(value.light) : -40))), intensity: Math.max(.5,Math.min(5,Number(value.intensity)||3)), shadows: value.shadows!==false };
+    return { pitch: Math.max(45,Math.min(80,Number(value.pitch)||65)), yaw: Math.max(-35,Math.min(35,Number(value.yaw)||0)), light: Math.max(-180,Math.min(180,(Number.isFinite(Number(value.light)) ? Number(value.light) : -40))), intensity: Math.max(.5,Math.min(5,Number(value.intensity)||3)), shadows: value.shadows!==false,theme:value.theme??'day' };
   } catch { return DEFAULT; }
 }
 
@@ -16,7 +17,9 @@ export default function Board(props) {
   latest.current=props;
   const [ready,setReady]=useState(false),[fallback,setFallback]=useState(false),[selected,setSelected]=useState(null);
   const [settings,setSettings]=useState(readSettings),[open,setOpen]=useState(false);
-  const settingsRef=useRef(settings);settingsRef.current=settings;
+  const completed=completedOfficialLevels(props.progress);
+  const theme=availableTheme(settings.theme,completed);
+  const settingsRef=useRef(settings);settingsRef.current={...settings,theme};
   useEffect(()=>{
     let cancelled=false, instance;
     import('./garageScene.js').then(({createGarageScene})=>{
@@ -31,19 +34,19 @@ export default function Board(props) {
   },[]);
   useEffect(()=>{engine.current?.sync();},[props.cars,props.won,props.hint,props.editorStart]);
   useEffect(()=>{
-    engine.current?.settings(settings);
+    engine.current?.settings({...settings,theme});
     try{localStorage.setItem('traffic-jam-scene',JSON.stringify(settings));}catch{/* Session-only settings still work. */}
-  },[settings]);
+  },[settings,theme]);
   useEffect(()=>{if(fallback){engine.current?.dispose();engine.current=null;}},[fallback]);
   function change(key,value){setSettings(current=>({...current,[key]:value}));}
   if(fallback)return <><p className="scene-fallback" role="status">此瀏覽器暫時無法顯示 3D，已切換到 2.5D 遊玩。</p><Board2D {...props}/></>;
-  return <div className="garage-3d">
+  return <div className={`garage-3d theme-${theme}`}>
     <div className="garage-canvas-wrap">
       <canvas ref={canvas} className="garage-canvas" tabIndex={0} aria-label="3D 停車場；點選車輛拖曳，或選取車輛後使用方向鍵" />
       {!ready&&<div className="scene-loading" role="status"><span className="loading-dot"/>正在載入玩具車庫…</div>}
-      <span className="scene-tag">3D 玩具車庫</span>
+      <span className="scene-tag">{SCENE_THEMES.find(t=>t.id===theme).name}</span>
     </div>
-    <div className="scene-options-bar"><span>真實光影 · 可調視角</span><button aria-expanded={open} aria-controls="scene-settings" onClick={()=>setOpen(!open)}>視角與光源</button></div>
+    <div className="scene-options-bar"><span>場景氣氛 · 已通關 {completed}/40</span><button aria-expanded={open} aria-controls="scene-settings" onClick={()=>setOpen(!open)}>視角與光源</button></div>
     {open&&<div id="scene-settings" className="scene-settings">
       <label>俯視角 <b>{settings.pitch}°</b><input aria-label="俯視角" type="range" min="45" max="80" value={settings.pitch} onChange={e=>change('pitch',Number(e.target.value))}/></label>
       <label>左右觀察 <b>{settings.yaw}°</b><input aria-label="左右觀察" type="range" min="-35" max="35" value={settings.yaw} onChange={e=>change('yaw',Number(e.target.value))}/></label>
@@ -53,6 +56,9 @@ export default function Board(props) {
       <button onClick={()=>setSettings({...DEFAULT})}>恢復預設</button>
       <p>角度越小越接近側視；設定會保存在這個瀏覽器。</p>
     </div>}
+    <div className="scene-themes" role="group" aria-label="場景氣氛">
+      {SCENE_THEMES.map(item=><button key={item.id} disabled={completed<item.required} aria-pressed={theme===item.id} onClick={()=>change('theme',item.id)}><i className={`theme-dot ${item.id}`}/><span>{item.name}<small>{completed<item.required?`通關 ${item.required} 關解鎖`:'已解鎖'}</small></span></button>)}
+    </div>
     <div className="vehicle-picker" aria-label={props.editor?'編輯車輛':'鍵盤選取車輛'}>
       {props.cars.map((car,index)=><button key={car.id} className={selected===car.id?'selected':''} disabled={!ready||props.disabled||props.won} style={{'--car-color':car.color}} aria-label={`選取${car.id==='target'?'紅色目標':`車輛 ${index+1}，`}${vehicleModel(car).name}`} aria-pressed={selected===car.id} onClick={()=>engine.current?.select(car.id)}><i/>{index+1}</button>)}
       {props.editor&&selected&&props.cars.some(c=>c.id===selected)&&<button className="remove-selected" disabled={props.disabled} onClick={()=>{props.onRemove(selected);setSelected(null);}}>移除選取車輛</button>}

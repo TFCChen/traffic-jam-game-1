@@ -35,6 +35,16 @@ lamp = mat('Headlamp', 'ffdf9c', .25)
 redlamp = mat('Tail lamp', 'df7460', .35)
 yellow = mat('Barrier orange', 'e7af6c', .5)
 bed = mat('Pickup bed', '526263', .8)
+wheel_material = mat('Rolling wheels', 'ffffff', .72, .05)
+wheel_bsdf=wheel_material.node_tree.nodes.get('Principled BSDF')
+wheel_colour=wheel_material.node_tree.nodes.new('ShaderNodeVertexColor')
+wheel_colour.layer_name='Col'
+wheel_material.node_tree.links.new(wheel_colour.outputs['Color'],wheel_bsdf.inputs['Base Color'])
+foliage=mat('Garden foliage','688a68',.95)
+terracotta=mat('Terracotta','c38765',.95)
+streetlamp=mat('Streetlamp glow','ffe7af',.3)
+drain=mat('Drain metal','34434a',.85)
+pavement=mat('Concrete apron','b8c1b9',.98)
 objects = []
 
 def cube(name, position, size, material, bevel=.04):
@@ -93,6 +103,12 @@ def export(name):
     bpy.ops.export_scene.gltf(filepath=os.path.join(OUT, name+'.glb'), export_format='GLB', use_selection=True, export_yup=True)
     return list(objects)
 
+def wheel_colourize(obj, colour):
+    layer=obj.data.color_attributes.new(name='Col',type='FLOAT_COLOR',domain='CORNER')
+    for element in layer.data: element.color=colour.diffuse_color
+    obj.data.materials.clear();obj.data.materials.append(wheel_material)
+    return obj
+
 def car(kind, length, colour):
     objects.clear()
     paint = mat('Paint '+kind, colour, .3, .04)
@@ -141,8 +157,10 @@ def car(kind, length, colour):
         if kind == 'taxi': cube('Taxi roof sign', (-.12,0,.75), (.32,.26,.12), lamp, .025)
     for x in (-length/2+.33, length/2-.34):
         for y in (-.43,.43):
-            cylinder('Wheel', (x,y,.19), .19,.13,rubber,'Y')
-            cylinder('Hub', (x,y*1.13,.19), .09,.025,chrome,'Y')
+            wheel_colourize(cylinder('Wheel', (x,y,.19), .19,.13,rubber,'Y'),rubber)
+            wheel_colourize(cylinder('Hub', (x,y*1.13,.19), .09,.025,chrome,'Y'),chrome)
+            wheel_colourize(cube('Wheel spoke',(x,y*1.16,.19),(.135,.018,.024),white,.004),white)
+            wheel_colourize(cube('Wheel spoke',(x,y*1.16,.19),(.024,.018,.135),white,.004),white)
     for y in (-.26,.26):
         cube('Headlight', (length/2-.065,y,.3), (.022,.15,.09), lamp, .02)
         cube('Taillight', (-length/2+.065,y,.3), (.022,.13,.07), redlamp, .018)
@@ -183,6 +201,33 @@ cube('Exit sign',(6.96,-1.61,.73),(.64,.08,.28),rail,.055)
 cube('Arrow',(6.94,-1.658,.73),(.31,.012,.035),white,.008)
 for angle in (-.7,.7):
     obj=cube('Arrow tip',(7.07,-1.66,.73),(.15,.012,.035),white,.007); obj.rotation_euler.y=angle
+# A continuous apron supports the scenery; the puzzle remains slightly raised.
+cube('Surrounding pavement',(3.25,-3,-.15),(8.8,6.7,.18),pavement,.1)
+scenery_start=len(objects)
+# Small surroundings stay outside the playable grid and exit lane.
+cube('Caretaker booth',(-.73,-1.45,.35),(.62,.68,.7),rail,.06)
+cube('Booth roof',(-.73,-1.45,.76),(.76,.82,.13),cream,.05)
+cube('Booth window',(-.406,-1.45,.48),(.018,.46,.27),glass,.025)
+cube('Booth door',(-.73,-1.097,.34),(.33,.018,.53),cream,.025)
+cube('Booth handle',(-.64,-1.08,.35),(.04,.025,.08),chrome,.008)
+for x,y in ((-.65,-5.3),(6.8,-.62)):
+    cylinder('Flower pot',(x,y,.12),.18,.24,terracotta)
+    for dx,dy,dz in ((0,0,.36),(.13,0,.3),(-.09,.09,.31)):
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=.19,location=(x+dx,y+dy,dz))
+        obj=bpy.context.object;obj.name='Plant';obj.data.materials.append(foliage);objects.append(obj)
+for x,y in ((6.8,-4.35),(7.14,-4.7)):
+    cube('Cone foot',(x,y,.045),(.28,.28,.09),rubber,.025)
+    bpy.ops.mesh.primitive_cone_add(vertices=12,radius1=.11,radius2=.025,depth=.32,location=(x,y,.24))
+    obj=bpy.context.object;obj.name='Traffic cone';obj.data.materials.append(yellow);objects.append(obj)
+    cylinder('Cone stripe',(x,y,.25),.071,.045,white)
+for x,y in ((-.7,-.2),(6.65,-5.45)):
+    cylinder('Lamp post',(x,y,.63),.032,1.26,drain)
+    cube('Lamp cap',(x,y,1.29),(.3,.25,.09),rail,.035)
+    cube('Lamp diffuser',(x,y,1.23),(.24,.2,.04),streetlamp,.015)
+cube('Drain grate',(5.6,-5.77,.04),(.56,.19,.009),drain,.012)
+for x in (5.4,5.5,5.6,5.7,5.8):cube('Drain slot',(x,-5.77,.048),(.028,.145,.01),chrome,.002)
+for obj in objects[scenery_start:]:
+    if not obj.name.startswith('Drain'):obj.location.z-=.06
 garage=export('garage')
 for group,x,y in assets:
     for obj in group: obj.location.x += x+10; obj.location.y += y
