@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.vite/
+.npm-cache/
+.browser-checks/
+.vercel/
+*.log
+.env
+.env.*
+!.env.example
