@@ -3,11 +3,12 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { legalMovesForCar } from './gameEngine.js';
 import { vehicleModel } from './vehicleModels.js';
-import { asphaltTexture, detailTexture, prepareWheels, rollingMaterial } from './garageMaterials.js';
+import { asphaltTexture, detailTexture, prepareWheels, rollingMaterial, batchColoredMeshes } from './garageMaterials.js';
 import { SCENE_THEMES } from './sceneThemes.js';
 import { QUALITY } from './gamePreferences.js';
 import { quadDistance,snapDragDelta } from './pointerHelpers.js';
 import {stepSuspension,contactImpulse} from './vehicleDynamics.js';
+import {createRenderProfiler} from './renderProfiler.js';
 
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 const modelNames = ['garage', 'racer', 'jeep', 'pickup', 'compact', 'taxi', 'schoolbus', 'coach', 'camper', 'delivery'];
@@ -16,13 +17,14 @@ function assets() {
   if (!assetsPromise) {
     const loader = new GLTFLoader();
     assetsPromise = Promise.all(modelNames.map(async name => [name, (await loader.loadAsync(`/models/${name}.glb`)).scene]))
-      .then(entries=>{for(const [name,root]of entries)if(name!=='garage')prepareWheels(root,['schoolbus','coach','camper','delivery'].includes(name)?3:2);return Object.fromEntries(entries);}).catch(error => { assetsPromise = null; throw error; });
+      .then(entries=>{for(const [name,root]of entries){if(name!=='garage')prepareWheels(root,['schoolbus','coach','camper','delivery'].includes(name)?3:2);root.traverse(o=>{if(o.isMesh)o.geometry.computeBoundingBox();});}return Object.fromEntries(entries);}).catch(error => { assetsPromise = null; throw error; });
   }
   return assetsPromise;
 }
 
 export function createGarageScene(canvas, getProps, callbacks) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  const profiler=createRenderProfiler(renderer.getContext());
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.autoUpdate = false;
@@ -44,7 +46,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
   const groups = new Map();
   const ownedMaterials = new Set(), ownedGeometries = new Set();
   let library, alive = true, ready = false, drag, selected, escapeStart, lastTime = performance.now(), frame;
-  let dirty = true, inView = true, settlingUntil = 0, lastShadow = 0, cameraFollow=0;
+  let dirty = true, inView = true, settlingUntil = 0, lastShadow = 0, cameraFollow=0,nextFrame=0,lastHover=0;
   const sceneryLamps=[];
   const stats = { frames: 0, shadowUpdates: 0 };
   const scratchPosition = new THREE.Vector3(), scratchDirection = new THREE.Vector3();
@@ -86,6 +88,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     const piece = new THREE.Mesh(gateGeometry, m); piece.scale.z=1/7; piece.position.z=(i+.5)*.98/7;
     piece.castShadow=true; gate.add(piece);
   }
+  const gateBatch=batchColoredMeshes(gate,()=>true);ownedMaterials.add(gateBatch.material);ownedGeometries.add(gateBatch.geometry);
   const instancePose=new THREE.Object3D(),accentColour=new THREE.Color();
   const glowGeometry=new THREE.PlaneGeometry(1.35,1.35);ownedGeometries.add(glowGeometry);
   const glowMaterial=new THREE.MeshBasicMaterial({map:glowTexture,color:'#8edcf0',transparent:true,opacity:.35,depthWrite:false,blending:THREE.AdditiveBlending});ownedMaterials.add(glowMaterial);
@@ -212,7 +215,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     canvas.setPointerCapture(event.pointerId); canvas.dataset.dragging=id;
   }
   function move(event) {
-    if(!drag||event.pointerId!==drag.pointerId){if(ready)canvas.style.cursor=carAt(event)?'grab':'default';return;}
+    if(!drag||event.pointerId!==drag.pointerId){if(ready&&performance.now()-lastHover>50){lastHover=performance.now();canvas.style.cursor=carAt(event)?'grab':'default';}return;}
     const point=planePoint(event); if(!point)return;
     const raw=drag.car.dir==='H'?point.x-drag.start.x:point.z-drag.start.z;
     const delta=clamp(raw,drag.min,drag.max);
@@ -245,16 +248,17 @@ export function createGarageScene(canvas, getProps, callbacks) {
     if(!library||!alive)return;
     if(drag)finish({pointerId:drag.pointerId},true);
     const props=getProps(),ids=new Set(props.cars.map(c=>c.id));
-    for(const [id,item]of groups)if(!ids.has(id)){scene.remove(item.group);item.group.traverse(o=>{if(o.isMesh){o.material.dispose();o.customDepthMaterial?.dispose();}});groups.delete(id);}
+    for(const [id,item]of groups)if(!ids.has(id)){scene.remove(item.group);item.group.traverse(o=>{if(o.isMesh){o.material.dispose();o.customDepthMaterial?.dispose();if(o.userData.generatedGeometry)o.geometry.dispose();}});groups.delete(id);}
     props.cars.forEach((car,index)=>{
       let item=groups.get(car.id);
       if(!item){
         const group=library[vehicleModel(car).kind].clone(true);
-        const lamps=[],tailLamps=[],wheelAngle={value:0};
+        batchColoredMeshes(group,mesh=>!['Opaque blue glass','Headlamp','Tail lamp','Rolling wheels'].includes(mesh.material.name)&&!mesh.material.name.startsWith('Paint'));
+        const lamps=[],tailLamps=[],paints=[],wheelAngle={value:0};
         group.traverse(object=>{if(object.isMesh){
-          object.material=object.material.clone();
+          if(!object.userData.generatedGeometry)object.material=object.material.clone();
           const material=object.material;
-          if(material.name.startsWith('Paint')){material.color.set(car.color);material.roughness=.3;material.metalness=.06;if('clearcoat'in material){material.clearcoat=.55;material.clearcoatRoughness=.2;}}
+          if(material.name.startsWith('Paint')){paints.push(material);material.color.set(car.color);material.roughness=.3;material.metalness=.06;if('clearcoat'in material){material.clearcoat=quality===QUALITY.high?.55:0;material.clearcoatRoughness=.2;}}
           if(material.name==='Opaque blue glass'){material.roughness=.1;material.metalness=.28;}
           if(material.name==='Headlamp'){material.emissive.set('#ffd994');lamps.push(material);}
           if(material.name==='Tail lamp'){tailLamps.push(material);}
@@ -269,7 +273,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
         bodyMeshes.forEach(mesh=>body.attach(mesh));
         const contact=new THREE.Mesh(contactGeometry,new THREE.MeshBasicMaterial({map:glowTexture,color:'#17232a',transparent:true,opacity:.32,depthWrite:false}));
         contact.rotation.x=-Math.PI/2;contact.position.y=-.014;contact.scale.set(car.len-.12,.85,1);contact.raycast=()=>{};group.add(contact);
-        item={group,body,suspension:{pitch:0,rate:0,speed:0},car,index,model:vehicleModel(car).kind,lamps,tailLamps,wheelAngle,velocity:0,brakeUntil:0};groups.set(car.id,item);scene.add(group);
+        item={group,body,suspension:{pitch:0,rate:0,speed:0},car,index,model:vehicleModel(car).kind,lamps,tailLamps,paints,wheelAngle,velocity:0,brakeUntil:0};groups.set(car.id,item);scene.add(group);
         group.position.set(car.col+(car.dir==='H'?car.len/2:.5),.055,car.row+(car.dir==='V'?car.len/2:.5));
       }
       item.car=car;
@@ -285,8 +289,11 @@ export function createGarageScene(canvas, getProps, callbacks) {
   }
   assets().then(async models=>{
     if(!alive)return; library=models;
-    const garage=library.garage.clone(true);garage.traverse(o=>{if(o.isMesh){
-      o.material=o.material.clone();ownedMaterials.add(o.material);
+    const garage=library.garage.clone(true);
+    const streetBatch=batchColoredMeshes(garage,mesh=>!['Asphalt blue slate','Street asphalt','Opaque blue glass','Streetlamp glow'].includes(mesh.material.name),{roughness:.85,metalness:.02,name:'Batched scenery'});
+    ownedGeometries.add(streetBatch.geometry);
+    garage.traverse(o=>{if(o.isMesh){
+      if(!o.userData.generatedGeometry)o.material=o.material.clone();ownedMaterials.add(o.material);
       if(o.material.name==='Asphalt blue slate'||o.material.name==='Street asphalt'){o.material.map=roadTexture;o.material.bumpMap=roadTexture;o.material.bumpScale=.004;}
       if(o.material.name==='Streetlamp glow')sceneryLamps.push(o.material);
       o.receiveShadow=true;o.castShadow=true;
@@ -297,11 +304,13 @@ export function createGarageScene(canvas, getProps, callbacks) {
   }).catch(error=>{if(alive)callbacks.error(error);});
   function animate(now) {
     if(!alive)return;frame=requestAnimationFrame(animate);
-    if(document.hidden||!inView){lastTime=now;return;}
+    if(document.hidden||!inView){lastTime=now;nextFrame=now;return;}
     if(library&&!ready){lastTime=now;return;}
     const active=!!drag||now<settlingUntil||(escapeStart!=null&&now-escapeStart<1900);
     // Cap high-refresh displays too; retain ambient life without rendering at 120/144 Hz.
-    if(!dirty&&((reduced.matches||!quality.decor)&&!active||now-lastTime<1000/(active?quality.activeFPS:quality.idleFPS)-.5))return;
+    const budget=1000/(active?quality.activeFPS:quality.idleFPS);
+    if(!dirty&&(((reduced.matches||!quality.decor)&&!active)||now+.9<nextFrame))return;
+    nextFrame=dirty||now-nextFrame>budget?now+budget:nextFrame+budget;
     const dt=Math.min(.04,(now-lastTime)/1000);lastTime=now;
     dirty=false;
     const props=getProps();
@@ -366,13 +375,15 @@ export function createGarageScene(canvas, getProps, callbacks) {
     particles.forEach(p=>{if(reduced.matches||!quality.decor){p.life=0;p.mesh.visible=false;return;}if(p.life<=0)return;p.life-=dt;p.mesh.visible=p.life>0;p.mesh.position.addScaledVector(p.velocity,dt);p.mesh.material.opacity=Math.max(0,p.life/p.duration)*.38;if(!p.spark)p.mesh.scale.addScalar(dt*.6);});
     if(shadowChanged&&now-lastShadow>=1000/30-.5)renderer.shadowMap.needsUpdate=true;
     if(renderer.shadowMap.needsUpdate){lastShadow=now;stats.shadowUpdates++;}
-    renderer.render(scene,camera);stats.frames++;
+    profiler.begin();renderer.render(scene,camera);profiler.end(renderer.info.render);stats.frames++;
   }
   resize();frame=requestAnimationFrame(animate);
   return {
     sync,
+    measure(value){profiler.set(value);},
     settings(next){
       if(drag)finish({pointerId:drag.pointerId},true);Object.assign(settings,next);quality=QUALITY[settings.quality]??QUALITY.standard;
+      for(const item of groups.values())for(const paint of item.paints){if('clearcoat'in paint){const coat=quality===QUALITY.high?.55:0;if(paint.clearcoat!==coat){paint.clearcoat=coat;paint.needsUpdate=true;}}}
       renderer.setPixelRatio(Math.min(devicePixelRatio,quality.pixelRatio));renderer.shadowMap.enabled=settings.shadows&&quality.decor;
       if(sun.shadow.mapSize.x!==quality.shadow){sun.shadow.map?.dispose();sun.shadow.map=null;sun.shadow.mapSize.set(quality.shadow,quality.shadow);}
       resize();
@@ -380,17 +391,17 @@ export function createGarageScene(canvas, getProps, callbacks) {
     select(id){selected=id;dirty=true;callbacks.select(id);canvas.focus({preventScroll:true});},
     project(x,y,z){const v=new THREE.Vector3(x,y,z).project(camera),r=canvas.getBoundingClientRect();return {x:r.left+(v.x+1)*r.width/2,y:r.top+(1-v.y)*r.height/2};},
     pick(x,y,pointerType='mouse'){return carAt({clientX:x,clientY:y,pointerType});},
-    snapshot(){return {ready,settings:{...settings},cars:[...groups.values()].map(i=>({id:i.car.id,model:i.model,dir:i.car.dir,len:i.car.len,position:i.group.position.toArray(),wheelAngle:i.wheelAngle.value,tilt:i.body.rotation.z,wheelTilt:i.group.rotation.z,velocity:i.velocity,tailLight:i.tailLamps[0]?.emissiveIntensity})),calls:renderer.info.render.calls,performance:{...stats,pixelRatio:renderer.getPixelRatio(),shadowSize:sun.shadow.mapSize.x,shadows:renderer.shadowMap.enabled,inView},guide:{visible:marker.visible,position:marker.position.toArray(),scale:marker.scale.toArray(),opacity:ringMaterial.opacity},celebration:celebration.visible,cameraFollow};},
+    snapshot(){return {ready,settings:{...settings},cars:[...groups.values()].map(i=>({id:i.car.id,model:i.model,dir:i.car.dir,len:i.car.len,position:i.group.position.toArray(),wheelAngle:i.wheelAngle.value,tilt:i.body.rotation.z,wheelTilt:i.group.rotation.z,velocity:i.velocity,tailLight:i.tailLamps[0]?.emissiveIntensity})),calls:renderer.info.render.calls,performance:{...stats,pixelRatio:renderer.getPixelRatio(),shadowSize:sun.shadow.mapSize.x,shadows:renderer.shadowMap.enabled,inView,profile:profiler.snapshot()},guide:{visible:marker.visible,position:marker.position.toArray(),scale:marker.scale.toArray(),opacity:ringMaterial.opacity},celebration:celebration.visible,cameraFollow};},
     dispose(){
       if(!alive)return;
       alive=false;cancelAnimationFrame(frame);observer.disconnect();visibilityObserver.disconnect();Object.entries(handlers).forEach(([n,h])=>canvas.removeEventListener(n,h));
       reduced.removeEventListener('change',motionChanged);
-      for(const item of groups.values())item.group.traverse(o=>{if(o.isMesh){o.material.dispose();o.customDepthMaterial?.dispose();}});
+      for(const item of groups.values())item.group.traverse(o=>{if(o.isMesh){o.material.dispose();o.customDepthMaterial?.dispose();if(o.userData.generatedGeometry)o.geometry.dispose();}});
         ownedMaterials.forEach(m=>m.dispose());ownedGeometries.forEach(g=>g.dispose());contactGeometry.dispose();
       hintArrow.dispose();
       roadTexture.dispose();glowTexture.dispose();skidTexture.dispose();environment.dispose();roadLights.dispose();leaves.dispose();celebration.dispose();lightPools.dispose();skidMarks.dispose();
       if(library)Object.values(library).forEach(root=>root.traverse(o=>{if(o.isMesh)o.geometry.dispose();}));
-      renderer.dispose();
+      profiler.dispose();renderer.dispose();
     },
   };
 }

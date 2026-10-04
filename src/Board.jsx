@@ -5,12 +5,12 @@ import { SCENE_THEMES, completedOfficialLevels, availableTheme } from './sceneTh
 import { QUALITY } from './gamePreferences.js';
 import { Icon, Sheet } from './GameUI.jsx';
 
-const DEFAULT = { pitch: 65, yaw: 0, light: -40, intensity: 3, shadows: true, theme:'day',quality:'standard',motion:1 };
+const DEFAULT = { pitch: 65, yaw: 0, light: -40, intensity: 3, shadows: true, theme:'day',quality:'standard',motion:1.2 };
 function readSettings() {
   try {
     const value=JSON.parse(localStorage.getItem('traffic-jam-scene') || 'null');
     if(!value)return DEFAULT;
-    return { pitch: Math.max(45,Math.min(80,Number(value.pitch)||65)), yaw: Math.max(-35,Math.min(35,Number(value.yaw)||0)), light: Math.max(-180,Math.min(180,(Number.isFinite(Number(value.light)) ? Number(value.light) : -40))), intensity: Math.max(.5,Math.min(5,Number(value.intensity)||3)), shadows: value.shadows!==false,theme:value.theme??'day',quality:QUALITY[value.quality]?value.quality:'standard',motion:Number.isFinite(Number(value.motion))?Math.max(0,Math.min(1.5,Number(value.motion))):1 };
+    return { pitch: Math.max(45,Math.min(80,Number(value.pitch)||65)), yaw: Math.max(-35,Math.min(35,Number(value.yaw)||0)), light: Math.max(-180,Math.min(180,(Number.isFinite(Number(value.light)) ? Number(value.light) : -40))), intensity: Math.max(.5,Math.min(5,Number(value.intensity)||3)), shadows: value.shadows!==false,theme:value.theme??'day',quality:QUALITY[value.quality]?value.quality:'standard',motion:Number.isFinite(Number(value.motion))?Math.max(0,Math.min(1.5,Number(value.motion))):1.2 };
   } catch { return DEFAULT; }
 }
 
@@ -32,7 +32,7 @@ export default function Board(props) {
       try {
         instance=createGarageScene(canvas.current,()=>latest.current,{ready:()=>setReady(true),error:()=>setFallback(true),select:setSelected,feedback:setFeedback});
         engine.current=instance;instance.settings(settingsRef.current);
-        canvas.current.garageInspection={project:instance.project,pick:instance.pick,snapshot:instance.snapshot};
+        canvas.current.garageInspection={project:instance.project,pick:instance.pick,snapshot:instance.snapshot,measure:instance.measure};
       } catch { setFallback(true); }
     }).catch(()=>{if(!cancelled)setFallback(true);});
     return ()=>{cancelled=true;instance?.dispose();engine.current=null;};
@@ -56,7 +56,7 @@ export default function Board(props) {
     <h3 className="settings-label">場景氣氛 <small>已通關 {completed}/40</small></h3><div className="scene-themes" role="group" aria-label="場景氣氛">
       {SCENE_THEMES.map(item=><button key={item.id} disabled={completed<item.required} aria-pressed={theme===item.id} onClick={()=>change('theme',item.id)}><i className={`theme-dot ${item.id}`}/><span>{item.name}<small>{completed<item.required?`通關 ${item.required} 關解鎖`:'已解鎖'}</small></span></button>)}
     </div>
-    <h3 className="settings-label">畫質與耗電</h3><div className="quality-options" role="group" aria-label="畫質">{Object.entries(QUALITY).map(([id,item])=><button key={id} aria-pressed={settings.quality===id} onClick={()=>change('quality',id)}>{item.name}<small>{id==='high'?'高解析光影':id==='saver'?'減少動態與耗電':'推薦'}</small></button>)}</div>
+    <h3 className="settings-label">畫質與耗電</h3><div className="quality-options" role="group" aria-label="畫質">{Object.entries(QUALITY).map(([id,item])=><button key={id} aria-pressed={settings.quality===id} onClick={()=>change('quality',id)}>{item.name}<small>{id==='high'?'細緻光影與車漆':id==='saver'?'減少動態與耗電':'流暢優先'}</small></button>)}</div>
     <h3 className="settings-label">視角與光源</h3><div id="scene-settings" className="scene-settings">
       <label>車身動態 <b>{Math.round((settings.motion??1)*100)}%</b><input aria-label="車身動態" type="range" min="0" max="1.5" step=".1" value={settings.motion??1} onChange={e=>change('motion',Number(e.target.value))}/></label>
       <label>俯視角 <b>{settings.pitch}°</b><input aria-label="俯視角" type="range" min="45" max="80" value={settings.pitch} onChange={e=>change('pitch',Number(e.target.value))}/></label>

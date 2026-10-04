@@ -61,7 +61,8 @@ def cube(name, position, size, material, bevel=.04):
     if bevel:
         mod = obj.modifiers.new('Soft toy edges', 'BEVEL')
         mod.width = bevel
-        mod.segments = 3
+        # Subpixel trim does not need the same bevel tessellation as the silhouette.
+        mod.segments = 3 if bevel>=.05 else 2 if bevel>=.025 else 1
         bpy.context.view_layer.objects.active = obj
         bpy.ops.object.modifier_apply(modifier=mod.name)
     for polygon in obj.data.polygons:

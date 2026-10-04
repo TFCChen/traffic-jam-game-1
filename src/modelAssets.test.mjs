@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { Box3 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { vehicleModel } from './vehicleModels.js';
-import { prepareWheels } from './garageMaterials.js';
+import { prepareWheels,batchColoredMeshes } from './garageMaterials.js';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const lengths={racer:2,jeep:2,pickup:2,compact:2,taxi:2,schoolbus:3,coach:3,camper:3,delivery:3};
@@ -17,6 +17,11 @@ for(const [name,length]of Object.entries(lengths)){
   assert.ok(bounds.min.z>=-.54&&bounds.max.z<=.54,`${name}: vehicle must fit within one lane`);
   assert.ok(bounds.min.y>=-.001&&bounds.max.y>.5&&bounds.max.y<1.3,`${name}: GLB must use the correct up axis and rest on its tyres`);
   prepareWheels(asset.scene,length);
+  const beforeBatch=new Box3().setFromObject(asset.scene);
+  const batch=batchColoredMeshes(asset.scene,mesh=>!['Opaque blue glass','Headlamp','Tail lamp','Rolling wheels'].includes(mesh.material.name)&&!mesh.material.name.startsWith('Paint'));
+  assert.ok(batch?.geometry.getAttribute('color'),`${name}: trim colours must survive batching`);
+  const afterBatch=new Box3().setFromObject(asset.scene);
+  assert.ok(beforeBatch.min.distanceTo(afterBatch.min)<.00001&&beforeBatch.max.distanceTo(afterBatch.max)<.00001,`${name}: batching must preserve vehicle shape and transforms`);
   let rolling=false;
   let painted=false;
   asset.scene.traverse(object=>{if(object.isMesh){

@@ -1,4 +1,25 @@
 import * as THREE from 'three';
+import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
+
+export function batchColoredMeshes(root,predicate,{roughness=.55,metalness=.12,name='Batched trim'}={}){
+  root.updateMatrixWorld(true);
+  const meshes=[];root.traverse(mesh=>{if(mesh.isMesh&&predicate(mesh))meshes.push(mesh);});
+  if(meshes.length<2)return;
+  const inverse=new THREE.Matrix4().copy(root.matrixWorld).invert(),geometries=[];
+  for(const mesh of meshes){
+    const geometry=mesh.geometry.clone().applyMatrix4(new THREE.Matrix4().multiplyMatrices(inverse,mesh.matrixWorld));
+    for(const name of Object.keys(geometry.attributes))if(name!=='position'&&name!=='normal')geometry.deleteAttribute(name);
+    const color=mesh.material.color,colors=new Float32Array(geometry.getAttribute('position').count*3);
+    for(let i=0;i<colors.length;i+=3){colors[i]=color.r;colors[i+1]=color.g;colors[i+2]=color.b;}
+    geometry.setAttribute('color',new THREE.BufferAttribute(colors,3));geometries.push(geometry);
+  }
+  const geometry=mergeGeometries(geometries);geometries.forEach(g=>g.dispose());
+  if(!geometry)throw Error('Colored trim geometry could not be batched.');
+  geometry.computeBoundingBox();geometry.computeBoundingSphere();
+  const material=new THREE.MeshStandardMaterial({vertexColors:true,roughness,metalness});material.name=name;
+  const merged=new THREE.Mesh(geometry,material);merged.userData.generatedGeometry=true;merged.castShadow=merged.receiveShadow=true;
+  meshes.forEach(mesh=>mesh.removeFromParent());root.add(merged);return merged;
+}
 
 export function detailTexture(kind) {
   const canvas=document.createElement('canvas');canvas.width=canvas.height=64;
