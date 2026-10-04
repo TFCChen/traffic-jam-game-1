@@ -415,3 +415,44 @@ button.selected, .tabs button.active { color: #246656; border-color: #9abfae; ba
   .win-card { max-height:calc(100dvh - 32px); overflow:auto; }
 }
 @media (max-width: 540px) { .garage-canvas-wrap { aspect-ratio: 1.18; }.vehicle-picker button { min-width: 36px; min-height: 36px; }.scene-settings { padding: 12px; gap: 9px; } }
+
+/* In-game cockpit: the scene, compact telemetry and action dock share one surface. */
+.app-shell { padding:16px 24px; background:radial-gradient(ellipse at 50% 25%,#303d40,#151d20 75%); color:#e1e8df; }
+.ambient-scene { display:none; }
+.workspace,.workspace.panel-hidden { width:min(1040px,100%); grid-template-columns:minmax(0,1fr); }
+.game-column { padding:0; min-height:calc(100dvh - 32px); gap:0; background:transparent; border:0; border-radius:0; box-shadow:none; }
+.game-hud { width:100%; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:12px 4px 18px; }
+.game-hud .stage-heading { width:auto; }.game-hud .stage-kicker { color:#a5b5ab; letter-spacing:.22em; font-size:9px; }
+.game-hud .stage-heading h2 { font-size:28px; color:#f1f0d9; margin:6px 0 0; letter-spacing:.02em; }
+.game-hud .stats { gap:0; width:auto; }.game-hud .stats span { min-width:70px; padding:0 18px; border:0; border-left:1px solid #53615c; border-radius:0; background:transparent; color:#97aaa3; font-size:10px; }
+.game-hud .stats b { font-size:25px; color:#f5d983; font-family:"Bahnschrift","Segoe UI",sans-serif; font-variant-numeric:tabular-nums; }
+.game-hud .stats span:last-child b { font-size:15px; line-height:2; color:#d0ddd5; }
+.instruction { width:100%; padding:10px 14px; margin:0 0 10px; border-radius:4px; background:#384943; color:#e4ecd9; font-size:12px; min-height:0; }
+.instruction.quiet { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); }
+.garage-3d { display:flex; flex:1; flex-direction:column; width:100%; }
+.garage-canvas-wrap { flex:1; aspect-ratio:auto; width:100%; margin:0; min-height:280px; border-radius:6px; box-shadow:0 0 0 1px #71807635; }
+.garage-canvas-wrap .garage-canvas { position:absolute; inset:0; width:100%; height:100%; }
+.scene-tag { background:#23312bbf; border:1px solid #73887640; color:#e2ebd7; padding:6px 9px; border-radius:3px; font-size:9px; letter-spacing:.08em; left:12px; top:12px; }
+.theme-neon .scene-tag,.theme-sunset .scene-tag { color:#e2ebd7; }
+.scene-options-bar { padding:6px 0; min-height:54px; }.scene-options-bar > span { color:#acbdb2; font-size:11px; padding-left:4px; }
+.scene-tools { display:flex; gap:6px; }.scene-tools button { min-height:44px; border:1px solid #50605a; border-radius:4px; background:transparent; color:#c7d6cc; box-shadow:none; padding:9px 12px; }.scene-tools .picker-toggle { width:auto; }
+.scene-tools button:hover { background:#35483e; border-color:#e6d59a; transform:none; }.scene-tools button:active { background:#50604a; transform:scale(.96); }
+.toolbar { width:100%; margin:0; padding:10px 0; gap:8px; border-top:1px solid #50605a; }
+.toolbar button { flex:1; flex-direction:column; gap:7px; padding:12px 8px; min-height:64px; color:#d6e2d7; background:#293733; border:1px solid #485b50; border-radius:6px; box-shadow:none; font-size:11px; }
+.toolbar button svg { width:21px; height:21px; color:#e9d89f; }.toolbar button:hover { background:#3b5042; border-color:#adbc96; transform:none; }.toolbar button:active { transform:scale(.96); background:#596643; }
+.toolbar button.selected { background:#4a5840; color:#f9efd0; border-color:#b9be86; }
+.board-footer { min-height:26px; padding:4px; color:#9bad9f; font-size:10px; }.board-footer button { padding:7px 10px; min-height:44px; font-size:11px; background:#34473b; border-color:#647657; color:#f6e6b6; box-shadow:none; }
+.vehicle-picker { padding:5px 0 12px; }.vehicle-picker button { background:#33463c; color:#dbe6d8; border-color:#62735b; }
+.editor-actions { padding:10px 0; }.editor-actions button { background:#34473b; border-color:#647657; color:#e4ecd9; box-shadow:none; }
+.game-sheet { border-radius:10px; border-color:#a5b09b; background:#ecefe4; box-shadow:0 20px 100px #0009; }
+.game-sheet button { border-radius:5px; box-shadow:none; }.game-sheet .badge { border-radius:7px; }.game-sheet .tabs { border-radius:6px; }
+.win-card { color:#263b45; border-radius:12px; box-shadow:0 24px 100px #0005; }.win-emblem { border-radius:10px; }.win-actions button { border-radius:6px; box-shadow:none; }
+@media (max-width:540px) {
+  .app-shell { padding:max(8px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left)); }
+  .game-column { min-height:calc(100dvh - max(8px,env(safe-area-inset-top)) - max(8px,env(safe-area-inset-bottom))); }
+  .game-hud { padding:10px 2px 15px; gap:8px; }.game-hud .stage-kicker { display:block; font-size:7px; letter-spacing:.13em; }.game-hud .stage-heading h2 { font-size:20px; }
+  .game-hud .stats span { display:block; min-width:0; padding:0 9px; font-size:9px; }.game-hud .stats b { font-size:21px; }.game-hud .stats span:last-child b { font-size:12px; line-height:2.2; }
+  .garage-canvas-wrap { width:100%; margin:0; min-height:260px; border-radius:4px; }.scene-tools button { padding:8px; font-size:10px; }.scene-options-bar > span { font-size:10px; }
+  .toolbar { gap:5px; }.toolbar button { min-height:62px; font-size:10px; gap:7px; }.toolbar button svg { width:19px; height:19px; }
+  .game-sheet { border-radius:12px 12px 0 0; }.board-footer { font-size:9px; }
+}

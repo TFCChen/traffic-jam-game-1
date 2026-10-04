@@ -7,6 +7,7 @@ import { asphaltTexture, detailTexture, prepareWheels, rollingMaterial } from '.
 import { SCENE_THEMES } from './sceneThemes.js';
 import { QUALITY } from './gamePreferences.js';
 import { quadDistance,snapDragDelta } from './pointerHelpers.js';
+import {stepSuspension} from './vehicleDynamics.js';
 
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 const modelNames = ['garage', 'racer', 'jeep', 'pickup', 'compact', 'taxi', 'schoolbus', 'coach', 'camper', 'delivery'];
@@ -176,7 +177,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     return nearest;
   }
   function planePoint(event) { cast(event); return raycaster.ray.intersectPlane(ground,new THREE.Vector3()); }
-  function blocked(id) { const item=groups.get(id); if(item)item.blockedUntil=performance.now()+300; settlingUntil=performance.now()+400;dirty=true;callbacks.select(id); }
+  function blocked(id) { const item=groups.get(id); if(item)item.brakeUntil=performance.now()+180; callbacks.feedback?.('車輛受阻，先移開擋路的車');settlingUntil=performance.now()+250;dirty=true;callbacks.select(id); }
   function down(event) {
     const props=getProps();
     if(drag&&event.pointerType==='touch'&&drag.pointerId!==event.pointerId){finish({pointerId:drag.pointerId},true);return;}
@@ -204,7 +205,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     const point=planePoint(event); if(!point)return;
     const raw=drag.car.dir==='H'?point.x-drag.start.x:point.z-drag.start.z;
     const delta=clamp(raw,drag.min,drag.max);
-    if(Math.abs(raw-delta)>.1&&(!drag.lastBlock||performance.now()-drag.lastBlock>350)){drag.lastBlock=performance.now();groups.get(drag.car.id).blockedUntil=performance.now()+180;callbacks.feedback?.('已到邊界，試著移開擋路的車');}
+    if(Math.abs(raw-delta)>.1&&(!drag.lastBlock||performance.now()-drag.lastBlock>350)){drag.lastBlock=performance.now();groups.get(drag.car.id).brakeUntil=performance.now()+180;callbacks.feedback?.('已到邊界，試著移開擋路的車');}
     const now=performance.now(); drag.speed=(delta-drag.delta)/Math.max(.008,(now-drag.lastAt)/1000);
     drag.lastAt=now; drag.delta=delta; canvas.style.cursor='grabbing';
   }
@@ -251,7 +252,10 @@ export function createGarageScene(canvas, getProps, callbacks) {
           }
           object.castShadow=true;object.receiveShadow=true;object.userData.carId=car.id;
         }});
-        item={group,car,index,model:vehicleModel(car).kind,lamps,tailLamps,wheelAngle,velocity:0,brakeUntil:0};groups.set(car.id,item);scene.add(group);
+        const body=new THREE.Group();body.position.y=.19;group.add(body);group.updateMatrixWorld(true);
+        const bodyMeshes=[];group.traverse(o=>{if(o.isMesh&&o.material.name!=='Rolling wheels')bodyMeshes.push(o);});
+        bodyMeshes.forEach(mesh=>body.attach(mesh));
+        item={group,body,suspension:{pitch:0,rate:0,speed:0},car,index,model:vehicleModel(car).kind,lamps,tailLamps,wheelAngle,velocity:0,brakeUntil:0};groups.set(car.id,item);scene.add(group);
         group.position.set(car.col+(car.dir==='H'?car.len/2:.5),.055,car.row+(car.dir==='V'?car.len/2:.5));
       }
       item.car=car;
@@ -305,11 +309,10 @@ export function createGarageScene(canvas, getProps, callbacks) {
       const travelled=(car.dir==='H'?group.position.x:group.position.z)-oldAxis,velocity=travelled/Math.max(.008,dt);
       item.wheelAngle.value-=travelled/.19;
       if(Math.abs(item.velocity)>.2&&Math.abs(velocity)<.12)item.brakeUntil=now+220;
-      const tilt=reduced.matches?0:clamp((velocity-item.velocity)*.006,-.025,.025);
-      group.rotation.z=THREE.MathUtils.lerp(group.rotation.z,tilt,1-Math.exp(-12*dt));
-      if(item.blockedUntil>now&&!reduced.matches)group.rotation.z=Math.sin(now*.07)*.018;
+      item.suspension=reduced.matches?{pitch:0,rate:0,speed:0}:stepSuspension(item.suspension,velocity,dt);
+      item.body.rotation.z=item.suspension.pitch;
       item.velocity=velocity;
-      if(Math.abs(group.rotation.z)>.001)shadowChanged=true;
+      if(Math.abs(item.body.rotation.z)>.00005)shadowChanged=true;
       if(Math.abs(velocity)>.12)item.gear=Math.sign(velocity);
       const reversing=velocity<-.12||(isDrag&&item.gear===-1),braking=now<item.brakeUntil;
       item.lamps.forEach(material=>{material.emissiveIntensity=settings.theme==='neon'?1.4:(isDrag||props.won)?.8:reduced.matches?.2:.15+(Math.sin(now*.001+item.index)*.5+.5)*.25;});
@@ -360,7 +363,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     select(id){selected=id;dirty=true;callbacks.select(id);canvas.focus({preventScroll:true});},
     project(x,y,z){const v=new THREE.Vector3(x,y,z).project(camera),r=canvas.getBoundingClientRect();return {x:r.left+(v.x+1)*r.width/2,y:r.top+(1-v.y)*r.height/2};},
     pick(x,y,pointerType='mouse'){return carAt({clientX:x,clientY:y,pointerType});},
-    snapshot(){return {ready,settings:{...settings},cars:[...groups.values()].map(i=>({id:i.car.id,model:i.model,dir:i.car.dir,len:i.car.len,position:i.group.position.toArray(),wheelAngle:i.wheelAngle.value,tilt:i.group.rotation.z,velocity:i.velocity,tailLight:i.tailLamps[0]?.emissiveIntensity})),calls:renderer.info.render.calls,performance:{...stats,pixelRatio:renderer.getPixelRatio(),shadowSize:sun.shadow.mapSize.x,shadows:renderer.shadowMap.enabled,inView},guide:{visible:marker.visible,position:marker.position.toArray(),scale:marker.scale.toArray(),opacity:ringMaterial.opacity},celebration:celebration.visible,cameraFollow};},
+    snapshot(){return {ready,settings:{...settings},cars:[...groups.values()].map(i=>({id:i.car.id,model:i.model,dir:i.car.dir,len:i.car.len,position:i.group.position.toArray(),wheelAngle:i.wheelAngle.value,tilt:i.body.rotation.z,wheelTilt:i.group.rotation.z,velocity:i.velocity,tailLight:i.tailLamps[0]?.emissiveIntensity})),calls:renderer.info.render.calls,performance:{...stats,pixelRatio:renderer.getPixelRatio(),shadowSize:sun.shadow.mapSize.x,shadows:renderer.shadowMap.enabled,inView},guide:{visible:marker.visible,position:marker.position.toArray(),scale:marker.scale.toArray(),opacity:ringMaterial.opacity},celebration:celebration.visible,cameraFollow};},
     dispose(){
       if(!alive)return;
       alive=false;cancelAnimationFrame(frame);observer.disconnect();visibilityObserver.disconnect();Object.entries(handlers).forEach(([n,h])=>canvas.removeEventListener(n,h));

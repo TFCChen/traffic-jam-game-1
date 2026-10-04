@@ -22,11 +22,21 @@ try{
   await send('Emulation.setTouchEmulationEnabled',{enabled:true,maxTouchPoints:2});
   await send('Emulation.setDeviceMetricsOverride',{width:375,height:900,deviceScaleFactor:2,mobile:true});
   await ready();
+  const blocked=await evaluate("(()=>{const a=document.querySelector('.garage-canvas').garageInspection,c=a.snapshot().cars.find(c=>c.id==='target'),[x,,z]=c.position;return {point:a.project(x,.55,z),position:c.position}})()");
+  await touch('touchStart',blocked.point);
+  for(let i=0;i<5;i++){
+    await sleep(60);
+    const car=await evaluate("document.querySelector('.garage-canvas').garageInspection.snapshot().cars.find(c=>c.id==='target')");
+    assert.deepEqual(car.position,blocked.position);assert.equal(car.wheelTilt,0);assert.equal(car.tilt,0);
+  }
+  await touch('touchEnd');
   const point=await evaluate(`(()=>{const a=document.querySelector('.garage-canvas').garageInspection,c=a.snapshot().cars.find(c=>c.id==='green'),[x,,z]=c.position,p=a.project(x,.4,z);for(let dy=-35;dy<=35;dy+=2)for(let dx=-65;dx<=65;dx+=2){const q={x:p.x+dx,y:p.y+dy};if(!a.pick(q.x,q.y)&&a.pick(q.x,q.y,'touch')==='green')return q;}throw Error('No tolerance sample');})()`);
   const delta=await evaluate("(()=>{const a=document.querySelector('.garage-canvas').garageInspection,p=a.project(1,.4,1),q=a.project(1.45,.4,1);return {x:q.x-p.x,y:q.y-p.y}})()");
   await touch('touchStart',point);
   assert.equal(await evaluate("document.querySelector('.garage-canvas').dataset.dragging"),'green');
   await touch('touchMove',{x:point.x+delta.x,y:point.y+delta.y});
+  const chassis=await evaluate("document.querySelector('.garage-canvas').garageInspection.snapshot().cars.find(c=>c.id==='green')");
+  assert.ok(Math.abs(chassis.tilt)<=.004);assert.equal(chassis.wheelTilt,0);
   await touch('touchEnd');
   assert.equal(await evaluate("document.querySelector('.stats b').textContent"),'1');
   assert.equal(await evaluate("document.querySelector('.garage-canvas').garageInspection.snapshot().guide.visible"),false);
@@ -56,6 +66,8 @@ try{
     const points=await evaluate(`(()=>{const a=document.querySelector('.garage-canvas').garageInspection,c=a.snapshot().cars.find(c=>c.id==='${id}'),[x,,z]=c.position;return {from:a.project(x,.55,z),to:a.project(x+(${dx}),.55,z+(${dz}))}})()`);
     await touch('touchStart',points.from);assert.equal(await evaluate("document.querySelector('.garage-canvas').dataset.dragging"),id);
     await touch('touchMove',points.to);await touch('touchEnd');await sleep(180);
+    const car=await evaluate(`document.querySelector('.garage-canvas').garageInspection.snapshot().cars.find(c=>c.id==='${id}')`);
+    assert.ok(Math.abs(car.tilt)<=.004);assert.equal(car.wheelTilt,0);
   }
   await sleep(1700);
   const result=await evaluate("({win:!!document.querySelector('.win-card'),moves:document.querySelector('.stats b').textContent,rewards:[...document.querySelectorAll('.win-rewards span')].map(x=>x.textContent),progress:JSON.parse(localStorage.getItem('traffic-jam-progress-v2'))})");

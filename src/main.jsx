@@ -501,25 +501,19 @@ function App() {
   return (
     <div className="app-shell">
       <div className="ambient-scene" aria-hidden="true"><i /><i /><i /><span /></div>
-      <header className="hero" inert={winOpen}>
-        <div>
-          <p className="eyebrow"><Icon name="garage" /> 小小解謎車庫</p>
-          <h1>Traffic Jam</h1>
-          <p>挪一挪，為紅車開出一條路。</p>
-        </div>
+      <main className="workspace panel-hidden" inert={winOpen}>
+        <section className={`game-column ${mode === "editor" ? "editing" : ""}`} aria-busy={loading}>
+        <header className="game-hud">
+          <div className="stage-heading"><div><span className="stage-kicker">{mode === "editor" ? "BUILD MODE" : "PUZZLE / GARAGE"}</span><h2>{mode === "editor" ? "關卡工作台" : currentTitle}</h2></div></div>
         <div className="stats">
           <span><b>{mode === "editor" ? editorCars.length : moves}</b>{mode === "editor" ? "車輛" : "步數"}</span>
           <span><b>{mode === "editor" ? editorValidation?.optimalMoves ?? "—" : analysis?.optimalMoves ?? "—"}</b>最佳</span>
           <span><b>{mode === "editor" ? DIFFICULTY_LABELS[editorValidation?.label] ?? "待驗證" : DIFFICULTY_LABELS[analysis?.label ?? current.difficulty] ?? "自訂"}</b>難度</span>
         </div>
-      </header>
-
-      <main className="workspace panel-hidden" inert={winOpen}>
-        <section className={`game-column ${mode === "editor" ? "editing" : ""}`} aria-busy={loading}>
-          <div className="stage-heading"><div><span className="stage-kicker">{mode === "editor" ? "設計你的停車場" : "準備出發"}</span><h2>{mode === "editor" ? "關卡工作台" : currentTitle}</h2></div><span className={`stage-badge ${won ? "cleared" : ""}`}>{mode === "editor" ? `${editorCars.length} 台車` : won ? "✓ 已通關" : "紅車 → 出口"}</span></div>
+        </header>
 
 
-          <div className={`instruction ${loading ? "loading" : ""}`} role="status" aria-live="polite">{loading && <span className="loading-dot" />}{message || (loading ? "正在準備停車場…" : mode === "editor" ? "點起點，再點車尾，放置 2 或 3 格車輛。" : won ? "道路暢通，紅車出發了！" : "沿著車身方向拖曳，放手就會停入格位。")}</div>
+          <div className={`instruction ${!message&&!loading&&mode==='play'?'quiet':''} ${loading ? "loading" : ""}`} role="status" aria-live="polite">{loading && <span className="loading-dot" />}{message || (loading ? "正在準備停車場…" : mode === "editor" ? "點起點，再點車尾，放置 2 或 3 格車輛。" : won ? "道路暢通，紅車出發了！" : "沿著車身方向拖曳，放手就會停入格位。")}</div>
 
           <Board
             key={`${current.id}-${mode}`}
@@ -581,7 +575,7 @@ function App() {
             </>
           )}
 
-          {mode === "play" && <div className="board-footer"><span className="status-dot" /><span>{won ? "停車場已解鎖" : "一次有效移動算一步"}</span>{won && winReady && <button onClick={() => setWinOpen(true)}>查看通關結果 <Icon name="arrow" /></button>}</div>}
+          {mode === "play" && <div className="board-footer"><span className="status-dot" /><span>{won ? "道路暢通" : "目標：紅車駛出東側出口"}</span>{won && winReady && <button onClick={() => setWinOpen(true)}>查看通關結果 <Icon name="arrow" /></button>}</div>}
         </section>
 
         {panel !== "none" && <Sheet label="關卡與收藏" onClose={()=>setPanel('none')}><aside className="side-panel" id="game-panels">

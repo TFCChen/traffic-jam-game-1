@@ -51,7 +51,7 @@ export default function Board(props) {
       {!ready&&<div className="scene-loading" role="status"><span className="loading-dot"/>正在載入玩具車庫…</div>}
       <span className="scene-tag">{SCENE_THEMES.find(t=>t.id===theme).name}</span>
     </div>
-    <div className="scene-options-bar"><span role="status">{feedback||SCENE_THEMES.find(t=>t.id===theme).name}</span><button aria-expanded={open} aria-controls="scene-settings" onClick={()=>setOpen(!open)}><Icon name="settings"/>車庫設定</button></div>
+    <div className="scene-options-bar"><span role="status">{feedback||'車庫就緒'}</span><div className="scene-tools">{!props.editor&&<button className="picker-toggle" aria-expanded={picker} onClick={()=>setPicker(!picker)}><Icon name="levels"/><span>選車</span></button>}<button aria-expanded={open} aria-controls="scene-settings" onClick={()=>setOpen(!open)}><Icon name="settings"/>車庫設定</button></div></div>
     {open&&<Sheet label="車庫設定" onClose={()=>setOpen(false)}><div className="settings-heading"><div><small>你的微縮車庫</small><h2>車庫設定</h2></div><button aria-label="關閉車庫設定" onClick={()=>setOpen(false)}><Icon name="close"/></button></div>
     <h3 className="settings-label">場景氣氛 <small>已通關 {completed}/40</small></h3><div className="scene-themes" role="group" aria-label="場景氣氛">
       {SCENE_THEMES.map(item=><button key={item.id} disabled={completed<item.required} aria-pressed={theme===item.id} onClick={()=>change('theme',item.id)}><i className={`theme-dot ${item.id}`}/><span>{item.name}<small>{completed<item.required?`通關 ${item.required} 關解鎖`:'已解鎖'}</small></span></button>)}
@@ -66,7 +66,6 @@ export default function Board(props) {
       <button onClick={()=>setSettings({...DEFAULT})}>恢復預設</button>
       <p>角度越小越接近側視。省電模式關閉投影與裝飾動態，保留移車回饋。設定會保存在這個瀏覽器。</p>
     </div></Sheet>}
-    {!props.editor&&<button className="picker-toggle" aria-expanded={picker} onClick={()=>setPicker(!picker)}>選取車輛／方向鍵操作</button>}
     {(props.editor||picker)&&<div className="vehicle-picker" aria-label={props.editor?'編輯車輛':'鍵盤選取車輛'}>
       {props.cars.map((car,index)=><button key={car.id} className={selected===car.id?'selected':''} disabled={!ready||props.disabled||props.won} style={{'--car-color':car.color}} aria-label={`選取${car.id==='target'?'紅色目標':`車輛 ${index+1}，`}${vehicleModel(car).name}`} aria-pressed={selected===car.id} onClick={()=>engine.current?.select(car.id)}><i/>{index+1}</button>)}
       {props.editor&&selected&&props.cars.some(c=>c.id===selected)&&<button className="remove-selected" disabled={props.disabled} onClick={()=>{props.onRemove(selected);setSelected(null);}}>移除選取車輛</button>}
