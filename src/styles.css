@@ -239,10 +239,10 @@ button.selected, .tabs button.active { color: #246656; border-color: #9abfae; ba
 .drive-effects b { display: none; position: absolute; right: 0; top: 0; width: 7px; height: 3px; border-radius: 2px; background: #ffe7a0; box-shadow: 0 0 6px #ffb35c; animation: tire-spark 340ms ease-out infinite; }
 .fast .drive-effects b { display: block; }.drive-effects b:nth-of-type(2) { top: 38px; animation-delay: -100ms; --spark-y: 14px; }.drive-effects b:nth-of-type(3) { animation-delay: -200ms; --spark-y: -18px; }.drive-effects b:nth-of-type(4) { top: 38px; animation-delay: -280ms; --spark-y: 8px; }
 .dragging .light-beams, .escaping .light-beams { opacity: 1; width: 32px; animation: none; }
-/* Orthographic 2.5D camera: 70 degrees above the ground, with a small yaw. */
-.board-viewport { width: min(560px, 100%); border-radius: 0; overflow: hidden; }
-.scene-rig { position: absolute; top: 0; left: 0; width: 560px; height: 478px; transform-origin: 0 0; transform-style: preserve-3d; }
-.board-frame { position: absolute; left: 12px; top: 86px; transform: rotateX(20deg) rotateZ(-8deg); transform-origin: 0 0; transform-style: preserve-3d; box-shadow: inset 0 2px 1px #ffffffe0, 12px 26px 26px #33493f35; }
+/* A level horizon and a 70-degree downward view; the board never rolls sideways. */
+.board-viewport { width: min(520px, 100%); border-radius: 0; overflow: hidden; }
+.scene-rig { position: absolute; top: 0; left: 0; width: 520px; height: 424px; transform-origin: 0 0; transform-style: preserve-3d; }
+.board-frame { position: absolute; left: 16px; top: 24px; transform: rotateX(20deg); transform-origin: 0 0; transform-style: preserve-3d; box-shadow: inset 0 2px 1px #ffffffe0, 12px 26px 26px #33493f35; }
 .board { transform-style: preserve-3d; isolation: auto; }
 .plane-probe { position: absolute; width: 0; height: 0; pointer-events: none; }
 .platform-front, .platform-right { position: absolute; pointer-events: none; background: linear-gradient(#90a79b, #637e71); border: 1px solid #556f61; }
@@ -258,7 +258,7 @@ button.selected, .tabs button.active { color: #246656; border-color: #9abfae; ba
 .vehicle.bus { --body-height: 24px; }.vehicle.model-racer { --body-height: 14px; }
 .vehicle:hover, .vehicle.dragging { filter: none; }
 .vehicle::before { content: ""; position: absolute; inset: 3px -1px -3px 1px; border-radius: 10px; background: #233d3a55; box-shadow: 3px 5px 7px #1d343d30; transform: translateZ(.5px); pointer-events: none; }
-.vehicle-skin { transform: translate(-50%, -50%) translateZ(var(--body-height)); transform-style: preserve-3d; box-shadow: inset 0 3px 1px #ffffff85, inset 0 -3px 0 #00000018, 5px 10px 10px #1d373f30; }
+.vehicle-skin { transform: translate(-50%, -50%) translateZ(var(--body-height)); transform-style: preserve-3d; box-shadow: inset 0 3px 1px #ffffff85, inset 0 -3px 0 #00000018, 5px 10px 10px #1d373f30; pointer-events: auto; }
 .vehicle.V .vehicle-skin { transform: translate(-50%, -50%) rotateZ(90deg) translateZ(var(--body-height)); }
 .vehicle.dragging .vehicle-skin { transform: translate(-50%, -50%) translateZ(calc(var(--body-height) + 4px)); }
 .vehicle.V.dragging .vehicle-skin { transform: translate(-50%, -50%) rotateZ(90deg) translateZ(calc(var(--body-height) + 4px)); }
@@ -270,7 +270,10 @@ button.selected, .tabs button.active { color: #246656; border-color: #9abfae; ba
 .body-wall.near::after, .body-wall.far::after { content: ""; position: absolute; bottom: 3px; left: 5px; right: 5px; height: 2px; background: #e1ead85a; box-shadow: 0 2px 0 #24423a45; }
 .body-wall.near::before, .body-wall.far::before { content: ""; position: absolute; bottom: -2px; left: 0; width: 100%; height: 14px; background: radial-gradient(circle at 15px 7px, #a4b3a0 0 2px, #394b45 2px 4px, #1f3430 4px 7px, transparent 7px), radial-gradient(circle at calc(100% - 15px) 7px, #a4b3a0 0 2px, #394b45 2px 4px, #1f3430 4px 7px, transparent 7px); }
 .bus .body-wall.near, .bus .body-wall.far { background: repeating-linear-gradient(90deg, transparent 0 6px, #25475499 6px 19px, transparent 19px 25px) 0 3px / 100% 10px no-repeat, linear-gradient(#ffffff12, #16343c40), var(--car-color); }
-.vehicle .vehicle-skin .car-roof { translate: 0 0 7px; transform-style: preserve-3d; box-shadow: 3px 5px 0 #27433d55, 5px 7px 5px #1e38382a; }
+.vehicle .vehicle-skin .car-roof { translate: 0 0 7px; transform-style: preserve-3d; box-shadow: 3px 5px 0 #27433d55, 5px 7px 5px #1e38382a; pointer-events: auto; }
+.vehicle .model-detail { pointer-events: auto; }
+.light-beams, .idle-exhaust, .drive-effects, .target-arrow { pointer-events: none; }
+.vehicle.escaping .vehicle-skin, .vehicle.escaping .car-roof, .vehicle.escaping .model-detail { pointer-events: none; }
 .car-roof::after { content: ""; position: absolute; top: 100%; left: 3px; right: 3px; height: 7px; transform-origin: top; transform: rotateX(-90deg); background: linear-gradient(#354d4b40, #213b3c65), var(--car-color); border-radius: 0 0 2px 2px; }
 .model-camper .car-roof::after, .model-delivery .car-roof::after { background: #b6c4ba; }
 .vehicle .vehicle-skin .wheels { display: none; }

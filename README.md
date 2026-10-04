@@ -55,6 +55,15 @@ npm run build
 
 測試涵蓋遊戲規則、解題路徑、評分與全部 40 關的資料一致性。GitHub Actions 會在 PR 與 main 更新時執行測試和打包。
 
+`scripts/check-vehicle-hits.js` 可在已載入遊戲的瀏覽器中執行，檢查每台車五個可見車頂、邊緣與側面位置是否命中正確車輛，以及棋盤軸線是否歪斜。使用 agent-browser 的 PowerShell 範例：
+
+```powershell
+agent-browser --session traffic-jam open http://localhost:5173
+Get-Content scripts/check-vehicle-hits.js -Raw | agent-browser --session traffic-jam eval --stdin
+```
+
+這項檢查需另行執行，不包含在 `npm test` 或 CI；仍需搭配實際拖曳與通關驗證。
+
 後續從最新 main 建立功能分支，在本地修改並測試，透過 PR 審查後合併。GitHub origin 為 https://github.com/TFCChen/traffic-jam-game-1.git。是否自動發布取決於 Vercel 專案的 Git 設定，合併後應確認部署狀態。
 
 ## 程式結構

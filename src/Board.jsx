@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { GRID, legalMovesForCar } from "./gameEngine.js";
 
 const CELL = 58;
-const SCENE_WIDTH = 560;
-const SCENE_HEIGHT = 478;
+const SCENE_WIDTH = 520;
+const SCENE_HEIGHT = 424;
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
 // A stable colour-to-model mapping keeps the same vehicle recognisable in every level.
