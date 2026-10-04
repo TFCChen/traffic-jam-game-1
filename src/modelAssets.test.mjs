@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { Box3 } from 'three';
+import { Box3,Raycaster,Vector3 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { vehicleModel } from './vehicleModels.js';
 import { prepareWheels,batchColoredMeshes } from './garageMaterials.js';
@@ -16,6 +16,21 @@ for(const [name,length]of Object.entries(lengths)){
   assert.ok(bounds.min.x>=-length/2-.12&&bounds.max.x<=length/2+.12,`${name}: vehicle must remain centred on its lane`);
   assert.ok(bounds.min.z>=-.54&&bounds.max.z<=.54,`${name}: vehicle must fit within one lane`);
   assert.ok(bounds.min.y>=-.001&&bounds.max.y>.5&&bounds.max.y<1.3,`${name}: GLB must use the correct up axis and rest on its tyres`);
+  if(name==='racer'){
+    asset.scene.updateMatrixWorld(true);
+    for(const x of [.45,.65,.85]){
+      const hit=new Raycaster(new Vector3(x,2,0),new Vector3(0,-1,0)).intersectObject(asset.scene,true)[0];
+      assert.ok(hit?.object.material.name.startsWith('Paint')&&hit.point.y>.15,'Wheel wells must not cut through the central bonnet.');
+    }
+    for(const x of [-.67,.66])for(const z of [-.40,.40]){
+      const hit=new Raycaster(new Vector3(x,2,z),new Vector3(0,-1,0)).intersectObject(asset.scene,true)[0];
+      assert.ok(hit?.object.material.name.startsWith('Paint')&&hit.point.y>.38,'The fender must cover the tyre crown, leaving an opening only at the side.');
+    }
+    for(const z of [-.35,.35]){
+      const hit=new Raycaster(new Vector3(.8,2,z),new Vector3(0,-1,0)).intersectObject(asset.scene,true)[0];
+      assert.equal(hit?.object.material.name,'Headlamp','LED lenses must sit above their housing and remain exposed.');
+    }
+  }
   prepareWheels(asset.scene,length);
   const beforeBatch=new Box3().setFromObject(asset.scene);
   const batch=batchColoredMeshes(asset.scene,mesh=>!['Opaque blue glass','Headlamp','Tail lamp','Rolling wheels'].includes(mesh.material.name)&&!mesh.material.name.startsWith('Paint'));

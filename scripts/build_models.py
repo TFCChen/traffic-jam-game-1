@@ -96,6 +96,7 @@ def export(name):
         bpy.ops.object.select_all(action='DESELECT')
         for obj in batch: obj.select_set(True)
         bpy.context.view_layer.objects.active=batch[0]
+        if name=='racer':bpy.ops.object.transform_apply(location=True,rotation=True,scale=True)
         bpy.ops.object.join()
         batch[0].name=material.name
         merged.append(batch[0])
@@ -172,30 +173,97 @@ def wheel_arch(x,y,material):
     objects.append(obj);bpy.context.view_layer.objects.active=obj
     mod=obj.modifiers.new('Fender thickness','SOLIDIFY');mod.thickness=.018;bpy.ops.object.modifier_apply(modifier=mod.name)
 
+def surface(name,vertices,faces,material,subdivide=0):
+    mesh=bpy.data.meshes.new(name);mesh.from_pydata(vertices,[],faces);mesh.update()
+    obj=bpy.data.objects.new(name,mesh);bpy.context.collection.objects.link(obj);mesh.materials.append(material);objects.append(obj)
+    bm=bmesh.new();bm.from_mesh(mesh);bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces));bm.to_mesh(mesh);bm.free()
+    bpy.context.view_layer.objects.active=obj
+    if subdivide:
+        mod=obj.modifiers.new('Continuous sculpted curves','SUBSURF');mod.levels=subdivide
+        bpy.ops.object.modifier_apply(modifier=mod.name)
+    for face in obj.data.polygons:face.use_smooth=True
+    return obj
+
+def ribbon(name,sections,material):
+    vertices=[]
+    for x,width,z in sections:
+        for t in (-1,-.5,0,.5,1):vertices.append((x,width*t,z+.008*(1-t*t)))
+    faces=[]
+    for i in range(len(sections)-1):
+        for j in range(4):faces.append((i*5+j,i*5+j+1,(i+1)*5+j+1,(i+1)*5+j))
+    return surface(name,vertices,faces,material)
+
+def strut(name,a,b,width,material):
+    direction=Vector(b)-Vector(a)
+    obj=cube(name,(Vector(a)+Vector(b))/2,(direction.length,width,width),material,width*.25)
+    obj.rotation_euler=direction.to_track_quat('X','Z').to_euler();return obj
+
+def midengine_coupe(paint):
+    # A single sculpted shell, with broad wheel shoulders and a low centre bonnet.
+    # The reference language is the 296 GTB: wraparound cabin and rear buttresses.
+    sections=[(-.965,.30,.285),(-.92,.365,.32),(-.82,.47,.335),(-.67,.54,.338),
+              (-.49,.415,.34),(-.28,.365,.345),(-.08,.355,.344),(.12,.36,.34),
+              (.32,.385,.325),(.49,.47,.303),(.66,.54,.279),(.79,.47,.251),(.9,.35,.224),(.965,.285,.215)]
+    vertices=[]
+    for x,w,crown in sections:
+        shoulder=crown+.17*math.exp(-((x+.67)/.24)**2)+.25*math.exp(-((x-.66)/.23)**2)
+        inner_shoulder=crown+.013+(shoulder-crown)*.62
+        vertices.extend([(x,-w*.84,.105),(x,-w,.15),(x,-w,.27 if x<.82 else .20),
+                         (x,-w*.93,shoulder),(x,-w*.61,inner_shoulder),(x,0,crown),
+                         (x,w*.61,inner_shoulder),(x,w*.93,shoulder),(x,w,.27 if x<.82 else .20),
+                         (x,w,.15),(x,w*.84,.105),(x,0,.105)])
+    faces=[tuple(range(11,-1,-1))]
+    for i in range(len(sections)-1):
+        for j in range(12):faces.append((i*12+j,i*12+(j+1)%12,(i+1)*12+(j+1)%12,(i+1)*12+j))
+    faces.append(tuple(range((len(sections)-1)*12,len(sections)*12)))
+    body=surface('Continuous mid-engine coachwork',vertices,faces,paint,1)
+    # Actual wheel openings replace the previous applied decorative rings.
+    for x in (-.67,.66):
+        for side in (-1,1):
+            bpy.ops.mesh.primitive_cylinder_add(vertices=40,radius=.205,depth=.30,location=(x,side*.44,.19),rotation=(math.pi/2,0,0))
+            cutter=bpy.context.object;bpy.context.view_layer.objects.active=body
+            mod=body.modifiers.new('Open wheel well','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter
+            bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
+    ribbon('Curved wraparound windscreen',[(.285,.297,.349),(.19,.275,.448),(.08,.246,.535),(-.015,.216,.581)],glass)
+    ribbon('Domed coupe roof',[(-.015,.216,.583),(-.10,.224,.607),(-.27,.220,.604),(-.40,.199,.572)],paint)
+    ribbon('Rear glass',[(-.40,.199,.571),(-.49,.219,.478),(-.59,.255,.364)],glass)
+    for side in (-1,1):
+        surface('Swept side window',[(.28,side*.297,.348),(-.015,side*.216,.581),(-.10,side*.224,.607),(-.27,side*.220,.604),(-.40,side*.199,.571),
+                                    (-.55,side*.279,.359),(-.12,side*.315,.348)],[(0,1,2,3,4,5,6)],glass)
+        strut('Swept A pillar',(.285,side*.305,.348),(-.015,side*.224,.585),.022,paint)
+        surface('Integrated rear buttress',[(-.39,side*.211,.575),(-.74,side*.339,.364),(-.78,side*.29,.357),(-.46,side*.203,.457)],[(0,1,2,3)],paint)
+        strut('Mirror stem',(.13,side*.285,.439),(.13,side*.375,.455),.014,rubber)
+        cube('Coupe mirror',(.13,side*.40,.455),(.11,.056,.04),paint,.012)
+        surface('Sculpted side intake',[(-.43,side*.382,.328),(-.19,side*.364,.30),(-.34,side*.379,.225),(-.49,side*.40,.261)],[(0,1,2,3)],rubber)
+        cube('Flush door handle',(-.13,side*.36,.31),(.07,.009,.014),chrome,.003)
+        led_points=[]
+        for x,y in ((.73,.39),(.80,.35),(.86,.30)):
+            hit,point,normal,index=body.ray_cast(Vector((x,side*y,2)),Vector((0,0,-1)))
+            if not hit:raise RuntimeError('Headlamp must follow the intact fender surface')
+            led_points.append((x,side*y,point.z+.010))
+        for a,b in zip(led_points,led_points[1:]):
+            dx,dy=b[0]-a[0],b[1]-a[1];span=math.hypot(dx,dy);nx,ny=-dy/span,dx/span
+            for label,width,offset,material in [('Inset lamp surround',.026,-.003,rubber),('Sculpted LED signature',.013,.002,lamp)]:
+                vertices=[(a[0]-nx*width/2,a[1]-ny*width/2,a[2]+offset),(b[0]-nx*width/2,b[1]-ny*width/2,b[2]+offset),
+                          (b[0]+nx*width/2,b[1]+ny*width/2,b[2]+offset),(a[0]+nx*width/2,a[1]+ny*width/2,a[2]+offset)]
+                surface(label,vertices,[(0,1,2,3)],material)
+        strut('Lower side blade',(-.42,side*.378,.13),(.40,side*.389,.13),.025,rubber)
+    ribbon('Engine cover',[(-.61,.235,.36),(-.74,.244,.355),(-.85,.237,.343)],glass)
+    for x in (-.66,-.715,-.77,-.825):cube('Engine cooling louvre',(x,0,.366),(.012,.38,.012),rubber,.002)
+    cube('Integrated rear lip',(-.918,0,.323),(.047,.64,.022),paint,.009)
+    cube('Front air intake',(.951,0,.164),(.024,.42,.046),rubber,.01)
+    cube('Rear diffuser',(-.955,0,.147),(.022,.51,.051),rubber,.008)
+    for y in (-.13,0,.13):cube('Diffuser fin',(-.949,y,.126),(.07,.017,.035),rubber,.003)
+
 def car(kind, length, colour):
     objects.clear()
     paint = mat('Paint '+kind, colour, .3, .04)
     paint.node_tree.nodes.get('Principled BSDF').inputs['Coat Weight'].default_value=.55
     paint.node_tree.nodes.get('Principled BSDF').inputs['Coat Roughness'].default_value=.2
     tall = kind in ('schoolbus', 'coach', 'camper', 'delivery')
-    coachwork(kind,length,paint)
+    if kind!='racer':coachwork(kind,length,paint)
     if kind == 'racer':
-        shaped_cabin('Swept coupe glass', (-.13,0,.465), (.86,.65,.30), glass,.62)
-        roof=cube('Coupe roof', (-.24,0,.616), (.42,.55,.045), paint, .025)
-        for vertex in roof.data.vertices:
-            if vertex.co.x>0:vertex.co.y*=.88
-        roof.data.update()
-        cube('Roof racing accent',(-.24,0,.642),(.35,.092,.006),cream,.002)
-        cube('Rear ducktail', (-.78,0,.377), (.105,.75,.045), paint, .018)
-        for y in (-.29,.29):cube('Rear spoiler support',(-.78,y,.341),(.04,.033,.042),rubber,.006)
-        # Follow the sculpted bonnet instead of laying flat bars above it.
-        for x,z,angle,size in [(.37,.335,.10,.33),(.60,.310,.12,.25),(.825,.265,.306,.18)]:
-            stripe=cube('Bonnet centre stripe',(x,0,z),(size,.095,.006),cream,.001)
-            stripe.rotation_euler.y=angle
-        for y in (-.31,.31):
-            lamp_housing=cube('Recessed headlamp pod',(.77,y,.284),(.19,.13,.027),rubber,.012)
-            lamp_housing.rotation_euler.y=.20
-            led=cube('LED blade',(.78,y,.302),(.11,.073,.010),lamp,.004);led.rotation_euler.y=.20
+        midengine_coupe(paint)
     elif kind == 'pickup':
         shaped_cabin('Sloped pickup glass', (.39,0,.49), (.62,.69,.38), glass)
         cube('Cab roof', (.3,0,.7), (.46,.73,.055), paint)
@@ -250,22 +318,17 @@ def car(kind, length, colour):
     mirror_x = .82 if tall else .13 if kind=='racer' else .28
     for y in (-.41,.41):
         cube('Lower rocker trim',(0,y,.145),(length-.46,.032,.05),rubber,.01)
-    if kind not in ('delivery','camper'):
+    if kind not in ('delivery','camper','racer'):
         front_x=.18 if kind=='racer' else length/2-(.35 if tall else .58)
         for y in (-.16,.16):cube('Windshield wiper',(front_x,y,.532 if kind=='racer' else .77 if tall else .57),(.025,.19,.015),rubber,.003)
     for y in (-.47,.47):
-        cube('Side mirror', (mirror_x,y,.59 if tall else .49), (.16,.085,.075), chrome, .018)
-        cube('Door handle', (.15,y*.89,.43), (.12,.023,.025), chrome, .008)
+        if kind!='racer':cube('Side mirror', (mirror_x,y,.59 if tall else .49), (.16,.085,.075), chrome, .018)
+        if kind!='racer':cube('Door handle', (.15,y*.89,.43), (.12,.023,.025), chrome, .008)
     if not tall:
-        for y in (-.417,.417):
-            cube('Door seam', (-.36,y,.33), (.015,.015,.16), rubber, .003)
+        if kind!='racer':
+            for y in (-.417,.417):cube('Door seam', (-.36,y,.33), (.015,.015,.16), rubber, .003)
         if kind == 'racer':
-            for y in (-.20,.20):
-                vent=cube('Flush bonnet vent', (.47,y,.329), (.15,.06,.009), rubber, .004);vent.rotation_euler.y=.10
-                for x in (.43,.48,.53):
-                    fin=cube('Bonnet vent blade',(x,y,.337-(x-.47)*.10),(.011,.044,.004),chrome,0)
             cube('Front splitter', (.90,0,.115), (.13,.71,.025), rubber, .008)
-            for y in (-.4,.4):cube('Sculpted side skirt',(-.07,y,.17),(.93,.035,.045),paint,.012)
         elif kind == 'jeep':
             for y in (-.18,-.09,0,.09,.18): cube('Jeep grille', (.927,y,.32), (.02,.036,.13), rubber, .005)
         elif kind == 'pickup':
@@ -295,16 +358,14 @@ def car(kind, length, colour):
     cube('Rear plate', (-length/2+.055,0,.24), (.026,.24,.09), white, .007)
     # Body details remain in existing paint/trim batches.
     for x in (-length/2+.33,length/2-.34):
-        for y in (-.422,.422):wheel_arch(x,y,paint if kind=='racer' else rubber)
-    for y in (-.325,.325):
+        if kind!='racer':
+            for y in (-.422,.422):wheel_arch(x,y,rubber)
+    for y in (() if kind=='racer' else (-.325,.325)):
         cube('Window sill',(-.16 if not tall else .25,y,.43 if not tall else .55),(.68 if not tall else .45,.024,.025),chrome,.007)
         if not tall:
             pillar=cube('Cabin pillar',(-.22,y,.52),(.042,.035,.29),paint,.008)
             pillar.rotation_euler.y=-.1 if kind=='racer' else .05
-    if kind=='racer':
-        cube('Front intake',(.925,0,.22),(.018,.32,.075),rubber,.012)
-        for y in (-.10,0,.10):cube('Intake fin',(.938,y,.22),(.009,.014,.059),chrome,.002)
-    elif kind=='compact':
+    if kind=='compact':
         cube('Panoramic roof',(-.24,0,.686),(.32,.45,.012),glass,.02)
     elif kind=='taxi':
         cube('Taxi sign face',(-.12,-.139,.76),(.24,.012,.048),rubber,.004)
