@@ -29,7 +29,7 @@ export default function Board(props) {
     }).catch(()=>{if(!cancelled)setFallback(true);});
     return ()=>{cancelled=true;instance?.dispose();engine.current=null;};
   },[]);
-  useEffect(()=>{engine.current?.sync();},[props.cars,props.won]);
+  useEffect(()=>{engine.current?.sync();},[props.cars,props.won,props.hint,props.editorStart]);
   useEffect(()=>{
     engine.current?.settings(settings);
     try{localStorage.setItem('traffic-jam-scene',JSON.stringify(settings));}catch{/* Session-only settings still work. */}

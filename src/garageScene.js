@@ -17,7 +17,7 @@ function assets() {
 
 export function createGarageScene(canvas, getProps, callbacks) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.autoUpdate = false;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -32,13 +32,18 @@ export function createGarageScene(canvas, getProps, callbacks) {
   const groups = new Map();
   const ownedMaterials = new Set(), ownedGeometries = new Set();
   let library, alive = true, ready = false, drag, selected, escapeStart, lastTime = performance.now(), frame;
+  let dirty = true, inView = true, settlingUntil = 0, lastShadow = 0;
+  const stats = { frames: 0, shadowUpdates: 0 };
+  const scratchPosition = new THREE.Vector3(), scratchDirection = new THREE.Vector3();
   const settings = { pitch: 65, yaw: 0, light: -40, intensity: 3, shadows: true };
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const motionChanged=()=>{dirty=true;settlingUntil=performance.now()+450;};
+  reduced.addEventListener('change',motionChanged);
   const ambient = new THREE.HemisphereLight(0xfff7e7, 0x738a89, 2.0);
   scene.add(ambient);
   const sun = new THREE.DirectionalLight(0xffefce, settings.intensity);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.mapSize.set(1024, 1024);
   sun.shadow.camera.left = -8; sun.shadow.camera.right = 8;
   sun.shadow.camera.top = 8; sun.shadow.camera.bottom = -8;
   sun.shadow.normalBias = .025;
@@ -50,7 +55,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
   const floorGeometry = new THREE.PlaneGeometry(200, 200); ownedGeometries.add(floorGeometry);
   const floor = new THREE.Mesh(floorGeometry, floorMaterial);
   floor.rotation.x = -Math.PI / 2; floor.position.y = -.48; floor.receiveShadow = true; scene.add(floor);
-  const ringMaterial = new THREE.MeshBasicMaterial({ color: '#f5d391', transparent: true, opacity: .75, depthWrite: false });
+  const ringMaterial = new THREE.MeshBasicMaterial({ color: '#f5d391', transparent: true, opacity: .13, depthWrite: false });
   ownedMaterials.add(ringMaterial);
   const ringGeometry = new THREE.PlaneGeometry(1, 1); ownedGeometries.add(ringGeometry);
   const marker = new THREE.Mesh(ringGeometry, ringMaterial);
@@ -96,6 +101,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     sun.position.set(aim.x+Math.sin(angle)*8, 10, aim.z+Math.cos(angle)*8);
     sun.intensity=settings.intensity; sun.castShadow=settings.shadows;
     renderer.shadowMap.needsUpdate=true;
+    dirty=true;
   }
   function resize() {
     const { width, height }=canvas.getBoundingClientRect();
@@ -105,6 +111,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
     camera.updateProjectionMatrix(); updateCamera();
   }
   const observer=new ResizeObserver(resize); observer.observe(canvas);
+  const visibilityObserver=new IntersectionObserver(([entry])=>{inView=entry.isIntersecting;dirty=true;});
+  visibilityObserver.observe(canvas);
   function cast(event) {
     const rect=canvas.getBoundingClientRect();
     pointer.set((event.clientX-rect.left)/rect.width*2-1, -(event.clientY-rect.top)/rect.height*2+1);
@@ -116,7 +124,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     return hit?.object.userData.carId;
   }
   function planePoint(event) { cast(event); return raycaster.ray.intersectPlane(ground,new THREE.Vector3()); }
-  function blocked(id) { const item=groups.get(id); if(item)item.blockedUntil=performance.now()+300; callbacks.select(id); }
+  function blocked(id) { const item=groups.get(id); if(item)item.blockedUntil=performance.now()+300; settlingUntil=performance.now()+400;dirty=true;callbacks.select(id); }
   function down(event) {
     const props=getProps();
     if (!ready || props.disabled || props.won || drag || (event.pointerType==='mouse' && event.button!==0)) return;
@@ -132,20 +140,23 @@ export function createGarageScene(canvas, getProps, callbacks) {
     const car=props.cars.find(c=>c.id===id), legal=legalMovesForCar(props.cars,id);
     if(!legal.length){blocked(id);return;}
     const start=planePoint(event); if(!start)return;
-    drag={car,legal,start,pointerId:event.pointerId,delta:0,lastAt:performance.now(),speed:0,lastPuff:0};
+    const deltas=legal.map(m=>m.delta);
+    drag={car,legal,start,min:Math.min(0,...deltas),max:Math.max(0,...deltas),pointerId:event.pointerId,delta:0,lastAt:performance.now(),speed:0,lastPuff:0};
+    dirty=true;
     canvas.setPointerCapture(event.pointerId); canvas.dataset.dragging=id;
   }
   function move(event) {
     if(!drag||event.pointerId!==drag.pointerId){if(ready)canvas.style.cursor=carAt(event)?'grab':'default';return;}
     const point=planePoint(event); if(!point)return;
-    const deltas=drag.legal.map(m=>m.delta),raw=drag.car.dir==='H'?point.x-drag.start.x:point.z-drag.start.z;
-    const delta=clamp(raw,Math.min(0,...deltas),Math.max(0,...deltas));
+    const raw=drag.car.dir==='H'?point.x-drag.start.x:point.z-drag.start.z;
+    const delta=clamp(raw,drag.min,drag.max);
     const now=performance.now(); drag.speed=(delta-drag.delta)/Math.max(.008,(now-drag.lastAt)/1000);
     drag.lastAt=now; drag.delta=delta; canvas.style.cursor='grabbing';
   }
   function finish(event,cancel=false) {
     if(!drag||event.pointerId!==drag.pointerId)return;
     const active=drag; drag=null; delete canvas.dataset.dragging;
+    dirty=true;settlingUntil=performance.now()+450;
     if(canvas.hasPointerCapture(event.pointerId))canvas.releasePointerCapture(event.pointerId);
     const move=active.legal.find(m=>m.delta===Math.round(active.delta));
     if(!cancel&&move)getProps().onMove(move);
@@ -183,6 +194,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       escapeStart=null;
     }
     renderer.shadowMap.needsUpdate=true;
+    dirty=true;settlingUntil=performance.now()+450;
   }
   assets().then(models=>{
     if(!alive)return; library=models;
@@ -191,8 +203,14 @@ export function createGarageScene(canvas, getProps, callbacks) {
   }).catch(error=>{if(alive)callbacks.error(error);});
   function animate(now) {
     if(!alive)return;frame=requestAnimationFrame(animate);
+    if(document.hidden||!inView){lastTime=now;return;}
+    const active=!!drag||now<settlingUntil||(escapeStart!=null&&now-escapeStart<1200);
+    // Cap high-refresh displays too; retain ambient life without rendering at 120/144 Hz.
+    if(!dirty&&(reduced.matches&&!active||now-lastTime<(active?1000/60:1000/30)-.5))return;
     const dt=Math.min(.04,(now-lastTime)/1000);lastTime=now;
+    dirty=false;
     const props=getProps();
+    let shadowChanged=false;
     if(props.won&&escapeStart==null)escapeStart=now;
     for(const item of groups.values()) {
       const {car,group}=item,isDrag=drag?.car.id===car.id;
@@ -202,42 +220,50 @@ export function createGarageScene(canvas, getProps, callbacks) {
         const t=reduced.matches?1:clamp((now-escapeStart)/850,0,1);x+=4*t*t;group.visible=t<1;
       }else group.visible=true;
       const blend=isDrag||reduced.matches?1:1-Math.exp(-18*dt);
-      if(isDrag||Math.abs(group.position.x-x)>.001||Math.abs(group.position.z-z)>.001)renderer.shadowMap.needsUpdate=true;
+      const height=isDrag ? .09 : .055;
+      if(Math.abs(group.position.x-x)>.001||Math.abs(group.position.z-z)>.001||group.position.y!==height)shadowChanged=true;
       group.position.x=THREE.MathUtils.lerp(group.position.x,x,blend);group.position.z=THREE.MathUtils.lerp(group.position.z,z,blend);
-      group.position.y=isDrag ? .09 : .055;
+      group.position.y=height;
       item.lamps.forEach(material=>{material.emissiveIntensity=(isDrag||props.won) ? .8 : reduced.matches ? .2 : .15+(Math.sin(now*.001+item.index)*.5+.5)*.25;});
       if(item.blockedUntil>now&&!reduced.matches)group.position.x+=Math.sin(now*.08)*.018;
       if(!props.editor&&!props.won&&!reduced.matches) {
         const tick=Math.floor(now/1000+item.index*1.47);
-        if(tick!==item.lastTick){item.lastTick=tick;if(tick%4===0)puff(group.localToWorld(new THREE.Vector3(-car.len/2,.19,.2)),new THREE.Vector3(car.dir==='H'?-1:0,0,car.dir==='V'?-1:0));}
+        if(tick!==item.lastTick){item.lastTick=tick;if(tick%4===0)puff(group.localToWorld(scratchPosition.set(-car.len/2,.19,.2)),scratchDirection.set(car.dir==='H'?-1:0,0,car.dir==='V'?-1:0));}
       }
       if(isDrag&&Math.abs(drag.speed)>1&&now-drag.lastAt<140&&now-drag.lastPuff>65) {
         drag.lastPuff=now;const sign=Math.sign(drag.speed);
-        puff(group.position.clone().add(new THREE.Vector3(car.dir==='H'?-sign*.8:0,.14,car.dir==='V'?-sign*.8:0)),new THREE.Vector3(car.dir==='H'?-sign:0,0,car.dir==='V'?-sign:0),Math.abs(drag.speed)>7);
+        puff(scratchPosition.copy(group.position).add(scratchDirection.set(car.dir==='H'?-sign*.8:0,.14,car.dir==='V'?-sign*.8:0)),scratchDirection.set(car.dir==='H'?-sign:0,0,car.dir==='V'?-sign:0),Math.abs(drag.speed)>7);
       }
     }
-    const marked=props.cars.find(c=>c.id===(props.hint?.carId??selected));
-    marker.visible=!!marked&&!props.won;
-    if(marked){marker.position.set(marked.col+(marked.dir==='H'?marked.len/2:.5),.05,marked.row+(marked.dir==='V'?marked.len/2:.5));marker.scale.set(marked.dir==='H'?marked.len-.08:.92,marked.dir==='V'?marked.len-.08:.92,1);}
-    if(props.editor&&props.editorStart){marker.visible=true;marker.position.set(props.editorStart.col+.5,.05,props.editorStart.row+.5);marker.scale.set(.92,.92,1);}
+    marker.visible=!!drag&&!props.won;
+    ringMaterial.opacity=.13;
+    if(drag){
+      const {car,min,max}=drag,span=car.len+max-min;
+      marker.position.set(car.col+(car.dir==='H'?(car.len+min+max)/2:.5),.05,car.row+(car.dir==='V'?(car.len+min+max)/2:.5));
+      marker.scale.set(car.dir==='H'?span-.08:.92,car.dir==='V'?span-.08:.92,1);
+    }
+    if(props.editor&&props.editorStart){marker.visible=true;ringMaterial.opacity=.25;marker.position.set(props.editorStart.col+.5,.05,props.editorStart.row+.5);marker.scale.set(.92,.92,1);}
     const hinted=props.cars.find(car=>car.id===props.hint?.carId);
     hintArrow.visible=!!hinted&&!props.won;
     if(hinted){const direction=new THREE.Vector3(hinted.dir==='H'?Math.sign(props.hint.delta):0,0,hinted.dir==='V'?Math.sign(props.hint.delta):0);hintArrow.setDirection(direction);hintArrow.position.set(hinted.col+(hinted.dir==='H'?hinted.len/2:.5),1.4,hinted.row+(hinted.dir==='V'?hinted.len/2:.5));hintArrow.position.addScaledVector(direction,-.55);}
-    const opening=props.won?Math.PI/2:0;if(Math.abs(gate.rotation.x+opening)>.001)renderer.shadowMap.needsUpdate=true;gate.rotation.x=THREE.MathUtils.lerp(gate.rotation.x,-opening,reduced.matches?1:1-Math.exp(-7*dt));
-    particles.forEach(p=>{if(p.life<=0)return;p.life-=dt;p.mesh.visible=p.life>0;p.mesh.position.addScaledVector(p.velocity,dt);p.mesh.material.opacity=Math.max(0,p.life/p.duration)*.38;if(!p.spark)p.mesh.scale.addScalar(dt*.6);});
-    renderer.render(scene,camera);
+    const opening=props.won?Math.PI/2:0;if(Math.abs(gate.rotation.x+opening)>.001)shadowChanged=true;gate.rotation.x=THREE.MathUtils.lerp(gate.rotation.x,-opening,reduced.matches?1:1-Math.exp(-7*dt));
+    particles.forEach(p=>{if(reduced.matches){p.life=0;p.mesh.visible=false;return;}if(p.life<=0)return;p.life-=dt;p.mesh.visible=p.life>0;p.mesh.position.addScaledVector(p.velocity,dt);p.mesh.material.opacity=Math.max(0,p.life/p.duration)*.38;if(!p.spark)p.mesh.scale.addScalar(dt*.6);});
+    if(shadowChanged&&now-lastShadow>=1000/30-.5)renderer.shadowMap.needsUpdate=true;
+    if(renderer.shadowMap.needsUpdate){lastShadow=now;stats.shadowUpdates++;}
+    renderer.render(scene,camera);stats.frames++;
   }
   resize();frame=requestAnimationFrame(animate);
   return {
     sync,
     settings(next){if(drag)finish({pointerId:drag.pointerId},true);Object.assign(settings,next);updateCamera();},
-    select(id){selected=id;callbacks.select(id);canvas.focus({preventScroll:true});},
+    select(id){selected=id;dirty=true;callbacks.select(id);canvas.focus({preventScroll:true});},
     project(x,y,z){const v=new THREE.Vector3(x,y,z).project(camera),r=canvas.getBoundingClientRect();return {x:r.left+(v.x+1)*r.width/2,y:r.top+(1-v.y)*r.height/2};},
     pick(x,y){return carAt({clientX:x,clientY:y});},
-    snapshot(){return {ready,settings:{...settings},cars:[...groups.values()].map(i=>({id:i.car.id,model:i.model,dir:i.car.dir,len:i.car.len,position:i.group.position.toArray()})),calls:renderer.info.render.calls};},
+    snapshot(){return {ready,settings:{...settings},cars:[...groups.values()].map(i=>({id:i.car.id,model:i.model,dir:i.car.dir,len:i.car.len,position:i.group.position.toArray()})),calls:renderer.info.render.calls,performance:{...stats,pixelRatio:renderer.getPixelRatio(),shadowSize:sun.shadow.mapSize.x,inView},guide:{visible:marker.visible,position:marker.position.toArray(),scale:marker.scale.toArray(),opacity:ringMaterial.opacity}};},
     dispose(){
       if(!alive)return;
-      alive=false;cancelAnimationFrame(frame);observer.disconnect();Object.entries(handlers).forEach(([n,h])=>canvas.removeEventListener(n,h));
+      alive=false;cancelAnimationFrame(frame);observer.disconnect();visibilityObserver.disconnect();Object.entries(handlers).forEach(([n,h])=>canvas.removeEventListener(n,h));
+      reduced.removeEventListener('change',motionChanged);
       for(const item of groups.values())item.group.traverse(o=>{if(o.isMesh)o.material.dispose();});
       ownedMaterials.forEach(m=>m.dispose());ownedGeometries.forEach(g=>g.dispose());
       hintArrow.dispose();
