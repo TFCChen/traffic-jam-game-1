@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { GRID, legalMovesForCar } from "./gameEngine.js";
 
 const CELL = 58;
-const FRAME_SIZE = GRID * CELL + 38;
-const SCENE_WIDTH = FRAME_SIZE + 92;
+const SCENE_WIDTH = 560;
+const SCENE_HEIGHT = 478;
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
 // A stable colour-to-model mapping keeps the same vehicle recognisable in every level.
@@ -27,6 +27,9 @@ function vehicleModel(car) {
 
 export default function Board({ cars, onMove, hint, editor, editorStart, onCellClick, onRemove, won, disabled }) {
   const viewport = useRef(null);
+  const planeOrigin = useRef(null);
+  const planeX = useRef(null);
+  const planeY = useRef(null);
   const dragRef = useRef(null);
   const [drag, setDrag] = useState(null);
   const [blocked, setBlocked] = useState(null);
@@ -46,6 +49,19 @@ export default function Board({ cars, onMove, hint, editor, editorStart, onCellC
     blockedTimer.current = setTimeout(() => setBlocked(null), 320);
   }
 
+  // Invert the projected ground plane, rather than its axis-aligned screen bounds.
+  // The orthographic camera keeps this mapping affine at every viewport size.
+  function boardPoint(event) {
+    const origin = planeOrigin.current.getBoundingClientRect();
+    const x = planeX.current.getBoundingClientRect();
+    const y = planeY.current.getBoundingClientRect();
+    const ax = (x.left - origin.left) / (GRID * CELL), ay = (x.top - origin.top) / (GRID * CELL);
+    const bx = (y.left - origin.left) / (GRID * CELL), by = (y.top - origin.top) / (GRID * CELL);
+    const determinant = ax * by - ay * bx;
+    const dx = event.clientX - origin.left, dy = event.clientY - origin.top;
+    return { x: (dx * by - dy * bx) / determinant, y: (dy * ax - dx * ay) / determinant };
+  }
+
   function startDrag(event, car) {
     if (editor || won || disabled || (event.pointerType === "mouse" && event.button !== 0) || dragRef.current) return;
     event.preventDefault();
@@ -53,8 +69,8 @@ export default function Board({ cars, onMove, hint, editor, editorStart, onCellC
     const legal = legalMovesForCar(cars, car.id);
     if (!legal.length) { showBlocked(car.id); return; }
     event.currentTarget.setPointerCapture(event.pointerId);
-    const scale = event.currentTarget.closest(".board").getBoundingClientRect().width / (GRID * CELL);
-    const next = { car, startX: event.clientX, startY: event.clientY, legal, pixels: 0, scale, pointerId: event.pointerId, lastTime: event.timeStamp, speed: 0, direction: 1 };
+    const point = boardPoint(event);
+    const next = { car, startX: point.x, startY: point.y, legal, pixels: 0, pointerId: event.pointerId, lastTime: event.timeStamp, speed: 0, direction: 1 };
     dragRef.current = next;
     setDrag(next);
   }
@@ -62,7 +78,8 @@ export default function Board({ cars, onMove, hint, editor, editorStart, onCellC
   function moveDrag(event) {
     const active = dragRef.current;
     if (!active || active.pointerId !== event.pointerId) return;
-    const raw = (active.car.dir === "H" ? event.clientX - active.startX : event.clientY - active.startY) / active.scale;
+    const point = boardPoint(event);
+    const raw = active.car.dir === "H" ? point.x - active.startX : point.y - active.startY;
     const deltas = active.legal.map(move => move.delta);
     const pixels = clamp(raw, Math.min(0, ...deltas) * CELL, Math.max(0, ...deltas) * CELL);
     const distance = pixels - active.pixels;
@@ -103,17 +120,19 @@ export default function Board({ cars, onMove, hint, editor, editorStart, onCellC
 
   function boardClick(event) {
     if (!editor) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const col = Math.floor((event.clientX - rect.left) / (rect.width / GRID));
-    const row = Math.floor((event.clientY - rect.top) / (rect.height / GRID));
+    const point = boardPoint(event);
+    const col = Math.floor(point.x / CELL);
+    const row = Math.floor(point.y / CELL);
     if (row >= 0 && row < GRID && col >= 0 && col < GRID) onCellClick({ row, col });
   }
 
   const deltas = drag?.legal.map(move => move.delta) ?? [];
   const min = Math.min(0, ...deltas), max = Math.max(0, ...deltas);
   return (
-    <div ref={viewport} className={`board-viewport ${won ? "is-cleared" : ""}`} style={{ height: FRAME_SIZE * boardScale }}>
-      <div className="board-frame" style={{ transform: `scale(${boardScale})` }}>
+    <div ref={viewport} className={`board-viewport ${won ? "is-cleared" : ""}`} style={{ height: SCENE_HEIGHT * boardScale }}>
+      <div className="scene-rig" style={{ transform: `scale(${boardScale})` }}>
+      <div className="board-frame">
+        <span className="platform-front" aria-hidden="true" /><span className="platform-right" aria-hidden="true" />
         <div className="garage-details" aria-hidden="true">
           <span className="fence north" /><span className="fence south" /><span className="fence west" />
           <span className="fence east upper" /><span className="fence east lower" />
@@ -123,6 +142,9 @@ export default function Board({ cars, onMove, hint, editor, editorStart, onCellC
         <div className="exit-road" aria-hidden="true"><span className="road-arrow">››</span><i className="exit-signal" /></div>
         <div className="exit-label">{won ? "暢通" : "出口"} <span>→</span></div>
         <div className="board" style={{ width: GRID * CELL, height: GRID * CELL }} onClick={boardClick} aria-label={editor ? "關卡編輯棋盤" : "停車場棋盤"}>
+          <span ref={planeOrigin} className="plane-probe" aria-hidden="true" style={{ left: 0, top: 0 }} />
+          <span ref={planeX} className="plane-probe" aria-hidden="true" style={{ left: GRID * CELL, top: 0 }} />
+          <span ref={planeY} className="plane-probe" aria-hidden="true" style={{ left: 0, top: GRID * CELL }} />
           {Array.from({ length: GRID * GRID }, (_, index) => <span key={index} className="cell" aria-hidden="true" style={{ left: (index % GRID) * CELL, top: Math.floor(index / GRID) * CELL, width: CELL, height: CELL }}><i>{String(index + 1).padStart(2, "0")}</i></span>)}
           <span className="drain drain-top" aria-hidden="true" /><span className="drain drain-bottom" aria-hidden="true" />
           {drag && <div className={`drag-lane ${drag.car.dir}`} style={{ left: (drag.car.col + (drag.car.dir === "H" ? min : 0)) * CELL, top: (drag.car.row + (drag.car.dir === "V" ? min : 0)) * CELL, width: (drag.car.dir === "H" ? drag.car.len + max - min : 1) * CELL, height: (drag.car.dir === "V" ? drag.car.len + max - min : 1) * CELL, "--car-color": drag.car.color }} />}
@@ -143,6 +165,7 @@ export default function Board({ cars, onMove, hint, editor, editorStart, onCellC
                 style={{ left: car.col * CELL + 4 + dx, top: car.row * CELL + 4 + dy, width: (car.dir === "H" ? car.len : 1) * CELL - 8, height: (car.dir === "V" ? car.len : 1) * CELL - 8, "--car-color": car.color, "--car-length": `${car.len * CELL - 8}px`, "--idle-delay": `${-index * 1.73}s` }}
                 onPointerDown={event => startDrag(event, car)} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={event => endDrag(event, true)} onLostPointerCapture={event => endDrag(event, true)} onKeyDown={event => keyboardMove(event, car)}>
                 <span className="vehicle-skin" aria-hidden="true">
+                  <span className="body-wall near" /><span className="body-wall far" /><span className="body-wall nose" /><span className="body-wall tail" />
                   <span className="wheels" />
                   <span className="car-roof"><i className="window front" /><i className="window rear" /><i className="roof-stripe" /></span>
                   <span className="model-detail" /><span className="bumper" />
@@ -158,6 +181,7 @@ export default function Board({ cars, onMove, hint, editor, editorStart, onCellC
             );
           })}
         </div>
+      </div>
       </div>
     </div>
   );

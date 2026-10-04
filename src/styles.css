@@ -239,7 +239,56 @@ button.selected, .tabs button.active { color: #246656; border-color: #9abfae; ba
 .drive-effects b { display: none; position: absolute; right: 0; top: 0; width: 7px; height: 3px; border-radius: 2px; background: #ffe7a0; box-shadow: 0 0 6px #ffb35c; animation: tire-spark 340ms ease-out infinite; }
 .fast .drive-effects b { display: block; }.drive-effects b:nth-of-type(2) { top: 38px; animation-delay: -100ms; --spark-y: 14px; }.drive-effects b:nth-of-type(3) { animation-delay: -200ms; --spark-y: -18px; }.drive-effects b:nth-of-type(4) { top: 38px; animation-delay: -280ms; --spark-y: 8px; }
 .dragging .light-beams, .escaping .light-beams { opacity: 1; width: 32px; animation: none; }
-@keyframes engine-idle { 0%, 70%, 100% { translate: 0 0; } 73%, 79% { translate: 0 .35px; } 76%, 82% { translate: 0 -.35px; } }
+/* Orthographic 2.5D camera: 70 degrees above the ground, with a small yaw. */
+.board-viewport { width: min(560px, 100%); border-radius: 0; overflow: hidden; }
+.scene-rig { position: absolute; top: 0; left: 0; width: 560px; height: 478px; transform-origin: 0 0; transform-style: preserve-3d; }
+.board-frame { position: absolute; left: 12px; top: 86px; transform: rotateX(20deg) rotateZ(-8deg); transform-origin: 0 0; transform-style: preserve-3d; box-shadow: inset 0 2px 1px #ffffffe0, 12px 26px 26px #33493f35; }
+.board { transform-style: preserve-3d; isolation: auto; }
+.plane-probe { position: absolute; width: 0; height: 0; pointer-events: none; }
+.platform-front, .platform-right { position: absolute; pointer-events: none; background: linear-gradient(#90a79b, #637e71); border: 1px solid #556f61; }
+.platform-front { top: 100%; left: 0; width: 100%; height: 24px; transform-origin: top; transform: rotateX(-90deg); border-radius: 0 0 5px 5px; }
+.platform-right { left: 100%; top: 0; height: 100%; width: 24px; transform-origin: left; transform: rotateY(90deg); background: linear-gradient(90deg, #849d90, #536e61); }
+.garage-details { transform-style: preserve-3d; }
+.fence { transform: translateZ(13px); box-shadow: 0 2px 2px #273b3b30; transform-style: preserve-3d; }
+.fence::after { content: ""; position: absolute; top: 100%; left: -1px; width: calc(100% + 2px); height: 13px; transform-origin: top; transform: rotateX(-90deg); background: repeating-linear-gradient(90deg, #6a8776 0 5px, #bacbbab0 5px 35px, #6a8776 35px 40px); border-bottom: 2px solid #567260; }
+.fence.west::after, .fence.east::after { top: -1px; left: 100%; width: 13px; height: calc(100% + 2px); transform-origin: left; transform: rotateY(90deg); background: repeating-linear-gradient(0deg, #6a8776 0 5px, #bacbbab0 5px 35px, #6a8776 35px 40px); border-bottom: 0; border-right: 2px solid #567260; }
+.gate-bollard { transform: translateZ(10px); }.garage-plate { transform: translateZ(14px); }
+.exit-label { transform: translateZ(18px); }.exit-signal { transform: translateZ(10px); }
+.vehicle { transform-style: preserve-3d; --body-height: 18px; filter: none; }
+.vehicle.bus { --body-height: 24px; }.vehicle.model-racer { --body-height: 14px; }
+.vehicle:hover, .vehicle.dragging { filter: none; }
+.vehicle::before { content: ""; position: absolute; inset: 3px -1px -3px 1px; border-radius: 10px; background: #233d3a55; box-shadow: 3px 5px 7px #1d343d30; transform: translateZ(.5px); pointer-events: none; }
+.vehicle-skin { transform: translate(-50%, -50%) translateZ(var(--body-height)); transform-style: preserve-3d; box-shadow: inset 0 3px 1px #ffffff85, inset 0 -3px 0 #00000018, 5px 10px 10px #1d373f30; }
+.vehicle.V .vehicle-skin { transform: translate(-50%, -50%) rotateZ(90deg) translateZ(var(--body-height)); }
+.vehicle.dragging .vehicle-skin { transform: translate(-50%, -50%) translateZ(calc(var(--body-height) + 4px)); }
+.vehicle.V.dragging .vehicle-skin { transform: translate(-50%, -50%) rotateZ(90deg) translateZ(calc(var(--body-height) + 4px)); }
+.body-wall { position: absolute; border: 1px solid #243d3f30; background: linear-gradient(#ffffff12, #16343c40), var(--car-color); }
+.body-wall.near, .body-wall.far { width: calc(100% - 8px); left: 4px; height: var(--body-height); transform-origin: top; transform: rotateX(-90deg); border-radius: 0 0 4px 4px; }
+.body-wall.near { top: calc(100% - 1px); }.body-wall.far { top: 1px; }
+.body-wall.nose, .body-wall.tail { height: calc(100% - 8px); top: 4px; width: var(--body-height); transform-origin: left; transform: rotateY(90deg); border-radius: 0 4px 4px 0; }
+.body-wall.nose { left: calc(100% - 1px); }.body-wall.tail { left: 1px; }
+.body-wall.near::after, .body-wall.far::after { content: ""; position: absolute; bottom: 3px; left: 5px; right: 5px; height: 2px; background: #e1ead85a; box-shadow: 0 2px 0 #24423a45; }
+.body-wall.near::before, .body-wall.far::before { content: ""; position: absolute; bottom: -2px; left: 0; width: 100%; height: 14px; background: radial-gradient(circle at 15px 7px, #a4b3a0 0 2px, #394b45 2px 4px, #1f3430 4px 7px, transparent 7px), radial-gradient(circle at calc(100% - 15px) 7px, #a4b3a0 0 2px, #394b45 2px 4px, #1f3430 4px 7px, transparent 7px); }
+.bus .body-wall.near, .bus .body-wall.far { background: repeating-linear-gradient(90deg, transparent 0 6px, #25475499 6px 19px, transparent 19px 25px) 0 3px / 100% 10px no-repeat, linear-gradient(#ffffff12, #16343c40), var(--car-color); }
+.vehicle .vehicle-skin .car-roof { translate: 0 0 7px; transform-style: preserve-3d; box-shadow: 3px 5px 0 #27433d55, 5px 7px 5px #1e38382a; }
+.car-roof::after { content: ""; position: absolute; top: 100%; left: 3px; right: 3px; height: 7px; transform-origin: top; transform: rotateX(-90deg); background: linear-gradient(#354d4b40, #213b3c65), var(--car-color); border-radius: 0 0 2px 2px; }
+.model-camper .car-roof::after, .model-delivery .car-roof::after { background: #b6c4ba; }
+.vehicle .vehicle-skin .wheels { display: none; }
+.vehicle .vehicle-skin .wheels::before, .vehicle .vehicle-skin .wheels::after { height: 9px; background: linear-gradient(#738479 0 2px, #253c3a 2px 7px, #596c60 7px); border: 1px solid #243f38; }
+.target-arrow, .hint-arrow { transform: translateZ(32px); }
+.vehicle .remove { transform: translateZ(40px); }
+.vehicle .remove:hover { transform: translateZ(40px) translateY(-1px); }
+.vehicle .remove:active { transform: translateZ(40px) translateY(2px) scale(.97); }
+.hinted .hint-arrow { animation: raised-hint 700ms ease-in-out infinite; }
+.vehicle.hinted { animation: raised-highlight 950ms ease-in-out infinite; }
+.drive-effects, .idle-exhaust { transform: translateZ(calc(-1 * var(--body-height) + 3px)); }
+.reverse .drive-effects { transform: rotateZ(180deg) translateZ(calc(-1 * var(--body-height) + 3px)); }
+.vehicle.escaping { animation: raised-escape 850ms cubic-bezier(.45,0,.75,.5) forwards; }
+.editor-start-marker { transform: translateZ(1px); }
+@keyframes raised-highlight { 50% { outline: 2px solid #ffeb9c; outline-offset: 3px; } }
+@keyframes raised-hint { 50% { transform: translateZ(32px) scale(1.16); } }
+@keyframes raised-escape { 0% { transform: translateX(0); } 20% { transform: translateX(8px); } 100% { transform: translateX(200px); } }
+@keyframes engine-idle { 0%, 70%, 100% { translate: 0 0 7px; } 73%, 79% { translate: 0 .35px 7px; } 76%, 82% { translate: 0 -.35px 7px; } }
 @keyframes idle-smoke { 0%, 55% { opacity: 0; transform: translate(0, 0) scale(.4); } 60% { opacity: .28; } 85%, 100% { opacity: 0; transform: translate(-20px, -7px) scale(1.6); } }
 @keyframes headlight-breathe { 0%, 35%, 100% { opacity: .2; } 48%, 68% { opacity: .9; } }
 @keyframes gate-light { 50% { box-shadow: 0 0 0 3px #d2dccc, 0 0 8px #ffd27680; } }
