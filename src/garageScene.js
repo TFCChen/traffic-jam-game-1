@@ -5,6 +5,8 @@ import { legalMovesForCar } from './gameEngine.js';
 import { vehicleModel } from './vehicleModels.js';
 import { asphaltTexture, detailTexture, prepareWheels, rollingMaterial } from './garageMaterials.js';
 import { SCENE_THEMES } from './sceneThemes.js';
+import { QUALITY } from './gamePreferences.js';
+import { quadDistance,snapDragDelta } from './pointerHelpers.js';
 
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 const modelNames = ['garage', 'racer', 'jeep', 'pickup', 'compact', 'taxi', 'schoolbus', 'coach', 'camper', 'delivery'];
@@ -44,7 +46,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
   const sceneryLamps=[];
   const stats = { frames: 0, shadowUpdates: 0 };
   const scratchPosition = new THREE.Vector3(), scratchDirection = new THREE.Vector3();
-  const settings = { pitch: 65, yaw: 0, light: -40, intensity: 3, shadows: true,theme:'day' };
+  const settings = { pitch: 65, yaw: 0, light: -40, intensity: 3, shadows: true,theme:'day',quality:'standard' };
+  let quality=QUALITY.standard;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const motionChanged=()=>{dirty=true;settlingUntil=performance.now()+450;};
   reduced.addEventListener('change',motionChanged);
@@ -130,7 +133,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     const angle=THREE.MathUtils.degToRad(settings.light);
     sun.position.set(aim.x+Math.sin(angle)*8, 10, aim.z+Math.cos(angle)*8);
     const theme=SCENE_THEMES.find(t=>t.id===settings.theme)??SCENE_THEMES[0];
-    sun.intensity=settings.intensity*theme.key;sun.color.set(theme.sun);sun.castShadow=settings.shadows;
+    sun.intensity=settings.intensity*theme.key;sun.color.set(theme.sun);sun.castShadow=settings.shadows&&quality.decor;
     ambient.color.set(theme.sky);ambient.groundColor.set(theme.ground);ambient.intensity=theme.ambient;
     scene.environmentIntensity=theme.environment;floorMaterial.color.set(theme.floor);
     sceneryLamps.forEach(material=>{material.emissive.set(settings.theme==='neon'?'#9accff':'#ffc882');material.emissiveIntensity=settings.theme==='neon'?2.2:settings.theme==='sunset'?.6:.1;});
@@ -157,12 +160,26 @@ export function createGarageScene(canvas, getProps, callbacks) {
   function carAt(event) {
     cast(event);
     const hit=raycaster.intersectObjects([...groups.values()].map(item=>item.group),true)[0];
-    return hit?.object.userData.carId;
+    if(hit)return hit.object.userData.carId;
+    if(event.pointerType!=='touch'||getProps().editor)return;
+    const rect=canvas.getBoundingClientRect(),point={x:event.clientX,y:event.clientY};
+    let nearest,best=12;
+    for(const item of groups.values()){
+      if(!item.group.visible)continue;
+      const quad=[[-1,-1],[1,-1],[1,1],[-1,1]].map(([x,z])=>{
+        const v=new THREE.Vector3(x*(item.car.len/2-.08),.4,z*.4);item.group.localToWorld(v);v.project(camera);
+        return {x:rect.left+(v.x+1)*rect.width/2,y:rect.top+(1-v.y)*rect.height/2};
+      });
+      const distance=quadDistance(point,quad);
+      if(distance<best){best=distance;nearest=item.car.id;}
+    }
+    return nearest;
   }
   function planePoint(event) { cast(event); return raycaster.ray.intersectPlane(ground,new THREE.Vector3()); }
   function blocked(id) { const item=groups.get(id); if(item)item.blockedUntil=performance.now()+300; settlingUntil=performance.now()+400;dirty=true;callbacks.select(id); }
   function down(event) {
     const props=getProps();
+    if(drag&&event.pointerType==='touch'&&drag.pointerId!==event.pointerId){finish({pointerId:drag.pointerId},true);return;}
     if (!ready || props.disabled || props.won || drag || (event.pointerType==='mouse' && event.button!==0)) return;
     const id=carAt(event);
     if(props.editor) {
@@ -172,6 +189,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       return;
     }
     if(!id)return;
+    callbacks.feedback?.(`${vehicleModel(props.cars.find(c=>c.id===id)).name} · ${props.cars.find(c=>c.id===id).dir==='H'?'左右':'上下'}移動`);
     event.preventDefault(); canvas.focus({preventScroll:true}); selected=id; callbacks.select(id);
     const car=props.cars.find(c=>c.id===id), legal=legalMovesForCar(props.cars,id);
     if(!legal.length){blocked(id);return;}
@@ -186,6 +204,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     const point=planePoint(event); if(!point)return;
     const raw=drag.car.dir==='H'?point.x-drag.start.x:point.z-drag.start.z;
     const delta=clamp(raw,drag.min,drag.max);
+    if(Math.abs(raw-delta)>.1&&(!drag.lastBlock||performance.now()-drag.lastBlock>350)){drag.lastBlock=performance.now();groups.get(drag.car.id).blockedUntil=performance.now()+180;callbacks.feedback?.('已到邊界，試著移開擋路的車');}
     const now=performance.now(); drag.speed=(delta-drag.delta)/Math.max(.008,(now-drag.lastAt)/1000);
     drag.lastAt=now; drag.delta=delta; canvas.style.cursor='grabbing';
   }
@@ -195,7 +214,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
     const item=groups.get(active.car.id);if(item&&Math.abs(active.delta)>.02)item.brakeUntil=performance.now()+280;
     dirty=true;settlingUntil=performance.now()+450;
     if(canvas.hasPointerCapture(event.pointerId))canvas.releasePointerCapture(event.pointerId);
-    const move=active.legal.find(m=>m.delta===Math.round(active.delta));
+    const move=active.legal.find(m=>m.delta===snapDragDelta(active.delta));
+    callbacks.feedback?.(cancel?'已取消移動':move?'已停入車位':'位置不變');
     if(!cancel&&move)getProps().onMove(move);
   }
   function key(event) {
@@ -263,7 +283,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     if(library&&!ready){lastTime=now;return;}
     const active=!!drag||now<settlingUntil||(escapeStart!=null&&now-escapeStart<1900);
     // Cap high-refresh displays too; retain ambient life without rendering at 120/144 Hz.
-    if(!dirty&&(reduced.matches&&!active||now-lastTime<(active?1000/60:1000/30)-.5))return;
+    if(!dirty&&((reduced.matches||!quality.decor)&&!active||now-lastTime<1000/(active?quality.activeFPS:quality.idleFPS)-.5))return;
     const dt=Math.min(.04,(now-lastTime)/1000);lastTime=now;
     dirty=false;
     const props=getProps();
@@ -294,11 +314,11 @@ export function createGarageScene(canvas, getProps, callbacks) {
       const reversing=velocity<-.12||(isDrag&&item.gear===-1),braking=now<item.brakeUntil;
       item.lamps.forEach(material=>{material.emissiveIntensity=settings.theme==='neon'?1.4:(isDrag||props.won)?.8:reduced.matches?.2:.15+(Math.sin(now*.001+item.index)*.5+.5)*.25;});
       item.tailLamps.forEach(material=>{material.color.set(reversing?'#e9f1e5':'#df7460');material.emissive.set(reversing?'#e7f0df':'#ef3426');material.emissiveIntensity=reversing?.9:braking?1.3:settings.theme==='neon'?.2:.03;});
-      if(!props.editor&&!props.won&&!reduced.matches) {
+      if(!props.editor&&!props.won&&!reduced.matches&&quality.decor) {
         const tick=Math.floor(now/1000+item.index*1.47);
         if(tick!==item.lastTick){item.lastTick=tick;if(tick%4===0)puff(group.localToWorld(scratchPosition.set(-car.len/2,.19,.2)),scratchDirection.set(car.dir==='H'?-1:0,0,car.dir==='V'?-1:0));}
       }
-      if(isDrag&&Math.abs(drag.speed)>1&&now-drag.lastAt<140&&now-drag.lastPuff>65) {
+      if(quality.decor&&isDrag&&Math.abs(drag.speed)>1&&now-drag.lastAt<140&&now-drag.lastPuff>65) {
         drag.lastPuff=now;const sign=Math.sign(drag.speed);
         puff(scratchPosition.copy(group.position).add(scratchDirection.set(car.dir==='H'?-sign*.8:0,.14,car.dir==='V'?-sign*.8:0)),scratchDirection.set(car.dir==='H'?-sign:0,0,car.dir==='V'?-sign:0),Math.abs(drag.speed)>7);
       }
@@ -318,12 +338,12 @@ export function createGarageScene(canvas, getProps, callbacks) {
     const victoryAge=escapeStart==null?0:now-escapeStart;
     const follow=props.won&&!reduced.matches?.18*Math.sin(Math.PI*clamp(victoryAge/1500,0,1)):0;
     camera.position.x+=follow-cameraFollow;cameraFollow=follow;camera.lookAt(scratchPosition.copy(aim).add(scratchDirection.set(follow,0,0)));camera.updateMatrixWorld();
-    leaves.visible=!reduced.matches&&settings.theme!=='neon'&&!props.editor;
+    leaves.visible=quality.decor&&!reduced.matches&&settings.theme!=='neon'&&!props.editor;
     if(leaves.visible){for(let i=0;i<4;i++){const t=(now*.00007+i*.25)%1;instancePose.position.set(i%2?6.85+Math.sin(t*6)*.13:-.7+Math.sin(t*7)*.13,.13+Math.sin(t*Math.PI)*.17,.2+t*5.7);instancePose.rotation.set(-1.2,t*7+i,t*5);instancePose.scale.set(1,1,1);instancePose.updateMatrix();leaves.setMatrixAt(i,instancePose.matrix);}leaves.instanceMatrix.needsUpdate=true;}
     for(let i=0;i<8;i++){const lit=props.won&&victoryAge>i%4*110;roadLights.setColorAt(i,accentColour.set(lit?'#a9efc4':settings.theme==='neon'?(i<4?'#79dfea':'#b591ef'):'#78a58c'));}roadLights.instanceColor.needsUpdate=true;
-    celebration.visible=props.won&&props.perfect&&!reduced.matches&&victoryAge>800&&victoryAge<1850;
+    celebration.visible=quality.decor&&props.won&&props.perfect&&!reduced.matches&&victoryAge>800&&victoryAge<1850;
     if(celebration.visible){const t=(victoryAge-800)/1050;for(let i=0;i<24;i++){const angle=i*2.4;instancePose.position.set(6.8+Math.cos(angle)*t*.9,.25+Math.sin(t*Math.PI)*(.7+(i%3)*.2),2.5+Math.sin(angle)*t*.8);instancePose.rotation.set(t*8+i,t*5+i,t*9);instancePose.scale.set(1,1,1);instancePose.updateMatrix();celebration.setMatrixAt(i,instancePose.matrix);}celebration.instanceMatrix.needsUpdate=true;}
-    particles.forEach(p=>{if(reduced.matches){p.life=0;p.mesh.visible=false;return;}if(p.life<=0)return;p.life-=dt;p.mesh.visible=p.life>0;p.mesh.position.addScaledVector(p.velocity,dt);p.mesh.material.opacity=Math.max(0,p.life/p.duration)*.38;if(!p.spark)p.mesh.scale.addScalar(dt*.6);});
+    particles.forEach(p=>{if(reduced.matches||!quality.decor){p.life=0;p.mesh.visible=false;return;}if(p.life<=0)return;p.life-=dt;p.mesh.visible=p.life>0;p.mesh.position.addScaledVector(p.velocity,dt);p.mesh.material.opacity=Math.max(0,p.life/p.duration)*.38;if(!p.spark)p.mesh.scale.addScalar(dt*.6);});
     if(shadowChanged&&now-lastShadow>=1000/30-.5)renderer.shadowMap.needsUpdate=true;
     if(renderer.shadowMap.needsUpdate){lastShadow=now;stats.shadowUpdates++;}
     renderer.render(scene,camera);stats.frames++;
@@ -331,11 +351,16 @@ export function createGarageScene(canvas, getProps, callbacks) {
   resize();frame=requestAnimationFrame(animate);
   return {
     sync,
-    settings(next){if(drag)finish({pointerId:drag.pointerId},true);Object.assign(settings,next);updateCamera();},
+    settings(next){
+      if(drag)finish({pointerId:drag.pointerId},true);Object.assign(settings,next);quality=QUALITY[settings.quality]??QUALITY.standard;
+      renderer.setPixelRatio(Math.min(devicePixelRatio,quality.pixelRatio));renderer.shadowMap.enabled=settings.shadows&&quality.decor;
+      if(sun.shadow.mapSize.x!==quality.shadow){sun.shadow.map?.dispose();sun.shadow.map=null;sun.shadow.mapSize.set(quality.shadow,quality.shadow);}
+      resize();
+    },
     select(id){selected=id;dirty=true;callbacks.select(id);canvas.focus({preventScroll:true});},
     project(x,y,z){const v=new THREE.Vector3(x,y,z).project(camera),r=canvas.getBoundingClientRect();return {x:r.left+(v.x+1)*r.width/2,y:r.top+(1-v.y)*r.height/2};},
-    pick(x,y){return carAt({clientX:x,clientY:y});},
-    snapshot(){return {ready,settings:{...settings},cars:[...groups.values()].map(i=>({id:i.car.id,model:i.model,dir:i.car.dir,len:i.car.len,position:i.group.position.toArray(),wheelAngle:i.wheelAngle.value,tilt:i.group.rotation.z,velocity:i.velocity,tailLight:i.tailLamps[0]?.emissiveIntensity})),calls:renderer.info.render.calls,performance:{...stats,pixelRatio:renderer.getPixelRatio(),shadowSize:sun.shadow.mapSize.x,inView},guide:{visible:marker.visible,position:marker.position.toArray(),scale:marker.scale.toArray(),opacity:ringMaterial.opacity},celebration:celebration.visible,cameraFollow};},
+    pick(x,y,pointerType='mouse'){return carAt({clientX:x,clientY:y,pointerType});},
+    snapshot(){return {ready,settings:{...settings},cars:[...groups.values()].map(i=>({id:i.car.id,model:i.model,dir:i.car.dir,len:i.car.len,position:i.group.position.toArray(),wheelAngle:i.wheelAngle.value,tilt:i.group.rotation.z,velocity:i.velocity,tailLight:i.tailLamps[0]?.emissiveIntensity})),calls:renderer.info.render.calls,performance:{...stats,pixelRatio:renderer.getPixelRatio(),shadowSize:sun.shadow.mapSize.x,shadows:renderer.shadowMap.enabled,inView},guide:{visible:marker.visible,position:marker.position.toArray(),scale:marker.scale.toArray(),opacity:ringMaterial.opacity},celebration:celebration.visible,cameraFollow};},
     dispose(){
       if(!alive)return;
       alive=false;cancelAnimationFrame(frame);observer.disconnect();visibilityObserver.disconnect();Object.entries(handlers).forEach(([n,h])=>canvas.removeEventListener(n,h));

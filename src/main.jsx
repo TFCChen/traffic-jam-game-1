@@ -2,7 +2,9 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 import Board from "./Board.jsx";
-import { Icon, WinDialog } from "./GameUI.jsx";
+import { Icon, Sheet, WinDialog } from "./GameUI.jsx";
+import { BADGES, newRewards } from './gamePreferences.js';
+import { completedOfficialLevels } from './sceneThemes.js';
 import {
   GRID,
   EXIT_ROW,
@@ -92,7 +94,11 @@ function App() {
   const [progress, setProgress] = useState(loadProgress);
   const [customLevels, setCustomLevels] = useState(loadCustomLevels);
   const [mode, setMode] = useState("play");
-  const [panel, setPanel] = useState(() => window.matchMedia("(min-width: 921px)").matches ? "levels" : "none");
+  const [panel, setPanel] = useState('none');
+  const [garageSettingsOpen,setGarageSettingsOpen]=useState(false);
+  const [rewards,setRewards]=useState([]),[rewardNotice,setRewardNotice]=useState(false);
+  const previousProgress=useRef(progress);
+  const winPresented=useRef(false);
   const [winReady, setWinReady] = useState(false);
   const [winOpen, setWinOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -140,19 +146,24 @@ function App() {
 
   useEffect(() => () => solverAbort.current?.abort(), []);
 
-  useEffect(() => {
-    if (panel === "none" || !window.matchMedia("(max-width: 920px)").matches) return;
-    document.getElementById("game-panels")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
-  }, [panel]);
+  useEffect(()=>{
+    const added=newRewards(previousProgress.current,progress);previousProgress.current=progress;
+    if(!added.length)return;
+    setRewards(added);setRewardNotice(true);
+  },[progress]);
+  useEffect(()=>{if(!rewardNotice)return;const timer=setTimeout(()=>setRewardNotice(false),5500);return()=>clearTimeout(timer);},[rewardNotice,rewards]);
 
   useEffect(() => {
+    winPresented.current=false;
     setWinReady(false);
     setWinOpen(false);
-    if (!won || mode !== "play") return;
+  },[won,mode,current.id]);
+  useEffect(() => {
+    if (!won || mode !== "play" || panel!=='none' || garageSettingsOpen || winPresented.current) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const timer = setTimeout(() => { setWinReady(true); setWinOpen(true); }, reduced ? 120 : 1550);
+    const timer = setTimeout(() => { winPresented.current=true;setWinReady(true); setWinOpen(true); }, reduced ? 120 : 1550);
     return () => clearTimeout(timer);
-  }, [won, mode, current.id]);
+  }, [won, mode, current.id,panel,garageSettingsOpen]);
 
   useEffect(() => {
     (async () => {
@@ -181,6 +192,7 @@ function App() {
           stars: Math.max(old?.stars || 0, stars),
           bestMoves: Math.min(old?.bestMoves ?? Infinity, moves),
           completed: true,
+          perfect:old?.perfect===true || (optimal!=null && moves===optimal),
         },
       };
       saveProgress(next);
@@ -189,6 +201,9 @@ function App() {
   }, [won]);
 
   async function loadLevel(meta) {
+    setRewards([]);
+    setRewardNotice(false);
+    setPanel('none');
     cancelPending();
     const version = loadVersion.current;
     setLoading(true);
@@ -240,6 +255,7 @@ function App() {
   }
 
   function undo() {
+    setRewards([]);
     setHint(null);
     if (!history.length) return;
     setCars(cloneCars(history.at(-1)));
@@ -249,6 +265,8 @@ function App() {
   }
 
   function reset() {
+    setRewards([]);
+    setRewardNotice(false);
     setWinOpen(false);
     setCars(cloneCars(startCars));
     setHistory([]);
@@ -282,7 +300,7 @@ function App() {
     cancelPending();
     const savedCustom = customLevels.find((item) => item.id === level.id);
     setMode("editor");
-    setPanel(savedCustom ? "custom" : "none");
+    setPanel("none");
     setEditorCars(cloneCars(level.cars));
     setEditorStart(null);
     setEditingCustomId(savedCustom?.id ?? null);
@@ -496,18 +514,10 @@ function App() {
         </div>
       </header>
 
-      <main className={`workspace ${panel === "none" ? "panel-hidden" : ""}`} inert={winOpen}>
+      <main className="workspace panel-hidden" inert={winOpen}>
         <section className={`game-column ${mode === "editor" ? "editing" : ""}`} aria-busy={loading}>
           <div className="stage-heading"><div><span className="stage-kicker">{mode === "editor" ? "設計你的停車場" : "準備出發"}</span><h2>{mode === "editor" ? "關卡工作台" : currentTitle}</h2></div><span className={`stage-badge ${won ? "cleared" : ""}`}>{mode === "editor" ? `${editorCars.length} 台車` : won ? "✓ 已通關" : "紅車 → 出口"}</span></div>
-          <div className="toolbar">
-            {mode === "play" ? <>
-              <button onClick={undo} disabled={!history.length || loading}><Icon name="undo" />復原</button>
-              <button onClick={reset} disabled={loading}><Icon name="reset" />重來</button>
-              <button onClick={showHint} disabled={won || loading}><Icon name="hint" />提示</button>
-            </> : <button onClick={() => { cancelPending(); setMode("play"); setMessage(""); }}><Icon name="undo" />返回遊戲</button>}
-            <button className={panel === "levels" ? "selected" : ""} onClick={() => setPanel(panel === "levels" ? "none" : "levels")} aria-expanded={panel === "levels"} aria-controls="game-panels"><Icon name="levels" />關卡</button>
-            <button className={mode === "editor" ? "selected" : ""} onClick={() => enterEditor()} disabled={mode === "editor" || loading}><Icon name="edit" />編輯器</button>
-          </div>
+
 
           <div className={`instruction ${loading ? "loading" : ""}`} role="status" aria-live="polite">{loading && <span className="loading-dot" />}{message || (loading ? "正在準備停車場…" : mode === "editor" ? "點起點，再點車尾，放置 2 或 3 格車輛。" : won ? "道路暢通，紅車出發了！" : "沿著車身方向拖曳，放手就會停入格位。")}</div>
 
@@ -515,6 +525,7 @@ function App() {
             key={`${current.id}-${mode}`}
             cars={mode === "editor" ? editorCars : cars}
             progress={progress}
+            onSettingsChange={setGarageSettingsOpen}
             perfect={mode==='play' && analysis?.optimalMoves!=null && moves<=analysis.optimalMoves}
             onMove={commitMove}
             hint={hint}
@@ -525,6 +536,15 @@ function App() {
             onCellClick={editorCell}
             onRemove={removeEditorCar}
           />
+          <div className="toolbar">
+            {mode === "play" ? <>
+              <button onClick={undo} disabled={!history.length || loading}><Icon name="undo" />復原</button>
+              <button onClick={reset} disabled={loading}><Icon name="reset" />重來</button>
+              <button onClick={showHint} disabled={won || loading}><Icon name="hint" />提示</button>
+            </> : <button onClick={() => { cancelPending(); setMode("play"); setMessage(""); }}><Icon name="undo" />返回遊戲</button>}
+            <button className={panel === "levels" ? "selected" : ""} onClick={() => setPanel(panel === "levels" ? "none" : "levels")} aria-expanded={panel === "levels"} aria-controls="game-panels"><Icon name="levels" />關卡</button>
+            <button className={mode === "editor" ? "selected" : ""} onClick={() => enterEditor()} disabled={mode === "editor" || loading}><Icon name="edit" />編輯器</button>
+          </div>
 
           {mode === "editor" && (
             <>
@@ -564,17 +584,19 @@ function App() {
           {mode === "play" && <div className="board-footer"><span className="status-dot" /><span>{won ? "停車場已解鎖" : "一次有效移動算一步"}</span>{won && winReady && <button onClick={() => setWinOpen(true)}>查看通關結果 <Icon name="arrow" /></button>}</div>}
         </section>
 
-        {panel !== "none" && <aside className="side-panel" id="game-panels">
-          <div className="panel-heading"><h2>{panel === "custom" ? "我的創作" : panel === "analysis" ? "解謎筆記" : "選一個挑戰"}</h2><button onClick={() => setPanel("none")} aria-label="收起面板"><Icon name="close" /></button></div>
+        {panel !== "none" && <Sheet label="關卡與收藏" onClose={()=>setPanel('none')}><aside className="side-panel" id="game-panels">
+          <div className="panel-heading"><h2>{panel === "collection" ? "我的收藏" : panel === "custom" ? "我的創作" : panel === "analysis" ? "解謎筆記" : "選一個挑戰"}</h2><button onClick={() => setPanel("none")} aria-label="收起面板"><Icon name="close" /></button></div>
           <div className="tabs">
             <button className={panel === "levels" ? "active" : ""} onClick={() => setPanel("levels")}>正式關卡</button>
             <button className={panel === "custom" ? "active" : ""} onClick={() => setPanel("custom")}>我的關卡</button>
             <button className={panel === "analysis" ? "active" : ""} onClick={() => setPanel("analysis")}>分析</button>
+            <button className={panel === "collection" ? "active" : ""} onClick={() => setPanel("collection")}>收藏</button>
           </div>
 
           {panel === "levels" && (
-            <LevelBrowser levels={levels} current={current} progress={progress} onSelect={loadLevel} />
+            <><div className="completion-summary"><b>{completedOfficialLevels(progress)} / 40</b><span>正式關卡已完成</span><progress value={completedOfficialLevels(progress)} max="40"/></div><LevelBrowser levels={levels} current={current} progress={progress} onSelect={meta=>{setPanel('none');loadLevel(meta);}} /></>
           )}
+          {panel==='collection'&&<div className="badge-collection">{BADGES.map(b=><div key={b.id} className={b.check(progress)?'badge earned':'badge'}><span aria-hidden="true">✦</span><b>{b.name}</b><p>{b.description}</p><small>{b.check(progress)?'已收藏':'尚未解鎖'}</small></div>)}</div>}
 
           {panel === "custom" && (
             <div className="custom-list">
@@ -630,9 +652,10 @@ function App() {
               </p>
             </div>
           )}
-        </aside>}
+        </aside></Sheet>}
       </main>
-      {winOpen && mode === "play" && won && <WinDialog moves={moves} stars={starsForPerformance(moves, analysis?.optimalMoves)} best={analysis?.optimalMoves} title={currentTitle} onClose={() => setWinOpen(false)} onRetry={reset} onNext={nextLevel} hasNext={hasNext} />}
+      {rewardNotice&&<div className="reward-notice" role="status"><b>✦ 新收藏</b><span>{rewards.map(r=>r.name).join(' · ')}</span><button aria-label="收起解鎖通知" onClick={()=>setRewardNotice(false)}>×</button></div>}
+      {winOpen && mode === "play" && won && <WinDialog moves={moves} stars={starsForPerformance(moves, analysis?.optimalMoves)} best={analysis?.optimalMoves} title={currentTitle} rewards={rewards} onClose={() => setWinOpen(false)} onRetry={reset} onNext={nextLevel} hasNext={hasNext} />}
     </div>
   );
 }

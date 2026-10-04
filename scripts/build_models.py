@@ -155,6 +155,45 @@ def car(kind, length, colour):
             cylinder('Rear spare tyre', (-length/2+.02,0,.47), .2,.12,rubber,'X')
             for y in (-.2,.2): cube('Roof rack', (-.25,y,.8), (.62,.06,.06), chrome, .02)
         if kind == 'taxi': cube('Taxi roof sign', (-.12,0,.75), (.32,.26,.12), lamp, .025)
+    # Small readable details share existing material batches, rather than extra draw calls.
+    mirror_x = .82 if tall else .28
+    for y in (-.47,.47):
+        cube('Side mirror', (mirror_x,y,.59 if tall else .49), (.16,.085,.075), chrome, .018)
+        cube('Door handle', (.15,y*.89,.43), (.12,.023,.025), chrome, .008)
+    if not tall:
+        for y in (-.417,.417):
+            cube('Door seam', (-.36,y,.33), (.015,.015,.16), rubber, .003)
+        if kind == 'racer':
+            for y in (-.19,.19): cube('Hood vent', (.64,y,.367), (.22,.07,.016), rubber, .008)
+            cube('Front splitter', (.91,0,.125), (.13,.76,.035), rubber, .01)
+        elif kind == 'jeep':
+            for y in (-.18,-.09,0,.09,.18): cube('Jeep grille', (.927,y,.32), (.02,.036,.13), rubber, .005)
+        elif kind == 'pickup':
+            for y in (-.18,0,.18): cube('Bed plank', (-.5,y,.402), (.63,.11,.04), cream, .01)
+        elif kind == 'taxi':
+            for x in (-.55,-.35,-.15,.05,.25):
+                for y in (-.424,.424): cube('Taxi checker', (x,y,.32), (.1,.016,.065), white, .004)
+        else:
+            for y in (-.342,.342): cube('Window pillar', (-.15,y,.51), (.055,.035,.29), paint, .01)
+    elif kind in ('schoolbus','coach'):
+        cube('Passenger door', (.8,-.403,.59), (.26,.021,.46), glass, .022)
+        cube('Door divider', (.8,-.42,.59), (.018,.018,.46), chrome, .004)
+        cube('Destination board', (1.166,0,.98), (.03,.44,.09), rubber, .012)
+        for y in (-.12,-.04,.04,.12): cube('Destination lettering', (1.19,y,.982), (.014,.038,.04), lamp, .003)
+    elif kind == 'delivery':
+        for y in (-.2,.2):
+            cube('Rear cargo door', (-1.353,y,.67), (.014,.37,.78), chrome, .016)
+            cube('Rear door latch', (-1.368,y,.64), (.018,.025,.4), rubber, .005)
+        for y in (-.416,.416):
+            cube('Cargo label', (-.45,y,.72), (.5,.018,.26), paint, .02)
+            cube('Cargo label bar', (-.45,y*1.027,.72), (.27,.014,.035), white, .006)
+    elif kind == 'camper':
+        cube('Living door', (.38,-.431,.65), (.32,.022,.63), cream, .028)
+        cube('Door window', (.38,-.45,.79), (.22,.02,.2), glass, .016)
+        cube('Door handle', (.48,-.468,.57), (.035,.025,.08), chrome, .008)
+        cube('Roof luggage', (.24,0,1.105), (.38,.42,.15), paint, .04)
+    cube('Rear plate', (-length/2+.055,0,.24), (.026,.24,.09), white, .007)
+    for y in (-.075,-.025,.025,.075): cube('Plate marks', (-length/2+.035,y,.24), (.012,.025,.047), rubber, .002)
     for x in (-length/2+.33, length/2-.34):
         for y in (-.43,.43):
             wheel_colourize(cylinder('Wheel', (x,y,.19), .19,.13,rubber,'Y'),rubber)
