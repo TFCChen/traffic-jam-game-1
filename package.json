@@ -4,11 +4,12 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "node src/gameEngine.test.mjs"
+    "test": "node src/gameEngine.test.mjs && node src/modelAssets.test.mjs"
   },
   "dependencies": {
     "react": "19.2.6",
-    "react-dom": "19.2.6"
+    "react-dom": "19.2.6",
+    "three": "0.186.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "5.2.0",

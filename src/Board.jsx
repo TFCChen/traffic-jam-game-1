@@ -1,196 +1,61 @@
-import React, { useEffect, useRef, useState } from "react";
-import { GRID, legalMovesForCar } from "./gameEngine.js";
+import React, { useEffect, useRef, useState } from 'react';
+import Board2D from './Board2D.jsx';
+import { vehicleModel } from './vehicleModels.js';
 
-const CELL = 58;
-const SCENE_WIDTH = 520;
-const SCENE_HEIGHT = 424;
-const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-
-// A stable colour-to-model mapping keeps the same vehicle recognisable in every level.
-function vehicleModel(car) {
-  if (car.id === "target") return { kind: "racer", name: "跑車" };
-  const hex = car.color.replace("#", "");
-  const rgb = [0, 2, 4].map(offset => parseInt(hex.slice(offset, offset + 2), 16) / 255);
-  const [r, g, b] = rgb, max = Math.max(...rgb), min = Math.min(...rgb);
-  const hue = max === min ? 0 : ((max === r ? (g - b) / (max - min) : max === g ? (b - r) / (max - min) + 2 : (r - g) / (max - min) + 4) * 60 + 360) % 360;
-  if (car.len === 3) {
-    if (hue < 75) return { kind: "schoolbus", name: "校車" };
-    if (hue < 180) return { kind: "camper", name: "露營車" };
-    if (hue < 250) return { kind: "coach", name: "城市巴士" };
-    return { kind: "delivery", name: "貨運卡車" };
-  }
-  if (hue < 55) return { kind: "pickup", name: "皮卡" };
-  if (hue < 170) return { kind: "jeep", name: "越野車" };
-  if (hue < 250) return { kind: "compact", name: "小轎車" };
-  return { kind: "taxi", name: "計程車" };
+const DEFAULT = { pitch: 65, yaw: 0, light: -40, intensity: 3, shadows: true };
+function readSettings() {
+  try {
+    const value=JSON.parse(localStorage.getItem('traffic-jam-scene') || 'null');
+    if(!value)return DEFAULT;
+    return { pitch: Math.max(45,Math.min(80,Number(value.pitch)||65)), yaw: Math.max(-35,Math.min(35,Number(value.yaw)||0)), light: Math.max(-180,Math.min(180,(Number.isFinite(Number(value.light)) ? Number(value.light) : -40))), intensity: Math.max(.5,Math.min(5,Number(value.intensity)||3)), shadows: value.shadows!==false };
+  } catch { return DEFAULT; }
 }
 
-export default function Board({ cars, onMove, hint, editor, editorStart, onCellClick, onRemove, won, disabled }) {
-  const viewport = useRef(null);
-  const planeOrigin = useRef(null);
-  const planeX = useRef(null);
-  const planeY = useRef(null);
-  const dragRef = useRef(null);
-  const [drag, setDrag] = useState(null);
-  const [blocked, setBlocked] = useState(null);
-  const [boardScale, setBoardScale] = useState(1);
-  const blockedTimer = useRef(null);
-  const motionTimer = useRef(null);
-
-  useEffect(() => {
-    const observer = new ResizeObserver(([entry]) => setBoardScale(Math.min(1, entry.contentRect.width / SCENE_WIDTH)));
-    observer.observe(viewport.current);
-    return () => { observer.disconnect(); clearTimeout(blockedTimer.current); clearTimeout(motionTimer.current); };
-  }, []);
-
-  function showBlocked(id) {
-    setBlocked(id);
-    clearTimeout(blockedTimer.current);
-    blockedTimer.current = setTimeout(() => setBlocked(null), 320);
-  }
-
-  // Invert the projected ground plane, rather than its axis-aligned screen bounds.
-  // The orthographic camera keeps this mapping affine at every viewport size.
-  function boardPoint(event) {
-    const origin = planeOrigin.current.getBoundingClientRect();
-    const x = planeX.current.getBoundingClientRect();
-    const y = planeY.current.getBoundingClientRect();
-    const ax = (x.left - origin.left) / (GRID * CELL), ay = (x.top - origin.top) / (GRID * CELL);
-    const bx = (y.left - origin.left) / (GRID * CELL), by = (y.top - origin.top) / (GRID * CELL);
-    const determinant = ax * by - ay * bx;
-    const dx = event.clientX - origin.left, dy = event.clientY - origin.top;
-    return { x: (dx * by - dy * bx) / determinant, y: (dy * ax - dx * ay) / determinant };
-  }
-
-  function startDrag(event, car) {
-    if (editor || won || disabled || (event.pointerType === "mouse" && event.button !== 0) || dragRef.current) return;
-    event.preventDefault();
-    event.currentTarget.focus({ preventScroll: true });
-    const legal = legalMovesForCar(cars, car.id);
-    if (!legal.length) { showBlocked(car.id); return; }
-    event.currentTarget.setPointerCapture(event.pointerId);
-    const point = boardPoint(event);
-    const next = { car, startX: point.x, startY: point.y, legal, pixels: 0, pointerId: event.pointerId, lastTime: event.timeStamp, speed: 0, direction: 1 };
-    dragRef.current = next;
-    setDrag(next);
-  }
-
-  function moveDrag(event) {
-    const active = dragRef.current;
-    if (!active || active.pointerId !== event.pointerId) return;
-    const point = boardPoint(event);
-    const raw = active.car.dir === "H" ? point.x - active.startX : point.y - active.startY;
-    const deltas = active.legal.map(move => move.delta);
-    const pixels = clamp(raw, Math.min(0, ...deltas) * CELL, Math.max(0, ...deltas) * CELL);
-    const distance = pixels - active.pixels;
-    const speed = Math.abs(distance) / Math.max(8, event.timeStamp - active.lastTime) * 1000;
-    const next = { ...active, pixels, lastTime: event.timeStamp, speed, direction: distance === 0 ? active.direction : Math.sign(distance) };
-    dragRef.current = next;
-    setDrag(next);
-    clearTimeout(motionTimer.current);
-    const pointerId = event.pointerId;
-    motionTimer.current = setTimeout(() => {
-      if (dragRef.current?.pointerId !== pointerId) return;
-      const stopped = { ...dragRef.current, speed: 0 };
-      dragRef.current = stopped;
-      setDrag(stopped);
-    }, 120);
-  }
-
-  function endDrag(event, cancel = false) {
-    const active = dragRef.current;
-    if (!active || active.pointerId !== event.pointerId) return;
-    const desired = Math.round(active.pixels / CELL);
-    const move = active.legal.find(item => item.delta === desired);
-    if (!cancel && move) onMove(move);
-    dragRef.current = null;
-    setDrag(null);
-    clearTimeout(motionTimer.current);
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-  }
-
-  function keyboardMove(event, car) {
-    if (editor || won || disabled) return;
-    const delta = car.dir === "H" ? { ArrowLeft: -1, ArrowRight: 1 }[event.key] : { ArrowUp: -1, ArrowDown: 1 }[event.key];
-    if (!delta) return;
-    event.preventDefault();
-    if (legalMovesForCar(cars, car.id).some(move => move.delta === delta)) onMove({ carId: car.id, delta });
-    else showBlocked(car.id);
-  }
-
-  function boardClick(event) {
-    if (!editor) return;
-    const point = boardPoint(event);
-    const col = Math.floor(point.x / CELL);
-    const row = Math.floor(point.y / CELL);
-    if (row >= 0 && row < GRID && col >= 0 && col < GRID) onCellClick({ row, col });
-  }
-
-  const deltas = drag?.legal.map(move => move.delta) ?? [];
-  const min = Math.min(0, ...deltas), max = Math.max(0, ...deltas);
-  return (
-    <div ref={viewport} className={`board-viewport ${won ? "is-cleared" : ""}`} style={{ height: SCENE_HEIGHT * boardScale }}>
-      <div className="scene-rig" style={{ transform: `scale(${boardScale})` }}>
-      <div className="board-frame">
-        <span className="platform-front" aria-hidden="true" /><span className="platform-right" aria-hidden="true" />
-        <div className="garage-details" aria-hidden="true">
-          <span className="fence north" /><span className="fence south" /><span className="fence west" />
-          <span className="fence east upper" /><span className="fence east lower" />
-          {[14, 132, 250, 372].flatMap((position, index) => [
-            <span key={`north-${index}`} className="rail-post" style={{ left: position, top: 6 }} />,
-            <span key={`south-${index}`} className="rail-post" style={{ left: position, top: 369 }} />,
-            <span key={`west-${index}`} className="rail-post" style={{ left: 6, top: position }} />,
-          ])}
-          {[14, 112, 210, 372].map((position, index) => <span key={`east-${index}`} className="rail-post" style={{ left: 370, top: position }} />)}
-          <span className="gate-bollard upper" /><span className="gate-bollard lower" />
-          <span className="garage-plate">P</span>
-          <span className="gate-housing"><i /><b /></span>
-          <span className="gate-arm" />
-        </div>
-        <div className="exit-road" aria-hidden="true"><span className="road-arrow">››</span><i className="exit-signal" /></div>
-        <div className="exit-label">{won ? "暢通" : "出口"} <span>→</span></div>
-        <div className="board" style={{ width: GRID * CELL, height: GRID * CELL }} onClick={boardClick} aria-label={editor ? "關卡編輯棋盤" : "停車場棋盤"}>
-          <span ref={planeOrigin} className="plane-probe" aria-hidden="true" style={{ left: 0, top: 0 }} />
-          <span ref={planeX} className="plane-probe" aria-hidden="true" style={{ left: GRID * CELL, top: 0 }} />
-          <span ref={planeY} className="plane-probe" aria-hidden="true" style={{ left: 0, top: GRID * CELL }} />
-          {Array.from({ length: GRID * GRID }, (_, index) => <span key={index} className="cell" aria-hidden="true" style={{ left: (index % GRID) * CELL, top: Math.floor(index / GRID) * CELL, width: CELL, height: CELL }}><i>{String(index + 1).padStart(2, "0")}</i></span>)}
-          <span className="drain drain-top" aria-hidden="true" /><span className="drain drain-bottom" aria-hidden="true" />
-          {drag && <div className={`drag-lane ${drag.car.dir}`} style={{ left: (drag.car.col + (drag.car.dir === "H" ? min : 0)) * CELL, top: (drag.car.row + (drag.car.dir === "V" ? min : 0)) * CELL, width: (drag.car.dir === "H" ? drag.car.len + max - min : 1) * CELL, height: (drag.car.dir === "V" ? drag.car.len + max - min : 1) * CELL, "--car-color": drag.car.color }} />}
-          {editor && editorStart && <span className="editor-start-marker" aria-label="已選取的車輛起點" style={{ left: editorStart.col * CELL + 4, top: editorStart.row * CELL + 4, width: CELL - 8, height: CELL - 8 }} />}
-          {cars.map((car, index) => {
-            const dragging = drag?.car.id === car.id;
-            const hinted = hint?.carId === car.id;
-            const escaping = won && car.id === "target";
-            const model = vehicleModel(car);
-            const fast = dragging && drag.speed > 480;
-            const dx = dragging && car.dir === "H" ? drag.pixels : 0;
-            const dy = dragging && car.dir === "V" ? drag.pixels : 0;
-            return (
-              <div key={car.id} role={editor ? undefined : "button"} tabIndex={editor || won ? -1 : 0}
-                aria-label={`${car.id === "target" ? "紅色目標" : `車輛 ${index + 1}，`}${model.name}，${car.dir === "H" ? "左右" : "上下"}移動`}
-                aria-disabled={editor ? undefined : won || disabled}
-                className={`vehicle ${car.dir} model-${model.kind} ${car.len === 3 ? "bus" : ""} ${car.id === "target" ? "target" : ""} ${hinted ? "hinted" : ""} ${dragging ? "dragging" : ""} ${fast ? "fast" : ""} ${dragging && drag.direction < 0 ? "reverse" : ""} ${blocked === car.id ? "blocked" : ""} ${escaping ? "escaping" : ""} ${editor ? "editing" : ""}`}
-                style={{ left: car.col * CELL + 4 + dx, top: car.row * CELL + 4 + dy, width: (car.dir === "H" ? car.len : 1) * CELL - 8, height: (car.dir === "V" ? car.len : 1) * CELL - 8, "--car-color": car.color, "--car-length": `${car.len * CELL - 8}px`, "--idle-delay": `${-index * 1.73}s` }}
-                onPointerDown={event => startDrag(event, car)} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={event => endDrag(event, true)} onLostPointerCapture={event => endDrag(event, true)} onKeyDown={event => keyboardMove(event, car)}>
-                <span className="vehicle-skin" aria-hidden="true">
-                  <span className="body-wall near" /><span className="body-wall far" /><span className="body-wall nose" /><span className="body-wall tail" />
-                  <span className="wheels" />
-                  <span className="car-roof"><i className="window front" /><i className="window rear" /><i className="roof-stripe" /></span>
-                  <span className="model-detail" /><span className="bumper" />
-                  <span className="headlights" /><span className="light-beams" /><span className="tail-lights" />
-                  <span className="idle-exhaust"><i /><i /></span>
-                  {dragging && drag.speed > 20 && <span className="drive-effects"><i /><i /><i /><b /><b /><b /><b /></span>}
-                </span>
-                {car.id === "target" && <span className="target-arrow" aria-hidden="true">→</span>}
-                {hinted && <span className="hint-arrow" aria-hidden="true">{car.dir === "H" ? (hint.delta > 0 ? "→" : "←") : (hint.delta > 0 ? "↓" : "↑")}</span>}
-                {escaping && <span className="exhaust" aria-hidden="true"><i /><i /><i /></span>}
-                {editor && <button className="remove" disabled={disabled} onClick={event => { event.stopPropagation(); onRemove(car.id); }} aria-label={`移除 ${car.id}`}>×</button>}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      </div>
+export default function Board(props) {
+  const canvas=useRef(null), engine=useRef(null), latest=useRef(props);
+  latest.current=props;
+  const [ready,setReady]=useState(false),[fallback,setFallback]=useState(false),[selected,setSelected]=useState(null);
+  const [settings,setSettings]=useState(readSettings),[open,setOpen]=useState(false);
+  const settingsRef=useRef(settings);settingsRef.current=settings;
+  useEffect(()=>{
+    let cancelled=false, instance;
+    import('./garageScene.js').then(({createGarageScene})=>{
+      if(cancelled)return;
+      try {
+        instance=createGarageScene(canvas.current,()=>latest.current,{ready:()=>setReady(true),error:()=>setFallback(true),select:setSelected});
+        engine.current=instance;instance.settings(settingsRef.current);
+        canvas.current.garageInspection={project:instance.project,pick:instance.pick,snapshot:instance.snapshot};
+      } catch { setFallback(true); }
+    }).catch(()=>{if(!cancelled)setFallback(true);});
+    return ()=>{cancelled=true;instance?.dispose();engine.current=null;};
+  },[]);
+  useEffect(()=>{engine.current?.sync();},[props.cars,props.won]);
+  useEffect(()=>{
+    engine.current?.settings(settings);
+    try{localStorage.setItem('traffic-jam-scene',JSON.stringify(settings));}catch{/* Session-only settings still work. */}
+  },[settings]);
+  useEffect(()=>{if(fallback){engine.current?.dispose();engine.current=null;}},[fallback]);
+  function change(key,value){setSettings(current=>({...current,[key]:value}));}
+  if(fallback)return <><p className="scene-fallback" role="status">此瀏覽器暫時無法顯示 3D，已切換到 2.5D 遊玩。</p><Board2D {...props}/></>;
+  return <div className="garage-3d">
+    <div className="garage-canvas-wrap">
+      <canvas ref={canvas} className="garage-canvas" tabIndex={0} aria-label="3D 停車場；點選車輛拖曳，或選取車輛後使用方向鍵" />
+      {!ready&&<div className="scene-loading" role="status"><span className="loading-dot"/>正在載入玩具車庫…</div>}
+      <span className="scene-tag">3D 玩具車庫</span>
     </div>
-  );
+    <div className="scene-options-bar"><span>真實光影 · 可調視角</span><button aria-expanded={open} aria-controls="scene-settings" onClick={()=>setOpen(!open)}>視角與光源</button></div>
+    {open&&<div id="scene-settings" className="scene-settings">
+      <label>俯視角 <b>{settings.pitch}°</b><input aria-label="俯視角" type="range" min="45" max="80" value={settings.pitch} onChange={e=>change('pitch',Number(e.target.value))}/></label>
+      <label>左右觀察 <b>{settings.yaw}°</b><input aria-label="左右觀察" type="range" min="-35" max="35" value={settings.yaw} onChange={e=>change('yaw',Number(e.target.value))}/></label>
+      <label>光源方向 <b>{settings.light}°</b><input aria-label="光源方向" type="range" min="-180" max="180" value={settings.light} onChange={e=>change('light',Number(e.target.value))}/></label>
+      <label>光源亮度 <b>{settings.intensity.toFixed(1)}</b><input aria-label="光源亮度" type="range" min=".5" max="5" step=".1" value={settings.intensity} onChange={e=>change('intensity',Number(e.target.value))}/></label>
+      <label className="shadow-toggle"><input type="checkbox" checked={settings.shadows} onChange={e=>change('shadows',e.target.checked)}/>投影陰影</label>
+      <button onClick={()=>setSettings({...DEFAULT})}>恢復預設</button>
+      <p>角度越小越接近側視；設定會保存在這個瀏覽器。</p>
+    </div>}
+    <div className="vehicle-picker" aria-label={props.editor?'編輯車輛':'鍵盤選取車輛'}>
+      {props.cars.map((car,index)=><button key={car.id} className={selected===car.id?'selected':''} disabled={!ready||props.disabled||props.won} style={{'--car-color':car.color}} aria-label={`選取${car.id==='target'?'紅色目標':`車輛 ${index+1}，`}${vehicleModel(car).name}`} aria-pressed={selected===car.id} onClick={()=>engine.current?.select(car.id)}><i/>{index+1}</button>)}
+      {props.editor&&selected&&props.cars.some(c=>c.id===selected)&&<button className="remove-selected" disabled={props.disabled} onClick={()=>{props.onRemove(selected);setSelected(null);}}>移除選取車輛</button>}
+    </div>
+  </div>;
 }

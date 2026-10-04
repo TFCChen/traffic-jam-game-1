@@ -1,6 +1,25 @@
 // Run in the loaded game with agent-browser eval --stdin.
 // Samples rendered surfaces, so a pointer-events or camera regression fails here.
 (async () => {
+  const canvas=document.querySelector('.garage-canvas');
+  if(canvas){
+    for(let attempt=0;attempt<200&&!canvas.dataset.ready;attempt++)await new Promise(resolve=>setTimeout(resolve,25));
+    const inspection=canvas.garageInspection;
+    if(!inspection?.snapshot().ready)throw new Error('3D models did not become ready.');
+    await new Promise(resolve=>setTimeout(resolve,250));
+    const results=[];
+    for(const car of inspection.snapshot().cars){
+      const [x,,z]=car.position;
+      const offsets=[[0,0],[car.dir==='H'?.35:0,car.dir==='V'?.35:0],[car.dir==='H'?-.35:0,car.dir==='V'?-.35:0]];
+      for(const [dx,dz]of offsets){
+        const point=inspection.project(x+dx,.55,z+dz),hit=inspection.pick(point.x,point.y);
+        results.push({id:car.id,hit,pass:hit===car.id});
+      }
+    }
+    const failures=results.filter(result=>!result.pass);
+    if(failures.length)throw new Error(JSON.stringify(failures));
+    return {renderer:'3D',cars:inspection.snapshot().cars.length,samples:results.length,passed:results.length,settings:inspection.snapshot().settings};
+  }
   // Wait for initial worker loading and ResizeObserver layout to settle.
   for (let attempt = 0; attempt < 100 && document.querySelector('.vehicle[aria-disabled="true"]'); attempt++) {
     await new Promise(resolve => setTimeout(resolve, 20));
