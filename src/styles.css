@@ -158,26 +158,26 @@ button.selected, .tabs button.active { color: #246656; border-color: #9abfae; ba
 .win-actions button { flex: 1; padding: 12px 7px; }
 .confetti { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .confetti i { position: absolute; top: -20px; left: var(--x); width: 8px; height: 13px; border-radius: 2px; background: var(--confetti-color); animation: confetti-fall 1900ms ease-in forwards; animation-delay: var(--delay); }
-/* Miniature garage: asphalt, painted bays, steel rails and a protected exit. */
-.board-frame { background: linear-gradient(135deg, #d7dfd2, #9eafa5); border-radius: 18px; }
-.board { background: radial-gradient(ellipse at 30% 10%, #ffffff0c, transparent 65%), repeating-linear-gradient(13deg, #ffffff03 0 1px, transparent 1px 4px), #586b69; border-radius: 6px; }
+/* Ceramic toy base, a quiet asphalt surface, and simple painted guardrails. */
+.board-frame { background: linear-gradient(135deg, #fff9ea, #e5e6d9); border-radius: 22px; border-color: #d3dccd; }
+.board { background: radial-gradient(ellipse at 20% 0%, #81979620, transparent 70%), #42585e; border-radius: 10px; box-shadow: inset 0 2px 5px #1d333b55, 0 0 0 2px #bdc8b7; }
 .cell { border: 0; background: none; pointer-events: none; }
-.cell::after { content: ""; position: absolute; inset: 2px; border: 1px solid #d7e5d933; border-radius: 4px; mask-image: conic-gradient(#000 0deg 18deg, transparent 18deg 72deg, #000 72deg 108deg, transparent 108deg 162deg, #000 162deg 198deg, transparent 198deg 252deg, #000 252deg 288deg, transparent 288deg 342deg, #000 342deg); }
-.cell i { position: absolute; bottom: 6px; right: 7px; font: 700 7px "Segoe UI", sans-serif; color: #dbe3d328; font-style: normal; }
+.cell::after { content: ""; position: absolute; inset: 3px; border: 1px solid #d7e5d922; border-radius: 3px; mask-image: conic-gradient(#000 0deg 10deg, transparent 10deg 80deg, #000 80deg 100deg, transparent 100deg 170deg, #000 170deg 190deg, transparent 190deg 260deg, #000 260deg 280deg, transparent 280deg 350deg, #000 350deg); }
+.cell i { display: none; }
 .garage-details { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
-.fence { position: absolute; border: 1px solid #778d82; border-radius: 3px; background: repeating-linear-gradient(90deg, transparent 0 35px, #60786c 35px 40px), linear-gradient(#eff4e9, #b4c5b8 45%, #819b8b 46%, #d2dfcc); box-shadow: 0 3px 0 #657e6b, 0 5px 5px #273b3b40; }
+.fence { position: absolute; border: 1px solid #9ab3a7; border-radius: 4px; background: #e5eee0; }
 .fence.north, .fence.south { left: 11px; right: 11px; height: 7px; }
 .fence.north { top: 6px; }.fence.south { bottom: 9px; }
-.fence.west, .fence.east { width: 7px; background: repeating-linear-gradient(0deg, transparent 0 35px, #60786c 35px 40px), linear-gradient(90deg, #eff4e9, #819b8b, #d2dfcc); }
+.fence.west, .fence.east { width: 7px; background: #e5eee0; }
 .fence.west { left: 6px; top: 11px; bottom: 14px; }.fence.east { right: 6px; }
 .fence.east.upper { top: 11px; height: 119px; }.fence.east.lower { top: 197px; bottom: 14px; }
-.gate-bollard { position: absolute; right: 3px; width: 13px; height: 13px; border-radius: 4px; background: repeating-linear-gradient(135deg, #f7d477 0 4px, #4c6159 4px 8px); border: 1px solid #ffe6a7; box-shadow: 0 3px 0 #566951, 0 4px 5px #223d3a60; }
+.gate-bollard { position: absolute; right: 3px; width: 13px; height: 13px; border-radius: 5px; background: #ffd781; border: 2px solid #fff0bc; box-shadow: 0 4px 0 #b99f68, 0 6px 6px #223d3a35; }
 .gate-bollard.upper { top: 124px; }.gate-bollard.lower { top: 191px; }
-.garage-plate { position: absolute; top: 2px; left: 32px; font-size: 7px; font-weight: 900; letter-spacing: .1em; color: #eef6df; padding: 2px 5px; background: #3f6c60; border: 1px solid #c1d5b7; border-radius: 2px; }
+.garage-plate { position: absolute; top: 0; left: 32px; width: 22px; height: 22px; display: grid; place-items: center; font-size: 14px; font-weight: 900; color: #fff8e2; background: #34786e; border: 2px solid #eaf0dc; border-radius: 6px; box-shadow: 0 2px 0 #285a53; }
 .drain { position: absolute; width: 30px; height: 5px; background: repeating-linear-gradient(90deg, #283d3d 0 2px, #75877d 2px 4px); border: 1px solid #879b8b; pointer-events: none; }
 .drain-top { top: 3px; right: 72px; }.drain-bottom { bottom: 3px; left: 72px; }
-.exit-road { background: repeating-linear-gradient(10deg, #ffffff03 0 1px, transparent 1px 4px), #617772; border-top: 4px solid #e4cf8e; border-bottom: 4px solid #e4cf8e; box-shadow: 0 5px 0 #7c9080, inset 0 2px 0 #324e4930; }
-.exit-road::before { content: ""; position: absolute; left: 4px; top: 3px; bottom: 3px; width: 17px; background: repeating-linear-gradient(0deg, #e8eed980 0 5px, transparent 5px 10px); }
+.exit-road { background: #42585e; border-top: 5px solid #e7e8da; border-bottom: 5px solid #e7e8da; box-shadow: 0 8px 0 #a9baad, 0 14px 10px #33493f20; }
+.exit-road::before { content: ""; position: absolute; left: 17px; top: 5px; bottom: 5px; width: 2px; background: #f3e9bf70; }
 .exit-label { top: 98px; color: #fffbe7; background: #436d61; border: 2px solid #d2dfc8; border-radius: 5px; padding: 2px; box-shadow: 0 3px 0 #789180; letter-spacing: .07em; }
 .exit-signal { top: -26px; right: 0; z-index: 2; background: #e7b765; animation: gate-light 4s ease-in-out infinite; }
 
@@ -239,20 +239,28 @@ button.selected, .tabs button.active { color: #246656; border-color: #9abfae; ba
 .drive-effects b { display: none; position: absolute; right: 0; top: 0; width: 7px; height: 3px; border-radius: 2px; background: #ffe7a0; box-shadow: 0 0 6px #ffb35c; animation: tire-spark 340ms ease-out infinite; }
 .fast .drive-effects b { display: block; }.drive-effects b:nth-of-type(2) { top: 38px; animation-delay: -100ms; --spark-y: 14px; }.drive-effects b:nth-of-type(3) { animation-delay: -200ms; --spark-y: -18px; }.drive-effects b:nth-of-type(4) { top: 38px; animation-delay: -280ms; --spark-y: 8px; }
 .dragging .light-beams, .escaping .light-beams { opacity: 1; width: 32px; animation: none; }
-/* A level horizon and a 70-degree downward view; the board never rolls sideways. */
+/* A level horizon and a 65-degree downward view; the board never rolls sideways. */
 .board-viewport { width: min(520px, 100%); border-radius: 0; overflow: hidden; }
 .scene-rig { position: absolute; top: 0; left: 0; width: 520px; height: 424px; transform-origin: 0 0; transform-style: preserve-3d; }
-.board-frame { position: absolute; left: 16px; top: 24px; transform: rotateX(20deg); transform-origin: 0 0; transform-style: preserve-3d; box-shadow: inset 0 2px 1px #ffffffe0, 12px 26px 26px #33493f35; }
+.board-frame { position: absolute; left: 16px; top: 32px; transform: rotateX(25deg); transform-origin: 0 0; transform-style: preserve-3d; box-shadow: inset 0 2px 1px #ffffffe0, 12px 32px 28px #33493f28; }
+.board-frame::after { background: #42585e; box-shadow: none; }
 .board { transform-style: preserve-3d; isolation: auto; }
 .plane-probe { position: absolute; width: 0; height: 0; pointer-events: none; }
-.platform-front, .platform-right { position: absolute; pointer-events: none; background: linear-gradient(#90a79b, #637e71); border: 1px solid #556f61; }
-.platform-front { top: 100%; left: 0; width: 100%; height: 24px; transform-origin: top; transform: rotateX(-90deg); border-radius: 0 0 5px 5px; }
-.platform-right { left: 100%; top: 0; height: 100%; width: 24px; transform-origin: left; transform: rotateY(90deg); background: linear-gradient(90deg, #849d90, #536e61); }
+.platform-front, .platform-right { position: absolute; pointer-events: none; background: linear-gradient(#d8e0d3 0 4px, #bcccbc 4px 30px, #8fa89b 30px); border: 1px solid #acbdae; }
+.platform-front { top: calc(100% - 1px); left: 1px; width: calc(100% - 2px); height: 38px; transform-origin: top; transform: rotateX(-90deg); border-radius: 0 0 12px 12px; }
+.platform-right { left: calc(100% - 1px); top: 0; height: 100%; width: 38px; transform-origin: left; transform: rotateY(90deg); background: #a8bfae; }
 .garage-details { transform-style: preserve-3d; }
-.fence { transform: translateZ(13px); box-shadow: 0 2px 2px #273b3b30; transform-style: preserve-3d; }
-.fence::after { content: ""; position: absolute; top: 100%; left: -1px; width: calc(100% + 2px); height: 13px; transform-origin: top; transform: rotateX(-90deg); background: repeating-linear-gradient(90deg, #6a8776 0 5px, #bacbbab0 5px 35px, #6a8776 35px 40px); border-bottom: 2px solid #567260; }
-.fence.west::after, .fence.east::after { top: -1px; left: 100%; width: 13px; height: calc(100% + 2px); transform-origin: left; transform: rotateY(90deg); background: repeating-linear-gradient(0deg, #6a8776 0 5px, #bacbbab0 5px 35px, #6a8776 35px 40px); border-bottom: 0; border-right: 2px solid #567260; }
-.gate-bollard { transform: translateZ(10px); }.garage-plate { transform: translateZ(14px); }
+.fence { transform: translateZ(17px); box-shadow: none; transform-style: preserve-3d; }
+.fence::after { content: ""; position: absolute; top: 100%; left: -1px; width: calc(100% + 2px); height: 5px; transform-origin: top; transform: rotateX(-90deg); background: #79a499; border-radius: 0 0 3px 3px; }
+.fence.west::after, .fence.east::after { top: -1px; left: 100%; width: 5px; height: calc(100% + 2px); transform-origin: left; transform: rotateY(90deg); background: #79a499; }
+.rail-post { position: absolute; width: 9px; height: 9px; border-radius: 3px; background: #edf2e2; border: 1px solid #abc3b2; transform: translateZ(20px); transform-style: preserve-3d; }
+.rail-post::before { content: ""; position: absolute; top: 100%; left: -1px; width: 9px; height: 20px; background: #78a294; transform-origin: top; transform: rotateX(-90deg); border-radius: 0 0 2px 2px; }
+.rail-post::after { content: ""; position: absolute; left: 100%; top: -1px; width: 20px; height: 9px; background: #558779; transform-origin: left; transform: rotateY(90deg); }
+.gate-housing { position: absolute; left: 397px; top: 109px; width: 20px; height: 22px; border-radius: 6px; background: #eef0dd; border: 2px solid #cad5bf; transform: translateZ(18px); box-shadow: 0 7px 0 #91ad9b; }
+.gate-housing i { position: absolute; inset: 5px 4px; border-radius: 3px; background: #365853; }.gate-housing b { position: absolute; right: 6px; top: 8px; width: 4px; height: 4px; background: #f6ca74; border-radius: 50%; }
+.gate-arm { position: absolute; left: 397px; top: 130px; width: 7px; height: 62px; transform-origin: top; transform: translateZ(13px); border-radius: 3px; background: repeating-linear-gradient(0deg, #fff5dc 0 12px, #eaaa77 12px 22px); border: 1px solid #f5e1b8; transition: transform 650ms cubic-bezier(.2,.8,.2,1); }
+.is-cleared .gate-arm { transform: translateZ(13px) rotateX(85deg); }.is-cleared .gate-housing b { background: #74d6a1; box-shadow: 0 0 6px #74d6a1; }
+.gate-bollard { transform: translateZ(10px); }.garage-plate { transform: translateZ(30px); }
 .exit-label { transform: translateZ(18px); }.exit-signal { transform: translateZ(10px); }
 .vehicle { transform-style: preserve-3d; --body-height: 18px; filter: none; }
 .vehicle.bus { --body-height: 24px; }.vehicle.model-racer { --body-height: 14px; }

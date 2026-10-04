@@ -6,6 +6,10 @@
     await new Promise(resolve => setTimeout(resolve, 20));
   }
   await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  // Loading a level can animate the target from its placeholder position.
+  const settling = [...document.querySelectorAll('.vehicle')].flatMap(car => car.getAnimations())
+    .filter(animation => ['left', 'top'].includes(animation.transitionProperty));
+  await Promise.all(settling.map(animation => animation.finished.catch(() => {})));
   const cars = [...document.querySelectorAll('.vehicle')];
   if (!cars.length) throw new Error('Load a playable level before checking hits.');
   const results = [];

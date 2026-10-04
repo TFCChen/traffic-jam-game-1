@@ -136,8 +136,16 @@ export default function Board({ cars, onMove, hint, editor, editorStart, onCellC
         <div className="garage-details" aria-hidden="true">
           <span className="fence north" /><span className="fence south" /><span className="fence west" />
           <span className="fence east upper" /><span className="fence east lower" />
+          {[14, 132, 250, 372].flatMap((position, index) => [
+            <span key={`north-${index}`} className="rail-post" style={{ left: position, top: 6 }} />,
+            <span key={`south-${index}`} className="rail-post" style={{ left: position, top: 369 }} />,
+            <span key={`west-${index}`} className="rail-post" style={{ left: 6, top: position }} />,
+          ])}
+          {[14, 112, 210, 372].map((position, index) => <span key={`east-${index}`} className="rail-post" style={{ left: 370, top: position }} />)}
           <span className="gate-bollard upper" /><span className="gate-bollard lower" />
-          <span className="garage-plate">P · 06</span>
+          <span className="garage-plate">P</span>
+          <span className="gate-housing"><i /><b /></span>
+          <span className="gate-arm" />
         </div>
         <div className="exit-road" aria-hidden="true"><span className="road-arrow">››</span><i className="exit-signal" /></div>
         <div className="exit-label">{won ? "暢通" : "出口"} <span>→</span></div>
