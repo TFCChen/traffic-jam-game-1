@@ -16,6 +16,18 @@ for(const [name,length]of Object.entries(lengths)){
   assert.ok(bounds.min.x>=-length/2-.12&&bounds.max.x<=length/2+.12,`${name}: vehicle must remain centred on its lane`);
   assert.ok(bounds.min.z>=-.54&&bounds.max.z<=.54,`${name}: vehicle must fit within one lane`);
   assert.ok(bounds.min.y>=-.001&&bounds.max.y>.5&&bounds.max.y<1.3,`${name}: GLB must use the correct up axis and rest on its tyres`);
+  if(name==='compact'||name==='jeep'){
+    asset.scene.updateMatrixWorld(true);
+    for(const x of [.45,.65,.85]){
+      const hit=new Raycaster(new Vector3(x,2,0),new Vector3(0,-1,0)).intersectObject(asset.scene,true)[0];
+      assert.ok(hit?.object.material.name.startsWith('Paint')&&hit.point.y>.3,`${name}: wheel cuts must leave the bonnet intact`);
+    }
+    for(const x of [-.67,.66])for(const z of [-.40,-.30,.30,.40]){
+      const hit=new Raycaster(new Vector3(x,2,z),new Vector3(0,-1,0)).intersectObject(asset.scene,true)[0];
+      assert.ok(hit?.object.material.name.startsWith('Paint')&&hit.point.y>.38,`${name}: fenders must cover the tyre crown`);
+    }
+    assert.ok(name==='jeep'?bounds.max.y>.82:bounds.max.y>.70&&bounds.max.y<.76,`${name}: distinct roof silhouette must survive export`);
+  }
   if(name==='racer'){
     asset.scene.updateMatrixWorld(true);
     for(const x of [.45,.65,.85]){

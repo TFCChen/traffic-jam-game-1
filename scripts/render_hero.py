@@ -1,9 +1,11 @@
 """Render the actual exported hero GLB for silhouette review, without altering assets."""
-import bpy, os
+import bpy, os, sys
 from mathutils import Vector
 ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
-bpy.ops.import_scene.gltf(filepath=os.path.join(ROOT,'public','models','racer.glb'))
+kind=sys.argv[sys.argv.index('--')+1] if '--' in sys.argv else 'racer'
+if kind not in ('racer','compact','jeep'):raise ValueError('Unsupported studio model')
+bpy.ops.import_scene.gltf(filepath=os.path.join(ROOT,'public','models',kind+'.glb'))
 scene=bpy.context.scene
 scene.render.engine='CYCLES';scene.cycles.samples=24;scene.cycles.use_denoising=True
 scene.render.resolution_x=900;scene.render.resolution_y=600;scene.render.resolution_percentage=100
@@ -22,5 +24,5 @@ bpy.ops.object.camera_add();camera=bpy.context.object;camera.data.type='ORTHO';c
 os.makedirs(os.path.join(ROOT,'.browser-checks'),exist_ok=True)
 for name,location in [('three-quarter',(3,-4,2.4)),('side',(0,-5,1.1))]:
     camera.location=location;camera.rotation_euler=(Vector((0,0,.29))-camera.location).to_track_quat('-Z','Y').to_euler()
-    scene.render.filepath=os.path.join(ROOT,'.browser-checks','coupe-'+name+'.png')
+    scene.render.filepath=os.path.join(ROOT,'.browser-checks',('coupe' if kind=='racer' else kind)+'-'+name+'.png')
     bpy.ops.render.render(write_still=True)
