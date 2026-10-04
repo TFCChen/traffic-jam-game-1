@@ -24,7 +24,11 @@ export function batchColoredMeshes(root,predicate,{roughness=.55,metalness=.12,n
 export function detailTexture(kind) {
   const canvas=document.createElement('canvas');canvas.width=canvas.height=64;
   const context=canvas.getContext('2d');
-  if(kind==='glow'){
+  if(kind==='beam'){
+    const gradient=context.createLinearGradient(0,0,0,64);
+    gradient.addColorStop(0,'rgba(255,239,191,0)');gradient.addColorStop(.75,'rgba(255,239,191,.24)');gradient.addColorStop(1,'rgba(255,239,191,.7)');
+    context.fillStyle=gradient;context.beginPath();context.moveTo(5,0);context.lineTo(59,0);context.lineTo(38,64);context.lineTo(26,64);context.closePath();context.fill();
+  }else if(kind==='glow'){
     const gradient=context.createRadialGradient(32,32,1,32,32,32);
     gradient.addColorStop(0,'rgba(255,255,255,.65)');gradient.addColorStop(1,'rgba(255,255,255,0)');
     context.fillStyle=gradient;context.fillRect(0,0,64,64);
@@ -36,13 +40,24 @@ export function detailTexture(kind) {
 }
 
 export function asphaltTexture() {
-  const canvas=document.createElement('canvas');canvas.width=canvas.height=128;
-  const context=canvas.getContext('2d'),data=context.createImageData(128,128);
+  const canvas=document.createElement('canvas');canvas.width=canvas.height=512;
+  const context=canvas.getContext('2d'),data=context.createImageData(512,512);
   let seed=731;
   for(let i=0;i<data.data.length;i+=4){seed=(seed*1664525+1013904223)>>>0;const shade=231+(seed%20);data.data.set([shade,shade,shade,255],i);}
   context.putImageData(data,0,0);
+  // Restrained wear: broad repair patches, aggregate and fine sealed cracks.
+  context.fillStyle='rgba(91,98,100,.07)';context.fillRect(84,137,173,101);
+  for(let i=0;i<450;i++){
+    seed=(seed*1664525+1013904223)>>>0;const x=seed%512;
+    seed=(seed*1664525+1013904223)>>>0;const y=seed%512;
+    context.fillStyle=i%3?'rgba(25,32,36,.09)':'rgba(255,255,255,.18)';context.fillRect(x,y,1+i%2,1);
+  }
+  context.strokeStyle='rgba(38,48,52,.10)';context.lineWidth=.8;
+  for(const [x,y]of [[43,61],[308,332],[401,111]]){
+    context.beginPath();context.moveTo(x,y);for(let i=1;i<8;i++)context.lineTo(x+i*8+Math.sin(i*2)*4,y+i*5+Math.cos(i*3)*5);context.stroke();
+  }
   const texture=new THREE.CanvasTexture(canvas);
-  texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.repeat.set(6,6);texture.colorSpace=THREE.SRGBColorSpace;
+  texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.repeat.set(2,2);texture.colorSpace=THREE.SRGBColorSpace;
   return texture;
 }
 

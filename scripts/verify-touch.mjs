@@ -26,12 +26,14 @@ try{
   const blocked=await evaluate("(()=>{const a=document.querySelector('.garage-canvas').garageInspection,c=a.snapshot().cars.find(c=>c.id==='target'),[x,,z]=c.position;return {point:a.project(x,.55,z),position:c.position}})()");
   const contactSamples=evaluate("(async()=>{const samples=[];for(let i=0;i<20;i++){samples.push(document.querySelector('.garage-canvas').garageInspection.snapshot().cars.find(c=>c.id==='target'));await new Promise(r=>setTimeout(r,25));}return samples;})()");
   await touch('touchStart',blocked.point);
-  let contactPeak=0;
+  let contactPeak=0,compressionPeak=0;
   for(const car of await contactSamples){
     assert.deepEqual(car.position,blocked.position);assert.equal(car.wheelTilt,0);assert.ok(Math.abs(car.tilt)<=.02);contactPeak=Math.max(contactPeak,Math.abs(car.tilt));
+    assert.ok(car.compression<=0&&car.compression>=-.006);compressionPeak=Math.min(compressionPeak,car.compression);
   }
   await touch('touchEnd');
   assert.ok(contactPeak>.001,'Blocked car should visibly compress once.');
+  assert.ok(compressionPeak<-.0005,'Contact must compress suspension while wheels stay grounded.');
   await sleep(500);
   assert.ok(Math.abs(await evaluate("document.querySelector('.garage-canvas').garageInspection.snapshot().cars.find(c=>c.id==='target').tilt"))<.0001,'Contact must settle quickly.');
   console.log(`Contact peak ${(contactPeak*180/Math.PI).toFixed(2)} degrees; stationary wheels and return to rest passed.`);
