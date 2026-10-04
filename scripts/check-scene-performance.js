@@ -1,7 +1,8 @@
 // Run with agent-browser eval --stdin on a loaded, idle 3D level.
 // Checks actual rendered frames, not the display's requestAnimationFrame rate.
 (async () => {
-  const canvas=document.querySelector('.garage-canvas');
+  let canvas;
+  for(let n=0;n<200&&!canvas;n++){canvas=document.querySelector('.garage-canvas');if(!canvas)await new Promise(resolve=>setTimeout(resolve,25));}
   for(let n=0;n<200&&!canvas?.dataset.ready;n++)await new Promise(resolve=>setTimeout(resolve,25));
   const inspection=canvas?.garageInspection;
   if(!inspection?.snapshot().ready)throw Error('Load a 3D level first.');

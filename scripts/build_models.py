@@ -45,6 +45,10 @@ terracotta=mat('Terracotta','c38765',.95)
 streetlamp=mat('Streetlamp glow','ffe7af',.3)
 drain=mat('Drain metal','34434a',.85)
 pavement=mat('Concrete apron','b8c1b9',.98)
+street=mat('Street asphalt','657071',.95)
+stone=mat('Sidewalk stone','aeb6ac',.95)
+wood=mat('Weathered wood','a58b6c',.85)
+awning=mat('Canvas awning','a19e78',.9)
 objects = []
 
 def cube(name, position, size, material, bevel=.04):
@@ -109,18 +113,30 @@ def wheel_colourize(obj, colour):
     obj.data.materials.clear();obj.data.materials.append(wheel_material)
     return obj
 
+def shaped_cabin(name,position,size,material):
+    obj=cube(name,position,size,material,0)
+    for vertex in obj.data.vertices:
+        if vertex.co.z>0:vertex.co.x*=.68;vertex.co.y*=.88
+    obj.data.update()
+    mod=obj.modifiers.new('Rounded glass edges','BEVEL');mod.width=.045;mod.segments=3
+    bpy.ops.object.modifier_apply(modifier=mod.name)
+    mod=obj.modifiers.new('Glass normals','WEIGHTED_NORMAL');bpy.ops.object.modifier_apply(modifier=mod.name)
+    return obj
+
 def car(kind, length, colour):
     objects.clear()
     paint = mat('Paint '+kind, colour, .3, .04)
+    paint.node_tree.nodes.get('Principled BSDF').inputs['Coat Weight'].default_value=.55
+    paint.node_tree.nodes.get('Principled BSDF').inputs['Coat Roughness'].default_value=.2
     tall = kind in ('schoolbus', 'coach', 'camper', 'delivery')
     cube('Chassis', (0,0,.22), (length-.16,.82,.25), paint, .09)
     if kind == 'racer':
-        cube('Low sporty cabin', (-.12,0,.47), (.9,.67,.32), glass, .09)
+        shaped_cabin('Sloped sporty glass', (-.12,0,.47), (.9,.67,.32), glass)
         cube('Sport roof', (-.2,0,.65), (.43,.62,.04), paint, .025)
         cube('Rear spoiler', (-length/2+.2,0,.45), (.12,.92,.055), white, .025)
         for y in (-.12,.12): cube('Racing stripe', (.6,y,.355), (.5,.055,.012), white, .005)
     elif kind == 'pickup':
-        cube('Cab glass', (.39,0,.49), (.62,.69,.38), glass, .08)
+        shaped_cabin('Sloped pickup glass', (.39,0,.49), (.62,.69,.38), glass)
         cube('Cab roof', (.3,0,.7), (.46,.73,.055), paint)
         cube('Cargo floor', (-.47,0,.36), (.8,.65,.06), bed, .025)
         for y in (-.35,.35): cube('Cargo sides', (-.47,y,.47), (.87,.07,.23), paint, .025)
@@ -149,7 +165,8 @@ def car(kind, length, colour):
         cube('Roof skylight', (-.4,0,1.1), (.43,.38,.035), glass, .04)
     else:
         cabin_height = .47 if kind == 'jeep' else .32
-        cube('Cabin glass', (-.15,0,.5), (1.12,.67,cabin_height), glass, .095)
+        if kind=='jeep':cube('Upright jeep glass', (-.15,0,.5), (1.12,.67,cabin_height), glass, .065)
+        else:shaped_cabin('Sloped passenger glass', (-.15,0,.5), (1.12,.67,cabin_height), glass)
         cube('Cabin roof', (-.25,0,.5+cabin_height/2+.02), (.55,.73,.06), paint, .035)
         if kind == 'jeep':
             cylinder('Rear spare tyre', (-length/2+.02,0,.47), .2,.12,rubber,'X')
@@ -157,6 +174,11 @@ def car(kind, length, colour):
         if kind == 'taxi': cube('Taxi roof sign', (-.12,0,.75), (.32,.26,.12), lamp, .025)
     # Small readable details share existing material batches, rather than extra draw calls.
     mirror_x = .82 if tall else .28
+    for y in (-.41,.41):
+        cube('Lower rocker trim',(0,y,.145),(length-.46,.032,.05),rubber,.01)
+    if kind not in ('delivery','camper'):
+        front_x=length/2-(.35 if tall else .58)
+        for y in (-.16,.16):cube('Windshield wiper',(front_x,y,.77 if tall else .57),(.06,.21,.022),rubber,.005)
     for y in (-.47,.47):
         cube('Side mirror', (mirror_x,y,.59 if tall else .49), (.16,.085,.075), chrome, .018)
         cube('Door handle', (.15,y*.89,.43), (.12,.023,.025), chrome, .008)
@@ -265,6 +287,40 @@ for x,y in ((-.7,-.2),(6.65,-5.45)):
     cube('Lamp diffuser',(x,y,1.23),(.24,.2,.04),streetlamp,.015)
 cube('Drain grate',(5.6,-5.77,.04),(.56,.19,.009),drain,.012)
 for x in (5.4,5.5,5.6,5.7,5.8):cube('Drain slot',(x,-5.77,.048),(.028,.145,.01),chrome,.002)
+# A quiet street corner frames the saturated puzzle cars. Keep the exit lane clear.
+cube('Neighbourhood street',(7.13,-3,.065),(1.14,6.7,.05),street,.015)
+for row in range(13):
+    y=.15-row*.51
+    cube('West paving slab',(-.72,y,.055),(.91,.49,.055),stone,.014)
+    if not -3.12<y<-1.88:cube('East paving slab',(6.4,y,.055),(.48,.49,.055),stone,.014)
+for y in (.12,-.55,-1.22,-3.65,-4.32,-4.99,-5.66):
+    cube('Street centre dash',(7.45,y,.099),(.035,.3,.008),white,.002)
+for y in (-3.35,-3.55,-3.75,-3.95):cube('Pedestrian crossing',(7.05,y,.099),(.79,.09,.008),white,.003)
+for y in (-.2,-.8,-1.4,-3.6,-4.2,-4.8,-5.4,-6):
+    cube('West kerbstone',(-.17,y,.1),(.14,.55,.14),cream,.02)
+    if y< -3.2 or y>-1.6:cube('Street kerbstone',(6.68,y,.1),(.12,.55,.14),cream,.02)
+# Kiosk frontage and striped canvas canopy, with a small warm display window.
+cube('Kiosk sign',(-.392,-1.45,.63),(.035,.48,.15),wood,.018)
+cube('Kiosk canopy',(-.63,-1.05,.81),(.91,.36,.08),awning,.015)
+for x in (-.98,-.76,-.54,-.32):cube('Canopy stripe',(x,-1.05,.855),(.085,.34,.015),cream,.004)
+cube('Kiosk service shelf',(-.405,-1.45,.36),(.22,.48,.055),wood,.012)
+cube('Kiosk window glow',(-.4,-1.45,.5),(.02,.36,.18),streetlamp,.014)
+# Low furniture sits below vehicle roofs, away from the grid and exit.
+for y in (-3.75,-4.02):
+    cube('Bench foot',(-.73,y,.16),(.45,.05,.3),drain,.008)
+for x in (-.91,-.77,-.63):cube('Bench seat slat',(x,-3.9,.32),(.1,.62,.045),wood,.008)
+for z in (.47,.58):cube('Bench back slat',(-.98,-3.9,z),(.045,.65,.08),wood,.01)
+for y in (-3.75,-4.04):cube('Bench back support',(-1.01,y,.42),(.035,.035,.49),drain,.006)
+cube('Street bin',(-.69,-2.68,.3),(.26,.28,.52),rail,.03)
+cube('Bin lid',(-.69,-2.68,.58),(.3,.32,.055),drain,.015)
+cube('Bin opening',(-.55,-2.68,.48),(.015,.15,.07),rubber,.01)
+for x,y in ((-.74,-5.32),(6.36,-5.87)):
+    cylinder('Street tree trunk',(x,y,.47),.047,.86,wood)
+    for dx,dy,z,r in ((0,0,.99,.26),(.16,.08,.88,.22),(-.14,-.08,.87,.22)):
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2,radius=r,location=(x+dx,y+dy,z))
+        obj=bpy.context.object;obj.name='Street tree crown';obj.data.materials.append(foliage);objects.append(obj)
+cube('Utility cover',(7.12,-5.2,.099),(.3,.3,.012),drain,.014)
+for x in (7.04,7.12,7.2):cube('Utility grooves',(x,-5.2,.108),(.018,.24,.008),chrome,.002)
 for obj in objects[scenery_start:]:
     if not obj.name.startswith('Drain'):obj.location.z-=.06
 garage=export('garage')

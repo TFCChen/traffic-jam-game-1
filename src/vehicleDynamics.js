@@ -4,7 +4,8 @@ const clamp=(value,limit)=>Math.max(-limit,Math.min(limit,value));
 export function stepSuspension(state,velocity,dt){
   const filtered=state.speed+(velocity-state.speed)*(1-Math.exp(-12*dt));
   const acceleration=clamp((filtered-state.speed)/Math.max(dt,.001),8);
-  const target=-acceleration*.00045,omega=20,offset=state.pitch-target;
+  const target=acceleration*.0015,omega=18,offset=state.pitch-target;
   const coefficient=state.rate+omega*offset,decay=Math.exp(-omega*dt);
-  return {speed:filtered,pitch:clamp(target+(offset+coefficient*dt)*decay,.004),rate:(state.rate-omega*coefficient*dt)*decay};
+  return {speed:filtered,pitch:clamp(target+(offset+coefficient*dt)*decay,.02),rate:(state.rate-omega*coefficient*dt)*decay};
 }
+export function contactImpulse(state,direction=1){return {...state,rate:-Math.sign(direction||1)*.8};}

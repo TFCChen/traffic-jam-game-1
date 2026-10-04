@@ -1,6 +1,7 @@
 // Run in the loaded game with agent-browser eval --stdin.
 // Samples rendered surfaces, so a pointer-events or camera regression fails here.
 (async () => {
+  for(let n=0;n<200&&!document.querySelector('.garage-canvas,.vehicle');n++)await new Promise(resolve=>setTimeout(resolve,25));
   const canvas=document.querySelector('.garage-canvas');
   if(canvas){
     for(let attempt=0;attempt<200&&!canvas.dataset.ready;attempt++)await new Promise(resolve=>setTimeout(resolve,25));
