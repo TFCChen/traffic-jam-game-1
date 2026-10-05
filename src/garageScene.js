@@ -13,7 +13,7 @@ import {
 } from "./garageMaterials.js";
 import { SCENE_THEMES } from "./sceneThemes.js";
 import { QUALITY } from "./gamePreferences.js";
-import { configureVehicleGlass, VEHICLE_MIRROR } from "./vehicleGlass.js";
+import { configureVehicleGlass, prepareVehicleGlass, VEHICLE_MIRROR } from "./vehicleGlass.js";
 import { quadDistance, snapDragDelta } from "./pointerHelpers.js";
 import {
   stepSuspension,
@@ -67,6 +67,11 @@ function assets() {
                 : 2,
             );
           root.traverse((o) => {
+            if (o.isMesh && o.material.name === 'Automotive glass') {
+              const original = o.geometry;
+              o.geometry = prepareVehicleGlass(original);
+              original.dispose();
+            }
             if (o.isMesh) o.geometry.computeBoundingBox();
           });
         }
@@ -1727,11 +1732,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
       lastShadow = now;
       stats.shadowUpdates++;
     }
-    // Keep refraction crisp while inspecting; moving glass needs fewer pixels.
-    // Only the shared transmission buffer changes, never the main scene scale.
-    renderer.transmissionResolutionScale = settings.quality === "high"
-      ? (active ? 0.3 : 1)
-      : (active ? 0.2 : 0.5);
+    // Camera and vehicle motion must not change the optical clarity of windows.
+    renderer.transmissionResolutionScale = 1;
     profiler.begin();
     renderer.render(scene, camera);
     profiler.end(renderer.info.render);
@@ -1820,6 +1822,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
           far: camera.far,
           position: camera.position.toArray(),
         },
+        transmissionResolutionScale: renderer.transmissionResolutionScale,
         viewCenter: screenCenterPoint()?.toArray(),
         cars: [...groups.values()].map((i) => ({
           id: i.car.id,

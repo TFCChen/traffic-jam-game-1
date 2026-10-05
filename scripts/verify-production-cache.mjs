@@ -51,7 +51,7 @@ try {
   assert.equal(result.progress,'level-17');
   assert(result.rejectsWrongVersion);
   assert(!result.caches.includes('traffic-jam-legacy-test'));
-  writeFileSync('docs/cache-recovery-2026-10-06/production-verification.json',JSON.stringify(result,null,2));
+  writeFileSync(process.argv[2] || 'docs/cache-recovery-2026-10-06/production-verification.json',JSON.stringify(result,null,2));
   console.log(JSON.stringify(result,null,2));
 } finally {
   if(c){await c.send('Network.emulateNetworkConditions',{offline:false,latency:0,downloadThroughput:-1,uploadThroughput:-1});c.close();}

@@ -6,6 +6,7 @@ import { Box3,Raycaster,Vector3 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { vehicleModel } from './vehicleModels.js';
 import { prepareWheels,batchColoredMeshes } from './garageMaterials.js';
+import { configureVehicleGlass, prepareVehicleGlass } from './vehicleGlass.js';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const lengths={racer:2,jeep:2,pickup:2,compact:2,taxi:2,schoolbus:3,coach:3,camper:3,delivery:3};
@@ -23,6 +24,16 @@ for(const [name,length]of Object.entries(lengths)){
     if(o.material.name==='Cabin upholstery')interior.push(o);
   }});
   assert.ok(glazing.length&&glazing.every(o=>o.material.isMeshPhysicalMaterial&&o.material.transmission>.8&&o.material.metalness===0),`${name}: glazing must export physical transmission instead of opaque plastic`);
+  for(const window of glazing){
+    const count=window.geometry.index?.count??window.geometry.getAttribute('position').count;
+    window.geometry=prepareVehicleGlass(window.geometry);
+    assert.equal(window.geometry.getAttribute('position').count,count*2,'Thin glass must contain both visible optical faces');
+  }
+  for(const quality of ['high','standard','saver','high'])for(const window of glazing){
+    configureVehicleGlass(window.material,quality);
+    assert.equal(window.material.roughness,.003,`${name}: tint must not turn glass into a rough frosted material`);
+    assert.equal(window.material.transmission,quality==='saver'?0:1);
+  }
   assert.ok(mirrors.length&&mirrors.every(o=>o.material.metalness===1),`${name}: reflective mirror lenses must survive export`);
   assert.ok(interior.length,`${name}: a visible cabin must contain actual interior geometry`);
   let leatherVertices=0;
@@ -36,6 +47,19 @@ for(const [name,length]of Object.entries(lengths)){
   const seatX={racer:-.25,compact:-.21,taxi:-.21,jeep:-.21,pickup:.12,delivery:.88,schoolbus:.30,coach:.98,camper:.98}[name];
   const seatZ={racer:.365,compact:.415,taxi:.415,jeep:.46,pickup:.46,delivery:.64,schoolbus:.54,coach:.54,camper:.54}[name];
   asset.scene.updateMatrixWorld(true);
+  const pillarX={racer:-.34,compact:-.23,taxi:-.23,jeep:-.23,pickup:-.12,camper:.78}[name];
+  if(pillarX!==undefined){
+    const h={racer:.49,compact:.56,taxi:.56,jeep:.62,pickup:.63,camper:.75}[name];
+    const hit=new Raycaster(new Vector3(pillarX,h,2),new Vector3(0,0,-1)).intersectObject(asset.scene,true)[0];
+    assert.ok(hit&&hit.object.material.name!=='Automotive glass',`${name}: B pillar must visibly occupy the gap between separate side panes`);
+  }
+  if(name==='coach'||name==='schoolbus'){
+    const x=name==='coach'?.70:.56;
+    const panel=new Raycaster(new Vector3(x+.07,.40,2),new Vector3(0,0,-1)).intersectObject(asset.scene,true)[0];
+    assert.ok(panel?.object.material.name.startsWith('Paint'),`${name}: passenger door needs a solid lower kick panel`);
+    const innerWall=new Raycaster(new Vector3(x+.07,.66,.40),new Vector3(0,0,-1)).intersectObject(asset.scene,true)[0];
+    assert.ok(!innerWall||innerWall.point.z<.34||!innerWall.object.material.name.startsWith('Paint'),`${name}: door glazing must expose a carved entrance instead of intact exterior bodywork`);
+  }
   const footwell=new Raycaster(new Vector3(seatX+.16,seatZ-.01,name==='racer'||['compact','taxi','jeep','pickup'].includes(name)?-.145:-.18),new Vector3(0,-1,0)).intersectObject(asset.scene,true)[0];
   assert.ok(footwell&&['Tyre rubber','Cabin upholstery','Seat stitching and console'].includes(footwell.object.material.name),`${name}: the footwell must expose carpet or a floor mat, not solid exterior coachwork`);
   assert.ok(footwell.point.y<seatZ-.09&&footwell.point.y>seatZ-.17,`${name}: feet need a recessed floor beneath the seat cushion`);
