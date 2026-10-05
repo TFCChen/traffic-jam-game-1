@@ -26,8 +26,14 @@ const updateWorkerFile = new URL(
 );
 const ready = () =>
   until(
-    "document.querySelector('.garage-canvas')?.garageInspection?.snapshot().ready&&document.querySelector('.game-column')?.getAttribute('aria-busy')==='false'",
+    "(()=>{const c=document.querySelector('.garage-canvas'),s=c?.garageInspection?.snapshot(),r=c?.getBoundingClientRect();return s?.ready&&s.sceneKey===s.performance.renderedSceneKey&&s.performance.viewport?.width===r.width&&s.performance.viewport?.height===r.height&&document.querySelector('.game-column')?.getAttribute('aria-busy')==='false'})()",
   );
+async function reload() {
+  const origin = await evaluate("performance.timeOrigin");
+  await evaluate("location.reload()");
+  await until(`performance.timeOrigin!==${origin}`);
+  await ready();
+}
 const shot = async (name) => {
   await sleep(450);
   writeFileSync(
@@ -81,9 +87,9 @@ try {
     mobile: false,
   });
   await evaluate(
-    `(()=>{for(const k of ${JSON.stringify(keys)})localStorage.removeItem(k);localStorage.setItem('traffic-jam-tutorial-v1','true');location.reload()})()`,
+    `(()=>{for(const k of ${JSON.stringify(keys)})localStorage.removeItem(k);localStorage.setItem('traffic-jam-tutorial-v1','true')})()`,
   );
-  await ready();
+  await reload();
   const projection = () =>
     evaluate(
       "document.querySelector('.garage-canvas').garageInspection.project(0,.055,0)",
@@ -141,8 +147,7 @@ try {
     ),
     1,
   );
-  await evaluate("location.reload()");
-  await ready();
+  await reload();
   await click("編輯器");
   assert.equal(
     await evaluate(
@@ -206,8 +211,7 @@ try {
     clickCount: 1,
   });
   await until("document.querySelector('.stats b').textContent==='1'");
-  await evaluate("location.reload()");
-  await ready();
+  await reload();
   assert.equal(
     await evaluate("document.querySelector('.stats b').textContent"),
     "1",

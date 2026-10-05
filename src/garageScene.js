@@ -513,6 +513,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
   }
   function resize() {
     const { width, height } = canvas.getBoundingClientRect();
+    stats.viewport = { width, height };
     renderer.setSize(width, height, false);
     const aspect = width / Math.max(1, height),
       halfWidth = 4.65,
@@ -1480,6 +1481,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     snapshot() {
       return {
         instanceId,
+        sceneKey,
         memory: { ...renderer.info.memory },
         ready,
         settings: { ...settings },
