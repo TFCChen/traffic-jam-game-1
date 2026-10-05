@@ -24,6 +24,8 @@ import {
 import { createRenderProfiler } from "./renderProfiler.js";
 import {
   DEFAULT_VIEW,
+  ORTHOGRAPHIC_DISTANCE,
+  ORTHOGRAPHIC_FAR,
   normalizeView,
   rotateView,
   panView,
@@ -105,7 +107,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     skidTexture = detailTexture("skid"),
     beamTexture = detailTexture("beam");
   const contactGeometry = new THREE.PlaneGeometry(1, 1);
-  const camera = new THREE.OrthographicCamera(-5, 5, 4, -4, 0.1, 80);
+  const camera = new THREE.OrthographicCamera(-5, 5, 4, -4, 0.1, ORTHOGRAPHIC_FAR);
   const aim = new THREE.Vector3(3, 0.15, 3);
   const viewAim = aim.clone();
   // A fixed reference view determines framing. Orbit changes orientation only,
@@ -167,7 +169,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     intensity: 3,
     shadows: true,
     theme: "day",
-    quality: "standard",
+    quality: "high",
     zoom: 1,
     panX: 0,
     panY: 0,
@@ -176,7 +178,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
   let cameraGesture = null,
     touchBlocked = false,
     cameraPending = false;
-  let quality = QUALITY.standard;
+  let quality = QUALITY.high;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const motionChanged = () => {
     dirty = true;
@@ -438,9 +440,9 @@ export function createGarageScene(canvas, getProps, callbacks) {
     const pitch = THREE.MathUtils.degToRad(settings.pitch),
       yaw = THREE.MathUtils.degToRad(settings.yaw);
     camera.position.set(
-      viewAim.x + Math.sin(yaw) * Math.cos(pitch) * 14,
-      viewAim.y + Math.sin(pitch) * 14,
-      viewAim.z + Math.cos(yaw) * Math.cos(pitch) * 14,
+      viewAim.x + Math.sin(yaw) * Math.cos(pitch) * ORTHOGRAPHIC_DISTANCE,
+      viewAim.y + Math.sin(pitch) * ORTHOGRAPHIC_DISTANCE,
+      viewAim.z + Math.cos(yaw) * Math.cos(pitch) * ORTHOGRAPHIC_DISTANCE,
     );
     camera.lookAt(viewAim);
     camera.updateMatrixWorld();
@@ -1138,12 +1140,20 @@ export function createGarageScene(canvas, getProps, callbacks) {
       let item = groups.get(car.id);
       if (!item) {
         const group = library[vehicleModel(car).kind].clone(true);
+        // Cabin details receive the roof's shadow, but do not cast tiny
+        // exterior shadows through glass. One batch retains all upholstery.
+        batchColoredMeshes(
+          group,
+          (mesh) => ["Cabin upholstery", "Tailored cabin leather", "Seat stitching and console"].includes(mesh.material.name),
+          { name: "Batched cabin", roughness: 0.7, metalness: 0.02 },
+        );
         batchColoredMeshes(
           group,
           (mesh) =>
             ![
               "Automotive glass",
               VEHICLE_MIRROR,
+              "Batched cabin",
               "Headlamp",
               "Tail lamp",
               "Rolling wheels",
@@ -1197,7 +1207,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
                 tyreCompression,
               );
             }
-            object.castShadow = material.name !== "Automotive glass";
+            object.castShadow = !["Automotive glass", "Batched cabin"].includes(material.name);
             object.receiveShadow = material.name !== "Automotive glass";
             object.userData.carId = car.id;
           }
@@ -1755,7 +1765,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       if (drag) finish({ pointerId: drag.pointerId }, true);
       Object.assign(settings, next);
       Object.assign(settings, normalizeView(settings));
-      quality = QUALITY[settings.quality] ?? QUALITY.standard;
+      quality = QUALITY[settings.quality] ?? QUALITY.high;
       for (const item of groups.values())
         for (const paint of item.paints) {
           if ("clearcoat" in paint) {
@@ -1790,6 +1800,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       return {
         x: r.left + ((v.x + 1) * r.width) / 2,
         y: r.top + ((1 - v.y) * r.height) / 2,
+        depth: v.z,
       };
     },
     pick(x, y, pointerType = "mouse") {
@@ -1805,6 +1816,9 @@ export function createGarageScene(canvas, getProps, callbacks) {
         cameraFrustum: {
           width: camera.right - camera.left,
           height: camera.top - camera.bottom,
+          near: camera.near,
+          far: camera.far,
+          position: camera.position.toArray(),
         },
         viewCenter: screenCenterPoint()?.toArray(),
         cars: [...groups.values()].map((i) => ({

@@ -17,7 +17,7 @@ const DEFAULT = {
   intensity: 3,
   shadows: true,
   theme: "day",
-  quality: "standard",
+  quality: "high",
   motion: 1.2,
   zoom: 1,
   panX: 0,
@@ -43,7 +43,7 @@ function readSettings() {
       intensity: Math.max(0.5, Math.min(5, Number(value.intensity) || 3)),
       shadows: value.shadows !== false,
       theme: value.theme ?? "day",
-      quality: QUALITY[value.quality] ? value.quality : "standard",
+      quality: QUALITY[value.quality] ? value.quality : "high",
       motion: Number.isFinite(Number(value.motion))
         ? Math.max(0, Math.min(1.5, Number(value.motion)))
         : 1.2,

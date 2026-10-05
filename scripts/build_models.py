@@ -36,6 +36,10 @@ panel_glass = mat('Smoked panel glass', '263b46', .12, .12)
 mirror_glass = mat('Mirror silver', 'dde5e8', .055, 1)
 upholstery = mat('Cabin upholstery', '34353a', .86)
 seat_trim = mat('Seat stitching and console', '887767', .75)
+leather = mat('Tailored cabin leather', 'ffffff', .65)
+leather_colour=leather.node_tree.nodes.new('ShaderNodeVertexColor')
+leather_colour.layer_name='Col'
+leather.node_tree.links.new(leather_colour.outputs['Color'],leather.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
 chrome = mat('Wheel hubs', 'c4d9da', .35, .4)
 white = mat('Warm white trim', 'f7efd5', .5)
 lamp = mat('Headlamp', 'ffdf9c', .25)
@@ -237,6 +241,83 @@ def glazing_pillar(name,sections,side,width,paint):
         joint=bpy.context.object;joint.name='Continuous pillar joint';joint.data.materials.append(paint);objects.append(joint)
         for polygon in joint.data.polygons:polygon.use_smooth=True
 
+def leather_piece(obj,kind):
+    # Vertex colours let different cabin palettes share one material/draw call.
+    palette={'racer':'a76843','jeep':'91846b','pickup':'8b6950','compact':'596e7a','taxi':'8a7660',
+             'camper':'b29a78','coach':'667b8b','schoolbus':'73675a','delivery':'65717b'}
+    rgb=[int(palette[kind][i:i+2],16)/255 for i in (0,2,4)]
+    colour=[c/12.92 if c<=.04045 else ((c+.055)/1.055)**2.4 for c in rgb]
+    layer=obj.data.color_attributes.new(name='Col',type='FLOAT_COLOR',domain='CORNER')
+    for element in layer.data:element.color=(*colour,1)
+    return obj
+
+def tailored_seat(x,y,z,height,kind,width=.20):
+    sporty=kind=='racer'
+    cube('Seat frame and cushion',(x,y,z),(.25,width,.046),upholstery,.023)
+    leather_piece(cube('Cushion centre insert',(x+.006,y,z+.025),(.19,width*.64,.017),leather,.008),kind)
+    # Closed, lofted backrest: narrow waist, broad shoulders and a reclining crown.
+    profiles=[(0,.77,0),(.18,.84,-.007),(.52,.75,-.018),(.80,1,-.035),(1,.83,-.045)]
+    vertices=[]
+    for t,w,recline in profiles:
+        bx=x-.096+recline;bz=z+.02+height*t;hw=width*w/2
+        vertices.extend([(bx-.023,y-hw*.8,bz),(bx-.012,y-hw,bz),(bx+.020,y-hw*.80,bz),
+                         (bx+.025,y+hw*.80,bz),(bx-.012,y+hw,bz),(bx-.023,y+hw*.8,bz)])
+    faces=[tuple(range(5,-1,-1))]
+    for i in range(len(profiles)-1):
+        for j in range(6):faces.append((i*6+j,i*6+(j+1)%6,(i+1)*6+(j+1)%6,(i+1)*6+j))
+    faces.append(tuple(range(24,30)))
+    surface('Contoured seat shell',vertices,faces,upholstery,1)
+    # Padded back insert follows the actual reclining surface.
+    for i,(a,b) in enumerate(zip(profiles,profiles[1:])):
+        verts=[]
+        for t,w,recline in (a,b):
+            for side in (-1,1):verts.append((x-.069+recline,y+side*width*.29*w,z+.02+height*t))
+        leather_piece(surface('Tailored backrest insert',verts,[(0,1,3,2)],leather),kind)
+        for side in (-1,1):
+            strut('Backrest piping',verts[0 if side<0 else 1],verts[2 if side<0 else 3],.003,seat_trim)
+    for side in (-1,1):
+        bolster=cube('Raised seat bolster',(x,y+side*width*.43,z+.038),(.23,.029,.038),upholstery,.014)
+        strut('Cushion seam',(x-.085,y+side*width*.31,z+.034),(x+.085,y+side*width*.31,z+.034),.003,seat_trim)
+    for i in range(4):
+        sx=x-.06+i*.035
+        strut('Cushion tailoring',(sx,y-width*.26,z+.035),(sx,y+width*.26,z+.035),.0018,seat_trim)
+    # Headrest is supported by two posts rather than floating above the seat.
+    for side in (-1,1):
+        strut('Headrest stem',(x-.14,y+side*.028,z+height),(x-.14,y+side*.028,z+height+.047),.006,chrome)
+    leather_piece(cube('Padded head restraint',(x-.142,y,z+height+.051),(.046,width*.57,.047),leather,.017),kind)
+    cube('Seatbelt buckle',(x-.015,y+(.115 if y<0 else -.115),z+.016),(.024,.014,.025),rubber,.004)
+    cube('Buckle release button',(x-.015,y+(.115 if y<0 else -.115),z+.031),(.018,.011,.005),redlamp,.002)
+
+def cockpit_controls(x,z,driver_y,kind,width=.47):
+    cube('Wrapped dashboard lower',(x,0,z-.018),(.13,width,.053),upholstery,.020)
+    # Overlapping flowing upper and lower surfaces replace the rectangular bar.
+    ribbon('Swept dashboard cap',[(x-.082,width*.46,z+.006),(x-.038,width*.51,z+.03),
+                                (x+.055,width*.47,z+.031),(x+.09,width*.43,z+.002)],upholstery)
+    cube('Satin dashboard fascia',(x-.073,0,z),(.012,width*.89,.016),chrome,.004)
+    for vy in (-width*.40,-.065,.065,width*.40):
+        cube('Inset air vent',(x-.082,vy,z+.013),(.009,.049,.019),rubber,.003)
+        for offset in (-.014,0,.014):
+            cube('Vent vane',(x-.088,vy+offset,z+.013),(.003,.002,.013),chrome,.001)
+    cube('Instrument hood',(x-.060,driver_y,z+.040),(.065,.112,.033),upholstery,.012)
+    cube('Recessed instrument display',(x-.094,driver_y,z+.035),(.003,.090,.023),panel_glass,.003)
+    for dy in (-.023,.023):
+        cylinder('Gauge bezel',(x-.097,driver_y+dy,z+.036),.009,.002,chrome,'X')
+        strut('Gauge needle',(x-.099,driver_y+dy-.004,z+.033),(x-.099,driver_y+dy+.004,z+.041),.002,white)
+    screen=cube('Centre infotainment screen',(x-.081,0,z+.025),(.008,.073,.045),rubber,.005)
+    cube('Infotainment glass',(x-.087,0,z+.025),(.002,.062,.032),panel_glass,.002)
+    for i in range(3):cube('Display graphic',(x-.089,-.018+i*.016,z+.025),(.001,.009,.003+i*.005),chrome,.001)
+    for dy in (-.027,.027):cylinder('Climate rotary dial',(x-.088,dy,z-.015),.008,.005,chrome,'X')
+    wx=x-.117;wz=z+.015;radius=.043 if kind=='racer' else .052
+    bpy.ops.mesh.primitive_torus_add(major_radius=radius,minor_radius=.007,major_segments=24,minor_segments=6,
+        location=(wx,driver_y,wz),rotation=(0,math.pi/2-.25,0))
+    wheel=bpy.context.object;wheel.name='Three spoke leather steering rim';wheel.data.materials.append(upholstery);objects.append(wheel)
+    for polygon in wheel.data.polygons:polygon.use_smooth=True
+    cube('Steering airbag hub',(wx,driver_y,wz),(.019,.035,.027),upholstery,.008)
+    for angle in (math.pi/2,math.pi*7/6,math.pi*11/6):
+        strut('Satin steering spoke',(wx,driver_y,wz),
+              (wx,driver_y+math.sin(angle)*radius*.86,wz+math.cos(angle)*radius*.86),.007,chrome)
+    strut('Steering column',(wx+.014,driver_y,wz),(x-.035,driver_y,z-.025),.013,upholstery)
+
 def cockpit(kind):
     """Visible cabin detail, batched by material rather than individual props."""
     sporty=kind=='racer';suv=kind=='jeep';pickup=kind=='pickup'
@@ -246,31 +327,30 @@ def cockpit(kind):
     cube('Carpeted cabin floor',(seat_x+.10,0,floor-.02),(.80,.52,.018),upholstery,.012)
     for side in (-1,1):
         y=side*.145
-        cube('Sculpted seat cushion',(seat_x,y,floor),(.24,.20,.045),upholstery,.022)
-        back=cube('Reclined bucket back',(seat_x-.105,y,floor+back_height/2),(.055,.20,back_height),upholstery,.025)
-        back.rotation_euler.y=-.14
-        cube('Seat head restraint',(seat_x-.12,y,floor+back_height+.021),(.045,.11,.047),upholstery,.016)
-        for edge in (-1,1):
-            cube('Seat side bolster',(seat_x,y+edge*.082,floor+.025),(.22,.026,.039),upholstery,.012)
-        cube('Seat inset seam',(seat_x-.133,y,floor+back_height*.65),(.006,.14,.012),seat_trim,.003)
-        cube('Cabin door card',(seat_x,side*.286,floor+.005),(.36,.025,.074),upholstery,.012)
-        cube('Interior door grip',(seat_x+.04,side*.273,floor+.025),(.10,.013,.013),chrome,.004)
+        tailored_seat(seat_x,y,floor,back_height,kind)
+        cube('Moulded door panel',(seat_x,side*.286,floor+.014),(.40,.025,.096),upholstery,.015)
+        leather_piece(cube('Padded door insert',(seat_x+.005,side*.272,floor+.022),(.27,.008,.047),leather,.008),kind)
+        cube('Door armrest',(seat_x-.015,side*.265,floor+.012),(.19,.035,.025),upholstery,.009)
+        cube('Interior release handle',(seat_x+.10,side*.263,floor+.045),(.050,.012,.012),chrome,.004)
+        cube('Window switch surround',(seat_x+.03,side*.253,floor+.027),(.04,.017,.005),rubber,.002)
+        for dz in (0,.007,.014):
+            strut('Door speaker grille',(seat_x+.09,side*.269,floor-.022+dz),
+                  (seat_x+.15,side*.269,floor-.022+dz),.002,seat_trim)
     dash_x=.20 if sporty else .49 if pickup else .24 if suv else .23
     dash_z=.412 if sporty else .535 if pickup or suv else .465
-    cube('Sculpted instrument panel',(dash_x,0,dash_z),(.115,.47,.053),upholstery,.020)
+    cockpit_controls(dash_x,dash_z,-.145,kind)
     cube('Centre console',(seat_x+.055,0,floor-.01),(.34,.062,.068),upholstery,.016)
     cube('Console inlay',(seat_x+.08,0,floor+.027),(.18,.041,.006),seat_trim,.003)
     cube('Gear selector',(seat_x+.07,0,floor+.047),(.026,.025,.037),chrome,.007)
-    cube('Instrument binnacle',(dash_x-.045,-.145,dash_z+.025),(.05,.105,.026),rubber,.009)
-    cube('Instrument screen',(dash_x-.073,-.145,dash_z+.024),(.003,.076,.016),panel_glass,.003)
-    bpy.ops.mesh.primitive_torus_add(major_radius=.043 if sporty else .052,minor_radius=.008,
-        major_segments=20,minor_segments=6,location=(dash_x-.097,-.145,dash_z+.015),rotation=(0,math.pi/2-.25,0))
-    wheel=bpy.context.object;wheel.name='Open steering rim';wheel.data.materials.append(upholstery);objects.append(wheel)
-    for polygon in wheel.data.polygons:polygon.use_smooth=True
-    strut('Steering crossbar',(dash_x-.097,-.185,dash_z+.015),(dash_x-.097,-.105,dash_z+.015),.009,chrome)
+    for cx in (seat_x-.045,seat_x-.103):
+        cylinder('Cupholder recess',(cx,0,floor+.027),.015,.004,rubber)
+    leather_piece(cube('Padded centre armrest',(seat_x-.08,0,floor+.033),(.095,.052,.024),leather,.010),kind)
     if not sporty and not pickup:
         cube('Rear seat bench',(-.54 if suv else -.48,0,floor),(.17,.43,.06),upholstery,.025)
         cube('Rear seat back',(-.63 if suv else -.565,0,floor+(.09 if suv else .07)),(.05,.43,.18 if suv else .13),upholstery,.02)
+        for side in (-1,1):
+            leather_piece(cube('Rear bench cushion insert',(-.54 if suv else -.48,side*.12,floor+.032),(.14,.15,.008),leather,.004),kind)
+            leather_piece(cube('Rear backrest insert',(-.601 if suv else -.536,side*.12,floor+(.09 if suv else .07)),(.006,.14,.13 if suv else .085),leather,.004),kind)
 
 def midengine_coupe(paint):
     # A single sculpted shell, with broad wheel shoulders and a low centre bonnet.
@@ -452,7 +532,9 @@ def leisure_vehicle(kind,paint):
             strut('Motorhome beltline',(-1.33,side*.435,.48),(.64,side*.435,.48),.022,paint)
         ribbon('Curved motorhome roof',[(-1.36,.355,1.049),(-1.25,.415,1.09),(.32,.415,1.09),(.66,.37,1.04)],white)
         cube('Rear motorhome panel',(-1.375,0,.77),(.06,.79,.58),white,.04)
-        for y in (-.18,.18):cube('Rear lounge seat',(-.84,y,.62),(.44,.28,.18),bed,.035)
+        for y in (-.18,.18):
+            leather_piece(cube('Rear lounge seat',(-.84,y,.62),(.44,.28,.18),leather,.035),'camper')
+            for x in (-.97,-.84,-.71):strut('Lounge cushion seam',(x,y-.10,.712),(x,y+.10,.712),.003,seat_trim)
         cube('Living table',(-.26,0,.68),(.36,.36,.025),wood,.01)
         ribbon('Motorhome panoramic windshield',[(1.435,.333,.43),(1.23,.344,.73),(1.08,.324,.92)],glass)
         ribbon('Overcab rounded roof',[(1.08,.326,.925),(.9,.349,.975),(.65,.367,1.02)],white)
@@ -515,7 +597,6 @@ def commercial_vehicle(kind,paint):
         for pos,size in [((.97,0,.72),(.52,1.0,.28)),((1.405,0,.715),(.12,.54,.29))]:
             cutter=cube('Cab window opening',pos,size,rubber,0);objects.remove(cutter);bpy.context.view_layer.objects.active=cabin
             mod=cabin.modifiers.new('Real cab glazing opening','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter;bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
-        for y in (-.18,.18):cube('Truck seat',(.88,y,.63),(.25,.23,.09),bed,.02)
         surface('Truck swept windshield',[(1.443,-.30,.54),(1.437,-.30,.88),(1.437,.30,.88),(1.443,.30,.54)],[(0,1,2,3)],glass)
         for side in (-1,1):
             surface('Driver side glass',[(1.30,side*.429,.56),(1.25,side*.409,.88),(.66,side*.429,.89),(.62,side*.429,.56)],[(0,1,2,3)],glass)
@@ -537,8 +618,7 @@ def commercial_vehicle(kind,paint):
             cutter=cube('Passenger window opening',(cx,0,.72),(width,1.1,.26),rubber,0);objects.remove(cutter);bpy.context.view_layer.objects.active=body
             mod=body.modifiers.new('Real passenger window cavity','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter;bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
             for side in (-1,1):
-                cube('Passenger seat cushion',(cx,side*.20,.615),(.20,.24,.07),bed,.02)
-                cube('Passenger seat back',(cx-.07,side*.20,.735),(.055,.24,.20),bed,.018)
+                tailored_seat(cx,side*.20,.615,.17,kind,.24)
         cutter=cube('Front glass opening',(front-.008,0,.705),(.08,.53,.27),rubber,0);objects.remove(cutter);bpy.context.view_layer.objects.active=body
         mod=body.modifiers.new('Open front glazing','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter;bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
         # Continuous dark glazing gives a modern coach; school bus keeps discrete bays.
@@ -619,12 +699,9 @@ def car(kind, length, colour):
         driver_x=.88 if kind=='delivery' else .30 if kind=='schoolbus' else .98
         seat_z=.64 if kind=='delivery' else .54
         for side in (-1,1):
-            cube('Driver seat back',(driver_x-.13,side*.18,seat_z+.10),(.055,.22,.20),upholstery,.022)
-            cube('Driver head restraint',(driver_x-.14,side*.18,seat_z+.22),(.05,.13,.06),upholstery,.015)
-        cube('Commercial dashboard',(driver_x+.27,0,seat_z+.04),(.12,.56,.065),upholstery,.022)
-        bpy.ops.mesh.primitive_torus_add(major_radius=.058,minor_radius=.008,major_segments=20,minor_segments=6,
-            location=(driver_x+.15,-.18,seat_z+.09),rotation=(0,math.pi/2-.25,0))
-        wheel=bpy.context.object;wheel.name='Commercial steering rim';wheel.data.materials.append(upholstery);objects.append(wheel)
+            tailored_seat(driver_x,side*.18,seat_z,.20,kind,.22)
+            leather_piece(cube('Commercial door armrest',(driver_x,side*.30,seat_z+.045),(.20,.037,.055),leather,.012),kind)
+        cockpit_controls(driver_x+.27,seat_z+.04,-.18,kind,.56)
     mirror_x = .82 if tall else .13 if kind=='racer' else .28
     for y in (-.41,.41):
         cube('Lower rocker trim',(0,y,.145),(length-.46,.032,.05),rubber,.01)

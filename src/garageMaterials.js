@@ -65,15 +65,18 @@ export function batchColoredMeshes(
       }
       geometry.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
     }
+    const sourceColors = mesh.material.vertexColors
+      ? geometry.getAttribute("color")
+      : null;
     for (const name of Object.keys(geometry.attributes))
       if (name !== "position" && name !== "normal" && !(atlas && name === "uv"))
         geometry.deleteAttribute(name);
     const color = mesh.material.color,
       colors = new Float32Array(geometry.getAttribute("position").count * 3);
     for (let i = 0; i < colors.length; i += 3) {
-      colors[i] = color.r;
-      colors[i + 1] = color.g;
-      colors[i + 2] = color.b;
+      colors[i] = color.r * (sourceColors?.getX(i / 3) ?? 1);
+      colors[i + 1] = color.g * (sourceColors?.getY(i / 3) ?? 1);
+      colors[i + 2] = color.b * (sourceColors?.getZ(i / 3) ?? 1);
     }
     geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
     geometries.push(geometry);

@@ -25,14 +25,21 @@ for(const [name,length]of Object.entries(lengths)){
   assert.ok(glazing.length&&glazing.every(o=>o.material.isMeshPhysicalMaterial&&o.material.transmission>.8&&o.material.metalness===0),`${name}: glazing must export physical transmission instead of opaque plastic`);
   assert.ok(mirrors.length&&mirrors.every(o=>o.material.metalness===1),`${name}: reflective mirror lenses must survive export`);
   assert.ok(interior.length,`${name}: a visible cabin must contain actual interior geometry`);
+  let leatherVertices=0;
+  asset.scene.traverse(o=>{if(o.isMesh&&o.material.name==='Tailored cabin leather'){
+    assert.ok(o.material.vertexColors,'Cabin palettes must use vertex colours');
+    const color=o.geometry.getAttribute('color');assert.ok(color,'Leather must export its colour attributes');
+    leatherVertices+=color.count;
+  }});
+  assert.ok(leatherVertices>100,`${name}: shaped and upholstered seat details must survive export`);
   if(['coach','schoolbus','delivery'].includes(name)){
     asset.scene.updateMatrixWorld(true);
     const windshield=new Raycaster(new Vector3(2,.70,0),new Vector3(-1,0,0)).intersectObject(asset.scene,true)[0];
     assert.equal(windshield?.object.material.name,'Automotive glass',`${name}: front glass must be exposed above the solid shell`);
     const opaque=[];asset.scene.traverse(o=>{if(o.isMesh&&o.material.name!=='Automotive glass')opaque.push(o);});
-    const interiorX=name==='delivery'?.88:name==='schoolbus'?-.345:-.285;
+    const interiorX=name==='delivery'?.88:name==='schoolbus'?-.40:-.34;
     const interior=new Raycaster(new Vector3(interiorX,name==='delivery'?.63:.735,2),new Vector3(0,0,-1)).intersectObjects(opaque,true)[0];
-    assert.equal(interior?.object.material.name,'Pickup bed',`${name}: side glazing must expose actual seats through the shell`);
+    assert.ok(['Cabin upholstery','Tailored cabin leather'].includes(interior?.object.material.name),`${name}: side glazing must expose actual seats through the shell`);
     if(name==='coach'){
       const route=new Raycaster(new Vector3(2,.925,.04),new Vector3(-1,0,0)).intersectObject(asset.scene,true)[0];
       assert.equal(route?.object.material.name,'Headlamp','Coach route pixels must remain in front of the destination housing');
@@ -86,8 +93,18 @@ for(const [name,length]of Object.entries(lengths)){
   }
   prepareWheels(asset.scene,length);
   const beforeBatch=new Box3().setFromObject(asset.scene);
+  const cabinColors=[];
+  asset.scene.traverse(o=>{if(o.isMesh&&o.material.name==='Tailored cabin leather'){
+    const c=o.geometry.getAttribute('color');cabinColors.push([c.getX(0)*o.material.color.r,c.getY(0)*o.material.color.g,c.getZ(0)*o.material.color.b]);
+  }});
   const batch=batchColoredMeshes(asset.scene,mesh=>!['Automotive glass','Mirror silver','Headlamp','Tail lamp','Rolling wheels'].includes(mesh.material.name)&&!mesh.material.name.startsWith('Paint'));
   assert.ok(batch?.geometry.getAttribute('color'),`${name}: trim colours must survive batching`);
+  const batchColors=batch.geometry.getAttribute('color');
+  for(const colour of cabinColors){
+    let found=false;
+    for(let i=0;i<batchColors.count&&!found;i++)found=colour.every((c,j)=>Math.abs(c-batchColors.getComponent(i,j))<.00001);
+    assert.ok(found,`${name}: batching must preserve the leather palette instead of turning inserts white`);
+  }
   const afterBatch=new Box3().setFromObject(asset.scene);
   assert.ok(beforeBatch.min.distanceTo(afterBatch.min)<.00001&&beforeBatch.max.distanceTo(afterBatch.max)<.00001,`${name}: batching must preserve vehicle shape and transforms`);
   let rolling=false;

@@ -1,4 +1,8 @@
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+// Orthographic size is independent of distance. Keep the entire 200-unit
+// ground and movable orbit target ahead of the camera, even at low angles.
+export const ORTHOGRAPHIC_DISTANCE = 200;
+export const ORTHOGRAPHIC_FAR = 400;
 export const DEFAULT_VIEW = {
   pitch: 60,
   yaw: -12,

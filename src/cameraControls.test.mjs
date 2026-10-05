@@ -1,12 +1,31 @@
 import assert from "node:assert/strict";
 import {
   DEFAULT_VIEW,
+  ORTHOGRAPHIC_DISTANCE,
+  ORTHOGRAPHIC_FAR,
   normalizeView,
   rotateView,
   panView,
   zoomView,
   touchPair,
 } from "./cameraControls.js";
+import { OrthographicCamera, Vector3 } from "three";
+// Regression: panning the orbit target toward the viewer put the lot behind
+// the old 14-unit camera's near plane, slicing it along a horizontal line.
+for (const pitch of [30, 45, 60, 80])
+  for (let yaw = -180; yaw < 180; yaw += 30)
+    for (const fx of [-32, 0, 32])
+      for (const fz of [-32, 0, 32]) {
+        const camera = new OrthographicCamera(-5, 5, 4, -4, .1, ORTHOGRAPHIC_FAR);
+        const p = pitch * Math.PI / 180, y = yaw * Math.PI / 180;
+        const target = new Vector3(3 + fx, .15, 3 + fz);
+        camera.position.copy(target).add(new Vector3(Math.sin(y)*Math.cos(p), Math.sin(p), Math.cos(y)*Math.cos(p)).multiplyScalar(ORTHOGRAPHIC_DISTANCE));
+        camera.lookAt(target); camera.updateMatrixWorld();
+        for (const x of [-100, 100]) for (const z of [-100, 100]) {
+          const depth = -new Vector3(x, -.48, z).applyMatrix4(camera.matrixWorldInverse).z;
+          assert.ok(depth > camera.near && depth < camera.far, 'Ground must stay between clipping planes at all orbit angles and stored focus limits');
+        }
+      }
 assert.deepEqual(
   normalizeView({ pitch: NaN, yaw: Infinity, zoom: NaN, panX: Infinity }),
   DEFAULT_VIEW,
