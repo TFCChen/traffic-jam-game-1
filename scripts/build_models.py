@@ -241,6 +241,46 @@ def glazing_pillar(name,sections,side,width,paint):
         joint=bpy.context.object;joint.name='Continuous pillar joint';joint.data.materials.append(paint);objects.append(joint)
         for polygon in joint.data.polygons:polygon.use_smooth=True
 
+def open_cabin_tub(body,kind):
+    # The exterior shell used to remain solid up to the seat cushions.
+    # Carve a real passenger well before adding a separate carpeted floor.
+    centre,length,bottom=( -.10,.72,.225) if kind=='racer' else ( .18,.78,.285) if kind=='pickup' else (1.04,.78,.375) if kind=='camper' else (-.18,1.04,.285 if kind=='jeep' else .255)
+    cutter=cube('Temporary passenger well',(centre,0,bottom+.40),(length,.54,.80),rubber,.025)
+    objects.remove(cutter);bpy.context.view_layer.objects.active=body
+    mod=body.modifiers.new('Recessed passenger cell','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter
+    bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
+
+def cabin_foundation(seat_x,cushion_z,dash_x,kind,width=.52):
+    floor_z=cushion_z-(.12 if kind=='racer' else .15)
+    # Visible gaps below individual seats; no continuous platform at cushion height.
+    rear=seat_x-.22;front=dash_x+.015
+    cube('Recessed carpeted floor',((rear+front)/2,0,floor_z),
+         (front-rear,width,.012),upholstery,.004)
+    cube('Transmission tunnel',((seat_x+dash_x)/2,0,floor_z+.025),
+         (dash_x-seat_x+.15,.057,.053),upholstery,.010)
+    for side in (-1,1):
+        y=side*(.18 if width>.53 else .145)
+        for offset in (-.062,.062):
+            cube('Separate seat runner',(seat_x,y+offset,floor_z+.018),(.23,.015,.022),chrome,.003)
+        for x in (seat_x-.065,seat_x+.055):
+            cube('Seat mounting pedestal',(x,y,(floor_z+cushion_z-.026)/2),
+                 (.037,.12,cushion_z-.026-floor_z),upholstery,.006)
+        foot_x=(seat_x+.135+dash_x)/2
+        cube('Individual recessed foot mat',(foot_x,y,floor_z+.008),
+             (max(.08,dash_x-seat_x-.135),.19,.005),rubber,.002)
+        # Toe board encloses the front of the well instead of a floating dash.
+        toe=cube('Sloped toe board',(dash_x+.017,y,floor_z+.052),(.035,.22,.10),upholstery,.007)
+        toe.rotation_euler.y=-.25
+        for i in range(3):
+            cube('Foot mat rib',(foot_x-.04+i*.035,y,floor_z+.012),(.003,.145,.002),seat_trim,0)
+    for py,w in ((-.178,.026),(-.122,.018)):
+        pedal=cube('Pedal pad',(dash_x-.032,py,floor_z+.049),(.009,w,.032),chrome,.003)
+        pedal.rotation_euler.y=-.3
+        strut('Pedal arm',(dash_x+.012,py,floor_z+.09),(dash_x-.029,py,floor_z+.05),.006,upholstery)
+    for side in (-1,1):
+        cube('Inner door sill',((rear+front)/2,side*(width/2+.016),floor_z+.055),
+             (front-rear,.028,.095),upholstery,.012)
+
 def leather_piece(obj,kind):
     # Vertex colours let different cabin palettes share one material/draw call.
     palette={'racer':'a76843','jeep':'91846b','pickup':'8b6950','compact':'596e7a','taxi':'8a7660',
@@ -293,7 +333,18 @@ def cockpit_controls(x,z,driver_y,kind,width=.47):
     # Overlapping flowing upper and lower surfaces replace the rectangular bar.
     ribbon('Swept dashboard cap',[(x-.082,width*.46,z+.006),(x-.038,width*.51,z+.03),
                                 (x+.055,width*.47,z+.031),(x+.09,width*.43,z+.002)],upholstery)
-    cube('Satin dashboard fascia',(x-.073,0,z),(.012,width*.89,.016),chrome,.004)
+    cube('Satin dashboard fascia',(x-.073,0,z),(.008,width*.89,.006),chrome,.002)
+    # Two cockpit zones: instrument pod on the left, layered passenger shelf
+    # and glovebox on the right, connected by a narrow falling centre stack.
+    leather_piece(cube('Passenger dashboard insert',(x-.072,width*.22,z-.015),
+                       (.008,width*.33,.035),leather,.004),kind)
+    cube('Glovebox lower panel',(x-.066,width*.25,z-.041),(.016,width*.38,.025),upholstery,.005)
+    cube('Glovebox release',(x-.076,width*.23,z-.034),(.003,.033,.005),chrome,.001)
+    for side in (-1,1):
+        strut('Dashboard stitched brow',(x-.04,side*width*.12,z+.033),
+              (x-.04,side*width*.43,z+.033),.002,seat_trim)
+    stack=cube('Sloping centre stack',(x-.075,0,z-.038),(.018,.066,.076),upholstery,.006)
+    stack.rotation_euler.y=-.25
     for vy in (-width*.40,-.065,.065,width*.40):
         cube('Inset air vent',(x-.082,vy,z+.013),(.009,.049,.019),rubber,.003)
         for offset in (-.014,0,.014):
@@ -324,19 +375,20 @@ def cockpit(kind):
     seat_x=-.25 if sporty else .12 if pickup else -.21
     floor=.365 if sporty else .46 if suv or pickup else .415
     back_height=.13 if sporty else .20 if not suv else .27
-    cube('Carpeted cabin floor',(seat_x+.10,0,floor-.02),(.80,.52,.018),upholstery,.012)
+    dash_x=.20 if sporty else .49 if pickup else .24 if suv else .23
+    cabin_foundation(seat_x,floor,dash_x,kind)
     for side in (-1,1):
         y=side*.145
         tailored_seat(seat_x,y,floor,back_height,kind)
-        cube('Moulded door panel',(seat_x,side*.286,floor+.014),(.40,.025,.096),upholstery,.015)
-        leather_piece(cube('Padded door insert',(seat_x+.005,side*.272,floor+.022),(.27,.008,.047),leather,.008),kind)
-        cube('Door armrest',(seat_x-.015,side*.265,floor+.012),(.19,.035,.025),upholstery,.009)
-        cube('Interior release handle',(seat_x+.10,side*.263,floor+.045),(.050,.012,.012),chrome,.004)
-        cube('Window switch surround',(seat_x+.03,side*.253,floor+.027),(.04,.017,.005),rubber,.002)
+        door_z=floor-(.065 if sporty else .045)
+        cube('Moulded door panel',(seat_x,side*.286,door_z),(.40,.025,.096),upholstery,.015)
+        leather_piece(cube('Padded door insert',(seat_x+.005,side*.272,door_z+.008),(.27,.008,.047),leather,.008),kind)
+        cube('Door armrest',(seat_x-.015,side*.265,door_z+.012),(.19,.035,.025),upholstery,.009)
+        cube('Interior release handle',(seat_x+.10,side*.263,door_z+.037),(.050,.012,.012),chrome,.004)
+        cube('Window switch surround',(seat_x+.03,side*.253,door_z+.027),(.04,.017,.005),rubber,.002)
         for dz in (0,.007,.014):
-            strut('Door speaker grille',(seat_x+.09,side*.269,floor-.022+dz),
-                  (seat_x+.15,side*.269,floor-.022+dz),.002,seat_trim)
-    dash_x=.20 if sporty else .49 if pickup else .24 if suv else .23
+            strut('Door speaker grille',(seat_x+.09,side*.269,door_z-.025+dz),
+                  (seat_x+.15,side*.269,door_z-.025+dz),.002,seat_trim)
     dash_z=.412 if sporty else .535 if pickup or suv else .465
     cockpit_controls(dash_x,dash_z,-.145,kind)
     cube('Centre console',(seat_x+.055,0,floor-.01),(.34,.062,.068),upholstery,.016)
@@ -376,6 +428,7 @@ def midengine_coupe(paint):
         for j in range(12):faces.append((i*12+j,i*12+(j+1)%12,(i+1)*12+(j+1)%12,(i+1)*12+j))
     faces.append(tuple(range((len(sections)-1)*12,len(sections)*12)))
     body=surface('Continuous mid-engine coachwork',vertices,faces,paint,1)
+    open_cabin_tub(body,'racer')
     # Actual wheel openings replace the previous applied decorative rings.
     for x in (-.67,.66):
         for side in (-1,1):
@@ -440,6 +493,7 @@ def passenger_car(kind,paint):
         for j in range(12):faces.append((i*12+j,i*12+(j+1)%12,(i+1)*12+(j+1)%12,(i+1)*12+j))
     faces.append(tuple(range((len(sections)-1)*12,len(sections)*12)))
     body=surface('Utility sculpted shell' if suv else 'Rounded hatchback shell',vertices,faces,paint,1)
+    open_cabin_tub(body,kind)
     for x in (-.67,.66):
         for side in (-1,1):
             bpy.ops.mesh.primitive_cylinder_add(vertices=32,radius=.205,depth=.30,location=(x,side*.44,.19),rotation=(math.pi/2,0,0))
@@ -517,6 +571,7 @@ def leisure_vehicle(kind,paint):
         for j in range(10):faces.append((i*10+j,i*10+(j+1)%10,(i+1)*10+(j+1)%10,(i+1)*10+j))
     faces.append(tuple(range((len(sections)-1)*10,len(sections)*10)))
     body=surface('Motorhome lower hull' if camper else 'Sculpted pickup hull',vertices,faces,paint,1)
+    open_cabin_tub(body,kind)
     for x in (-length/2+.33,length/2-.34):
         for side in (-1,1):
             bpy.ops.mesh.primitive_cylinder_add(vertices=32,radius=.205,depth=.30,location=(x,side*.44,.19),rotation=(math.pi/2,0,0));cutter=bpy.context.object;bpy.context.view_layer.objects.active=body
@@ -594,6 +649,10 @@ def commercial_vehicle(kind,paint):
         body=cube('Truck lower chassis',(0,0,.28),(2.86,.90,.34),paint,.06)
         cube('Rounded cargo box',(-.47,0,.695),(1.86,.87,.85),white,.065)
         cabin=cube('Truck contoured cab',(.94,0,.565),(.97,.84,.84),paint,.10)
+        cutter=cube('Temporary truck footwell',(1.02,0,.70),(.74,.54,.46),rubber,.018)
+        objects.remove(cutter);bpy.context.view_layer.objects.active=cabin
+        mod=cabin.modifiers.new('Recessed truck passenger cell','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter
+        bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
         for pos,size in [((.97,0,.72),(.52,1.0,.28)),((1.405,0,.715),(.12,.54,.29))]:
             cutter=cube('Cab window opening',pos,size,rubber,0);objects.remove(cutter);bpy.context.view_layer.objects.active=cabin
             mod=cabin.modifiers.new('Real cab glazing opening','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter;bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
@@ -612,6 +671,13 @@ def commercial_vehicle(kind,paint):
             for z in (.45,.95):cube('Cargo hinge',(-1.431,y*1.75,z),(.02,.047,.031),rubber,.004)
     else:
         body=surface('Rounded passenger body',vertices,faces,paint)
+        front_inner=front-.045
+        cutter=cube('Temporary passenger aisle',((-1.30+front_inner)/2,0,.645),
+                    (front_inner+1.30,.66,.54),rubber,.018)
+        objects.remove(cutter);bpy.context.view_layer.objects.active=body
+        mod=body.modifiers.new('Hollow bus passenger cell','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter
+        bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
+        cube('Bus carpeted aisle',((-1.27+front_inner)/2,0,.391),(front_inner+1.27,.64,.016),upholstery,.003)
         start=-1.22;end=.67 if school else 1.19;count=5 if school else 6
         for i in range(count):
             width=(end-start)/count-.04;cx=start+(end-start)*(i+.5)/count
@@ -619,6 +685,7 @@ def commercial_vehicle(kind,paint):
             mod=body.modifiers.new('Real passenger window cavity','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter;bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
             for side in (-1,1):
                 tailored_seat(cx,side*.20,.615,.17,kind,.24)
+                for px in (cx-.07,cx+.05):cube('Passenger seat pedestal',(px,side*.20,.493),(.025,.13,.188),upholstery,.004)
         cutter=cube('Front glass opening',(front-.008,0,.705),(.08,.53,.27),rubber,0);objects.remove(cutter);bpy.context.view_layer.objects.active=body
         mod=body.modifiers.new('Open front glazing','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter;bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
         # Continuous dark glazing gives a modern coach; school bus keeps discrete bays.
@@ -698,6 +765,7 @@ def car(kind, length, colour):
     else:
         driver_x=.88 if kind=='delivery' else .30 if kind=='schoolbus' else .98
         seat_z=.64 if kind=='delivery' else .54
+        cabin_foundation(driver_x,seat_z,driver_x+.27,kind,.56)
         for side in (-1,1):
             tailored_seat(driver_x,side*.18,seat_z,.20,kind,.22)
             leather_piece(cube('Commercial door armrest',(driver_x,side*.30,seat_z+.045),(.20,.037,.055),leather,.012),kind)

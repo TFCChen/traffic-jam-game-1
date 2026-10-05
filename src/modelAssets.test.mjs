@@ -32,6 +32,13 @@ for(const [name,length]of Object.entries(lengths)){
     leatherVertices+=color.count;
   }});
   assert.ok(leatherVertices>100,`${name}: shaped and upholstered seat details must survive export`);
+  // Feet belong below the cushion plane, inside an actual hollow body shell.
+  const seatX={racer:-.25,compact:-.21,taxi:-.21,jeep:-.21,pickup:.12,delivery:.88,schoolbus:.30,coach:.98,camper:.98}[name];
+  const seatZ={racer:.365,compact:.415,taxi:.415,jeep:.46,pickup:.46,delivery:.64,schoolbus:.54,coach:.54,camper:.54}[name];
+  asset.scene.updateMatrixWorld(true);
+  const footwell=new Raycaster(new Vector3(seatX+.16,seatZ-.01,name==='racer'||['compact','taxi','jeep','pickup'].includes(name)?-.145:-.18),new Vector3(0,-1,0)).intersectObject(asset.scene,true)[0];
+  assert.ok(footwell&&['Tyre rubber','Cabin upholstery','Seat stitching and console'].includes(footwell.object.material.name),`${name}: the footwell must expose carpet or a floor mat, not solid exterior coachwork`);
+  assert.ok(footwell.point.y<seatZ-.09&&footwell.point.y>seatZ-.17,`${name}: feet need a recessed floor beneath the seat cushion`);
   if(['coach','schoolbus','delivery'].includes(name)){
     asset.scene.updateMatrixWorld(true);
     const windshield=new Raycaster(new Vector3(2,.70,0),new Vector3(-1,0,0)).intersectObject(asset.scene,true)[0];
