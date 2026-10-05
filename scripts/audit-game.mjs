@@ -29,5 +29,5 @@ const storage={customObjectAccepted:!Array.isArray(loadCustomLevels())};
 try{saveProgress({});storage.writeThrows=false;}catch(error){storage.writeThrows=error.name;}
 delete globalThis.localStorage;
 const result={levels,probes,storage};
-writeFileSync(new URL('../docs/audit-2026-10-05/engine-evidence.json',import.meta.url),JSON.stringify(result,null,2));
+writeFileSync(new URL('../docs/upgrade-2026-10-05/engine-evidence.json',import.meta.url),JSON.stringify(result,null,2));
 console.log(JSON.stringify({officialLevels:levels.length,allSolvedAndReplayed:true,maxSolveAndReplayMs:Math.max(...levels.map(l=>l.solveAndReplayMs)),probes,storage},null,2));

@@ -1,0 +1,10 @@
+{
+  "results": [
+    "Corrupt custom data remains playable and original bytes survive repair",
+    "Real file import restores named draft; existing-car drag and editor undo work",
+    "Empty-grid drag places a car with the selected tool and supports undo",
+    "Quota failure reports unsaved work without false success or overwriting creations",
+    "Guide Escape returns focus; 200%-equivalent viewport retains controls and 44 px targets",
+    "Keyboard picker activation, arrow movement and undo work"
+  ]
+}

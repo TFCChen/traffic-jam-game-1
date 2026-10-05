@@ -164,3 +164,13 @@ Get-Content scripts/check-vehicle-hits.js -Raw | agent-browser --session traffic
 可重跑 `node scripts/audit-game.mjs`（離線求解／邊界檢查）、`node scripts/verify-all-levels.mjs <CDP URL>`（40 關實際拖曳）及 `node scripts/verify-editor-recovery.mjs <CDP URL>`（儲存／備援）。瀏覽器腳本請使用隔離測試瀏覽器，測試完成會還原進度與偏好。
 
 上一輪主角與構圖更新後的標準日景拖曳量測為 124 次繪製呼叫、167,654 個三角形中位數；CPU 提交 p95 1.0 ms，GPU p95 11.20 ms。繪製呼叫維持上一輪同級，新增主角幾何使三角形略增；GPU 時間仍受測試環境影響。六種構圖的 144 個車身命中、完整四角、真實觸控九步通關與待機／離屏停繪已驗證。
+
+## 全面改善版本
+
+[本輪十六項改善與驗證報告](docs/upgrade-2026-10-05/REPORT.md) 記錄固定構圖、統一 UI、草稿／存檔保護、直接試玩、接續遊戲、備份匯入匯出與離線快取，以及三款剩餘車模、窗洞內裝、材質圖集與前後軸／輪胎回饋。
+
+正式關卡解題路線改為建置時預算；3D renderer 在切關與編輯模式間共用。新增低幀率回正與初始化位置防護。車身動態仍預設 120%，遊戲不加入聲音。
+
+目前主要瀏覽器回歸腳本為 `scripts/verify-upgrade.mjs`、`scripts/verify-resilience.mjs`、`scripts/verify-all-levels.mjs`、`scripts/verify-touch.mjs` 與 `scripts/verify-art.mjs`；各接收隔離 Chrome 的 CDP WebSocket URL。`scripts/verify-idle.mjs` 檢查待機陰影與離屏停繪；`scripts/benchmark-render.mjs` 收集 CPU/GPU 與輸入至提交樣本。GitHub Actions 執行單元測試、正式建置、草稿／存檔流程及全部 40 關真實拖曳，並保存畫面證據。
+
+初次連線完成離線下載後可離線重開；新版快取準備完成時，以「更新並重新開啟」啟用，保留裝置進度與草稿。備份匯入保留既有最佳成績，同 id 不同自製關卡會另存副本。容量不足時會標示尚未保存，可匯出備份。

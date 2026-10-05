@@ -13,37 +13,75 @@ export function cells(car) {
 
 export function isWon(cars) {
   const target = cars.find((car) => car.id === TARGET_ID);
-  return Boolean(target && target.row === EXIT_ROW && target.col + target.len >= GRID);
+  return Boolean(
+    target && target.row === EXIT_ROW && target.col + target.len >= GRID,
+  );
 }
 
 export function validateLevel(cars) {
   const errors = [];
-  if (!Array.isArray(cars) || cars.length === 0) errors.push("關卡至少需要一台車。");
+  if (!Array.isArray(cars) || cars.length === 0 || cars.length > 18)
+    return {
+      valid: false,
+      errors: ["關卡需要 1 至 18 台車，且必須使用車輛陣列。"],
+    };
   const ids = new Set();
   const occupied = new Map();
   let targetCount = 0;
 
   for (const car of cars || []) {
+    if (
+      !car ||
+      typeof car !== "object" ||
+      typeof car.id !== "string" ||
+      !car.id.trim() ||
+      car.id.length > 80
+    ) {
+      errors.push("車輛資料與 id 格式不正確。");
+      continue;
+    }
     if (!car?.id || ids.has(car.id)) errors.push("每台車都需要不重複的 id。");
     ids.add(car?.id);
     if (car?.id === TARGET_ID) targetCount += 1;
-    if (![2, 3].includes(car?.len)) errors.push(`${car?.id ?? "車輛"} 長度必須為 2 或 3。`);
-    if (!["H", "V"].includes(car?.dir)) errors.push(`${car?.id ?? "車輛"} 方向必須為 H 或 V。`);
+    if (![2, 3].includes(car?.len))
+      errors.push(`${car?.id ?? "車輛"} 長度必須為 2 或 3。`);
+    if (!["H", "V"].includes(car?.dir))
+      errors.push(`${car?.id ?? "車輛"} 方向必須為 H 或 V。`);
+    if (!Number.isInteger(car.row) || !Number.isInteger(car.col))
+      errors.push(`${car.id} 座標必須是有限整數。`);
+    if (!/^#[\da-f]{6}$/i.test(car.color ?? ""))
+      errors.push(`${car.id} 顏色必須是六位十六進位色碼。`);
+    if (
+      ![2, 3].includes(car.len) ||
+      !["H", "V"].includes(car.dir) ||
+      !Number.isInteger(car.row) ||
+      !Number.isInteger(car.col)
+    )
+      continue;
     for (const cell of cells(car)) {
-      if (cell.row < 0 || cell.row >= GRID || cell.col < 0 || cell.col >= GRID) {
+      if (
+        cell.row < 0 ||
+        cell.row >= GRID ||
+        cell.col < 0 ||
+        cell.col >= GRID
+      ) {
         errors.push(`${car.id} 超出棋盤。`);
         continue;
       }
       const key = `${cell.row}:${cell.col}`;
-      if (occupied.has(key)) errors.push(`${car.id} 與 ${occupied.get(key)} 重疊。`);
+      if (occupied.has(key))
+        errors.push(`${car.id} 與 ${occupied.get(key)} 重疊。`);
       occupied.set(key, car.id);
     }
   }
 
-  if (targetCount !== 1) errors.push("關卡必須恰好有一台 target 紅車。");
-  const target = (cars || []).find((car) => car.id === TARGET_ID);
-  if (target && (target.dir !== "H" || target.row !== EXIT_ROW || target.len !== 2)) {
-    errors.push("Target 必須是位於第 3 列、長度 2 的水平車。");
+  if (targetCount !== 1) errors.push("關卡必須恰好有一台紅色目標車。");
+  const target = cars.find((car) => car?.id === TARGET_ID);
+  if (
+    target &&
+    (target.dir !== "H" || target.row !== EXIT_ROW || target.len !== 2)
+  ) {
+    errors.push("紅色目標車必須是位於第 3 列、長度 2 的水平車。");
   }
   return { valid: errors.length === 0, errors: [...new Set(errors)] };
 }
@@ -53,7 +91,8 @@ function occupancy(cars, ignoredId = null) {
   for (const car of cars) {
     if (car.id === ignoredId) continue;
     for (const cell of cells(car)) {
-      if (cell.row >= 0 && cell.row < GRID && cell.col >= 0 && cell.col < GRID) board[cell.row][cell.col] = car.id;
+      if (cell.row >= 0 && cell.row < GRID && cell.col >= 0 && cell.col < GRID)
+        board[cell.row][cell.col] = car.id;
     }
   }
   return board;
@@ -70,7 +109,11 @@ export function legalMovesForCar(cars, carId) {
       if (car.dir === "H") next.col += direction * distance;
       else next.row += direction * distance;
       const nextCells = cells(next);
-      const targetExit = car.id === TARGET_ID && car.dir === "H" && direction > 0 && car.row === EXIT_ROW;
+      const targetExit =
+        car.id === TARGET_ID &&
+        car.dir === "H" &&
+        direction > 0 &&
+        car.row === EXIT_ROW;
       const invalid = nextCells.some(({ row, col }) => {
         if (row < 0 || row >= GRID || col < 0) return true;
         if (col >= GRID) return !targetExit;
@@ -91,7 +134,9 @@ export function allLegalMoves(cars) {
 export function applyMove(cars, move) {
   return cars.map((car) => {
     if (car.id !== move.carId) return { ...car };
-    return car.dir === "H" ? { ...car, col: car.col + move.delta } : { ...car, row: car.row + move.delta };
+    return car.dir === "H"
+      ? { ...car, col: car.col + move.delta }
+      : { ...car, row: car.row + move.delta };
   });
 }
 
@@ -103,28 +148,66 @@ export function stateKey(cars) {
 }
 
 export function solveLevel(cars, { maxStates = 120000 } = {}) {
+  if (!Number.isInteger(maxStates) || maxStates < 1)
+    return {
+      solvable: false,
+      status: "limit",
+      reason: "搜尋預算不足，尚未判定是否有解。",
+      moves: [],
+      explored: 0,
+    };
   const validation = validateLevel(cars);
-  if (!validation.valid) return { solvable: false, reason: validation.errors[0], moves: [], explored: 0 };
+  if (!validation.valid)
+    return {
+      solvable: false,
+      reason: validation.errors[0],
+      moves: [],
+      explored: 0,
+    };
   if (isWon(cars)) return { solvable: true, moves: [], explored: 1 };
 
   const start = cloneCars(cars);
-  const queue = [{ cars: start, path: [] }];
-  const seen = new Set([stateKey(start)]);
+  const keyFor = (items) =>
+    items.map((c) => (c.dir === "H" ? c.col : c.row)).join(",");
+  const queue = [{ cars: start, parent: -1, move: null }];
+  const seen = new Set([keyFor(start)]);
   let index = 0;
 
   while (index < queue.length && seen.size <= maxStates) {
-    const current = queue[index++];
+    const parent = index++,
+      current = queue[parent];
     for (const move of allLegalMoves(current.cars)) {
       const nextCars = applyMove(current.cars, move);
-      const key = stateKey(nextCars);
+      const key = keyFor(nextCars);
       if (seen.has(key)) continue;
       seen.add(key);
-      const path = [...current.path, move];
-      if (isWon(nextCars)) return { solvable: true, moves: path, explored: seen.size };
-      queue.push({ cars: nextCars, path });
+      if (isWon(nextCars)) {
+        const path = [move];
+        let node = parent;
+        while (queue[node].parent !== -1) {
+          path.push(queue[node].move);
+          node = queue[node].parent;
+        }
+        return { solvable: true, moves: path.reverse(), explored: seen.size };
+      }
+      queue.push({ cars: nextCars, parent, move });
+      if (seen.size > maxStates)
+        return {
+          solvable: false,
+          status: "limit",
+          reason: "搜尋達到上限，尚未判定是否有解。請減少車輛後再驗證。",
+          moves: [],
+          explored: seen.size,
+        };
     }
   }
-  return { solvable: false, reason: seen.size > maxStates ? "搜尋範圍過大。" : "找不到解法。", moves: [], explored: seen.size };
+  return {
+    solvable: false,
+    status: "unsolvable",
+    reason: "找不到解法。",
+    moves: [],
+    explored: seen.size,
+  };
 }
 
 export function estimatedDifficultyFromOptimalMoves(optimalMoves) {
@@ -135,7 +218,11 @@ export function estimatedDifficultyFromOptimalMoves(optimalMoves) {
   return "Expert";
 }
 
-export function analyzeDifficulty(cars, solution = solveLevel(cars), { officialDifficulty = null } = {}) {
+export function analyzeDifficulty(
+  cars,
+  solution = solveLevel(cars),
+  { officialDifficulty = null } = {},
+) {
   if (!solution.solvable) {
     return {
       label: "Unsolvable",
@@ -149,9 +236,17 @@ export function analyzeDifficulty(cars, solution = solveLevel(cars), { officialD
   }
 
   const target = cars.find((car) => car.id === TARGET_ID);
-  const blockers = cars.filter((car) => car.id !== TARGET_ID && cells(car).some((cell) => cell.row === EXIT_ROW && cell.col >= target.col + target.len)).length;
+  const blockers = cars.filter(
+    (car) =>
+      car.id !== TARGET_ID &&
+      cells(car).some(
+        (cell) => cell.row === EXIT_ROW && cell.col >= target.col + target.len,
+      ),
+  ).length;
   const uniqueCars = new Set(solution.moves.map((move) => move.carId)).size;
-  const estimatedLabel = estimatedDifficultyFromOptimalMoves(solution.moves.length);
+  const estimatedLabel = estimatedDifficultyFromOptimalMoves(
+    solution.moves.length,
+  );
   const score = solution.moves.length * 3 + uniqueCars * 2 + blockers * 2;
 
   return {
@@ -169,6 +264,7 @@ export function analyzeDifficulty(cars, solution = solveLevel(cars), { officialD
 export function starsForPerformance(moves, optimalMoves) {
   if (!Number.isFinite(optimalMoves)) return 1;
   if (moves <= optimalMoves) return 3;
-  if (moves <= optimalMoves + Math.max(2, Math.ceil(optimalMoves * 0.25))) return 2;
+  if (moves <= optimalMoves + Math.max(2, Math.ceil(optimalMoves * 0.25)))
+    return 2;
   return 1;
 }

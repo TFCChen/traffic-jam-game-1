@@ -1,0 +1,663 @@
+/* Shared player-facing tokens. Board dimensions never depend on status text. */
+:root {
+  --ink: #e9eee5;
+  --muted: #b5c3b9;
+  --surface: #243530;
+  --surface-raised: #31443c;
+  --line: #53695c;
+  --gold: #f4d889;
+  --accent: #adcda3;
+  background: #15221e;
+  color: var(--ink);
+}
+.app-shell {
+  background: radial-gradient(ellipse at 50% 25%, #35453c, #14231f 80%);
+  color: var(--ink);
+}
+.workspace,
+.workspace.panel-hidden {
+  gap: 8px;
+}
+.game-column {
+  min-height: 0;
+  gap: 0;
+}
+.game-hud {
+  height: 88px;
+  padding: 10px 4px;
+  flex: none;
+}
+.game-hud .stage-kicker {
+  display: none;
+}
+.game-hud .stage-heading h2 {
+  font-size: 26px;
+  margin: 0;
+  color: var(--ink);
+}
+.instruction,
+.instruction.quiet {
+  position: static;
+  clip-path: none;
+  width: 100%;
+  height: 48px;
+  min-height: 48px;
+  padding: 6px 14px;
+  margin: 0;
+  overflow: auto;
+  flex: none;
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13px;
+}
+.garage-3d {
+  flex: none;
+  margin: 0;
+}
+.garage-canvas-wrap {
+  height: clamp(320px, calc(100dvh - 400px), 600px);
+  min-height: 0;
+  flex: none;
+  aspect-ratio: auto;
+  border-radius: 0 0 10px 10px;
+}
+.scene-options-bar {
+  height: 56px;
+  flex: none;
+  font-size: 13px;
+}
+.scene-options-bar > span {
+  font-size: 13px;
+  color: var(--muted);
+}
+button,
+input,
+select {
+  font: inherit;
+}
+button {
+  min-height: 44px;
+  background: var(--surface-raised);
+  border-color: var(--line);
+  color: var(--ink);
+  border-radius: 8px;
+  box-shadow: none;
+  transition:
+    background 120ms,
+    transform 120ms,
+    border-color 120ms;
+}
+button:hover {
+  background: #405b48;
+  border-color: var(--accent);
+  transform: none;
+}
+button:active {
+  transform: scale(0.97);
+  background: #596749;
+}
+button.accent {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #203529;
+  box-shadow: none;
+}
+button.accent:hover {
+  background: #ffe5a5;
+}
+button.selected,
+.tabs button.active,
+.quality-options button[aria-pressed="true"],
+.scene-themes button[aria-pressed="true"] {
+  color: var(--ink);
+  background: #425942;
+  border-color: var(--gold);
+}
+.toolbar {
+  height: 84px;
+  flex: none;
+  padding: 10px 0;
+  gap: 8px;
+}
+.toolbar button {
+  font-size: 13px;
+  border-radius: 8px;
+  min-height: 64px;
+}
+.board-footer {
+  min-height: 32px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.game-sheet {
+  padding: 24px;
+  border-radius: 18px;
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 24px 100px #0009;
+}
+.game-sheet::backdrop {
+  background: #08150fc9;
+  backdrop-filter: blur(6px);
+}
+.game-sheet .tabs {
+  background: #1b2c25;
+  border: 1px solid var(--line);
+  padding: 5px;
+  border-radius: 10px;
+}
+.game-sheet button,
+.game-sheet .tabs button {
+  min-height: 44px;
+  font-size: 13px;
+  border-radius: 8px;
+}
+.game-sheet h2,
+.game-sheet h3,
+.game-sheet b,
+.game-sheet dd {
+  color: var(--ink);
+}
+.game-sheet p,
+.game-sheet small,
+.game-sheet dt {
+  color: var(--muted);
+}
+.game-sheet .scene-settings,
+.analysis-card dl > div,
+.custom-item,
+.badge {
+  background: #1c2d26;
+  border-color: var(--line);
+  color: var(--ink);
+}
+.scene-settings {
+  background: #1c2d26;
+  border-color: var(--line);
+  padding: 16px;
+  gap: 16px;
+}
+.scene-settings label {
+  color: var(--ink);
+  font-size: 14px;
+}
+.scene-settings p,
+.scene-settings > button,
+.quality-options small,
+.scene-themes small {
+  font-size: 12px;
+  color: var(--muted);
+}
+.scene-settings input[type="range"] {
+  min-height: 44px;
+  accent-color: var(--gold);
+}
+.settings-heading small,
+.settings-label small {
+  color: var(--muted);
+  font-size: 13px;
+}
+.view-presets {
+  display: flex;
+  gap: 8px;
+  grid-column: 1/-1;
+}
+.view-presets button {
+  flex: 1;
+}
+.quality-options button {
+  font-size: 14px;
+}
+.game-sheet .scene-themes small {
+  font-size: 12px;
+}
+.level-browser h3 small {
+  display: none;
+}
+.level-grid button {
+  position: relative;
+  overflow: hidden;
+  background: #1e3229;
+  border: 1px solid var(--line);
+  min-height: 66px;
+  gap: 5px;
+  color: var(--ink);
+}
+.level-grid button.active {
+  border-color: var(--gold);
+  background: #435e40;
+}
+.level-grid button small {
+  color: var(--gold);
+}
+.badge {
+  padding: 20px 16px;
+  border-radius: 12px;
+}
+.badge.earned {
+  background: linear-gradient(145deg, #49533a, #283f31);
+  border-color: #b7b482;
+  color: var(--ink);
+}
+.badge .medal {
+  width: 60px;
+  height: 68px;
+  display: grid;
+  place-items: center;
+  background: #435545;
+  clip-path: polygon(15% 0, 85% 0, 100% 25%, 90% 80%, 50% 100%, 10% 80%, 0 25%);
+  margin: 0 auto 16px;
+  color: #a6b4a4;
+}
+.badge.earned .medal {
+  background: linear-gradient(135deg, #ffe6a2, #a77e34);
+  color: #2c3c29;
+}
+.medal svg {
+  width: 30px;
+  height: 30px;
+}
+.medal-1 {
+  rotate: 6deg;
+}
+.medal-2 {
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%) !important;
+}
+.medal-3 {
+  border-radius: 50%;
+  clip-path: none !important;
+}
+.medal-4 {
+  background: linear-gradient(135deg, #d8eee7, #7ea1a1) !important;
+}
+.vehicle-picker {
+  height: 112px;
+  overflow: auto;
+  align-content: start;
+  justify-content: flex-start;
+  padding: 8px 0;
+  gap: 6px;
+}
+.vehicle-picker button {
+  min-width: 104px;
+  min-height: 48px;
+  font-size: 12px;
+}
+.vehicle-picker .remove-selected {
+  color: #ffb79e;
+}
+.mini-car {
+  display: inline-block;
+  position: relative;
+  width: 36px;
+  height: 19px;
+  background: var(--car-color, #e85847);
+  border: 1px solid #fff4;
+  border-radius: 12px 7px 7px 12px;
+  box-shadow: 0 3px 0 #0d1b17;
+  flex: none;
+}
+.mini-car:after {
+  content: "";
+  position: absolute;
+  inset: 3px 11px 3px 8px;
+  border-radius: 4px;
+  background: #173b49;
+}
+.mini-car.coach,
+.mini-car.schoolbus,
+.mini-car.camper,
+.mini-car.delivery {
+  width: 42px;
+  height: 22px;
+  border-radius: 5px;
+}
+.mini-car.jeep,
+.mini-car.pickup {
+  border-radius: 4px;
+}
+.keyboard-help {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.editor-actions {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 0;
+}
+.editor-actions label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.editor-actions label:first-child {
+  width: 100%;
+}
+.editor-actions input {
+  flex: 1;
+  min-width: 0;
+}
+.editor-actions input,
+.editor-actions select {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #1a2b23;
+  color: var(--ink);
+}
+.editor-validation {
+  width: 100%;
+  max-height: 240px;
+  overflow: auto;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.analysis-card dl > div {
+  border-radius: 8px;
+}
+.analysis-card dd {
+  color: var(--gold);
+}
+.utility-dock {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+.utility-dock button {
+  font-size: 12px;
+  padding: 8px 12px;
+  background: transparent;
+}
+.storage-alert {
+  padding: 14px;
+  border: 1px solid #d4a779;
+  border-radius: 10px;
+  background: #493e2b;
+  color: #ffedbc;
+  line-height: 1.6;
+  font-size: 14px;
+}
+.storage-alert button {
+  margin-left: 12px;
+}
+.tutorial-card p {
+  line-height: 1.8;
+  font-size: 16px;
+}
+.tutorial-card button {
+  margin: 4px;
+}
+.tutorial-illustration {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+  min-height: 140px;
+  border-radius: 12px;
+  background: #16281f;
+  color: var(--gold);
+  font-size: 28px;
+}
+.tutorial-illustration .mini-car {
+  scale: 1.8;
+}
+.win-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 18px;
+}
+.win-card h2,
+.win-card .win-score b {
+  color: var(--ink);
+}
+.win-copy,
+.win-level,
+.win-score span {
+  color: var(--muted);
+}
+.win-score {
+  background: #14271f;
+  border: 1px solid var(--line);
+  font-size: 13px;
+}
+.win-score > i {
+  background: #708c75;
+}
+.win-rewards small {
+  font-size: 11px;
+  color: #e4e9dc;
+}
+.win-emblem {
+  background: #43513b;
+  color: var(--gold);
+}
+.win-rewards span {
+  background: #374c36;
+  color: var(--gold);
+}
+.reward-notice {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--gold);
+}
+.fallback-workspace {
+  width: 100%;
+  min-height: 400px;
+}
+.scene-fallback {
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.fallback-workspace .board-viewport {
+  margin: auto;
+}
+@media (max-width: 540px) {
+  .app-shell {
+    padding: 8px;
+  }
+  .game-hud {
+    height: 70px;
+    padding: 8px 2px;
+  }
+  .game-hud .stage-heading h2 {
+    font-size: 20px;
+  }
+  .game-hud .stats span {
+    font-size: 11px;
+    padding: 0 7px;
+  }
+  .game-hud .stats b {
+    font-size: 21px;
+  }
+  .instruction,
+  .instruction.quiet {
+    height: 52px;
+    min-height: 52px;
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  .garage-canvas-wrap {
+    height: auto;
+    aspect-ratio: 1;
+    min-height: 0;
+  }
+  .scene-options-bar > span {
+    font-size: 12px;
+  }
+  .scene-tools button {
+    font-size: 12px;
+    padding: 8px;
+  }
+  .toolbar {
+    height: 78px;
+    gap: 4px;
+  }
+  .toolbar button {
+    font-size: 12px;
+    min-height: 58px;
+    padding: 8px 3px;
+  }
+  .board-footer {
+    font-size: 12px;
+  }
+  .game-sheet {
+    padding: 20px 16px;
+    border-radius: 18px 18px 0 0;
+  }
+  .scene-settings {
+    grid-template-columns: 1fr;
+  }
+  .quality-options small {
+    font-size: 11px;
+  }
+  .game-sheet .scene-themes {
+    flex-direction: column;
+  }
+  .game-sheet .scene-themes button {
+    padding: 12px;
+  }
+  .vehicle-picker button {
+    min-width: 96px;
+    min-height: 48px;
+  }
+  .badge-collection {
+    gap: 8px;
+  }
+  .badge {
+    padding: 16px 12px;
+  }
+  .utility-dock {
+    gap: 4px;
+  }
+  .utility-dock button {
+    font-size: 12px;
+    padding: 8px;
+  }
+  .editor-validation {
+    max-height: 200px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  button {
+    transition: none;
+  }
+}
+.offline-status {
+  width: min(1040px, 100%);
+  margin: 12px auto 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.offline-status button {
+  margin-left: 10px;
+}
+.level-thumbnail {
+  width: 42px;
+  height: 42px;
+  flex: none;
+}
+.level-grid button {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.level-grid button b {
+  font-size: 16px;
+}
+.scene-preview {
+  display: block;
+  height: 58px;
+  width: 130px;
+  border-radius: 8px;
+  margin-top: 8px;
+  background: linear-gradient(170deg, #b96550, #e0bb80 48%, #4d5651 49%);
+  box-shadow: inset 0 0 0 1px #fff3;
+}
+.preview-neon {
+  background: linear-gradient(170deg, #314471, #7797a0 48%, #223945 49%);
+}
+.journey-summary {
+  line-height: 1.7;
+  padding: 12px;
+  background: #1a2e24;
+  border-radius: 10px;
+  color: var(--gold);
+}
+@media (min-width: 900px) {
+  .game-column.editing {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    column-gap: 16px;
+    align-items: start;
+  }
+  .editing .game-hud {
+    grid-column: 1/-1;
+  }
+  .editing .instruction {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .editing .garage-3d {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  .editing .toolbar {
+    grid-column: 1;
+    grid-row: 4;
+  }
+  .editing .editor-actions {
+    grid-column: 2;
+    grid-row: 2/4;
+    align-content: start;
+    max-height: calc(100dvh - 240px);
+    overflow: auto;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  .editing .editor-actions label {
+    flex-wrap: wrap;
+  }
+  .editing .editor-actions label:first-child input {
+    width: 100%;
+    flex-basis: 100%;
+  }
+  .editing .editor-validation {
+    grid-column: 2;
+    grid-row: 4;
+    max-height: 220px;
+  }
+  .editing .vehicle-picker {
+    height: 62px;
+    flex-wrap: nowrap;
+    overflow: auto;
+  }
+  .editing .vehicle-picker button {
+    flex: none;
+  }
+  .editing .garage-canvas-wrap {
+    height: clamp(320px, calc(100dvh - 410px), 560px);
+  }
+}

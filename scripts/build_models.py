@@ -96,7 +96,7 @@ def export(name):
         bpy.ops.object.select_all(action='DESELECT')
         for obj in batch: obj.select_set(True)
         bpy.context.view_layer.objects.active=batch[0]
-        if name in ('racer','compact','jeep','coach','schoolbus','delivery'):bpy.ops.object.transform_apply(location=True,rotation=True,scale=True)
+        if name in ('racer','compact','jeep','coach','schoolbus','delivery','taxi','pickup','camper'):bpy.ops.object.transform_apply(location=True,rotation=True,scale=True)
         bpy.ops.object.join()
         batch[0].name=material.name
         merged.append(batch[0])
@@ -308,6 +308,9 @@ def passenger_car(kind,paint):
         roof=[(.08,.263,.683),(-.06,.282,.714),(-.30,.281,.716),(-.47,.250,.682)]
         front=[(.40,.325,.387),(.29,.307,.520),(.08,.263,.682)]
         rear=[(-.47,.25,.681),(-.64,.294,.532),(-.78,.335,.390)]
+        if kind=='taxi':
+            roof=[(.10,.264,.684),(-.04,.281,.721),(-.38,.279,.721),(-.54,.253,.676)]
+            rear=[(-.54,.253,.675),(-.65,.289,.511),(-.74,.324,.405)]
     ribbon('Contoured passenger windscreen',front,glass)
     ribbon('Crowned passenger roof',roof,paint)
     ribbon('Sloping hatch glass',rear,glass)
@@ -343,8 +346,83 @@ def passenger_car(kind,paint):
         cylinder('Spare wheel cover',(-1.021,0,.46),.119,.020,paint,'X')
     else:
         ribbon('Hatch spoiler',[(-.75,.337,.424),(-.83,.347,.416)],paint)
-        ribbon('Glass roof insert',[(-.05,.19,.724),(-.24,.195,.726),(-.36,.185,.712)],glass)
+        if kind!='taxi':ribbon('Glass roof insert',[(-.05,.19,.724),(-.24,.195,.726),(-.36,.185,.712)],glass)
     cube('Lower bumper lip',(.916,0,.155),(.062,.61,.033),rubber,.012)
+    if kind=='taxi':
+        for side in (-1,1):
+            for index,x in enumerate((-.34,-.22,-.10,.02,.14,.26)):
+                for row,z in enumerate((.315,.35)):
+                    points=[]
+                    for px,pz in ((x-.047,z-.013),(x+.047,z-.013),(x+.047,z+.013),(x-.047,z+.013)):
+                        hit,point,normal,face=body.ray_cast(Vector((px,side*2,pz)),Vector((0,-side,0)))
+                        if hit and abs(point.y)>.34:points.append((px,point.y+side*.005,pz))
+                    if len(points)==4:surface('Flush taxi checker',points,[(0,1,2,3)],white if (index+row)%2 else rubber)
+
+def leisure_vehicle(kind,paint):
+    """Separate utility silhouettes: open-bed pickup and coachbuilt motorhome."""
+    camper=kind=='camper';length=3 if camper else 2
+    sections=[(-length/2+.06,.37),(-length/2+.16,.46),(-length/2+.33,.515),(-.3,.44),(.15,.44),(length/2-.34,.515),(length/2-.16,.45),(length/2-.06,.34)]
+    vertices=[]
+    for x,w in sections:
+        crown=.445 if not camper else .405
+        vertices.extend([(x,-w*.9,.115),(x,-w,.21),(x,-w,.35),(x,-w*.85,crown-.012),(x,0,crown),(x,w*.85,crown-.012),(x,w,.35),(x,w,.21),(x,w*.9,.115),(x,0,.115)])
+    faces=[tuple(range(9,-1,-1))]
+    for i in range(len(sections)-1):
+        for j in range(10):faces.append((i*10+j,i*10+(j+1)%10,(i+1)*10+(j+1)%10,(i+1)*10+j))
+    faces.append(tuple(range((len(sections)-1)*10,len(sections)*10)))
+    body=surface('Motorhome lower hull' if camper else 'Sculpted pickup hull',vertices,faces,paint,1)
+    for x in (-length/2+.33,length/2-.34):
+        for side in (-1,1):
+            bpy.ops.mesh.primitive_cylinder_add(vertices=32,radius=.205,depth=.30,location=(x,side*.44,.19),rotation=(math.pi/2,0,0));cutter=bpy.context.object;bpy.context.view_layer.objects.active=body
+            mod=body.modifiers.new('Utility wheel opening','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter;bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
+    if camper:
+        # Side panels bound a visible cabin instead of a solid box behind the glass.
+        cube('Motorhome floor',(-.29,0,.44),(2.25,.78,.12),white,.045)
+        for side in (-1,1):
+            cube('Lower living wall',(-.35,side*.403,.59),(2.12,.055,.25),white,.04)
+            cube('Upper window header',(-.35,side*.403,1.015),(2.12,.055,.15),white,.04)
+            for x in (-1.36,-.73,-.13,.54):cube('Living window pillar',(x,side*.403,.80),(.075,.055,.32),white,.018)
+            for x in (-1.03,-.43,.20):cube('Tinted living glazing',(x,side*.411,.80),(.51,.014,.25),glass,.025)
+            strut('Motorhome beltline',(-1.33,side*.435,.48),(.64,side*.435,.48),.022,paint)
+        ribbon('Curved motorhome roof',[(-1.36,.355,1.049),(-1.25,.415,1.09),(.32,.415,1.09),(.66,.37,1.04)],white)
+        cube('Rear motorhome panel',(-1.375,0,.77),(.06,.79,.58),white,.04)
+        for y in (-.18,.18):cube('Rear lounge seat',(-.84,y,.62),(.44,.28,.18),bed,.035)
+        cube('Living table',(-.26,0,.68),(.36,.36,.025),wood,.01)
+        ribbon('Motorhome panoramic windshield',[(1.435,.333,.43),(1.23,.344,.73),(1.08,.324,.92)],glass)
+        ribbon('Overcab rounded roof',[(1.08,.326,.925),(.9,.349,.975),(.65,.367,1.02)],white)
+        for side in (-1,1):
+            surface('Cab side glass',[(1.435,side*.333,.43),(1.08,side*.324,.92),(.66,side*.367,1.02),(.64,side*.403,.48)],[(0,1,2,3)],glass)
+            strut('Motorhome A pillar',(1.435,side*.34,.43),(1.08,side*.332,.925),.025,white)
+            cube('Entry door',(.43,-.441,.68),(.24,.022,.57),white,.022)
+            cube('Entry glazed panel',(.43,-.457,.79),(.17,.015,.23),glass,.018)
+            cube('Motorhome mirror',(1.05,side*.472,.69),(.09,.07,.10),paint,.018)
+        cube('Roof solar panel',(-.63,0,1.111),(.52,.55,.025),glass,.018)
+        for y in (-.16,0,.16):cube('Solar cell seam',(-.63,y,1.128),(.48,.012,.006),chrome,0)
+        cube('Roof ventilation',(.11,0,1.13),(.27,.31,.07),cream,.026)
+        cube('Front grille',(1.452,0,.29),(.017,.37,.07),rubber,.009)
+        front=1.453
+    else:
+        cutter=cube('Temporary open bed',(-.48,0,.58),(.79,.66,.40),rubber,0);objects.remove(cutter);bpy.context.view_layer.objects.active=body
+        mod=body.modifiers.new('Open cargo bed','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter;bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
+        cube('Cargo bed liner',(-.48,0,.386),(.75,.62,.021),bed,.014)
+        for y in (-.22,-.11,0,.11,.22):cube('Bed liner ridge',(-.48,y,.40),(.69,.018,.012),rubber,.003)
+        ribbon('Pickup front glazing',[(.66,.323,.46),(.56,.299,.65),(.39,.269,.78)],glass)
+        ribbon('Pickup cab roof',[(.39,.27,.784),(.27,.291,.81),(-.10,.291,.80),(-.23,.265,.76)],paint)
+        ribbon('Pickup rear window',[(-.23,.265,.76),(-.26,.313,.45)],glass)
+        for side in (-1,1):
+            surface('Pickup side glazing',[(.66,side*.323,.46),(.39,side*.269,.78),(-.23,side*.265,.76),(-.26,side*.313,.45)],[(0,1,2,3)],glass)
+            strut('Pickup A pillar',(.66,side*.331,.46),(.39,side*.277,.784),.028,paint)
+            strut('Cab rear pillar',(-.23,side*.273,.765),(-.26,side*.321,.45),.032,paint)
+            cube('Pickup mirror',(.51,side*.432,.62),(.11,.09,.065),paint,.018)
+            cube('Pickup handle',(.03,side*.436,.39),(.085,.015,.025),chrome,.006)
+            cube('Cargo rail cap',(-.49,side*.361,.461),(.79,.04,.024),rubber,.007)
+            cube('Side running board',(.10,side*.44,.16),(.72,.075,.025),chrome,.008)
+        cube('Tailgate seam',(-.914,0,.344),(.014,.62,.015),rubber,.004)
+        cube('Tailgate latch',(-.929,0,.40),(.012,.15,.03),chrome,.005)
+        cube('Pickup front grille',(.944,0,.30),(.018,.40,.11),rubber,.009)
+        for y in (-.12,0,.12):cube('Grille rib',(.956,y,.30),(.013,.021,.083),chrome,.004)
+        front=.955
+    for side in (-1,1):cube('Utility LED lamp',(front,side*.26,.365 if camper else .365),(.02,.16,.045),lamp,.009)
 
 def commercial_vehicle(kind,paint):
     school=kind=='schoolbus';truck=kind=='delivery'
@@ -367,7 +445,11 @@ def commercial_vehicle(kind,paint):
     if truck:
         body=cube('Truck lower chassis',(0,0,.28),(2.86,.90,.34),paint,.06)
         cube('Rounded cargo box',(-.47,0,.695),(1.86,.87,.85),white,.065)
-        cube('Truck contoured cab',(.94,0,.565),(.97,.84,.84),paint,.10)
+        cabin=cube('Truck contoured cab',(.94,0,.565),(.97,.84,.84),paint,.10)
+        for pos,size in [((.97,0,.72),(.52,1.0,.28)),((1.405,0,.715),(.12,.54,.29))]:
+            cutter=cube('Cab window opening',pos,size,rubber,0);objects.remove(cutter);bpy.context.view_layer.objects.active=cabin
+            mod=cabin.modifiers.new('Real cab glazing opening','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter;bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
+        for y in (-.18,.18):cube('Truck seat',(.88,y,.63),(.25,.23,.09),bed,.02)
         surface('Truck swept windshield',[(1.443,-.30,.54),(1.437,-.30,.88),(1.437,.30,.88),(1.443,.30,.54)],[(0,1,2,3)],glass)
         for side in (-1,1):
             surface('Driver side glass',[(1.30,side*.429,.56),(1.25,side*.409,.88),(.66,side*.429,.89),(.62,side*.429,.56)],[(0,1,2,3)],glass)
@@ -383,6 +465,16 @@ def commercial_vehicle(kind,paint):
             for z in (.45,.95):cube('Cargo hinge',(-1.431,y*1.75,z),(.02,.047,.031),rubber,.004)
     else:
         body=surface('Rounded passenger body',vertices,faces,paint)
+        start=-1.22;end=.67 if school else 1.19;count=5 if school else 6
+        for i in range(count):
+            width=(end-start)/count-.04;cx=start+(end-start)*(i+.5)/count
+            cutter=cube('Passenger window opening',(cx,0,.72),(width,1.1,.26),rubber,0);objects.remove(cutter);bpy.context.view_layer.objects.active=body
+            mod=body.modifiers.new('Real passenger window cavity','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter;bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
+            for side in (-1,1):
+                cube('Passenger seat cushion',(cx,side*.20,.615),(.20,.24,.07),bed,.02)
+                cube('Passenger seat back',(cx-.07,side*.20,.735),(.055,.24,.20),bed,.018)
+        cutter=cube('Front glass opening',(front-.008,0,.705),(.08,.53,.27),rubber,0);objects.remove(cutter);bpy.context.view_layer.objects.active=body
+        mod=body.modifiers.new('Open front glazing','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter;bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
         # Continuous dark glazing gives a modern coach; school bus keeps discrete bays.
         for side in (-1,1):
             start=-1.22;end=.67 if school else 1.19
@@ -443,32 +535,17 @@ def car(kind, length, colour):
     paint.node_tree.nodes.get('Principled BSDF').inputs['Coat Roughness'].default_value=.2
     tall = kind in ('schoolbus', 'coach', 'camper', 'delivery')
     commercial=kind in ('coach','schoolbus','delivery')
-    refined=kind in ('racer','compact','jeep') or commercial
+    refined=kind in ('racer','compact','jeep','taxi','pickup','camper') or commercial
     if not refined:coachwork(kind,length,paint)
     if kind == 'racer':
         midengine_coupe(paint)
-    elif kind in ('compact','jeep'):
+    elif kind in ('compact','jeep','taxi'):
         passenger_car(kind,paint)
+        if kind=='taxi':cube('Taxi roof sign',(-.19,0,.79),(.27,.23,.10),lamp,.021)
+    elif kind in ('pickup','camper'):
+        leisure_vehicle(kind,paint)
     elif commercial:
         commercial_vehicle(kind,paint)
-    elif kind == 'pickup':
-        shaped_cabin('Sloped pickup glass', (.39,0,.49), (.62,.69,.38), glass)
-        cube('Cab roof', (.3,0,.7), (.46,.73,.055), paint)
-        cube('Cargo floor', (-.47,0,.36), (.8,.65,.06), bed, .025)
-        for y in (-.35,.35): cube('Cargo sides', (-.47,y,.47), (.87,.07,.23), paint, .025)
-        cube('Tailgate', (-.89,0,.47), (.07,.74,.23), paint, .025)
-    elif kind == 'camper':
-        cube('Camper shell', (-.25,0,.65), (length-.6,.82,.85), white, .11)
-        cube('Driver glass', (length/2-.25,0,.66), (.05,.63,.38), glass, .035)
-        for y in (-.42,.42):
-            cube('Camper window', (-.45,y,.74), (.49,.025,.32), glass)
-            cube('Camper colour stripe', (-.25,y,.42), (length-.8,.02,.13), paint, .015)
-        cube('Roof skylight', (-.4,0,1.1), (.43,.38,.035), glass, .04)
-    else:
-        cabin_height = .32
-        shaped_cabin('Sloped passenger glass', (-.15,0,.5), (1.12,.67,cabin_height), glass)
-        cube('Cabin roof', (-.25,0,.5+cabin_height/2+.02), (.55,.73,.06), paint, .035)
-        if kind == 'taxi': cube('Taxi roof sign', (-.12,0,.75), (.32,.26,.12), lamp, .025)
     # Small readable details share existing material batches, rather than extra draw calls.
     if not tall:
         cabin_x=.3 if kind=='pickup' else -.16
@@ -492,18 +569,8 @@ def car(kind, length, colour):
             for y in (-.417,.417):cube('Door seam', (-.36,y,.33), (.015,.015,.16), rubber, .003)
         if kind == 'racer':
             cube('Front splitter', (.90,0,.115), (.13,.71,.025), rubber, .008)
-        elif kind == 'pickup':
-            for y in (-.18,0,.18): cube('Bed plank', (-.5,y,.402), (.63,.11,.04), cream, .01)
-        elif kind == 'taxi':
-            for x in (-.55,-.35,-.15,.05,.25):
-                for y in (-.424,.424): cube('Taxi checker', (x,y,.32), (.1,.016,.065), white, .004)
         elif not refined:
             for y in (-.342,.342): cube('Window pillar', (-.15,y,.51), (.055,.035,.29), paint, .01)
-    elif kind == 'camper':
-        cube('Living door', (.38,-.431,.65), (.32,.022,.63), cream, .028)
-        cube('Door window', (.38,-.45,.79), (.22,.02,.2), glass, .016)
-        cube('Door handle', (.48,-.468,.57), (.035,.025,.08), chrome, .008)
-        cube('Roof luggage', (.24,0,1.105), (.38,.42,.15), paint, .04)
     cube('Rear plate', (-length/2+.055,0,.24), (.026,.24,.09), white, .007)
     # Body details remain in existing paint/trim batches.
     for x in (-length/2+.33,length/2-.34):
@@ -515,7 +582,7 @@ def car(kind, length, colour):
             pillar=cube('Cabin pillar',(-.22,y,.52),(.042,.035,.29),paint,.008)
             pillar.rotation_euler.y=-.1 if kind=='racer' else .05
     if kind=='taxi':
-        cube('Taxi sign face',(-.12,-.139,.76),(.24,.012,.048),rubber,.004)
+        cube('Taxi sign face',(-.19,-.123,.79),(.24,.012,.048),rubber,.004)
     cube('Exhaust outlet',(-length/2+.043,.23,.15),(.06,.085,.045),rubber,.008)
     for y in (-.075,-.025,.025,.075): cube('Plate marks', (-length/2+.035,y,.24), (.012,.025,.047), rubber, .002)
     for x in (-length/2+.33, length/2-.34):

@@ -20,6 +20,10 @@ for(const [name,length]of Object.entries(lengths)){
     asset.scene.updateMatrixWorld(true);
     const windshield=new Raycaster(new Vector3(2,.70,0),new Vector3(-1,0,0)).intersectObject(asset.scene,true)[0];
     assert.equal(windshield?.object.material.name,'Opaque blue glass',`${name}: front glass must be exposed above the solid shell`);
+    const opaque=[];asset.scene.traverse(o=>{if(o.isMesh&&o.material.name!=='Opaque blue glass')opaque.push(o);});
+    const interiorX=name==='delivery'?.88:name==='schoolbus'?-.345:-.285;
+    const interior=new Raycaster(new Vector3(interiorX,name==='delivery'?.63:.735,2),new Vector3(0,0,-1)).intersectObjects(opaque,true)[0];
+    assert.equal(interior?.object.material.name,'Pickup bed',`${name}: side glazing must expose actual seats through the shell`);
     if(name==='coach'){
       const route=new Raycaster(new Vector3(2,.925,.04),new Vector3(-1,0,0)).intersectObject(asset.scene,true)[0];
       assert.equal(route?.object.material.name,'Headlamp','Coach route pixels must remain in front of the destination housing');
