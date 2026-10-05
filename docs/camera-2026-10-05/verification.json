@@ -1,6 +1,7 @@
 {
   "results": [
-    "Right-button orbit changes elevation and yaw without moving cars",
+    "Right-button orbit reverses pitch direction, preserves yaw direction and keeps projection scale fixed",
+    "Orbit after wheel zoom retains the chosen projection scale; upward drag lowers pitch",
     "Wheel zoom, Shift-right pan and middle-button pan preserve orbit angles",
     "Projected vehicle picking and legal drag still work after orbit/zoom/pan; reset restores framing",
     "One-finger street drag rotates the camera without moving cars",
@@ -30,6 +31,10 @@
       "panX": 0,
       "panY": 0,
       "motion": 1.2
+    },
+    "cameraFrustum": {
+      "width": 14.1547319590192,
+      "height": 8.166191514818768
     },
     "cars": [
       {
@@ -171,7 +176,7 @@
     ],
     "calls": 68,
     "performance": {
-      "frames": 17,
+      "frames": 19,
       "shadowUpdates": 3,
       "renderedSceneKey": "1-play",
       "viewport": {
@@ -239,7 +244,7 @@
     },
     "ready": true,
     "settings": {
-      "pitch": 50.100000000000016,
+      "pitch": 69.9,
       "yaw": -42,
       "light": -40,
       "intensity": 3,
@@ -250,6 +255,10 @@
       "panX": 0,
       "panY": 0,
       "motion": 1.2
+    },
+    "cameraFrustum": {
+      "width": 14.1547319590192,
+      "height": 8.166191514818768
     },
     "cars": [
       {
@@ -391,7 +400,7 @@
     ],
     "calls": 69,
     "performance": {
-      "frames": 35,
+      "frames": 39,
       "shadowUpdates": 3,
       "renderedSceneKey": "1-play",
       "viewport": {
@@ -471,6 +480,10 @@
       "panY": 0,
       "motion": 1.2
     },
+    "cameraFrustum": {
+      "width": 5.232985191696774,
+      "height": 5.232985191696774
+    },
     "cars": [
       {
         "id": "green",
@@ -478,15 +491,15 @@
         "dir": "H",
         "len": 2,
         "position": [
-          1.0000000000001363,
+          1.000000000000087,
           0.055,
           0.5
         ],
-        "wheelAngle": -7.178675742913953e-13,
-        "tilt": 2.5961456152070015e-8,
-        "compression": -2.3296450046839112e-9,
+        "wheelAngle": -4.571752453524613e-13,
+        "tilt": 1.9299897748727846e-8,
+        "compression": -1.7296862553362047e-9,
         "wheelTilt": 0,
-        "velocity": -2.8625027381901e-12,
+        "velocity": -1.834859609560159e-12,
         "tailLight": 0.03
       },
       {
@@ -534,8 +547,8 @@
           2.5
         ],
         "wheelAngle": 0,
-        "tilt": -0.004511681091424403,
-        "compression": -0.0006246059174719876,
+        "tilt": -0.004513380993303469,
+        "compression": -0.0006247289654663091,
         "wheelTilt": 0,
         "velocity": 0,
         "tailLight": 1.3
@@ -611,8 +624,8 @@
     ],
     "calls": 65,
     "performance": {
-      "frames": 192,
-      "shadowUpdates": 62,
+      "frames": 216,
+      "shadowUpdates": 61,
       "renderedSceneKey": "1-play",
       "viewport": {
         "width": 374,
@@ -691,6 +704,10 @@
       "panY": 0,
       "motion": 1.2
     },
+    "cameraFrustum": {
+      "width": 5.232985191696774,
+      "height": 5.232985191696774
+    },
     "cars": [
       {
         "id": "green",
@@ -698,15 +715,15 @@
         "dir": "H",
         "len": 2,
         "position": [
-          1.0000000000000007,
+          1.0000000000000004,
           0.055,
           0.5
         ],
-        "wheelAngle": -3.818871085110373e-15,
-        "tilt": 8.722473951178548e-10,
-        "compression": -7.770131760231891e-11,
+        "wheelAngle": -1.3994773484496265e-15,
+        "tilt": 5.303009151766322e-10,
+        "compression": -4.7212844744848326e-11,
         "wheelTilt": 0,
-        "velocity": -1.3296084127247528e-14,
+        "velocity": 0,
         "tailLight": 0.03
       },
       {
@@ -754,8 +771,8 @@
           2.5
         ],
         "wheelAngle": 0,
-        "tilt": -0.005815715752741124,
-        "compression": -0.0008268840342562089,
+        "tilt": -0.0045862853244399366,
+        "compression": -0.0006309046239690863,
         "wheelTilt": 0,
         "velocity": 0,
         "tailLight": 1.3
@@ -829,9 +846,9 @@
         "tailLight": 0.03
       }
     ],
-    "calls": 63,
+    "calls": 117,
     "performance": {
-      "frames": 210,
+      "frames": 235,
       "shadowUpdates": 70,
       "renderedSceneKey": "1-play",
       "viewport": {

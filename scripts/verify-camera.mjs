@@ -138,13 +138,16 @@ try {
   await mouseDrag("right", 100, 45);
   const rotated = await snapshot();
   assert.notEqual(rotated.settings.yaw, initial.settings.yaw);
-  assert.notEqual(rotated.settings.pitch, initial.settings.pitch);
+  assert.equal(rotated.settings.yaw, initial.settings.yaw - 30);
+  assert.ok(rotated.settings.pitch > initial.settings.pitch);
+  assert.deepEqual(rotated.cameraFrustum, initial.cameraFrustum);
+  assert.equal(rotated.settings.zoom, initial.settings.zoom);
   assert.equal(
     await evaluate("document.querySelector('.stats b').textContent"),
     "0",
   );
   results.push(
-    "Right-button orbit changes elevation and yaw without moving cars",
+    "Right-button orbit reverses pitch direction, preserves yaw direction and keeps projection scale fixed",
   );
   let r = await rect();
   const point = { x: r.x + r.w * 0.63, y: r.y + r.h * 0.43 };
@@ -177,7 +180,24 @@ try {
     "Zoom keeps the cursor's world point fixed within native pointer pixel rounding",
   );
   assert.ok((await snapshot()).settings.zoom > 1);
+  const beforeZoomedOrbit = await snapshot();
+  await mouseDrag("right", 40, -60);
   const zoomed = await snapshot();
+  assert.equal(zoomed.settings.zoom, beforeZoomedOrbit.settings.zoom);
+  assert.ok(
+    Math.abs(
+      zoomed.cameraFrustum.width - beforeZoomedOrbit.cameraFrustum.width,
+    ) < 1e-12,
+  );
+  assert.ok(
+    Math.abs(
+      zoomed.cameraFrustum.height - beforeZoomedOrbit.cameraFrustum.height,
+    ) < 1e-12,
+  );
+  assert.ok(zoomed.settings.pitch < beforeZoomedOrbit.settings.pitch);
+  results.push(
+    "Orbit after wheel zoom retains the chosen projection scale; upward drag lowers pitch",
+  );
   assert.notEqual(zoomed.settings.panX, 0);
   await mouseDrag("right", 65, -30, 8);
   const shifted = await snapshot();
@@ -226,6 +246,8 @@ try {
   await touch("touchMove", [{ id: 8, x: street.x + 30, y: street.y + 15 }]);
   await touch("touchEnd", []);
   assert.notEqual((await snapshot()).settings.yaw, beforeTouch.settings.yaw);
+  assert.ok((await snapshot()).settings.pitch > beforeTouch.settings.pitch);
+  assert.deepEqual((await snapshot()).cameraFrustum, beforeTouch.cameraFrustum);
   results.push("One-finger street drag rotates the camera without moving cars");
   await click("重置視角");
   await touch("touchStart", [a, b]);

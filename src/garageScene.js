@@ -22,6 +22,7 @@ import {
 } from "./vehicleDynamics.js";
 import { createRenderProfiler } from "./renderProfiler.js";
 import {
+  DEFAULT_VIEW,
   normalizeView,
   rotateView,
   panView,
@@ -105,6 +106,18 @@ export function createGarageScene(canvas, getProps, callbacks) {
   const contactGeometry = new THREE.PlaneGeometry(1, 1);
   const camera = new THREE.OrthographicCamera(-5, 5, 4, -4, 0.1, 80);
   const aim = new THREE.Vector3(3.45, 0.15, 3);
+  // A fixed reference view determines framing. Orbit changes orientation only,
+  // so fitting the current angle cannot silently change the player's scale.
+  const framingCamera = camera.clone();
+  const framingPitch = THREE.MathUtils.degToRad(DEFAULT_VIEW.pitch),
+    framingYaw = THREE.MathUtils.degToRad(DEFAULT_VIEW.yaw);
+  framingCamera.position.set(
+    aim.x + Math.sin(framingYaw) * Math.cos(framingPitch) * 14,
+    aim.y + Math.sin(framingPitch) * 14,
+    aim.z + Math.cos(framingYaw) * Math.cos(framingPitch) * 14,
+  );
+  framingCamera.lookAt(aim);
+  framingCamera.updateMatrixWorld();
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
   const ground = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.055);
@@ -468,7 +481,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
         for (const y of ys)
           for (const z of zs) {
             const point = new THREE.Vector3(x, y, z).applyMatrix4(
-              camera.matrixWorldInverse,
+              framingCamera.matrixWorldInverse,
             );
             minX = Math.min(minX, point.x);
             maxX = Math.max(maxX, point.x);
@@ -1751,6 +1764,10 @@ export function createGarageScene(canvas, getProps, callbacks) {
         memory: { ...renderer.info.memory },
         ready,
         settings: { ...settings },
+        cameraFrustum: {
+          width: camera.right - camera.left,
+          height: camera.top - camera.bottom,
+        },
         cars: [...groups.values()].map((i) => ({
           id: i.car.id,
           model: i.model,

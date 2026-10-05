@@ -16,7 +16,7 @@ export function rotateView(view, dx, dy) {
   return normalizeView({
     ...view,
     yaw: view.yaw - dx * 0.3,
-    pitch: view.pitch - dy * 0.22,
+    pitch: view.pitch + dy * 0.22,
   });
 }
 export function panView(view, dx, dy, width, height, pixelsWide, pixelsHigh) {
