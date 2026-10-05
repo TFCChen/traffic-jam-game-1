@@ -53,6 +53,7 @@ try {
   for (const script of [
     "verify-upgrade.mjs",
     "verify-resilience.mjs",
+    "verify-camera.mjs",
     "verify-all-levels.mjs",
   ]) {
     const child = spawn(process.execPath, [`scripts/${script}`, url], {

@@ -18,6 +18,53 @@
 .workspace.panel-hidden {
   gap: 8px;
 }
+.camera-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 0 10px;
+  color: var(--muted);
+}
+.camera-zoom-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.camera-navigation button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: none;
+  font-size: 12px;
+}
+.camera-zoom-tools span {
+  min-width: 40px;
+  text-align: center;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.camera-help {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.camera-help-touch {
+  display: none;
+}
+@media (pointer: coarse) {
+  .camera-help-desktop {
+    display: none;
+  }
+  .camera-help-touch {
+    display: inline;
+  }
+}
 .game-column {
   min-height: 0;
   gap: 0;

@@ -1,0 +1,893 @@
+{
+  "results": [
+    "Right-button orbit changes elevation and yaw without moving cars",
+    "Wheel zoom, Shift-right pan and middle-button pan preserve orbit angles",
+    "Projected vehicle picking and legal drag still work after orbit/zoom/pan; reset restores framing",
+    "One-finger street drag rotates the camera without moving cars",
+    "Two-finger drag pans without rotation or committing vehicle movement",
+    "Symmetric pinch zooms without orbit; two-finger drag translates without rotation",
+    "Adding/lifting the second finger cancels the car drag; remaining finger cannot accidentally move a car",
+    "Camera preferences survive reload",
+    "Editor camera gestures do not place a car; mobile controls fit and remain >=44 px"
+  ],
+  "initial": {
+    "instanceId": 1,
+    "sceneKey": "1-play",
+    "memory": {
+      "geometries": 60,
+      "textures": 8
+    },
+    "ready": true,
+    "settings": {
+      "pitch": 60,
+      "yaw": -12,
+      "light": -40,
+      "intensity": 3,
+      "shadows": true,
+      "theme": "day",
+      "quality": "standard",
+      "zoom": 1,
+      "panX": 0,
+      "panY": 0,
+      "motion": 1.2
+    },
+    "cars": [
+      {
+        "id": "green",
+        "model": "jeep",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          1,
+          0.055,
+          0.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "purpleBus",
+        "model": "delivery",
+        "dir": "V",
+        "len": 3,
+        "position": [
+          0.5,
+          0.055,
+          2.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "yellowBus",
+        "model": "schoolbus",
+        "dir": "V",
+        "len": 3,
+        "position": [
+          5.5,
+          0.055,
+          1.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          2,
+          0.055,
+          2.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "blueBus",
+        "model": "coach",
+        "dir": "V",
+        "len": 3,
+        "position": [
+          3.5,
+          0.055,
+          2.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "sky",
+        "model": "compact",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          5,
+          0.055,
+          3.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "orange",
+        "model": "pickup",
+        "dir": "V",
+        "len": 2,
+        "position": [
+          0.5,
+          0.055,
+          5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "tealBus",
+        "model": "camper",
+        "dir": "H",
+        "len": 3,
+        "position": [
+          2.5,
+          0.055,
+          5.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      }
+    ],
+    "calls": 68,
+    "performance": {
+      "frames": 17,
+      "shadowUpdates": 3,
+      "renderedSceneKey": "1-play",
+      "viewport": {
+        "width": 1040,
+        "height": 600
+      },
+      "inputToSubmission": {
+        "count": 0,
+        "median": null,
+        "p95": null
+      },
+      "pixelRatio": 1,
+      "shadowSize": 1024,
+      "shadows": true,
+      "inView": true,
+      "profile": {
+        "cpuMs": {
+          "samples": 0,
+          "median": null,
+          "p95": null
+        },
+        "gpuMs": {
+          "samples": 0,
+          "median": null,
+          "p95": null
+        },
+        "drawCalls": {
+          "samples": 0,
+          "median": null,
+          "p95": null
+        },
+        "triangles": {
+          "samples": 0,
+          "median": null,
+          "p95": null
+        },
+        "gpuTimer": true
+      }
+    },
+    "guide": {
+      "visible": false,
+      "position": [
+        0,
+        0.047,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "opacity": 0.13
+    },
+    "celebration": false,
+    "cameraFollow": 0,
+    "cameraGesture": null,
+    "touchPointers": 0
+  },
+  "rotated": {
+    "instanceId": 1,
+    "sceneKey": "1-play",
+    "memory": {
+      "geometries": 60,
+      "textures": 8
+    },
+    "ready": true,
+    "settings": {
+      "pitch": 50.100000000000016,
+      "yaw": -42,
+      "light": -40,
+      "intensity": 3,
+      "shadows": true,
+      "theme": "day",
+      "quality": "standard",
+      "zoom": 1,
+      "panX": 0,
+      "panY": 0,
+      "motion": 1.2
+    },
+    "cars": [
+      {
+        "id": "green",
+        "model": "jeep",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          1,
+          0.055,
+          0.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "purpleBus",
+        "model": "delivery",
+        "dir": "V",
+        "len": 3,
+        "position": [
+          0.5,
+          0.055,
+          2.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "yellowBus",
+        "model": "schoolbus",
+        "dir": "V",
+        "len": 3,
+        "position": [
+          5.5,
+          0.055,
+          1.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          2,
+          0.055,
+          2.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "blueBus",
+        "model": "coach",
+        "dir": "V",
+        "len": 3,
+        "position": [
+          3.5,
+          0.055,
+          2.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "sky",
+        "model": "compact",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          5,
+          0.055,
+          3.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "orange",
+        "model": "pickup",
+        "dir": "V",
+        "len": 2,
+        "position": [
+          0.5,
+          0.055,
+          5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "tealBus",
+        "model": "camper",
+        "dir": "H",
+        "len": 3,
+        "position": [
+          2.5,
+          0.055,
+          5.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      }
+    ],
+    "calls": 69,
+    "performance": {
+      "frames": 35,
+      "shadowUpdates": 3,
+      "renderedSceneKey": "1-play",
+      "viewport": {
+        "width": 1040,
+        "height": 600
+      },
+      "inputToSubmission": {
+        "count": 0,
+        "median": null,
+        "p95": null
+      },
+      "pixelRatio": 1,
+      "shadowSize": 1024,
+      "shadows": true,
+      "inView": true,
+      "profile": {
+        "cpuMs": {
+          "samples": 0,
+          "median": null,
+          "p95": null
+        },
+        "gpuMs": {
+          "samples": 0,
+          "median": null,
+          "p95": null
+        },
+        "drawCalls": {
+          "samples": 0,
+          "median": null,
+          "p95": null
+        },
+        "triangles": {
+          "samples": 0,
+          "median": null,
+          "p95": null
+        },
+        "gpuTimer": true
+      }
+    },
+    "guide": {
+      "visible": false,
+      "position": [
+        0,
+        0.047,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "opacity": 0.13
+    },
+    "celebration": false,
+    "cameraFollow": 0,
+    "cameraGesture": null,
+    "touchPointers": 0
+  },
+  "pinched": {
+    "instanceId": 1,
+    "sceneKey": "1-play",
+    "memory": {
+      "geometries": 61,
+      "textures": 8
+    },
+    "ready": true,
+    "settings": {
+      "pitch": 60,
+      "yaw": -12,
+      "light": -40,
+      "intensity": 3,
+      "shadows": true,
+      "theme": "day",
+      "quality": "standard",
+      "zoom": 1.584893083922835,
+      "panX": 0,
+      "panY": 0,
+      "motion": 1.2
+    },
+    "cars": [
+      {
+        "id": "green",
+        "model": "jeep",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          1.0000000000001363,
+          0.055,
+          0.5
+        ],
+        "wheelAngle": -7.178675742913953e-13,
+        "tilt": 2.5961456152070015e-8,
+        "compression": -2.3296450046839112e-9,
+        "wheelTilt": 0,
+        "velocity": -2.8625027381901e-12,
+        "tailLight": 0.03
+      },
+      {
+        "id": "purpleBus",
+        "model": "delivery",
+        "dir": "V",
+        "len": 3,
+        "position": [
+          0.5,
+          0.055,
+          2.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "yellowBus",
+        "model": "schoolbus",
+        "dir": "V",
+        "len": 3,
+        "position": [
+          5.5,
+          0.055,
+          1.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          2,
+          0.055,
+          2.5
+        ],
+        "wheelAngle": 0,
+        "tilt": -0.004511681091424403,
+        "compression": -0.0006246059174719876,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 1.3
+      },
+      {
+        "id": "blueBus",
+        "model": "coach",
+        "dir": "V",
+        "len": 3,
+        "position": [
+          3.5,
+          0.055,
+          2.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "sky",
+        "model": "compact",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          5,
+          0.055,
+          3.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "orange",
+        "model": "pickup",
+        "dir": "V",
+        "len": 2,
+        "position": [
+          0.5,
+          0.055,
+          5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "tealBus",
+        "model": "camper",
+        "dir": "H",
+        "len": 3,
+        "position": [
+          2.5,
+          0.055,
+          5.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      }
+    ],
+    "calls": 65,
+    "performance": {
+      "frames": 192,
+      "shadowUpdates": 62,
+      "renderedSceneKey": "1-play",
+      "viewport": {
+        "width": 374,
+        "height": 374
+      },
+      "inputToSubmission": {
+        "count": 0,
+        "median": null,
+        "p95": null
+      },
+      "pixelRatio": 1.5,
+      "shadowSize": 1024,
+      "shadows": true,
+      "inView": true,
+      "profile": {
+        "cpuMs": {
+          "samples": 0,
+          "median": null,
+          "p95": null
+        },
+        "gpuMs": {
+          "samples": 0,
+          "median": null,
+          "p95": null
+        },
+        "drawCalls": {
+          "samples": 0,
+          "median": null,
+          "p95": null
+        },
+        "triangles": {
+          "samples": 0,
+          "median": null,
+          "p95": null
+        },
+        "gpuTimer": true
+      }
+    },
+    "guide": {
+      "visible": false,
+      "position": [
+        2.5,
+        0.05,
+        0.5
+      ],
+      "scale": [
+        4.92,
+        0.92,
+        1
+      ],
+      "opacity": 0.13
+    },
+    "celebration": false,
+    "cameraFollow": 0,
+    "cameraGesture": null,
+    "touchPointers": 0
+  },
+  "panned": {
+    "instanceId": 1,
+    "sceneKey": "1-play",
+    "memory": {
+      "geometries": 61,
+      "textures": 8
+    },
+    "ready": true,
+    "settings": {
+      "pitch": 60,
+      "yaw": -12,
+      "light": -40,
+      "intensity": 3,
+      "shadows": true,
+      "theme": "day",
+      "quality": "standard",
+      "zoom": 1.584893083922835,
+      "panX": -0.4897178655331205,
+      "panY": 0,
+      "motion": 1.2
+    },
+    "cars": [
+      {
+        "id": "green",
+        "model": "jeep",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          1.0000000000000007,
+          0.055,
+          0.5
+        ],
+        "wheelAngle": -3.818871085110373e-15,
+        "tilt": 8.722473951178548e-10,
+        "compression": -7.770131760231891e-11,
+        "wheelTilt": 0,
+        "velocity": -1.3296084127247528e-14,
+        "tailLight": 0.03
+      },
+      {
+        "id": "purpleBus",
+        "model": "delivery",
+        "dir": "V",
+        "len": 3,
+        "position": [
+          0.5,
+          0.055,
+          2.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "yellowBus",
+        "model": "schoolbus",
+        "dir": "V",
+        "len": 3,
+        "position": [
+          5.5,
+          0.055,
+          1.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          2,
+          0.055,
+          2.5
+        ],
+        "wheelAngle": 0,
+        "tilt": -0.005815715752741124,
+        "compression": -0.0008268840342562089,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 1.3
+      },
+      {
+        "id": "blueBus",
+        "model": "coach",
+        "dir": "V",
+        "len": 3,
+        "position": [
+          3.5,
+          0.055,
+          2.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "sky",
+        "model": "compact",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          5,
+          0.055,
+          3.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "orange",
+        "model": "pickup",
+        "dir": "V",
+        "len": 2,
+        "position": [
+          0.5,
+          0.055,
+          5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      },
+      {
+        "id": "tealBus",
+        "model": "camper",
+        "dir": "H",
+        "len": 3,
+        "position": [
+          2.5,
+          0.055,
+          5.5
+        ],
+        "wheelAngle": 0,
+        "tilt": 0,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.03
+      }
+    ],
+    "calls": 63,
+    "performance": {
+      "frames": 210,
+      "shadowUpdates": 70,
+      "renderedSceneKey": "1-play",
+      "viewport": {
+        "width": 374,
+        "height": 374
+      },
+      "inputToSubmission": {
+        "count": 0,
+        "median": null,
+        "p95": null
+      },
+      "pixelRatio": 1.5,
+      "shadowSize": 1024,
+      "shadows": true,
+      "inView": true,
+      "profile": {
+        "cpuMs": {
+          "samples": 0,
+          "median": null,
+          "p95": null
+        },
+        "gpuMs": {
+          "samples": 0,
+          "median": null,
+          "p95": null
+        },
+        "drawCalls": {
+          "samples": 0,
+          "median": null,
+          "p95": null
+        },
+        "triangles": {
+          "samples": 0,
+          "median": null,
+          "p95": null
+        },
+        "gpuTimer": true
+      }
+    },
+    "guide": {
+      "visible": false,
+      "position": [
+        2.5,
+        0.05,
+        0.5
+      ],
+      "scale": [
+        4.92,
+        0.92,
+        1
+      ],
+      "opacity": 0.13
+    },
+    "celebration": false,
+    "cameraFollow": 0,
+    "cameraGesture": null,
+    "touchPointers": 0
+  }
+}

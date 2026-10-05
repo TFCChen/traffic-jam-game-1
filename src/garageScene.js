@@ -21,6 +21,13 @@ import {
   SUSPENSION_PROFILES,
 } from "./vehicleDynamics.js";
 import { createRenderProfiler } from "./renderProfiler.js";
+import {
+  normalizeView,
+  rotateView,
+  panView,
+  zoomView,
+  touchPair,
+} from "./cameraControls.js";
 
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 const modelNames = [
@@ -146,7 +153,14 @@ export function createGarageScene(canvas, getProps, callbacks) {
     shadows: true,
     theme: "day",
     quality: "standard",
+    zoom: 1,
+    panX: 0,
+    panY: 0,
   };
+  const touches = new Map();
+  let cameraGesture = null,
+    touchBlocked = false,
+    cameraPending = false;
   let quality = QUALITY.standard;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const motionChanged = () => {
@@ -399,7 +413,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     p.velocity.copy(direction).multiplyScalar(spark ? 1.5 : 0.3);
     p.velocity.y = spark ? 0.2 : 0.2;
   }
-  function updateCamera() {
+  function updateCamera(viewOnly = false) {
     cameraFollow = 0;
     const pitch = THREE.MathUtils.degToRad(settings.pitch),
       yaw = THREE.MathUtils.degToRad(settings.yaw);
@@ -469,11 +483,21 @@ export function createGarageScene(canvas, getProps, callbacks) {
         ((maxY - minY) / 2 + padding) * aspect,
       ),
       halfHeight = halfWidth / aspect;
-    camera.left = centerX - halfWidth;
-    camera.right = centerX + halfWidth;
-    camera.top = centerY + halfHeight;
-    camera.bottom = centerY - halfHeight;
+    const visibleWidth = halfWidth / settings.zoom,
+      visibleHeight = halfHeight / settings.zoom;
+    const limitX = Math.max(0.7, halfWidth - visibleWidth + 0.5),
+      limitY = Math.max(0.7, halfHeight - visibleHeight + 0.5);
+    settings.panX = clamp(settings.panX, -limitX, limitX);
+    settings.panY = clamp(settings.panY, -limitY, limitY);
+    camera.left = centerX + settings.panX - visibleWidth;
+    camera.right = centerX + settings.panX + visibleWidth;
+    camera.top = centerY + settings.panY + visibleHeight;
+    camera.bottom = centerY + settings.panY - visibleHeight;
     camera.updateProjectionMatrix();
+    if (viewOnly) {
+      dirty = true;
+      return;
+    }
     const angle = THREE.MathUtils.degToRad(settings.light);
     sun.position.set(
       aim.x + Math.sin(angle) * 8,
@@ -600,8 +624,220 @@ export function createGarageScene(canvas, getProps, callbacks) {
     callbacks.feedback?.("車輛受阻，先移開擋路的車");
     callbacks.select(id);
   }
+  let wheelTimer;
+  const publishCamera = () => callbacks.cameraChange?.(normalizeView(settings));
+  function applyCamera(view) {
+    Object.assign(settings, normalizeView(view));
+    updateCamera(true);
+  }
+  function zoomAt(zoom, x, y) {
+    const r = canvas.getBoundingClientRect();
+    applyCamera(
+      zoomView(
+        settings,
+        zoom,
+        (x - r.left) / r.width - 0.5,
+        0.5 - (y - r.top) / r.height,
+        camera.right - camera.left,
+        camera.top - camera.bottom,
+      ),
+    );
+  }
+  function flushCamera() {
+    if (!cameraPending || !cameraGesture) return;
+    cameraPending = false;
+    const g = cameraGesture;
+    const next =
+      g.kind === "touch"
+        ? touches.size === 2
+          ? touchPair([...touches.values()])
+          : null
+        : g.current;
+    if (!next) return;
+    const dx = next.x - g.last.x,
+      dy = next.y - g.last.y;
+    const r = canvas.getBoundingClientRect();
+    applyCamera(
+      g.mode === "pan"
+        ? panView(
+            settings,
+            dx,
+            dy,
+            camera.right - camera.left,
+            camera.top - camera.bottom,
+            r.width,
+            r.height,
+          )
+        : rotateView(settings, dx, dy),
+    );
+    if (g.kind === "touch")
+      zoomAt((settings.zoom * next.distance) / g.last.distance, next.x, next.y);
+    g.last = next;
+  }
+  function cancelCamera(publish = true) {
+    flushCamera();
+    const active = !!cameraGesture;
+    const ids = [
+      ...touches.keys(),
+      ...(cameraGesture?.kind === "mouse" ? [cameraGesture.pointerId] : []),
+    ];
+    cameraGesture = null;
+    cameraPending = false;
+    touchBlocked = false;
+    touches.clear();
+    delete canvas.dataset.cameraGesture;
+    canvas.style.cursor = "default";
+    for (const id of ids)
+      if (canvas.hasPointerCapture(id)) canvas.releasePointerCapture(id);
+    if (publish && active) publishCamera();
+  }
+  function cameraDown(event) {
+    if (!ready || getProps().disabled) return false;
+    if (event.pointerType === "touch") {
+      flushCamera();
+      touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      canvas.setPointerCapture(event.pointerId);
+      if (touches.size < 2) {
+        if (touchBlocked) return true;
+        const point = planePoint(event);
+        if (
+          carAt(event) ||
+          (point &&
+            point.x >= 0 &&
+            point.x <= 6 &&
+            point.z >= 0 &&
+            point.z <= 6)
+        )
+          return false;
+        cameraGesture = {
+          kind: "singleTouch",
+          pointerId: event.pointerId,
+          mode: "orbit",
+          last: { x: event.clientX, y: event.clientY },
+          current: { x: event.clientX, y: event.clientY },
+        };
+        canvas.focus({ preventScroll: true });
+        canvas.dataset.cameraGesture = "orbit";
+        event.preventDefault();
+        return true;
+      }
+      event.preventDefault();
+      if (drag) finish({ pointerId: drag.pointerId }, true, true);
+      if (editorDrag) finish({ pointerId: editorDrag.pointerId }, true, true);
+      if (touches.size > 2) {
+        flushCamera();
+        cameraGesture = null;
+        cameraPending = false;
+        delete canvas.dataset.cameraGesture;
+        touchBlocked = true;
+        publishCamera();
+        return true;
+      }
+      if (touchBlocked && !cameraGesture) return true;
+      touchBlocked = true;
+      cameraGesture = {
+        kind: "touch",
+        mode: "pan",
+        last: touchPair([...touches.values()]),
+      };
+    } else if (event.button === 2 || event.button === 1) {
+      event.preventDefault();
+      if (drag) finish({ pointerId: drag.pointerId }, true, true);
+      if (editorDrag) finish({ pointerId: editorDrag.pointerId }, true, true);
+      cameraGesture = {
+        kind: "mouse",
+        pointerId: event.pointerId,
+        mode: event.button === 1 || event.shiftKey ? "pan" : "orbit",
+        last: { x: event.clientX, y: event.clientY },
+        current: { x: event.clientX, y: event.clientY },
+      };
+      canvas.setPointerCapture(event.pointerId);
+    } else return !!cameraGesture;
+    canvas.focus({ preventScroll: true });
+    canvas.dataset.cameraGesture = cameraGesture.mode;
+    canvas.style.cursor = "grabbing";
+    return true;
+  }
+  function cameraMove(event) {
+    if (touches.has(event.pointerId))
+      touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (
+      cameraGesture?.kind === "touch" ||
+      cameraGesture?.pointerId === event.pointerId
+    ) {
+      if (cameraGesture.kind !== "touch")
+        cameraGesture.current = { x: event.clientX, y: event.clientY };
+      cameraPending = true;
+      dirty = true;
+      event.preventDefault();
+      return true;
+    }
+    return event.pointerType === "touch" && touchBlocked;
+  }
+  function cameraEnd(event) {
+    if (
+      (cameraGesture?.kind === "mouse" ||
+        cameraGesture?.kind === "singleTouch") &&
+      cameraGesture.pointerId === event.pointerId
+    ) {
+      cancelCamera();
+      return true;
+    }
+    if (!touches.has(event.pointerId)) return false;
+    flushCamera();
+    const handled = touchBlocked;
+    touches.delete(event.pointerId);
+    if (cameraGesture?.kind === "touch") {
+      cameraGesture = null;
+      cameraPending = false;
+      delete canvas.dataset.cameraGesture;
+      publishCamera();
+    }
+    if (!touches.size) touchBlocked = false;
+    if (handled && canvas.hasPointerCapture(event.pointerId))
+      canvas.releasePointerCapture(event.pointerId);
+    if (handled) canvas.style.cursor = "default";
+    return handled;
+  }
+  function wheelCamera(event) {
+    if (!ready || getProps().disabled) return;
+    event.preventDefault();
+    if (drag) finish({ pointerId: drag.pointerId }, true);
+    if (editorDrag) finish({ pointerId: editorDrag.pointerId }, true);
+    flushCamera();
+    const pixels =
+      event.deltaY *
+      (event.deltaMode === 1
+        ? 16
+        : event.deltaMode === 2
+          ? canvas.clientHeight
+          : 1);
+    zoomAt(
+      settings.zoom * Math.exp(-clamp(pixels, -600, 600) * 0.0015),
+      event.clientX,
+      event.clientY,
+    );
+    clearTimeout(wheelTimer);
+    wheelTimer = setTimeout(publishCamera, 180);
+  }
+  function cancelInput() {
+    const ids = [drag?.pointerId, editorDrag?.pointerId].filter(
+      (id) => id != null,
+    );
+    if (drag) finish({ pointerId: drag.pointerId }, true, true);
+    if (editorDrag) finish({ pointerId: editorDrag.pointerId }, true, true);
+    cancelCamera();
+    for (const id of ids)
+      if (canvas.hasPointerCapture(id)) canvas.releasePointerCapture(id);
+  }
+  const pauseInput = () => {
+    if (document.hidden) cancelInput();
+  };
+  window.addEventListener("blur", cancelInput);
+  document.addEventListener("visibilitychange", pauseInput);
   function down(event) {
     const props = getProps();
+    if (cameraDown(event)) return;
     if (
       drag &&
       event.pointerType === "touch" &&
@@ -656,7 +892,6 @@ export function createGarageScene(canvas, getProps, callbacks) {
           start: { x: event.clientX, y: event.clientY },
         };
         canvas.setPointerCapture(event.pointerId);
-        props.onCellClick({ row: editorDrag.row, col: editorDrag.col });
       }
       return;
     }
@@ -694,6 +929,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     canvas.dataset.dragging = id;
   }
   function move(event) {
+    if (cameraMove(event)) return;
     if (editorDrag?.pointerId === event.pointerId) {
       editorDrag.moved =
         Math.hypot(
@@ -728,14 +964,18 @@ export function createGarageScene(canvas, getProps, callbacks) {
     canvas.style.cursor = "grabbing";
     if (measuring) pendingInputAt = performance.now();
   }
-  function finish(event, cancel = false) {
+  function finish(event, cancel = false, transferring = false) {
+    if (!transferring && cameraEnd(event)) return;
     if (editorDrag?.pointerId === event.pointerId) {
       const active = editorDrag;
       editorDrag = null;
-      if (canvas.hasPointerCapture(event.pointerId))
+      if (!transferring && canvas.hasPointerCapture(event.pointerId))
         canvas.releasePointerCapture(event.pointerId);
-      if (!cancel && active.moved)
-        getProps().onPlace?.({ row: active.row, col: active.col });
+      if (!cancel)
+        (active.moved ? getProps().onPlace : getProps().onCellClick)?.({
+          row: active.row,
+          col: active.col,
+        });
       return;
     }
     if (!drag || event.pointerId !== drag.pointerId) return;
@@ -749,7 +989,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     }
     dirty = true;
     settlingUntil = performance.now() + 450;
-    if (canvas.hasPointerCapture(event.pointerId))
+    if (!transferring && canvas.hasPointerCapture(event.pointerId))
       canvas.releasePointerCapture(event.pointerId);
     const move = active.legal.find(
       (m) => m.delta === snapDragDelta(active.delta),
@@ -762,6 +1002,11 @@ export function createGarageScene(canvas, getProps, callbacks) {
   }
   function key(event) {
     const props = getProps();
+    if (event.key === "Escape" && cameraGesture) {
+      cancelCamera();
+      event.preventDefault();
+      return;
+    }
     if (props.disabled || props.won || props.editor) return;
     if (event.key === "Escape" && drag) {
       finish({ pointerId: drag.pointerId }, true);
@@ -784,16 +1029,25 @@ export function createGarageScene(canvas, getProps, callbacks) {
     pointermove: move,
     pointerup: (e) => finish(e),
     pointercancel: (e) => finish(e, true),
-    lostpointercapture: (e) => finish(e, true),
+    lostpointercapture: (e) => {
+      if (!canvas.hasPointerCapture(e.pointerId)) finish(e, true);
+    },
     keydown: key,
+    wheel: wheelCamera,
+    contextmenu: (e) => e.preventDefault(),
     webglcontextlost: (event) => {
       event.preventDefault();
       if (drag) finish({ pointerId: drag.pointerId }, true);
+      cancelCamera(false);
       callbacks.error(new Error("WebGL context lost"));
     },
   };
   Object.entries(handlers).forEach(([name, handler]) =>
-    canvas.addEventListener(name, handler),
+    canvas.addEventListener(
+      name,
+      handler,
+      name === "wheel" ? { passive: false } : undefined,
+    ),
   );
   function sync() {
     if (!library || !alive) return;
@@ -803,6 +1057,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     const changed = sceneKey !== props.sceneKey;
     sceneKey = props.sceneKey;
     if (changed) {
+      cancelCamera();
       escapeStart = null;
       cameraFollow = 0;
       selected = null;
@@ -1028,8 +1283,10 @@ export function createGarageScene(canvas, getProps, callbacks) {
       lastTime = now;
       return;
     }
+    flushCamera();
     const active =
       !!drag ||
+      !!cameraGesture ||
       now < settlingUntil ||
       (escapeStart != null && now - escapeStart < 1900);
     // Cap high-refresh displays too; retain ambient life without rendering at 120/144 Hz.
@@ -1428,9 +1685,18 @@ export function createGarageScene(canvas, getProps, callbacks) {
       inputSamples.length = 0;
       profiler.set(value);
     },
+    cancelInput,
     settings(next) {
+      if (
+        Object.entries(next).every(([key, value]) =>
+          Object.is(settings[key], value),
+        )
+      )
+        return;
+      cancelCamera(false);
       if (drag) finish({ pointerId: drag.pointerId }, true);
       Object.assign(settings, next);
+      Object.assign(settings, normalizeView(settings));
       quality = QUALITY[settings.quality] ?? QUALITY.standard;
       for (const item of groups.values())
         for (const paint of item.paints) {
@@ -1516,9 +1782,15 @@ export function createGarageScene(canvas, getProps, callbacks) {
         },
         celebration: celebration.visible,
         cameraFollow,
+        cameraGesture: cameraGesture?.mode ?? null,
+        touchPointers: touches.size,
       };
     },
     dispose() {
+      window.removeEventListener("blur", cancelInput);
+      document.removeEventListener("visibilitychange", pauseInput);
+      clearTimeout(wheelTimer);
+      cancelCamera(false);
       if (!alive) return;
       alive = false;
       cancelAnimationFrame(frame);

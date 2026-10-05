@@ -8,6 +8,7 @@ import {
 } from "./sceneThemes.js";
 import { QUALITY } from "./gamePreferences.js";
 import { Icon, Sheet } from "./GameUI.jsx";
+import { DEFAULT_VIEW, normalizeView } from "./cameraControls.js";
 
 const DEFAULT = {
   pitch: 60,
@@ -18,6 +19,9 @@ const DEFAULT = {
   theme: "day",
   quality: "standard",
   motion: 1.2,
+  zoom: 1,
+  panX: 0,
+  panY: 0,
 };
 function readSettings() {
   try {
@@ -26,14 +30,7 @@ function readSettings() {
     );
     if (!value) return DEFAULT;
     return {
-      pitch: Math.max(45, Math.min(80, Number(value.pitch) || DEFAULT.pitch)),
-      yaw: Math.max(
-        -35,
-        Math.min(
-          35,
-          Number.isFinite(Number(value.yaw)) ? Number(value.yaw) : DEFAULT.yaw,
-        ),
-      ),
+      ...normalizeView(value),
       light: Math.max(
         -180,
         Math.min(
@@ -92,6 +89,8 @@ export default function Board(props) {
             error: () => setFallback(true),
             select: setSelected,
             feedback: setFeedback,
+            cameraChange: (view) =>
+              setSettings((current) => ({ ...current, ...view })),
           });
           engine.current = instance;
           instance.settings(settingsRef.current);
@@ -125,6 +124,9 @@ export default function Board(props) {
     props.sceneKey,
     props.editor,
   ]);
+  useEffect(() => {
+    if (open || props.disabled) engine.current?.cancelInput();
+  }, [open, props.disabled]);
   useEffect(() => {
     engine.current?.settings({ ...settings, theme });
     try {
@@ -168,7 +170,7 @@ export default function Board(props) {
           ref={canvas}
           className="garage-canvas"
           tabIndex={0}
-          aria-label="3D 停車場；點選車輛拖曳，或選取車輛後使用方向鍵"
+          aria-label="3D 停車場；單指或左鍵移車，右鍵旋轉、Shift 加右鍵平移、滾輪縮放；場外單指旋轉、雙指平移、捏合縮放。選車後可用方向鍵移動。"
         />
         {!ready && (
           <div className="scene-loading" role="status">
@@ -202,6 +204,42 @@ export default function Board(props) {
             車庫設定
           </button>
         </div>
+      </div>
+      <div className="camera-navigation" role="group" aria-label="視角操作">
+        <div className="camera-zoom-tools">
+          <button
+            disabled={!ready || open || props.disabled || settings.zoom <= 0.65}
+            aria-label="縮小場景"
+            onClick={() => change("zoom", Math.max(0.65, settings.zoom / 1.2))}
+          >
+            −
+          </button>
+          <span aria-label="場景放大倍率">
+            {Math.round(settings.zoom * 100)}%
+          </span>
+          <button
+            disabled={!ready || open || props.disabled || settings.zoom >= 4}
+            aria-label="放大場景"
+            onClick={() => change("zoom", Math.min(4, settings.zoom * 1.2))}
+          >
+            ＋
+          </button>
+          <button
+            disabled={!ready || open || props.disabled}
+            aria-label="重置視角"
+            onClick={() => setSettings((s) => ({ ...s, ...DEFAULT_VIEW }))}
+          >
+            重置
+          </button>
+        </div>
+        <p className="camera-help">
+          <span className="camera-help-desktop">
+            右鍵旋轉 · Shift＋右鍵／中鍵平移 · 滾輪縮放
+          </span>
+          <span className="camera-help-touch">
+            場外單指旋轉 · 雙指平移／捏合縮放 · 單指移車
+          </span>
+        </p>
       </div>
       {open && (
         <Sheet label="車庫設定" onClose={() => setOpen(false)}>
@@ -261,7 +299,12 @@ export default function Board(props) {
             <div className="view-presets">
               <button
                 onClick={() =>
-                  setSettings((s) => ({ ...s, pitch: 70, yaw: -12 }))
+                  setSettings((s) => ({
+                    ...s,
+                    ...DEFAULT_VIEW,
+                    pitch: 70,
+                    yaw: -12,
+                  }))
                 }
               >
                 遊玩視角
@@ -270,6 +313,7 @@ export default function Board(props) {
                 onClick={() =>
                   setSettings((s) => ({
                     ...s,
+                    ...DEFAULT_VIEW,
                     pitch: 45,
                     yaw: -25,
                     quality: "high",
@@ -292,23 +336,23 @@ export default function Board(props) {
               />
             </label>
             <label>
-              俯視角 <b>{settings.pitch}°</b>
+              俯視角 <b>{Math.round(settings.pitch)}°</b>
               <input
                 aria-label="俯視角"
                 type="range"
-                min="45"
+                min="30"
                 max="80"
                 value={settings.pitch}
                 onChange={(e) => change("pitch", Number(e.target.value))}
               />
             </label>
             <label>
-              左右觀察 <b>{settings.yaw}°</b>
+              左右觀察 <b>{Math.round(settings.yaw)}°</b>
               <input
                 aria-label="左右觀察"
                 type="range"
-                min="-35"
-                max="35"
+                min="-180"
+                max="180"
                 value={settings.yaw}
                 onChange={(e) => change("yaw", Number(e.target.value))}
               />
