@@ -16,7 +16,7 @@ const results = [];
 mkdirSync(new URL("../.browser-checks/", import.meta.url), { recursive: true });
 const ready = () =>
   until(
-    "document.querySelector('.garage-canvas')?.garageInspection?.snapshot().ready&&document.querySelector('.game-column')?.getAttribute('aria-busy')==='false'",
+    "(()=>{const c=document.querySelector('.garage-canvas'),s=c?.garageInspection?.snapshot(),r=c?.getBoundingClientRect();return s?.ready&&s.sceneKey===s.performance.renderedSceneKey&&s.performance.viewport?.width===r.width&&s.performance.viewport?.height===r.height&&document.querySelector('.game-column')?.getAttribute('aria-busy')==='false'})()",
   );
 async function upload(data) {
   writeFileSync(fixture, JSON.stringify(data));
@@ -32,9 +32,11 @@ async function upload(data) {
   await sleep(200);
 }
 try {
+  const initialOrigin = await evaluate("performance.timeOrigin");
   await evaluate(
     "(async()=>{for(const r of await navigator.serviceWorker.getRegistrations())await r.unregister();for(const k of Object.keys(localStorage))if(k.startsWith('traffic-jam-'))localStorage.removeItem(k);localStorage.setItem('traffic-jam-tutorial-v1','true');localStorage.setItem('traffic-jam-custom-levels-v2','{}');location.reload();})()",
   );
+  await until(`performance.timeOrigin!==${initialOrigin}`);
   await ready();
   assert.ok(await evaluate("!!document.querySelector('.storage-alert')"));
   assert.equal(
@@ -65,6 +67,9 @@ try {
     progress: {},
     customLevels: {},
   });
+  await until(
+    "/匯入失敗/.test(document.querySelector('.instruction').textContent)",
+  );
   assert.match(
     await evaluate("document.querySelector('.instruction').textContent"),
     /匯入失敗/,
@@ -84,6 +89,9 @@ try {
     draft: { cars, title: "匯入草稿", id: null },
   };
   await upload(data);
+  await until(
+    "/備份已合併/.test(document.querySelector('.instruction').textContent)",
+  );
   assert.match(
     await evaluate("document.querySelector('.instruction').textContent"),
     /備份已合併/,
