@@ -1,7 +1,8 @@
 // Browser integration test. Pass the test browser's CDP WebSocket URL as argument.
 // Uses real Chrome touch input; fixtures and preferences are restored on completion.
 import assert from 'node:assert/strict';
-import {writeFile} from 'node:fs/promises';
+import {writeFile,mkdir} from 'node:fs/promises';
+await mkdir(new URL('../.browser-checks/',import.meta.url),{recursive:true});
 const ws=new WebSocket(process.argv[2]);
 await new Promise((resolve,reject)=>{ws.onopen=resolve;ws.onerror=reject;});
 let sequence=0,session;const pending=new Map();

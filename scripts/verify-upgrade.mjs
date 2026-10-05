@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdirSync, writeFileSync, readFileSync } from "node:fs";
+import { mkdirSync, writeFileSync, readFileSync, unlinkSync } from "node:fs";
 import { connect } from "./cdp-test.mjs";
 import { solveLevel } from "../src/gameEngine.js";
 const { send, evaluate, sleep, until, click, close } = await connect(
@@ -19,6 +19,11 @@ const keys = [
 const dir = new URL("../docs/upgrade-2026-10-05/", import.meta.url);
 mkdirSync(dir, { recursive: true });
 const results = [];
+const updateWorkerName = `sw-regression-${process.pid}.js`;
+const updateWorkerFile = new URL(
+  `../dist/${updateWorkerName}`,
+  import.meta.url,
+);
 const ready = () =>
   until(
     "document.querySelector('.garage-canvas')?.garageInspection?.snapshot().ready&&document.querySelector('.game-column')?.getAttribute('aria-busy')==='false'",
@@ -58,6 +63,12 @@ async function level(id) {
     `document.querySelector('.level-grid button[aria-label^="第 ${id} 關"]').click()`,
   );
   await ready();
+  await evaluate(
+    "document.querySelector('.garage-canvas').scrollIntoView({block:'center'})",
+  );
+  await until(
+    `document.querySelector('.garage-canvas').garageInspection.snapshot().performance.renderedSceneKey===${JSON.stringify(`${id}-play`)}`,
+  );
 }
 try {
   await evaluate(
@@ -225,14 +236,18 @@ try {
     memories.push(snap.memory);
     if (i % 20 === 19) console.log(`Stable scene switches: ${i + 1}`);
   }
-  // Hidden/offscreen meshes may not upload until a rendered frame. Detect growth,
-  // without requiring identical counts while resources are disposed and uploaded.
+  writeFileSync(
+    new URL("scene-switch-samples.json", dir),
+    JSON.stringify({ memories, switchTimes }, null, 2),
+  );
+  // Sample after a confirmed rendered frame so slow software renderers upload
+  // the same meshes before comparing resource counts.
   for (const field of ["geometries", "textures"]) {
     const warmMax = Math.max(...memories.slice(0, 20).map((m) => m[field]));
     const finalMax = Math.max(...memories.slice(-20).map((m) => m[field]));
     assert.ok(
       finalMax <= warmMax + 2,
-      `${field} must not grow across repeated level switches`,
+      `${field} must not grow across repeated level switches: warm=${warmMax}, final=${finalMax}`,
     );
   }
   const switchP95 = [...switchTimes].sort((a, b) => a - b)[94];
@@ -254,6 +269,46 @@ try {
   await click("關閉車庫設定");
   results.push("Mobile settings targets >=44px");
   await until("!!navigator.serviceWorker.controller");
+  const preserved = await evaluate(
+    "({progress:localStorage.getItem('traffic-jam-progress-v2'),draft:localStorage.getItem('traffic-jam-draft-v1')})",
+  );
+  const workerSource = readFileSync(
+    new URL("../dist/sw.js", import.meta.url),
+    "utf8",
+  ).replace(/const CACHE="([^"]+)"/, 'const CACHE="$1-regression"');
+  writeFileSync(updateWorkerFile, workerSource);
+  await evaluate(
+    `navigator.serviceWorker.register('/${updateWorkerName}',{scope:'/'}).then(()=>true)`,
+  );
+  await until(
+    "[...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='更新並重新開啟')",
+  );
+  await shot("11-offline-update");
+  const beforeUpdate = await evaluate("performance.timeOrigin");
+  await click("更新並重新開啟");
+  await until(`performance.timeOrigin!==${beforeUpdate}`);
+  await ready();
+  assert.deepEqual(
+    await evaluate(
+      "({progress:localStorage.getItem('traffic-jam-progress-v2'),draft:localStorage.getItem('traffic-jam-draft-v1')})",
+    ),
+    preserved,
+  );
+  // Reload registers the production worker again; explicitly restore that version.
+  await until(
+    "[...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='更新並重新開啟')",
+  );
+  const beforeRestore = await evaluate("performance.timeOrigin");
+  await click("更新並重新開啟");
+  await until(`performance.timeOrigin!==${beforeRestore}`);
+  await ready();
+  await until(
+    "navigator.serviceWorker.controller?.scriptURL.endsWith('/sw.js')&&!document.querySelector('.offline-status button')",
+  );
+  await shot("12-update-active");
+  results.push(
+    "First-installed worker update reloads the app and preserves progress/draft",
+  );
   await send("Network.enable");
   await send("Network.emulateNetworkConditions", {
     offline: true,
@@ -301,6 +356,9 @@ try {
   );
   console.log(results.join("\n"));
 } finally {
+  try {
+    unlinkSync(updateWorkerFile);
+  } catch {}
   await send("Network.emulateNetworkConditions", {
     offline: false,
     latency: 0,

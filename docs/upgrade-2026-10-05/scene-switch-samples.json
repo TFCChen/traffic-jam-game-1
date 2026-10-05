@@ -1,16 +1,4 @@
 {
-  "results": [
-    "Hint preserves board projection",
-    "Invalid endpoint retains start; validation preserves projection",
-    "Undo/redo and named draft survive leave/reload",
-    "Unsaved trial returns to same draft; named save succeeds",
-    "Reload resumes board, moves and undo history",
-    "100 level switches reuse one renderer",
-    "Mobile settings targets >=44px",
-    "First-installed worker update reloads the app and preserves progress/draft",
-    "Offline reload and level 40 assets load from versioned snapshot",
-    "WebGL loss fallback and 3D retry"
-  ],
   "memories": [
     {
       "geometries": 70,
@@ -514,7 +502,5 @@
     1185.4176999999909,
     1034.0357000000076,
     1155.4231000000145
-  ],
-  "switchP95": 1219.2102999999988,
-  "switchTiming": "Includes panel button click, 100 ms test wait and readiness polling; not pure renderer time"
+  ]
 }

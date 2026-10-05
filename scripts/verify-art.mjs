@@ -1,6 +1,7 @@
 // Capture the actual 3D scene at multiple angles. Use an isolated localhost:4173 browser.
 import assert from 'node:assert/strict';
-import {writeFile} from 'node:fs/promises';
+import {writeFile,mkdir} from 'node:fs/promises';
+await mkdir(new URL('../.browser-checks/',import.meta.url),{recursive:true});
 const ws=new WebSocket(process.argv[2]);await new Promise((resolve,reject)=>{ws.onopen=resolve;ws.onerror=reject;});
 let sequence=0,session;const pending=new Map();
 ws.onmessage=e=>{const r=JSON.parse(e.data),p=pending.get(r.id);if(p){pending.delete(r.id);r.error?p.reject(Error(r.error.message)):p.resolve(r.result);}};

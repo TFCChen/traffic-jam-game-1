@@ -122,7 +122,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     nextFrame = 0,
     lastHover = 0;
   const sceneryLamps = [];
-  const stats = { frames: 0, shadowUpdates: 0 };
+  const stats = { frames: 0, shadowUpdates: 0, renderedSceneKey: null };
   const inputSamples = [];
   let pendingInputAt = null,
     measuring = false;
@@ -1410,6 +1410,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     renderer.render(scene, camera);
     profiler.end(renderer.info.render);
     stats.frames++;
+    stats.renderedSceneKey = sceneKey;
     if (pendingInputAt !== null) {
       inputSamples.push(performance.now() - pendingInputAt);
       if (inputSamples.length > 1000) inputSamples.shift();

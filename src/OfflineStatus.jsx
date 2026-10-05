@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 export default function OfflineStatus() {
+  const updateRequested = useRef(false);
   const [offline, setOffline] = useState(!navigator.onLine),
     [registration, setRegistration] = useState(null),
-    [cached, setCached] = useState(Boolean(navigator.serviceWorker?.controller)),
+    [cached, setCached] = useState(
+      Boolean(navigator.serviceWorker?.controller),
+    ),
     [error, setError] = useState(false);
   useEffect(() => {
     const online = () => setOffline(!navigator.onLine);
@@ -10,12 +13,16 @@ export default function OfflineStatus() {
     window.addEventListener("offline", online);
     let alive = true,
       reloading = false;
-    const controlled = Boolean(navigator.serviceWorker?.controller);
+    let controlled = Boolean(navigator.serviceWorker?.controller);
     const change = () => {
-      if (controlled && !reloading) {
+      if ((controlled || updateRequested.current) && !reloading) {
         reloading = true;
         location.reload();
-      } else if (alive) setCached(true);
+      } else if (alive) {
+        controlled = true;
+        setCached(true);
+        setRegistration(null);
+      }
     };
     navigator.serviceWorker?.addEventListener("controllerchange", change);
     if (import.meta.env.PROD && "serviceWorker" in navigator) {
@@ -55,7 +62,10 @@ export default function OfflineStatus() {
         <>
           <span>新版車庫已準備好，草稿和進度會保留。</span>
           <button
-            onClick={() => registration.waiting.postMessage("ACTIVATE_UPDATE")}
+            onClick={() => {
+              updateRequested.current = true;
+              registration.waiting.postMessage("ACTIVATE_UPDATE");
+            }}
           >
             更新並重新開啟
           </button>

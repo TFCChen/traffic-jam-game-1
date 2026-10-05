@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { writeFileSync, unlinkSync } from "node:fs";
+import { writeFileSync, unlinkSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { connect } from "./cdp-test.mjs";
 const { send, evaluate, until, click, sleep, close } = await connect(
@@ -13,6 +13,7 @@ const fixture = new URL(
   import.meta.url,
 );
 const results = [];
+mkdirSync(new URL("../.browser-checks/", import.meta.url), { recursive: true });
 const ready = () =>
   until(
     "document.querySelector('.garage-canvas')?.garageInspection?.snapshot().ready&&document.querySelector('.game-column')?.getAttribute('aria-busy')==='false'",
