@@ -19,10 +19,11 @@ export default function OfflineStatus() {
     navigator.serviceWorker?.addEventListener("controllerchange", change);
     if (import.meta.env.PROD && "serviceWorker" in navigator) {
       navigator.serviceWorker
-        .register("/sw.js")
+        .register("/sw.js", { updateViaCache: "none" })
         .then((reg) => {
           if (!alive) return;
           setRegistration(reg);
+          reg.update().catch(() => {});
           reg.addEventListener("updatefound", () => {
             const worker = reg.installing;
             worker?.addEventListener("statechange", () => {

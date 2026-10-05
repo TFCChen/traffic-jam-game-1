@@ -54,7 +54,7 @@ function assets() {
     assetsPromise = Promise.all(
       modelNames.map(async (name) => [
         name,
-        (await loader.loadAsync(`/models/${name}.glb`)).scene,
+        (await loader.loadAsync(`/models/${name}.glb?v=${__MODEL_REVISION__}`)).scene,
       ]),
     )
       .then((entries) => {

@@ -1,4 +1,4 @@
-export async function connect(url) {
+export async function connect(url, origin = 'http://localhost:4173') {
   const ws = new WebSocket(url);
   await new Promise((r, j) => {
     ws.onopen = r;
@@ -33,7 +33,7 @@ export async function connect(url) {
     });
   const targets = await send("Target.getTargets", {}, false),
     page = targets.targetInfos.find(
-      (t) => t.type === "page" && t.url.startsWith("http://localhost:4173"),
+      (t) => t.type === "page" && t.url.startsWith(origin),
     );
   if (!page) throw Error("Open isolated localhost:4173 tab first");
   session = (

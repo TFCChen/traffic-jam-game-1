@@ -1,0 +1,10 @@
+{
+  "title": "玩具車庫・交通解謎",
+  "offlineModelStatus": 200,
+  "hash": "cf8ac663815651fb1424fd998443e4b91a343660313abd780ac234418088bd87",
+  "rejectsWrongVersion": true,
+  "progress": "level-17",
+  "caches": [
+    "traffic-jam-3ec89445065de105"
+  ]
+}
