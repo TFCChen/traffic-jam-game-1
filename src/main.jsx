@@ -87,6 +87,111 @@ function isPointOccupied(cars, point) {
   });
 }
 
+function InstallApp() {
+  const [platform, setPlatform] = useState("other");
+  const [installed, setInstalled] = useState(false);
+  const [guide, setGuide] = useState(false);
+  const prompt = useRef(null);
+  useEffect(() => {
+    const ua = navigator.userAgent;
+    setPlatform(
+      /iPhone|iPad|iPod/.test(ua) ||
+        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+        ? "ios"
+        : /Android/i.test(ua)
+          ? "android"
+          : "desktop",
+    );
+    const standalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      navigator.standalone === true;
+    setInstalled(standalone);
+    const install = (event) => {
+      event.preventDefault();
+      prompt.current = event;
+    };
+    const done = () => {
+      setInstalled(true);
+      prompt.current = null;
+    };
+    window.addEventListener("beforeinstallprompt", install);
+    window.addEventListener("appinstalled", done);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", install);
+      window.removeEventListener("appinstalled", done);
+    };
+  }, []);
+  async function openGuide() {
+    if (prompt.current) {
+      const event = prompt.current;
+      prompt.current = null;
+      await event.prompt();
+      if ((await event.userChoice).outcome === "accepted") setInstalled(true);
+      else setGuide(true);
+    } else setGuide(true);
+  }
+  if (installed) return null;
+  return (
+    <>
+      <button className="install-app-button" onClick={openGuide}>
+        <Icon name="install" />
+        安裝遊戲
+      </button>
+      {guide && (
+        <Sheet label="安裝玩具車庫" onClose={() => setGuide(false)}>
+          <div className="install-guide">
+            <div className="install-guide-icon">
+              <img src="/icon.svg" alt="" />
+            </div>
+            <small>玩具車庫 · 交通解謎</small>
+            <h2>加入主畫面，像 App 一樣遊玩</h2>
+            {platform === "ios" ? (
+              <ol>
+                <li>
+                  先在 <b>Safari</b>{" "}
+                  開啟朋友傳來的遊戲分享網址，等車庫載入完成。
+                </li>
+                <li>
+                  點底部的<b>分享</b>圖示（方框上箭頭）。
+                </li>
+                <li>
+                  選擇<b>加入主畫面</b>，再點右上角<b>加入</b>。
+                </li>
+              </ol>
+            ) : platform === "android" ? (
+              <ol>
+                <li>
+                  在 <b>Chrome</b> 開啟遊戲網址並等畫面載入完成。
+                </li>
+                <li>
+                  點右上角 <b>⋮</b>，選擇<b>安裝應用程式</b>或<b>加到主畫面</b>
+                  。
+                </li>
+                <li>確認安裝後，就能從主畫面的遊戲圖示啟動。</li>
+              </ol>
+            ) : (
+              <ol>
+                <li>使用 Chrome 或 Edge 開啟遊戲網址。</li>
+                <li>
+                  在網址列的安裝圖示或瀏覽器選單選擇<b>安裝玩具車庫</b>。
+                </li>
+                <li>安裝後可從桌面或開始功能表啟動。</li>
+              </ol>
+            )}
+            <p>
+              安裝免費、不需經過 App
+              Store；需要網路開啟分享連結，首次載入完成後，已快取的遊戲也可離線遊玩。
+            </p>
+            <button className="accent" onClick={() => setGuide(false)}>
+              知道了
+            </button>
+          </div>
+        </Sheet>
+      )}
+    </>
+  );
+}
+
 function App() {
   const [levels, setLevels] = useState([]);
   const [current, setCurrent] = useState(DEFAULT_LEVEL);
@@ -1037,6 +1142,7 @@ function App() {
         </section>
 
         <div className="utility-dock">
+          <InstallApp />
           <button
             onClick={() => {
               setTutorialStep(0);

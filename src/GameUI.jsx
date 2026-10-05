@@ -10,6 +10,7 @@ const paths = {
   close: "m6 6 12 12 M18 6 6 18",
   garage: "m3 9 9-6 9 6v12H3z M7 21V11h10v10 M7 15h10 M7 18h10",
   settings: "M4 7h16 M4 17h16 M8 4v6 M16 14v6",
+  install: "M12 3v12m-5-5 5 5 5-5M5 17v3h14v-3",
 };
 
 export function Sheet({ label, onClose, children }) {

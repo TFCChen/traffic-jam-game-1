@@ -34,7 +34,7 @@ npm run preview
 
 開發網址預設 http://localhost:5173。Windows PowerShell 若限制 npm.ps1，改用 npm.cmd。手機與電腦連同 Wi-Fi，使用開發伺服器顯示的 Network URL 即可測試。
 
-3D 模組以動態 import 載入，GLB 素材另外下載。Three.js 模組仍超過 Vite 的 500KB 提醒門檻；目前沒有離線快取。手機加入主畫面由 manifest 支援，尚無 Service Worker。
+3D 模組以動態 import 載入，GLB 素材另外下載。正式建置會以版本化 Service Worker 預先快取遊戲、關卡、車模及 PWA 圖示，完成首次載入後可離線遊玩。iPhone、Android 與桌面安裝方式見 [PWA 安裝指南](docs/PWA-INSTALL.md)。Three.js 模組仍超過 Vite 的 500KB 提醒門檻。
 
 ## Blender 素材
 
