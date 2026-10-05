@@ -1,0 +1,274 @@
+{
+  "levels": [
+    {
+      "id": 1,
+      "moves": 9,
+      "explored": 691,
+      "solveAndReplayMs": 60
+    },
+    {
+      "id": 2,
+      "moves": 9,
+      "explored": 4589,
+      "solveAndReplayMs": 399
+    },
+    {
+      "id": 3,
+      "moves": 14,
+      "explored": 775,
+      "solveAndReplayMs": 40
+    },
+    {
+      "id": 4,
+      "moves": 9,
+      "explored": 363,
+      "solveAndReplayMs": 19
+    },
+    {
+      "id": 5,
+      "moves": 9,
+      "explored": 2190,
+      "solveAndReplayMs": 208
+    },
+    {
+      "id": 6,
+      "moves": 9,
+      "explored": 1650,
+      "solveAndReplayMs": 179
+    },
+    {
+      "id": 7,
+      "moves": 13,
+      "explored": 4944,
+      "solveAndReplayMs": 356
+    },
+    {
+      "id": 8,
+      "moves": 11,
+      "explored": 2260,
+      "solveAndReplayMs": 311
+    },
+    {
+      "id": 9,
+      "moves": 12,
+      "explored": 681,
+      "solveAndReplayMs": 59
+    },
+    {
+      "id": 10,
+      "moves": 17,
+      "explored": 1900,
+      "solveAndReplayMs": 207
+    },
+    {
+      "id": 11,
+      "moves": 25,
+      "explored": 828,
+      "solveAndReplayMs": 59
+    },
+    {
+      "id": 12,
+      "moves": 17,
+      "explored": 1268,
+      "solveAndReplayMs": 80
+    },
+    {
+      "id": 13,
+      "moves": 16,
+      "explored": 8267,
+      "solveAndReplayMs": 1059
+    },
+    {
+      "id": 14,
+      "moves": 17,
+      "explored": 10322,
+      "solveAndReplayMs": 1248
+    },
+    {
+      "id": 15,
+      "moves": 23,
+      "explored": 525,
+      "solveAndReplayMs": 87
+    },
+    {
+      "id": 16,
+      "moves": 21,
+      "explored": 2505,
+      "solveAndReplayMs": 250
+    },
+    {
+      "id": 17,
+      "moves": 24,
+      "explored": 2125,
+      "solveAndReplayMs": 283
+    },
+    {
+      "id": 18,
+      "moves": 25,
+      "explored": 1585,
+      "solveAndReplayMs": 137
+    },
+    {
+      "id": 19,
+      "moves": 22,
+      "explored": 484,
+      "solveAndReplayMs": 38
+    },
+    {
+      "id": 20,
+      "moves": 10,
+      "explored": 1602,
+      "solveAndReplayMs": 110
+    },
+    {
+      "id": 21,
+      "moves": 21,
+      "explored": 258,
+      "solveAndReplayMs": 14
+    },
+    {
+      "id": 22,
+      "moves": 26,
+      "explored": 3587,
+      "solveAndReplayMs": 435
+    },
+    {
+      "id": 23,
+      "moves": 29,
+      "explored": 2401,
+      "solveAndReplayMs": 205
+    },
+    {
+      "id": 24,
+      "moves": 25,
+      "explored": 4278,
+      "solveAndReplayMs": 461
+    },
+    {
+      "id": 25,
+      "moves": 27,
+      "explored": 8591,
+      "solveAndReplayMs": 1405
+    },
+    {
+      "id": 26,
+      "moves": 28,
+      "explored": 4808,
+      "solveAndReplayMs": 604
+    },
+    {
+      "id": 27,
+      "moves": 28,
+      "explored": 2741,
+      "solveAndReplayMs": 247
+    },
+    {
+      "id": 28,
+      "moves": 30,
+      "explored": 2068,
+      "solveAndReplayMs": 237
+    },
+    {
+      "id": 29,
+      "moves": 31,
+      "explored": 4316,
+      "solveAndReplayMs": 570
+    },
+    {
+      "id": 30,
+      "moves": 32,
+      "explored": 1164,
+      "solveAndReplayMs": 107
+    },
+    {
+      "id": 31,
+      "moves": 37,
+      "explored": 3969,
+      "solveAndReplayMs": 467
+    },
+    {
+      "id": 32,
+      "moves": 37,
+      "explored": 577,
+      "solveAndReplayMs": 54
+    },
+    {
+      "id": 33,
+      "moves": 40,
+      "explored": 4063,
+      "solveAndReplayMs": 555
+    },
+    {
+      "id": 34,
+      "moves": 43,
+      "explored": 4367,
+      "solveAndReplayMs": 585
+    },
+    {
+      "id": 35,
+      "moves": 43,
+      "explored": 3964,
+      "solveAndReplayMs": 472
+    },
+    {
+      "id": 36,
+      "moves": 44,
+      "explored": 2555,
+      "solveAndReplayMs": 300
+    },
+    {
+      "id": 37,
+      "moves": 47,
+      "explored": 1943,
+      "solveAndReplayMs": 276
+    },
+    {
+      "id": 38,
+      "moves": 48,
+      "explored": 3711,
+      "solveAndReplayMs": 374
+    },
+    {
+      "id": 39,
+      "moves": 50,
+      "explored": 3585,
+      "solveAndReplayMs": 428
+    },
+    {
+      "id": 40,
+      "moves": 51,
+      "explored": 3025,
+      "solveAndReplayMs": 418
+    }
+  ],
+  "probes": [
+    {
+      "name": "non-array",
+      "throws": "(cars || []) is not iterable"
+    },
+    {
+      "name": "null-car",
+      "throws": "Cannot read properties of null (reading 'len')"
+    },
+    {
+      "name": "fractional-coordinate",
+      "result": {
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "name": "nonfinite-coordinate",
+      "result": {
+        "valid": false,
+        "errors": [
+          "bad 與 bad 重疊。"
+        ]
+      }
+    }
+  ],
+  "storage": {
+    "customObjectAccepted": true,
+    "writeThrows": "QuotaExceededError"
+  }
+}

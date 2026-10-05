@@ -16,6 +16,19 @@ for(const [name,length]of Object.entries(lengths)){
   assert.ok(bounds.min.x>=-length/2-.12&&bounds.max.x<=length/2+.12,`${name}: vehicle must remain centred on its lane`);
   assert.ok(bounds.min.z>=-.54&&bounds.max.z<=.54,`${name}: vehicle must fit within one lane`);
   assert.ok(bounds.min.y>=-.001&&bounds.max.y>.5&&bounds.max.y<1.3,`${name}: GLB must use the correct up axis and rest on its tyres`);
+  if(['coach','schoolbus','delivery'].includes(name)){
+    asset.scene.updateMatrixWorld(true);
+    const windshield=new Raycaster(new Vector3(2,.70,0),new Vector3(-1,0,0)).intersectObject(asset.scene,true)[0];
+    assert.equal(windshield?.object.material.name,'Opaque blue glass',`${name}: front glass must be exposed above the solid shell`);
+    if(name==='coach'){
+      const route=new Raycaster(new Vector3(2,.925,.04),new Vector3(-1,0,0)).intersectObject(asset.scene,true)[0];
+      assert.equal(route?.object.material.name,'Headlamp','Coach route pixels must remain in front of the destination housing');
+    }
+    for(const x of [-1.17,1.16])for(const z of [-.36,.36]){
+      const hit=new Raycaster(new Vector3(x,2,z),new Vector3(0,-1,0)).intersectObject(asset.scene,true)[0];
+      assert.ok(hit?.point.y>.4&&!['Rolling wheels','Tyre rubber'].includes(hit.object.material.name),`${name}: wheel openings must retain body above the tyres`);
+    }
+  }
   if(['racer','compact','jeep'].includes(name)){
     asset.scene.updateMatrixWorld(true);
     const paint=[];asset.scene.traverse(o=>{if(o.isMesh&&o.material.name.startsWith('Paint'))paint.push(o);});
