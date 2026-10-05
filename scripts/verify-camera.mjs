@@ -15,6 +15,13 @@ const snapshot = () =>
   evaluate(
     "document.querySelector('.garage-canvas').garageInspection.snapshot()",
   );
+function assertSameCenter(before, after) {
+  assert.ok(
+    Math.hypot(...before.viewCenter.map((v, i) => v - after.viewCenter[i])) <
+      1e-8,
+    "Orbit keeps the current viewport center fixed in world space",
+  );
+}
 const ready = () =>
   until(
     "(()=>{const c=document.querySelector('.garage-canvas'),s=c?.garageInspection?.snapshot(),r=c?.getBoundingClientRect();return s?.ready&&s.sceneKey===s.performance.renderedSceneKey&&s.performance.viewport?.width===r.width&&s.performance.viewport?.height===r.height&&document.querySelector('.stage-heading h2')?.textContent==='第 01 關'&&document.querySelector('.game-column')?.getAttribute('aria-busy')==='false'})()",
@@ -142,6 +149,7 @@ try {
   assert.ok(rotated.settings.pitch > initial.settings.pitch);
   assert.deepEqual(rotated.cameraFrustum, initial.cameraFrustum);
   assert.equal(rotated.settings.zoom, initial.settings.zoom);
+  assertSameCenter(initial, rotated);
   assert.equal(
     await evaluate("document.querySelector('.stats b').textContent"),
     "0",
@@ -195,6 +203,7 @@ try {
     ) < 1e-12,
   );
   assert.ok(zoomed.settings.pitch < beforeZoomedOrbit.settings.pitch);
+  assertSameCenter(beforeZoomedOrbit, zoomed);
   results.push(
     "Orbit after wheel zoom retains the chosen projection scale; upward drag lowers pitch",
   );
@@ -206,6 +215,12 @@ try {
   assert.notEqual(shifted.settings.panX, zoomed.settings.panX);
   await mouseDrag("middle", -35, 25);
   assert.notEqual((await snapshot()).settings.panX, shifted.settings.panX);
+  const pannedBeforeOrbit = await snapshot();
+  await mouseDrag("right", 45, 20);
+  assertSameCenter(pannedBeforeOrbit, await snapshot());
+  results.push(
+    "Orbit after zoom and both pan gestures keeps the viewed ground point centered",
+  );
   results.push(
     "Wheel zoom, Shift-right pan and middle-button pan preserve orbit angles",
   );
@@ -248,6 +263,7 @@ try {
   assert.notEqual((await snapshot()).settings.yaw, beforeTouch.settings.yaw);
   assert.ok((await snapshot()).settings.pitch > beforeTouch.settings.pitch);
   assert.deepEqual((await snapshot()).cameraFrustum, beforeTouch.cameraFrustum);
+  assertSameCenter(beforeTouch, await snapshot());
   results.push("One-finger street drag rotates the camera without moving cars");
   await click("重置視角");
   await touch("touchStart", [a, b]);
@@ -341,6 +357,8 @@ try {
   await ready();
   assert.equal((await snapshot()).settings.yaw, persist.yaw);
   assert.equal((await snapshot()).settings.zoom, persist.zoom);
+  assert.equal((await snapshot()).settings.focusX, persist.focusX);
+  assert.equal((await snapshot()).settings.focusZ, persist.focusZ);
   results.push("Camera preferences survive reload");
   assert.ok(
     await evaluate(

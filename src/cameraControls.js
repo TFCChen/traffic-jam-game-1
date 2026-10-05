@@ -1,5 +1,13 @@
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-export const DEFAULT_VIEW = { pitch: 60, yaw: -12, zoom: 1, panX: 0, panY: 0 };
+export const DEFAULT_VIEW = {
+  pitch: 60,
+  yaw: -12,
+  zoom: 1,
+  panX: 0,
+  panY: 0,
+  focusX: 0,
+  focusZ: 0,
+};
 const number = (v, fallback) =>
   Number.isFinite(Number(v)) ? Number(v) : fallback;
 export function normalizeView(value = {}) {
@@ -10,6 +18,8 @@ export function normalizeView(value = {}) {
     zoom: clamp(number(value.zoom, 1), 0.65, 4),
     panX: clamp(number(value.panX, 0), -8, 8),
     panY: clamp(number(value.panY, 0), -8, 8),
+    focusX: clamp(number(value.focusX, 0), -32, 32),
+    focusZ: clamp(number(value.focusZ, 0), -32, 32),
   };
 }
 export function rotateView(view, dx, dy) {

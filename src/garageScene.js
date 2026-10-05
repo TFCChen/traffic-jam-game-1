@@ -106,6 +106,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
   const contactGeometry = new THREE.PlaneGeometry(1, 1);
   const camera = new THREE.OrthographicCamera(-5, 5, 4, -4, 0.1, 80);
   const aim = new THREE.Vector3(3.45, 0.15, 3);
+  const viewAim = aim.clone();
   // A fixed reference view determines framing. Orbit changes orientation only,
   // so fitting the current angle cannot silently change the player's scale.
   const framingCamera = camera.clone();
@@ -428,14 +429,19 @@ export function createGarageScene(canvas, getProps, callbacks) {
   }
   function updateCamera(viewOnly = false) {
     cameraFollow = 0;
+    viewAim.set(
+      aim.x + (settings.focusX ?? 0),
+      aim.y,
+      aim.z + (settings.focusZ ?? 0),
+    );
     const pitch = THREE.MathUtils.degToRad(settings.pitch),
       yaw = THREE.MathUtils.degToRad(settings.yaw);
     camera.position.set(
-      aim.x + Math.sin(yaw) * Math.cos(pitch) * 14,
-      aim.y + Math.sin(pitch) * 14,
-      aim.z + Math.cos(yaw) * Math.cos(pitch) * 14,
+      viewAim.x + Math.sin(yaw) * Math.cos(pitch) * 14,
+      viewAim.y + Math.sin(pitch) * 14,
+      viewAim.z + Math.cos(yaw) * Math.cos(pitch) * 14,
     );
-    camera.lookAt(aim);
+    camera.lookAt(viewAim);
     camera.updateMatrixWorld();
     const rect = canvas.getBoundingClientRect(),
       aspect = rect.width / Math.max(1, rect.height);
@@ -656,6 +662,24 @@ export function createGarageScene(canvas, getProps, callbacks) {
       ),
     );
   }
+  function screenCenterPoint() {
+    const r = canvas.getBoundingClientRect();
+    return planePoint({
+      clientX: r.left + r.width / 2,
+      clientY: r.top + r.height / 2,
+    });
+  }
+  function orbitAtScreenCenter(dx, dy) {
+    const pivot = screenCenterPoint();
+    applyCamera(rotateView(settings, dx, dy));
+    const moved = screenCenterPoint();
+    if (pivot && moved)
+      applyCamera({
+        ...settings,
+        focusX: settings.focusX + pivot.x - moved.x,
+        focusZ: settings.focusZ + pivot.z - moved.z,
+      });
+  }
   function flushCamera() {
     if (!cameraPending || !cameraGesture) return;
     cameraPending = false;
@@ -670,19 +694,19 @@ export function createGarageScene(canvas, getProps, callbacks) {
     const dx = next.x - g.last.x,
       dy = next.y - g.last.y;
     const r = canvas.getBoundingClientRect();
-    applyCamera(
-      g.mode === "pan"
-        ? panView(
-            settings,
-            dx,
-            dy,
-            camera.right - camera.left,
-            camera.top - camera.bottom,
-            r.width,
-            r.height,
-          )
-        : rotateView(settings, dx, dy),
-    );
+    if (g.mode === "pan")
+      applyCamera(
+        panView(
+          settings,
+          dx,
+          dy,
+          camera.right - camera.left,
+          camera.top - camera.bottom,
+          r.width,
+          r.height,
+        ),
+      );
+    else orbitAtScreenCenter(dx, dy);
     if (g.kind === "touch")
       zoomAt((settings.zoom * next.distance) / g.last.distance, next.x, next.y);
     g.last = next;
@@ -1543,7 +1567,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     camera.position.x += follow - cameraFollow;
     cameraFollow = follow;
     camera.lookAt(
-      scratchPosition.copy(aim).add(scratchDirection.set(follow, 0, 0)),
+      scratchPosition.copy(viewAim).add(scratchDirection.set(follow, 0, 0)),
     );
     camera.updateMatrixWorld();
     headlightBeams.visible = settings.theme === "neon" && quality.decor;
@@ -1768,6 +1792,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
           width: camera.right - camera.left,
           height: camera.top - camera.bottom,
         },
+        viewCenter: screenCenterPoint()?.toArray(),
         cars: [...groups.values()].map((i) => ({
           id: i.car.id,
           model: i.model,

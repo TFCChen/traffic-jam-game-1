@@ -22,6 +22,8 @@ const DEFAULT = {
   zoom: 1,
   panX: 0,
   panY: 0,
+  focusX: 0,
+  focusZ: 0,
 };
 function readSettings() {
   try {
