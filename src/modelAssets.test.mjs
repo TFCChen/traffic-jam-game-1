@@ -16,11 +16,20 @@ for(const [name,length]of Object.entries(lengths)){
   assert.ok(bounds.min.x>=-length/2-.12&&bounds.max.x<=length/2+.12,`${name}: vehicle must remain centred on its lane`);
   assert.ok(bounds.min.z>=-.54&&bounds.max.z<=.54,`${name}: vehicle must fit within one lane`);
   assert.ok(bounds.min.y>=-.001&&bounds.max.y>.5&&bounds.max.y<1.3,`${name}: GLB must use the correct up axis and rest on its tyres`);
+  const glazing=[],mirrors=[],interior=[];
+  asset.scene.traverse(o=>{if(o.isMesh){
+    if(o.material.name==='Automotive glass')glazing.push(o);
+    if(o.material.name==='Mirror silver')mirrors.push(o);
+    if(o.material.name==='Cabin upholstery')interior.push(o);
+  }});
+  assert.ok(glazing.length&&glazing.every(o=>o.material.isMeshPhysicalMaterial&&o.material.transmission>.8&&o.material.metalness===0),`${name}: glazing must export physical transmission instead of opaque plastic`);
+  assert.ok(mirrors.length&&mirrors.every(o=>o.material.metalness===1),`${name}: reflective mirror lenses must survive export`);
+  assert.ok(interior.length,`${name}: a visible cabin must contain actual interior geometry`);
   if(['coach','schoolbus','delivery'].includes(name)){
     asset.scene.updateMatrixWorld(true);
     const windshield=new Raycaster(new Vector3(2,.70,0),new Vector3(-1,0,0)).intersectObject(asset.scene,true)[0];
-    assert.equal(windshield?.object.material.name,'Opaque blue glass',`${name}: front glass must be exposed above the solid shell`);
-    const opaque=[];asset.scene.traverse(o=>{if(o.isMesh&&o.material.name!=='Opaque blue glass')opaque.push(o);});
+    assert.equal(windshield?.object.material.name,'Automotive glass',`${name}: front glass must be exposed above the solid shell`);
+    const opaque=[];asset.scene.traverse(o=>{if(o.isMesh&&o.material.name!=='Automotive glass')opaque.push(o);});
     const interiorX=name==='delivery'?.88:name==='schoolbus'?-.345:-.285;
     const interior=new Raycaster(new Vector3(interiorX,name==='delivery'?.63:.735,2),new Vector3(0,0,-1)).intersectObjects(opaque,true)[0];
     assert.equal(interior?.object.material.name,'Pickup bed',`${name}: side glazing must expose actual seats through the shell`);
@@ -56,6 +65,12 @@ for(const [name,length]of Object.entries(lengths)){
   }
   if(name==='racer'){
     asset.scene.updateMatrixWorld(true);
+    for(const mirror of mirrors){
+      const p=mirror.geometry.getAttribute('position');
+      for(let i=0;i<p.count;i++)assert.ok(Math.abs(new Vector3().fromBufferAttribute(p,i).applyMatrix4(mirror.matrixWorld).z)>.38,'Coupe mirror lenses must sit outside the cabin glazing.');
+    }
+    const seat=new Raycaster(new Vector3(-.355,.43,1),new Vector3(0,0,-1)).intersectObjects(interior,true)[0];
+    assert.ok(seat,'Coupe side window must expose a real seat back at passenger eye level.');
     for(const x of [.45,.65,.85]){
       const hit=new Raycaster(new Vector3(x,2,0),new Vector3(0,-1,0)).intersectObject(asset.scene,true)[0];
       assert.ok(hit?.object.material.name.startsWith('Paint')&&hit.point.y>.15,'Wheel wells must not cut through the central bonnet.');
@@ -71,7 +86,7 @@ for(const [name,length]of Object.entries(lengths)){
   }
   prepareWheels(asset.scene,length);
   const beforeBatch=new Box3().setFromObject(asset.scene);
-  const batch=batchColoredMeshes(asset.scene,mesh=>!['Opaque blue glass','Headlamp','Tail lamp','Rolling wheels'].includes(mesh.material.name)&&!mesh.material.name.startsWith('Paint'));
+  const batch=batchColoredMeshes(asset.scene,mesh=>!['Automotive glass','Mirror silver','Headlamp','Tail lamp','Rolling wheels'].includes(mesh.material.name)&&!mesh.material.name.startsWith('Paint'));
   assert.ok(batch?.geometry.getAttribute('color'),`${name}: trim colours must survive batching`);
   const afterBatch=new Box3().setFromObject(asset.scene);
   assert.ok(beforeBatch.min.distanceTo(afterBatch.min)<.00001&&beforeBatch.max.distanceTo(afterBatch.max)<.00001,`${name}: batching must preserve vehicle shape and transforms`);

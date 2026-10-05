@@ -1,0 +1,106 @@
+{
+  "results": [
+    "all-nine-standard: all 9 vehicle windows use the expected glass mode; screenshot captured.",
+    "coupe-side-high: all 9 vehicle windows use the expected glass mode; screenshot captured.",
+    "coupe-front-high: all 9 vehicle windows use the expected glass mode; screenshot captured.",
+    "coupe-rear-high: all 9 vehicle windows use the expected glass mode; screenshot captured.",
+    "all-nine-sunset: all 9 vehicle windows use the expected glass mode; screenshot captured.",
+    "all-nine-neon: all 9 vehicle windows use the expected glass mode; screenshot captured.",
+    "all-nine-saver: all 9 vehicle windows use the expected glass mode; screenshot captured.",
+    "390px mobile: full viewport and no horizontal overflow.",
+    "Real pointer drag commits one legal move; undo restores the board.",
+    "Switching saver/high/standard in the live UI updates window shaders correctly."
+  ],
+  "performanceResults": [
+    {
+      "quality": "standard",
+      "activeFPS": 56.34824667472793,
+      "cpuMs": {
+        "samples": 234,
+        "median": 3.4000000059604645,
+        "p95": 5.700000017881393
+      },
+      "gpuMs": {
+        "samples": 230,
+        "median": 12.231822,
+        "p95": 13.824582
+      },
+      "drawCalls": {
+        "samples": 234,
+        "median": 157,
+        "p95": 217
+      },
+      "triangles": {
+        "samples": 234,
+        "median": 237498,
+        "p95": 354772
+      },
+      "gpuTimer": true,
+      "inputToSubmission": {
+        "count": 120,
+        "median": 3.7999999821186066,
+        "p95": 8.200000017881393
+      }
+    },
+    {
+      "quality": "high",
+      "activeFPS": 51.052395879982086,
+      "cpuMs": {
+        "samples": 230,
+        "median": 3.5,
+        "p95": 6.5999999940395355
+      },
+      "gpuMs": {
+        "samples": 226,
+        "median": 14.269947,
+        "p95": 16.63677
+      },
+      "drawCalls": {
+        "samples": 230,
+        "median": 156,
+        "p95": 216
+      },
+      "triangles": {
+        "samples": 230,
+        "median": 237462,
+        "p95": 354736
+      },
+      "gpuTimer": true,
+      "inputToSubmission": {
+        "count": 120,
+        "median": 4.0999999940395355,
+        "p95": 6.9000000059604645
+      }
+    },
+    {
+      "quality": "saver",
+      "activeFPS": 30.031612223393047,
+      "cpuMs": {
+        "samples": 115,
+        "median": 0.8999999761581421,
+        "p95": 1.300000011920929
+      },
+      "gpuMs": {
+        "samples": 114,
+        "median": 8.885208,
+        "p95": 13.382343
+      },
+      "drawCalls": {
+        "samples": 115,
+        "median": 81,
+        "p95": 81
+      },
+      "triangles": {
+        "samples": 115,
+        "median": 118682,
+        "p95": 118682
+      },
+      "gpuTimer": true,
+      "inputToSubmission": {
+        "count": 114,
+        "median": 13.300000011920929,
+        "p95": 30
+      }
+    }
+  ]
+}

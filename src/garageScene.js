@@ -13,6 +13,7 @@ import {
 } from "./garageMaterials.js";
 import { SCENE_THEMES } from "./sceneThemes.js";
 import { QUALITY } from "./gamePreferences.js";
+import { configureVehicleGlass, VEHICLE_MIRROR } from "./vehicleGlass.js";
 import { quadDistance, snapDragDelta } from "./pointerHelpers.js";
 import {
   stepSuspension,
@@ -1141,7 +1142,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
           group,
           (mesh) =>
             ![
-              "Opaque blue glass",
+              "Automotive glass",
+              VEHICLE_MIRROR,
               "Headlamp",
               "Tail lamp",
               "Rolling wheels",
@@ -1169,15 +1171,14 @@ export function createGarageScene(canvas, getProps, callbacks) {
                 material.clearcoatRoughness = 0.2;
               }
             }
-            if (material.name === "Opaque blue glass") {
+            if (material.name === "Automotive glass") {
               windows.push(material);
-              material.roughness = 0.12;
-              material.metalness = 0.18;
-              material.transparent = quality === QUALITY.high;
-              material.opacity = material.transparent ? 0.68 : 1;
-              material.depthWrite = !material.transparent;
-              material.side = THREE.DoubleSide;
-              material.forceSinglePass = true;
+              configureVehicleGlass(material, settings.quality);
+            }
+            if (material.name === VEHICLE_MIRROR) {
+              material.metalness = 1;
+              material.roughness = 0.055;
+              material.envMapIntensity = 1.4;
             }
             if (material.name === "Headlamp") {
               material.emissive.set("#ffd994");
@@ -1196,8 +1197,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
                 tyreCompression,
               );
             }
-            object.castShadow = true;
-            object.receiveShadow = true;
+            object.castShadow = material.name !== "Automotive glass";
+            object.receiveShadow = material.name !== "Automotive glass";
             object.userData.carId = car.id;
           }
         });
@@ -1281,7 +1282,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
           ![
             "Asphalt blue slate",
             "Street asphalt",
-            "Opaque blue glass",
+            "Automotive glass",
             "Streetlamp glow",
           ].includes(mesh.material.name),
         {
@@ -1716,6 +1717,11 @@ export function createGarageScene(canvas, getProps, callbacks) {
       lastShadow = now;
       stats.shadowUpdates++;
     }
+    // Keep refraction crisp while inspecting; moving glass needs fewer pixels.
+    // Only the shared transmission buffer changes, never the main scene scale.
+    renderer.transmissionResolutionScale = settings.quality === "high"
+      ? (active ? 0.3 : 1)
+      : (active ? 0.2 : 0.5);
     profiler.begin();
     renderer.render(scene, camera);
     profiler.end(renderer.info.render);
@@ -1761,15 +1767,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
           }
         }
       for (const item of groups.values())
-        for (const glass of item.windows) {
-          const transparent = quality === QUALITY.high;
-          if (glass.transparent !== transparent) {
-            glass.transparent = transparent;
-            glass.opacity = transparent ? 0.68 : 1;
-            glass.depthWrite = !transparent;
-            glass.needsUpdate = true;
-          }
-        }
+        for (const glass of item.windows)
+          configureVehicleGlass(glass, settings.quality);
       renderer.setPixelRatio(Math.min(devicePixelRatio, quality.pixelRatio));
       renderer.shadowMap.enabled = settings.shadows && quality.decor;
       if (sun.shadow.mapSize.x !== quality.shadow) {
@@ -1814,6 +1813,13 @@ export function createGarageScene(canvas, getProps, callbacks) {
           dir: i.car.dir,
           len: i.car.len,
           position: i.group.position.toArray(),
+          glazing: i.windows.map((m) => ({
+            physical: m.isMeshPhysicalMaterial === true,
+            transmission: m.transmission,
+            opacity: m.opacity,
+            roughness: m.roughness,
+            ior: m.ior,
+          })),
           wheelAngle: i.wheelAngle.value,
           tilt: i.body.rotation.z,
           compression: i.body.position.y - 0.19,
