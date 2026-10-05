@@ -7,6 +7,7 @@ export async function connect(url) {
   let id = 0,
     session;
   const pending = new Map();
+  const listeners = new Map();
   ws.onmessage = (e) => {
     const r = JSON.parse(e.data),
       p = pending.get(r.id);
@@ -14,6 +15,8 @@ export async function connect(url) {
       pending.delete(r.id);
       r.error ? p.reject(Error(r.error.message)) : p.resolve(r.result);
     }
+    if (r.method && r.sessionId === session)
+      for (const listener of listeners.get(r.method) ?? []) listener(r.params);
   };
   const send = (method, params = {}, attached = true) =>
     new Promise((resolve, reject) => {
@@ -63,5 +66,18 @@ export async function connect(url) {
     );
     await sleep(100);
   };
-  return { send, evaluate, sleep, until, click, close: () => ws.close() };
+  const onEvent = (method, listener) => {
+    if (!listeners.has(method)) listeners.set(method, new Set());
+    listeners.get(method).add(listener);
+    return () => listeners.get(method).delete(listener);
+  };
+  return {
+    send,
+    evaluate,
+    sleep,
+    until,
+    click,
+    onEvent,
+    close: () => ws.close(),
+  };
 }

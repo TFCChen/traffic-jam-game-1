@@ -52,7 +52,8 @@ const COLORS = [
   "#f97316",
 ];
 const DEFAULT_LEVEL = {
-  id: 1,
+  id: "demo",
+  title: "暫時車庫",
   difficulty: "Beginner",
   file: "level-001.json",
   cars: [
@@ -152,7 +153,9 @@ function App() {
   );
   const currentTitle =
     typeof current.id === "number"
-      ? `第 ${String(current.id).padStart(2, "0")} 關`
+      ? initialized
+        ? `第 ${String(current.id).padStart(2, "0")} 關`
+        : "暫時車庫"
       : current.title;
 
   useEffect(() => {
@@ -299,13 +302,13 @@ function App() {
           setMoves(restored.moves);
           setMessage("已接續上次的停車場。");
         }
-        setInitialized(true);
+        setInitialized(Boolean(source));
         if (!loadTutorial() && completedOfficialLevels(progress) === 0)
           setTutorial(true);
       } catch {
-        setLevels([DEFAULT_LEVEL]);
-        setMessage("無法讀取關卡索引，已載入內建示範關卡。");
-        setInitialized(true);
+        setLevels([]);
+        setMessage("無法讀取關卡索引；暫時棋盤不會保存成績，請重新整理。");
+        setInitialized(false);
       }
     })();
   }, []);
@@ -346,6 +349,7 @@ function App() {
       if (version !== loadVersion.current) return;
       const level = { ...meta, ...raw, cars: cloneCars(raw.cars) };
       setCurrent(level);
+      setInitialized(level.id !== "demo");
       setStartCars(cloneCars(level.cars));
       setCars(cloneCars(level.cars));
       setHistory([]);

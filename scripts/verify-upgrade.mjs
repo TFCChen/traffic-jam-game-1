@@ -316,7 +316,9 @@ try {
     downloadThroughput: 0,
     uploadThroughput: 0,
   });
+  const beforeOffline = await evaluate("performance.timeOrigin");
   await evaluate("location.reload()");
+  await until(`performance.timeOrigin!==${beforeOffline}`);
   await ready();
   await level(40);
   await until(

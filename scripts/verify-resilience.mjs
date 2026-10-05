@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { writeFileSync, unlinkSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { connect } from "./cdp-test.mjs";
-const { send, evaluate, until, click, sleep, close } = await connect(
+const { send, evaluate, until, click, sleep, onEvent, close } = await connect(
   process.argv[2],
 );
 const saved = await evaluate(
@@ -285,6 +285,68 @@ try {
     movesBefore,
   );
   results.push("Keyboard picker activation, arrow movement and undo work");
+  const beforeFailure = await evaluate(
+    "localStorage.getItem('traffic-jam-progress-v2')",
+  );
+  await send("Network.setBypassServiceWorker", { bypass: true });
+  await send("Network.enable");
+  await send("Network.setCacheDisabled", { cacheDisabled: true });
+  const unsubscribe = onEvent("Fetch.requestPaused", ({ requestId }) => {
+    send("Fetch.fulfillRequest", {
+      requestId,
+      responseCode: 503,
+      responseHeaders: [{ name: "Content-Type", value: "application/json" }],
+      body: Buffer.from("{}").toString("base64"),
+    }).catch(console.error);
+  });
+  try {
+    await send("Fetch.enable", {
+      patterns: [
+        { urlPattern: "*/levels/index.json", requestStage: "Request" },
+      ],
+    });
+    const origin = await evaluate("performance.timeOrigin");
+    await send("Page.reload", { ignoreCache: true });
+    await until(`performance.timeOrigin!==${origin}`);
+    await ready();
+    await until(
+      "document.querySelector('.stage-heading h2')?.textContent==='暫時車庫'",
+    );
+    await click("選車");
+    for (const [carId, key, code] of [
+      ["block", "ArrowUp", 38],
+      ...Array.from({ length: 4 }, () => ["target", "ArrowRight", 39]),
+    ]) {
+      await evaluate(
+        `(()=>{const buttons=[...document.querySelectorAll('.vehicle-picker button')];const index=${carId === "target" ? 0 : 1};buttons[index].focus();buttons[index].click()})()`,
+      );
+      await send("Input.dispatchKeyEvent", {
+        type: "keyDown",
+        key,
+        code: key,
+        windowsVirtualKeyCode: code,
+      });
+      await send("Input.dispatchKeyEvent", {
+        type: "keyUp",
+        key,
+        code: key,
+        windowsVirtualKeyCode: code,
+      });
+      await sleep(120);
+    }
+    await until("!!document.querySelector('.win-card')");
+    assert.equal(
+      await evaluate("localStorage.getItem('traffic-jam-progress-v2')"),
+      beforeFailure,
+    );
+    results.push(
+      "503 index fallback can be played without overwriting official progress",
+    );
+  } finally {
+    await send("Fetch.disable");
+    unsubscribe();
+    await send("Network.setBypassServiceWorker", { bypass: false });
+  }
   writeFileSync(
     new URL("../docs/upgrade-2026-10-05/resilience.json", import.meta.url),
     JSON.stringify({ results }, null, 2),
