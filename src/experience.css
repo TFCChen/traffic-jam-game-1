@@ -1,17 +1,17 @@
 /* Shared player-facing tokens. Board dimensions never depend on status text. */
 :root {
-  --ink: #e9eee5;
-  --muted: #b5c3b9;
-  --surface: #243530;
-  --surface-raised: #31443c;
-  --line: #53695c;
-  --gold: #f4d889;
-  --accent: #adcda3;
-  background: #15221e;
+  --ink: #f4f1eb;
+  --muted: #b8bbc3;
+  --surface: #22252d;
+  --surface-raised: #303440;
+  --line: #525763;
+  --gold: #efc777;
+  --accent: #efc777;
+  background: #181b22;
   color: var(--ink);
 }
 .app-shell {
-  background: radial-gradient(ellipse at 50% 25%, #35453c, #14231f 80%);
+  background: radial-gradient(ellipse at 50% 25%, #343945, #181b22 80%);
   color: var(--ink);
 }
 .workspace,
@@ -749,4 +749,96 @@ button.selected,
   .editing .garage-canvas-wrap {
     height: clamp(320px, calc(100dvh - 410px), 560px);
   }
+}
+
+/* Scene-first layout: controls float at the edges rather than shrinking the stage. */
+.utility-menu { position: relative; margin: 12px auto; width: max-content; z-index: 12; }
+.utility-menu summary { list-style: none; cursor: pointer; padding: 12px 18px; min-height: 44px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font-size: 13px; }
+.utility-menu summary::-webkit-details-marker { display: none; }
+.utility-menu summary:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.utility-menu[open] .utility-dock { position: absolute; right: 0; top: 52px; width: 220px; display: flex; flex-direction: column; padding: 10px; border: 1px solid var(--line); border-radius: 14px; background: #22252df5; box-shadow: 0 16px 45px #0006; }
+.utility-dock button { color: var(--ink); border-color: var(--line); }
+button:hover, .toolbar button:hover, .scene-tools button:hover { background: #414653; border-color: var(--gold); }
+button:active, .toolbar button:active, .scene-tools button:active { background: #535361; }
+button.selected, .tabs button.active, .quality-options button[aria-pressed="true"], .scene-themes button[aria-pressed="true"], .level-grid button.active { background: #514632; border-color: var(--gold); color: var(--ink); }
+.game-sheet .tabs, .scene-settings, .analysis-card dl > div, .custom-item, .badge, .level-grid button, .editor-actions input, .editor-actions select, .journey-summary { background: var(--surface-raised); }
+.game-sheet::backdrop { background: #101219c9; }
+
+.immersive-play { padding: 0; height: 100dvh; min-height: 480px; overflow: hidden; }
+.immersive-play .workspace, .immersive-play .workspace.panel-hidden { width: 100%; height: 100%; margin: 0; display: block; }
+.immersive-play .game-column { height: 100%; min-height: 0; display: block; }
+.immersive-play .garage-3d { position: absolute; inset: 0; margin: 0; display: block; }
+.immersive-play .garage-canvas-wrap { width: 100%; height: 100%; min-height: 0; aspect-ratio: auto; border-radius: 0; box-shadow: none; }
+.immersive-play .game-hud { position: absolute; z-index: 5; top: max(18px, env(safe-area-inset-top)); left: max(24px, env(safe-area-inset-left)); width: auto; height: auto; gap: 32px; padding: 12px 18px; border: 1px solid #ffffff20; border-radius: 16px; background: #20232de8; box-shadow: 0 8px 30px #0002; }
+.immersive-play .game-hud .stage-heading h2 { font-size: 21px; }
+.immersive-play .game-hud .stats span { min-width: 50px; font-size: 10px; padding: 0 12px; color: var(--muted); border-color: #ffffff25; }
+.immersive-play .game-hud .stats b { color: var(--gold); font-size: 22px; }
+.immersive-play .game-hud .stats span:last-child b { font-size: 13px; color: var(--ink); }
+.immersive-play .instruction { position: absolute; z-index: 5; top: max(100px, calc(env(safe-area-inset-top) + 82px)); left: 24px; width: min(460px, calc(100% - 48px)); height: auto; min-height: 0; max-height: 80px; border: 1px solid #ffffff20; border-radius: 12px; padding: 10px 14px; background: #20232ded; }
+.immersive-play .instruction.quiet { width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); }
+.immersive-play .toolbar { position: absolute; z-index: 5; width: max-content; max-width: calc(100% - 32px); height: auto; left: 50%; bottom: max(34px, calc(env(safe-area-inset-bottom) + 22px)); transform: translateX(-50%); padding: 6px; flex-wrap: nowrap; gap: 4px; background: #20232deb; border: 1px solid #ffffff25; border-radius: 18px; box-shadow: 0 8px 35px #0003; }
+.immersive-play .toolbar button { min-width: 74px; min-height: 58px; padding: 8px 12px; border: 0; border-radius: 12px; background: transparent; color: var(--ink); font-size: 11px; gap: 5px; }
+.immersive-play .toolbar button svg { color: var(--gold); width: 20px; height: 20px; }
+.immersive-play .toolbar button:hover { background: #ffffff12; }
+.immersive-play .toolbar button.selected { background: #514632; }
+.immersive-play .scene-tag { top: auto; bottom: 16px; left: 24px; background: transparent; border: 0; color: #f4f1eb; text-shadow: 0 1px 4px #000; }
+.immersive-play .scene-options-bar { position: absolute; z-index: 5; top: max(80px, calc(env(safe-area-inset-top) + 64px)); right: max(24px, env(safe-area-inset-right)); height: auto; min-height: 0; padding: 0; }
+.immersive-play .scene-options-bar > span { position: fixed; left: 24px; bottom: 46px; max-width: 240px; font-size: 12px; color: var(--ink); text-shadow: 0 1px 4px #000; pointer-events: none; }
+.immersive-play .scene-tools button, .immersive-play .camera-navigation button { background: #20232de8; color: var(--ink); border: 1px solid #ffffff25; border-radius: 12px; font-size: 12px; }
+.immersive-play .camera-navigation { position: absolute; z-index: 5; right: max(24px, env(safe-area-inset-right)); bottom: max(34px, calc(env(safe-area-inset-bottom) + 22px)); padding: 6px; background: #20232de8; border: 1px solid #ffffff25; border-radius: 14px; }
+.immersive-play .camera-navigation button { border: 0; background: transparent; }
+.immersive-play .camera-navigation button:hover { background: #ffffff12; }
+.immersive-play .camera-help { display: none; }
+.immersive-play .board-footer { position: absolute; z-index: 5; bottom: max(6px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: max-content; max-width: 100%; margin: 0; padding: 0; min-height: 20px; color: var(--ink); font-size: 11px; text-shadow: 0 1px 4px #000; }
+.immersive-play .board-footer button { background: var(--surface); color: var(--gold); }
+.immersive-play .utility-menu { position: absolute; right: max(24px, env(safe-area-inset-right)); top: max(18px, env(safe-area-inset-top)); margin: 0; }
+.immersive-play .utility-menu summary { background: #20232de8; border-color: #ffffff25; }
+.immersive-play .offline-status { position: absolute; z-index: 6; bottom: 115px; left: 24px; width: auto; max-width: calc(100% - 48px); margin: 0; padding: 5px 9px; border-radius: 8px; background: #20232de8; font-size: 11px; }
+.immersive-play .vehicle-picker { position: absolute; z-index: 6; right: 24px; top: 140px; max-width: min(360px, calc(100% - 48px)); max-height: calc(100dvh - 280px); overflow: auto; padding: 10px; border-radius: 14px; background: var(--surface); }
+.immersive-play .vehicle-picker button { background: var(--surface-raised); color: var(--ink); border-color: var(--line); }
+/* Fallback remains usable on devices without WebGL. */
+.immersive-play .fallback-workspace { position: absolute; inset: 120px 16px 130px; overflow: auto; }
+@media (max-width: 900px) {
+  .immersive-play .camera-navigation { bottom: 114px; }
+  .immersive-play .scene-options-bar > span { display: none; }
+}
+@media (max-width: 540px) {
+  .immersive-play { min-height: 440px; }
+  .immersive-play .game-hud { top: max(10px, env(safe-area-inset-top)); left: 10px; right: 74px; gap: 6px; padding: 10px; border-radius: 12px; }
+  .immersive-play .game-hud .stage-heading h2 { font-size: 16px; white-space: nowrap; }
+  .immersive-play .game-hud .stats span { min-width: 0; padding: 0 6px; font-size: 9px; }
+  .immersive-play .game-hud .stats b { font-size: 18px; }
+  .immersive-play .game-hud .stats span:last-child { display: none; }
+  .immersive-play .utility-menu { right: 10px; top: max(10px, env(safe-area-inset-top)); }
+  .immersive-play .utility-menu summary { padding: 12px; }
+  .immersive-play .instruction { top: max(76px, calc(env(safe-area-inset-top) + 66px)); left: 10px; width: calc(100% - 20px); font-size: 12px; }
+  .immersive-play .toolbar { bottom: max(32px, calc(env(safe-area-inset-bottom) + 24px)); padding: 4px; width: calc(100% - 24px); }
+  .immersive-play .toolbar button { min-width: 0; flex: 1; padding: 8px 4px; min-height: 54px; }
+  .immersive-play .scene-options-bar { top: auto; bottom: max(104px, calc(env(safe-area-inset-bottom) + 96px)); left: 12px; right: auto; }
+  .immersive-play .scene-tools { gap: 4px; }
+  .immersive-play .scene-tools button { padding: 8px; font-size: 11px; }
+  .immersive-play .scene-tools button svg { width: 16px; height: 16px; }
+  .immersive-play .camera-navigation { bottom: max(104px, calc(env(safe-area-inset-bottom) + 96px)); right: 12px; padding: 0; }
+  .immersive-play .camera-zoom-tools { gap: 0; }
+  .immersive-play .camera-navigation button { min-width: 36px; padding: 8px 4px; font-size: 11px; }
+  .immersive-play .camera-zoom-tools span { min-width: 34px; font-size: 10px; }
+  .immersive-play .scene-tag { bottom: auto; top: max(78px, calc(env(safe-area-inset-top) + 68px)); left: 12px; font-size: 9px; padding: 0; }
+  .immersive-play .vehicle-picker { top: auto; bottom: 162px; right: 12px; max-height: 35dvh; }
+  .immersive-play .offline-status { left: 12px; bottom: 160px; }
+}
+@media (max-height: 500px) and (min-width: 541px) {
+  .immersive-play { min-height: 320px; }
+  .immersive-play .game-hud { top: 10px; left: 12px; padding: 8px 12px; }
+  .immersive-play .scene-options-bar { top: 10px; right: 90px; }
+  .immersive-play .utility-menu { top: 10px; right: 12px; }
+  .immersive-play .camera-navigation { bottom: 30px; right: 12px; }
+  .immersive-play .toolbar { bottom: 30px; }
+}
+@media (max-width: 540px) {
+  .immersive-play .camera-navigation button { min-width: 44px; min-height: 44px; }
+  .immersive-play .game-hud .stage-heading { width: auto; }
+}
+@media (max-width: 360px) {
+  .immersive-play .camera-navigation { bottom: max(156px, calc(env(safe-area-inset-bottom) + 148px)); }
+  .immersive-play .offline-status { bottom: 212px; }
 }

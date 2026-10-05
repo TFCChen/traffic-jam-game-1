@@ -16,8 +16,9 @@ export function normalizeView(value = {}) {
     pitch: clamp(number(value.pitch, DEFAULT_VIEW.pitch), 30, 80),
     yaw: ((((yaw + 180) % 360) + 360) % 360) - 180,
     zoom: clamp(number(value.zoom, 1), 0.65, 4),
-    panX: clamp(number(value.panX, 0), -8, 8),
-    panY: clamp(number(value.panY, 0), -8, 8),
+    // Conservative storage limits; scene bounds account for orbit focus offsets.
+    panX: clamp(number(value.panX, 0), -64, 64),
+    panY: clamp(number(value.panY, 0), -64, 64),
     focusX: clamp(number(value.focusX, 0), -32, 32),
     focusZ: clamp(number(value.focusZ, 0), -32, 32),
   };

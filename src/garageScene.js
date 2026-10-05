@@ -105,7 +105,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     beamTexture = detailTexture("beam");
   const contactGeometry = new THREE.PlaneGeometry(1, 1);
   const camera = new THREE.OrthographicCamera(-5, 5, 4, -4, 0.1, 80);
-  const aim = new THREE.Vector3(3.45, 0.15, 3);
+  const aim = new THREE.Vector3(3, 0.15, 3);
   const viewAim = aim.clone();
   // A fixed reference view determines framing. Orbit changes orientation only,
   // so fitting the current angle cannot silently change the player's scale.
@@ -494,20 +494,35 @@ export function createGarageScene(canvas, getProps, callbacks) {
             minY = Math.min(minY, point.y);
             maxY = Math.max(maxY, point.y);
           }
-    const padding = portrait ? 0.16 : 0.22,
-      centerX = (minX + maxX) / 2,
-      centerY = (minY + maxY) / 2;
+    const padding = portrait ? 0.16 : 0.22;
+    // Frame the puzzle itself centrally; the exit road must not shift the lot.
+    const referenceCenter = aim
+        .clone()
+        .applyMatrix4(framingCamera.matrixWorldInverse),
+      centerX = referenceCenter.x,
+      centerY = referenceCenter.y;
     const halfWidth = Math.max(
-        (maxX - minX) / 2 + padding,
-        ((maxY - minY) / 2 + padding) * aspect,
+        Math.max(maxX - centerX, centerX - minX) + padding,
+        (Math.max(maxY - centerY, centerY - minY) + padding) * aspect,
       ),
       halfHeight = halfWidth / aspect;
     const visibleWidth = halfWidth / settings.zoom,
       visibleHeight = halfHeight / settings.zoom;
-    const limitX = Math.max(0.7, halfWidth - visibleWidth + 0.5),
-      limitY = Math.max(0.7, halfHeight - visibleHeight + 0.5);
-    settings.panX = clamp(settings.panX, -limitX, limitX);
-    settings.panY = clamp(settings.panY, -limitY, limitY);
+    const limitX = Math.max(1.5, halfWidth - visibleWidth + 2),
+      limitY = Math.max(1.5, halfHeight - visibleHeight + 2);
+    // Orbit shifts focus to preserve the screen center. Bound the actual view
+    // relative to the lot in the CURRENT camera basis, not the old pan origin.
+    const lotCenter = aim.clone().applyMatrix4(camera.matrixWorldInverse);
+    settings.panX = clamp(
+      settings.panX,
+      lotCenter.x - centerX - limitX,
+      lotCenter.x - centerX + limitX,
+    );
+    settings.panY = clamp(
+      settings.panY,
+      lotCenter.y - centerY - limitY,
+      lotCenter.y - centerY + limitY,
+    );
     camera.left = centerX + settings.panX - visibleWidth;
     camera.right = centerX + settings.panX + visibleWidth;
     camera.top = centerY + settings.panY + visibleHeight;

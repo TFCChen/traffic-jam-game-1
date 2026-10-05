@@ -853,7 +853,7 @@ function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${mode === "play" ? "immersive-play" : "editor-shell"}`}>
       <div className="ambient-scene" aria-hidden="true">
         <i />
         <i />
@@ -901,7 +901,7 @@ function App() {
           </header>
 
           <div
-            className={`instruction ${!message && !loading && mode === "play" ? "quiet" : ""} ${loading ? "loading" : ""}`}
+            className={`instruction ${(!message || message === "已接續上次的停車場。") && !loading && mode === "play" ? "quiet" : ""} ${loading ? "loading" : ""}`}
             role="status"
             aria-live="polite"
           >
@@ -1123,10 +1123,8 @@ function App() {
             </>
           )}
 
-          {mode === "play" && (
+          {mode === "play" && won && (
             <div className="board-footer">
-              <span className="status-dot" />
-              <span>{won ? "道路暢通" : "目標：紅車駛出東側出口"}</span>
               {won && (
                 <button
                   onClick={() => {
@@ -1141,33 +1139,36 @@ function App() {
           )}
         </section>
 
-        <div className="utility-dock">
-          <InstallApp />
-          <button
-            onClick={() => {
-              setTutorialStep(0);
-              setTutorial(true);
-            }}
-          >
-            操作指南
-          </button>
-          {trial && <button onClick={() => enterEditor()}>返回草稿</button>}
-          <button
-            onClick={() =>
-              downloadBackup({ progress, customLevels, draft: draft.current })
-            }
-          >
-            匯出備份
-          </button>
-          <button onClick={() => importFile.current.click()}>匯入備份</button>
-          <input
-            ref={importFile}
-            type="file"
-            accept="application/json,.json"
-            hidden
-            onChange={importData}
-          />
-        </div>
+        <details className="utility-menu">
+          <summary>選單</summary>
+          <div className="utility-dock">
+            <InstallApp />
+            <button
+              onClick={() => {
+                setTutorialStep(0);
+                setTutorial(true);
+              }}
+            >
+              操作指南
+            </button>
+            {trial && <button onClick={() => enterEditor()}>返回草稿</button>}
+            <button
+              onClick={() =>
+                downloadBackup({ progress, customLevels, draft: draft.current })
+              }
+            >
+              匯出備份
+            </button>
+            <button onClick={() => importFile.current.click()}>匯入備份</button>
+            <input
+              ref={importFile}
+              type="file"
+              accept="application/json,.json"
+              hidden
+              onChange={importData}
+            />
+          </div>
+        </details>
         {storageError && (
           <div className="storage-alert" role="alert">
             {storageError}

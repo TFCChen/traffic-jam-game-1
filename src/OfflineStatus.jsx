@@ -1,16 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 export default function OfflineStatus() {
   const updateRequested = useRef(false);
-  const [offline, setOffline] = useState(!navigator.onLine),
-    [registration, setRegistration] = useState(null),
-    [cached, setCached] = useState(
-      Boolean(navigator.serviceWorker?.controller),
-    ),
+  const [registration, setRegistration] = useState(null),
     [error, setError] = useState(false);
   useEffect(() => {
-    const online = () => setOffline(!navigator.onLine);
-    window.addEventListener("online", online);
-    window.addEventListener("offline", online);
     let alive = true,
       reloading = false;
     let controlled = Boolean(navigator.serviceWorker?.controller);
@@ -20,7 +13,6 @@ export default function OfflineStatus() {
         location.reload();
       } else if (alive) {
         controlled = true;
-        setCached(true);
         setRegistration(null);
       }
     };
@@ -31,15 +23,11 @@ export default function OfflineStatus() {
         .then((reg) => {
           if (!alive) return;
           setRegistration(reg);
-          setCached(Boolean(navigator.serviceWorker.controller));
           reg.addEventListener("updatefound", () => {
             const worker = reg.installing;
             worker?.addEventListener("statechange", () => {
               if (alive && worker.state === "installed") {
                 setRegistration({ ...reg, waiting: reg.waiting });
-                setCached(
-                  !navigator.serviceWorker.controller || Boolean(reg.active),
-                );
               }
               if (alive && worker.state === "redundant") setError(true);
             });
@@ -51,11 +39,10 @@ export default function OfflineStatus() {
     }
     return () => {
       alive = false;
-      window.removeEventListener("online", online);
-      window.removeEventListener("offline", online);
       navigator.serviceWorker?.removeEventListener("controllerchange", change);
     };
   }, []);
+  if (!registration?.waiting && !error) return null;
   return (
     <div className="offline-status" role="status">
       {registration?.waiting ? (
@@ -72,13 +59,7 @@ export default function OfflineStatus() {
         </>
       ) : (
         <span>
-          {error
-            ? "離線下載未完成；連線後可重試。"
-            : offline
-              ? "目前離線，已下載的車庫仍可遊玩。"
-              : cached
-                ? "車庫已可離線遊玩。"
-                : "正在準備離線車庫…"}
+          離線下載未完成；連線後可重試。
         </span>
       )}
     </div>

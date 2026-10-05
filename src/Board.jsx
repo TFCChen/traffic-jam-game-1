@@ -63,8 +63,7 @@ export default function Board(props) {
     [retry, setRetry] = useState(0);
   const [settings, setSettings] = useState(readSettings),
     [open, setOpen] = useState(false);
-  const [feedback, setFeedback] = useState(""),
-    [picker, setPicker] = useState(false);
+  const [feedback, setFeedback] = useState("");
   latest.current = { ...props, disabled: props.disabled || open };
   useEffect(() => {
     props.onSettingsChange?.(open);
@@ -180,23 +179,10 @@ export default function Board(props) {
             正在載入玩具車庫…
           </div>
         )}
-        <span className="scene-tag">
-          {SCENE_THEMES.find((t) => t.id === theme).name}
-        </span>
       </div>
       <div className="scene-options-bar">
-        <span role="status">{feedback || "車庫就緒"}</span>
+        <span role="status" className="keyboard-help">{feedback}</span>
         <div className="scene-tools">
-          {!props.editor && (
-            <button
-              className="picker-toggle"
-              aria-expanded={picker}
-              onClick={() => setPicker(!picker)}
-            >
-              <Icon name="levels" />
-              <span>選車</span>
-            </button>
-          )}
           <button
             aria-expanded={open}
             aria-controls="scene-settings"
@@ -400,7 +386,7 @@ export default function Board(props) {
           </div>
         </Sheet>
       )}
-      {(props.editor || picker) && (
+      {props.editor && (
         <div
           className="vehicle-picker"
           aria-label={props.editor ? "編輯車輛" : "鍵盤選取車輛"}
