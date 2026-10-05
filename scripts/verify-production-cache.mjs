@@ -1,8 +1,7 @@
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, writeFileSync } from 'node:fs';
 import { resolve, extname } from 'node:path';
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
+import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
 import { connect } from './cdp-test.mjs';
@@ -22,7 +21,18 @@ const server = createServer((req,res)=>{
 });
 await new Promise(r=>server.listen(4174,'127.0.0.1',r));
 const env={...process.env,AGENT_BROWSER_SOCKET_DIR:resolve('.browser-checks')};
-const browser=async(args)=>(await promisify(execFile)('agent-browser.cmd',['--session','production-cache',...args],{env,encoding:'utf8',shell:true})).stdout;
+const browser=args=>new Promise((resolve,reject)=>{
+  const child=spawn('agent-browser.cmd',['--session','production-cache',...args],{env,shell:true});
+  let stdout='',stderr='';
+  child.stdout.on('data',chunk=>{stdout+=chunk});child.stderr.on('data',chunk=>{stderr+=chunk});
+  child.on('error',reject);
+  // A newly launched browser daemon may inherit the CLI's pipe handles on Windows.
+  // Its long lifetime must not prevent this finished CLI command from returning.
+  child.on('exit',code=>setTimeout(()=>{
+    child.stdout.destroy();child.stderr.destroy();
+    code===0?resolve(stdout):reject(Error(stderr||`Browser CLI exited ${code}`));
+  },25));
+});
 let c;
 try {
   await browser(['open','http://localhost:4174/']);
