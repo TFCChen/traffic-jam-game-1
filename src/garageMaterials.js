@@ -303,9 +303,17 @@ export function prepareWheels(root, length) {
     prepared.push(geometry);
   }
   if (!prepared.length) return;
-  const geometry = mergeGeometries(prepared);
+  let geometry = mergeGeometries(prepared);
   if (!geometry) throw Error('Wheel and stationary brake geometry could not be batched');
   prepared.forEach(g => g.dispose());
+  const visibleCount=geometry.index.count,shadow=createWheelShadowGeometry(length);
+  shadow.deleteAttribute('uv');
+  const colorSize=geometry.attributes.color.itemSize;
+  shadow.setAttribute('color',new THREE.BufferAttribute(new Float32Array(shadow.attributes.position.count*colorSize).fill(1),colorSize));
+  const combined=mergeGeometries([geometry,shadow]);
+  geometry.dispose();shadow.dispose();geometry=combined;
+  geometry.userData.shadowRange=[visibleCount,geometry.index.count-visibleCount];
+  geometry.setDrawRange(0,visibleCount);
   const material = wheels.find(mesh => mesh.material.name === 'Rolling wheels').material;
   wheels.forEach(mesh => mesh.removeFromParent());
   const batch = new THREE.Mesh(geometry, material);
@@ -317,7 +325,7 @@ export function rollingMaterial(
   material,
   angle,
   compression = { value: [0, 0] },
-  steering = { value: 0 },
+  steering = { value: [0,0] },
 ) {
   material.onBeforeCompile = (shader) => {
     if (!material.isMeshDepthMaterial) surfaceShader(shader, 'wheelSurface');
@@ -325,7 +333,7 @@ export function rollingMaterial(
     shader.uniforms.tyreCompression = compression;
     shader.uniforms.wheelSteering = steering;
     shader.vertexShader =
-      "uniform float wheelAngle;\nuniform float wheelSteering;\nuniform vec2 tyreCompression;\nattribute vec3 wheelPivot;\nattribute float wheelSpin;\n" +
+      "uniform float wheelAngle;\nuniform vec2 wheelSteering;\nuniform vec2 tyreCompression;\nattribute vec3 wheelPivot;\nattribute float wheelSpin;\n" +
       shader.vertexShader;
     shader.vertexShader = shader.vertexShader.replace(
       "#include <begin_vertex>",
@@ -333,7 +341,7 @@ export function rollingMaterial(
       float wc=cos(wheelAngle*wheelSpin), ws=sin(wheelAngle*wheelSpin);
       vec2 wp=transformed.xy-wheelPivot.xy;
       transformed.xy=vec2(wc*wp.x-ws*wp.y,ws*wp.x+wc*wp.y)+wheelPivot.xy;
-      float steer=wheelPivot.x>0.0?wheelSteering:0.0;
+      float steer=wheelPivot.x>0.0?(wheelPivot.z<0.0?wheelSteering.x:wheelSteering.y):0.0;
       float sc=cos(steer),ss=sin(steer);
       vec2 axleOffset=transformed.xz-wheelPivot.xz;
       transformed.xz=vec2(sc*axleOffset.x+ss*axleOffset.y,-ss*axleOffset.x+sc*axleOffset.y)+wheelPivot.xz;
@@ -346,11 +354,29 @@ export function rollingMaterial(
       `#include <beginnormal_vertex>
       float nc=cos(wheelAngle*wheelSpin), ns=sin(wheelAngle*wheelSpin);
       objectNormal.xy=vec2(nc*objectNormal.x-ns*objectNormal.y,ns*objectNormal.x+nc*objectNormal.y);
-      float normalSteer=wheelPivot.x>0.0?wheelSteering:0.0;
+      float normalSteer=wheelPivot.x>0.0?(wheelPivot.z<0.0?wheelSteering.x:wheelSteering.y):0.0;
       float normalSC=cos(normalSteer),normalSS=sin(normalSteer);
       objectNormal.xz=vec2(normalSC*objectNormal.x+normalSS*objectNormal.z,-normalSS*objectNormal.x+normalSC*objectNormal.z);`,
     );
   };
-  material.customProgramCacheKey = () => "rolling-wheels-steering-v5";
+  material.customProgramCacheKey = () => "rolling-wheels-ackermann-v6";
   return material;
+}
+
+// Shadow maps cannot resolve tread grooves, spokes or brake drillings. Retain
+// the tyre silhouette and exactly the same hubs/steering in a tiny depth mesh.
+export function createWheelShadowGeometry(length) {
+  const pieces=[];
+  for(const x of [-length/2+.33,length/2-.34])for(const z of [-.43,.43]){
+    const geometry=new THREE.CylinderGeometry(.19,.19,.134,24,1);
+    geometry.rotateX(Math.PI/2);geometry.translate(x,.19,z);
+    const count=geometry.attributes.position.count,pivots=new Float32Array(count*3);
+    for(let i=0;i<count;i++)pivots.set([x,.19,z],i*3);
+    geometry.setAttribute('wheelPivot',new THREE.BufferAttribute(pivots,3));
+    geometry.setAttribute('wheelSpin',new THREE.BufferAttribute(new Float32Array(count),1));
+    geometry.setAttribute('wheelSurface',new THREE.BufferAttribute(new Float32Array(count*2),2));
+    pieces.push(geometry);
+  }
+  const geometry=mergeGeometries(pieces);pieces.forEach(g=>g.dispose());
+  return geometry;
 }

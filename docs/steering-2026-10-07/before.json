@@ -1,0 +1,164 @@
+[
+  {
+    "name": "desktop-day",
+    "idle": {
+      "cpuMs": {
+        "samples": 59,
+        "median": 1.899999976158142,
+        "p95": 3.399999976158142
+      },
+      "gpuMs": {
+        "samples": 55,
+        "median": 20.515156,
+        "p95": 38.850677
+      },
+      "drawCalls": {
+        "samples": 59,
+        "median": 96,
+        "p95": 96
+      },
+      "triangles": {
+        "samples": 59,
+        "median": 356118,
+        "p95": 356118
+      },
+      "gpuTimer": true
+    },
+    "active": {
+      "cpuMs": {
+        "samples": 130,
+        "median": 2.399999976158142,
+        "p95": 3.800000011920929
+      },
+      "gpuMs": {
+        "samples": 119,
+        "median": 28.95651,
+        "p95": 52.376041
+      },
+      "drawCalls": {
+        "samples": 130,
+        "median": 151,
+        "p95": 153
+      },
+      "triangles": {
+        "samples": 130,
+        "median": 731044,
+        "p95": 756996
+      },
+      "gpuTimer": true
+    },
+    "inputToSubmission": {
+      "count": 87,
+      "median": 2.800000011920929,
+      "p95": 4.5
+    }
+  },
+  {
+    "name": "desktop-night",
+    "idle": {
+      "cpuMs": {
+        "samples": 39,
+        "median": 1.899999976158142,
+        "p95": 3.300000011920929
+      },
+      "gpuMs": {
+        "samples": 34,
+        "median": 43.227968,
+        "p95": 58.587343
+      },
+      "drawCalls": {
+        "samples": 39,
+        "median": 96,
+        "p95": 96
+      },
+      "triangles": {
+        "samples": 39,
+        "median": 356118,
+        "p95": 356118
+      },
+      "gpuTimer": true
+    },
+    "active": {
+      "cpuMs": {
+        "samples": 94,
+        "median": 2.699999988079071,
+        "p95": 4.5
+      },
+      "gpuMs": {
+        "samples": 90,
+        "median": 44.628125,
+        "p95": 61.783958
+      },
+      "drawCalls": {
+        "samples": 94,
+        "median": 158,
+        "p95": 164
+      },
+      "triangles": {
+        "samples": 94,
+        "median": 751636,
+        "p95": 786948
+      },
+      "gpuTimer": true
+    },
+    "inputToSubmission": {
+      "count": 89,
+      "median": 3.199999988079071,
+      "p95": 5.100000023841858
+    }
+  },
+  {
+    "name": "mobile-night",
+    "idle": {
+      "cpuMs": {
+        "samples": 64,
+        "median": 1.5,
+        "p95": 2.899999976158142
+      },
+      "gpuMs": {
+        "samples": 62,
+        "median": 24.812187,
+        "p95": 47.520989
+      },
+      "drawCalls": {
+        "samples": 64,
+        "median": 96,
+        "p95": 96
+      },
+      "triangles": {
+        "samples": 64,
+        "median": 356118,
+        "p95": 356118
+      },
+      "gpuTimer": true
+    },
+    "active": {
+      "cpuMs": {
+        "samples": 144,
+        "median": 2.5,
+        "p95": 3.900000035762787
+      },
+      "gpuMs": {
+        "samples": 139,
+        "median": 25.344739,
+        "p95": 48.247135
+      },
+      "drawCalls": {
+        "samples": 144,
+        "median": 135,
+        "p95": 163
+      },
+      "triangles": {
+        "samples": 144,
+        "median": 586000,
+        "p95": 786860
+      },
+      "gpuTimer": true
+    },
+    "inputToSubmission": {
+      "count": 89,
+      "median": 2.900000035762787,
+      "p95": 4.699999988079071
+    }
+  }
+]

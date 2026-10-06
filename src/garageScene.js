@@ -1,4 +1,6 @@
 import * as THREE from "three";
+import { cullUnlitPixels } from './localLightCulling.js';
+cullUnlitPixels();
 import { createHintGuide } from './hintGuide.js';
 import { exitPose, EXIT_COMPLETE_MS } from './exitChoreography.js';
 import { vegetationShadowProxy } from './environmentShadows.js';
@@ -241,6 +243,10 @@ export function createGarageScene(canvas, getProps, callbacks) {
     roughness: 1,
   });
   floorMaterial.onBeforeCompile = (shader) => {
+    // The backdrop is outside the playable block. It needs the sun/sky and
+    // courtyard silhouette, but not eight local lamp evaluations per pixel.
+    shader.fragmentShader=shader.fragmentShader.replace('#include <lights_fragment_begin>',
+      THREE.ShaderChunk.lights_fragment_begin.replaceAll('NUM_POINT_LIGHTS','0').replaceAll('NUM_SPOT_LIGHTS','0'));
     shader.vertexShader =
       "varying vec3 garageFloorPosition;\n" + shader.vertexShader;
     shader.vertexShader = shader.vertexShader.replace(
@@ -254,7 +260,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       "#include <color_fragment>\nvec2 floorOffset=garageFloorPosition.xz-vec2(3.);\ndiffuseColor.rgb*=mix(.68,1.04,exp(-dot(floorOffset,floorOffset)*.027));",
     );
   };
-  floorMaterial.customProgramCacheKey = () => "garage-floor-gradient-v1";
+  floorMaterial.customProgramCacheKey = () => "garage-floor-sky-and-sun-v2";
   ownedMaterials.add(floorMaterial);
   const floorGeometry = new THREE.PlaneGeometry(200, 200);
   ownedGeometries.add(floorGeometry);
@@ -262,6 +268,9 @@ export function createGarageScene(canvas, getProps, callbacks) {
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = -0.48;
   floor.receiveShadow = true;
+  // Fill the backdrop after the opaque courtyard, so covered pixels never
+  // execute its lighting/shadow shader. Transparent vehicle panes still follow.
+  floor.renderOrder = 1;
   scene.add(floor);
   const ringMaterial = new THREE.MeshBasicMaterial({
     color: "#f5d391",
@@ -358,25 +367,6 @@ export function createGarageScene(canvas, getProps, callbacks) {
     );
     instancePose.updateMatrix();
     skidMarks.setMatrixAt(i, instancePose.matrix);
-  }
-  const accentMaterial = new THREE.MeshBasicMaterial({ color: "#78a58c" });
-  ownedMaterials.add(accentMaterial);
-  const accentGeometry = new THREE.BoxGeometry(0.13, 0.012, 0.035);
-  ownedGeometries.add(accentGeometry);
-  const roadLights = new THREE.InstancedMesh(accentGeometry, accentMaterial, 8);
-  let roadLightState = null;
-  scene.add(roadLights);
-  for (let i = 0; i < 8; i++) {
-    instancePose.position.set(
-      6.12 + (i % 4) * 0.37,
-      0.052,
-      i < 4 ? 2.03 : 2.97,
-    );
-    instancePose.rotation.set(0, 0, 0);
-    instancePose.scale.set(1, 1, 1);
-    instancePose.updateMatrix();
-    roadLights.setMatrixAt(i, instancePose.matrix);
-    roadLights.setColorAt(i, accentColour.set("#78a58c"));
   }
   const leafGeometry = new THREE.PlaneGeometry(0.07, 0.13);
   ownedGeometries.add(leafGeometry);
@@ -1203,7 +1193,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
           paints = [],
           windows = [],
           wheelAngle = { value: 0 },
-          wheelSteering = { value: 0 },
+          wheelSteering = { value: [0,0] },
           tyreCompression = { value: [0, 0] };
         group.traverse((object) => {
           if (object.isMesh) {
@@ -1255,6 +1245,10 @@ export function createGarageScene(canvas, getProps, callbacks) {
               material.customProgramCacheKey=()=> 'rear-lens-emission-v1';
             }
             if (material.name === "Rolling wheels") {
+              // Use the same draw call and steering uniforms, selecting the
+              // appended tyre silhouettes only while a shadow map is rendered.
+              object.onBeforeShadow=(_r,_o,_c,_s,geometry)=>geometry.setDrawRange(...geometry.userData.shadowRange);
+              object.onAfterShadow=(_r,_o,_c,_s,geometry)=>geometry.setDrawRange(0,geometry.userData.shadowRange[0]);
               rollingMaterial(material, wheelAngle, tyreCompression, wheelSteering);
               object.customDepthMaterial = rollingMaterial(
                 new THREE.MeshDepthMaterial({
@@ -1494,8 +1488,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
           (car.dir === "H" ? group.position.x : group.position.z) - oldAxis,
         velocity = travelled / Math.max(0.008, dt);
       item.wheelAngle.value -= travelled / 0.19;
-      item.wheelSteering.value=exit?.steering??0;
-      if(exiting && now-escapeStart>4750 && velocity>.08)item.brakeUntil=now+140;
+      item.wheelSteering.value=exit?.steeringPair??[0,0];
       if(exiting)item.exitDistance=exit.distance;
       item.body.rotation.x=(exit?.bank??0)*(settings.motion??1);
       if(Math.abs(velocity)>.12){item.lastMotionAt=now;item.stopBrake=false;}
@@ -1690,7 +1683,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
       scratchPosition.copy(viewAim).add(scratchDirection.set(follow, 0, followZ)),
     );
     camera.updateMatrixWorld();
-    const litCar=groups.get(drag?.car.id ?? (props.won?'target':selected??'target'));
+    const lightOwner=groups.get(drag?.car.id ?? (props.won?'target':selected??'target'));
+    const litCar=lightOwner?.group.visible?lightOwner:null;
     // Headlight refreshes must not force an unchanged sun map to render again.
     if (renderer.shadowMap.needsUpdate) sun.shadow.needsUpdate = true;
     if (vehicleLights.update(props.editor?null:litCar,settings,quality,now,shadowChanged||renderer.shadowMap.needsUpdate)) renderer.shadowMap.needsUpdate=true;
@@ -1713,27 +1707,6 @@ export function createGarageScene(canvas, getProps, callbacks) {
         leaves.setMatrixAt(i, instancePose.matrix);
       }
       leaves.instanceMatrix.needsUpdate = true;
-    }
-    const roadLightMask = props.won ? Math.min(4, Math.max(0, Math.ceil(victoryAge / 110))) : 0;
-    const nextRoadLightState = `${settings.theme}:${roadLightMask}`;
-    if (roadLightState !== nextRoadLightState) {
-      for (let i = 0; i < 8; i++) {
-        const lit = i % 4 < roadLightMask;
-        roadLights.setColorAt(
-          i,
-          accentColour.set(
-            lit
-              ? "#a9efc4"
-              : settings.theme === "neon"
-                ? i < 4
-                  ? "#79dfea"
-                  : "#b591ef"
-                : "#78a58c",
-          ),
-        );
-      }
-      roadLights.instanceColor.needsUpdate = true;
-      roadLightState = nextRoadLightState;
     }
     celebration.visible =
       quality.decor &&
@@ -1897,7 +1870,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
             optics: m.userData.optics,
           })),
           wheelAngle: i.wheelAngle.value,
-          wheelSteering: i.wheelSteering.value,
+          wheelSteering: i.wheelSteering.value[1],
+          wheelSteeringPair: i.wheelSteering.value,
           tilt: i.body.rotation.z,
           compression: i.body.position.y - 0.19,
           wheelTilt: i.group.rotation.z,
@@ -1968,7 +1942,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       vehicleLights.dispose();
       exhaustSmoke.dispose();
       environment.dispose();
-      roadLights.dispose();
+
       leaves.dispose();
       celebration.dispose();
       placementCells.dispose(); placementGhost.dispose();

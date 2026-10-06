@@ -50,6 +50,8 @@ npm run preview
 
 只重建場地可執行 `scripts/build_environment.py`，不會覆寫車輛 GLB。它產生完整正方形街區、石材鋪面、咖啡店、細葉植栽與休憩區，並保存 `art/street-courtyard.blend`。匯出後自動透過 `scripts/compact_environment.py` 壓縮顏色與法線儲存格式，頂點位置保持完整精度；GLB 使用標準 `KHR_mesh_quantization`，由既有 Three.js loader 讀取。詳細驗證與截圖見 [街區重建報告](docs/courtyard-2026-10-07/README.md)。
 
+最新的車輪轉向、駛離通道與效能比較見 [轉向與效能驗證](docs/steering-2026-10-07/README.md)。車輪的可見細節與簡化陰影輪廓共用同一 geometry，僅在 shadow pass 切換 draw range；若修改輪距、輪徑或軸距，需同步更新 `prepareWheels`、`createWheelShadowGeometry` 與 `exitChoreography`。
+
 ## 驗證
 
 視角操作：電腦右鍵拖曳旋轉，Shift＋右鍵／中鍵平移，滾輪縮放；手機場外單指旋轉、雙指平移與捏合縮放，車身單指拖曳保持移車。提供 ＋／− 與重置，倍率 65%–400%。[操作細節與原生輸入驗證](docs/camera-2026-10-05/REPORT.md)。

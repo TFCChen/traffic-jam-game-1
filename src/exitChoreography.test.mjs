@@ -15,10 +15,12 @@ for(let age=16;age<=EXIT_COMPLETE_MS;age+=16){
   }
   maxSteering=Math.max(maxSteering,Math.abs(p.steering));prior=p;
 }
-assert(turned&&maxSteering>.4&&maxSteering<.8);
+assert(turned&&maxSteering>.4&&maxSteering<.6);
 const end=exitPose(EXIT_COMPLETE_MS);
-assert.equal(end.visible,true,'Car remains in the world instead of disappearing mid-street');
+assert.equal(end.visible,false,'Car departs beneath the street passage');
 assert.equal(end.follow,0);assert.equal(end.complete,true);assert.equal(Math.abs(end.steering),0);
-assert(end.z+1<10.25,'Stopped car remains on the street');
+assert(end.z>9.27&&end.z+.67<10.25,'Car is inside the passage, still supported by asphalt');
+const turning=exitPose(3000);
+assert(Math.abs(turning.steeringPair[1])>Math.abs(turning.steeringPair[0]),'Inside wheel steers more sharply');
 assert.equal(exitPose(0,5,2.5,true).follow,0);assert.equal(exitPose(120,5,2.5,true).complete,true);
 console.log('Smooth steering, continuous heading, fence/street clearance and camera restoration passed.');

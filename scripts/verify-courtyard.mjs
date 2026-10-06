@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';
 import {connect} from './cdp-test.mjs';
-const c=await connect(process.argv[2]),dir=new URL('../docs/courtyard-2026-10-07/',import.meta.url);mkdirSync(dir,{recursive:true});
+const c=await connect(process.argv[2]),dir=new URL(process.env.VERIFY_ART_OUTPUT_DIR??'../docs/courtyard-2026-10-07/',import.meta.url);mkdirSync(dir,{recursive:true});
 const saved=await c.evaluate(`Object.fromEntries(Object.keys(localStorage).filter(k=>k.startsWith('traffic-jam-')).map(k=>[k,localStorage.getItem(k)]))`);
 const ready=()=>c.until(`(()=>{const s=document.querySelector('.garage-canvas')?.garageInspection?.snapshot();return s?.ready&&s.sceneKey===s.performance.renderedSceneKey})()`);
 const snap=()=>c.evaluate(`document.querySelector('.garage-canvas').garageInspection.snapshot()`);

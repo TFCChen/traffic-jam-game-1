@@ -139,8 +139,13 @@ for(const [name,length]of Object.entries(lengths)){
   asset.scene.traverse(o=>{if(o.isMesh&&o.material.name==='Rolling wheels')rollingBatches.push(o);});
   assert.equal(rollingBatches.length,1,`${name}: brakes must share the wheel draw call`);
   const spin=rollingBatches[0].geometry.getAttribute('wheelSpin');
-  assert.ok(spin&&Array.from(spin.array).some(v=>v===1));
-  assert.equal(Array.from(spin.array).some(v=>v===0),stationaryBrakes.length>0,`${name}: calipers must remain fixed while rims rotate`);
+  const wheelGeometry=rollingBatches[0].geometry;
+  const visibleVertices=Array.from(wheelGeometry.index.array.slice(0,wheelGeometry.drawRange.count)).reduce((max,v)=>Math.max(max,v),0)+1;
+  const visibleSpin=Array.from(spin.array.slice(0,visibleVertices));
+  assert.ok(spin&&visibleSpin.some(v=>v===1));
+  assert.equal(visibleSpin.some(v=>v===0),stationaryBrakes.length>0,`${name}: calipers must remain fixed while rims rotate`);
+  assert.equal(wheelGeometry.userData.shadowRange[0],wheelGeometry.drawRange.count);
+  assert(wheelGeometry.userData.shadowRange[1]<=1200,'All tyre shadows reuse the original draw call with bounded silhouette geometry');
   assert.ok((rollingBatches[0].geometry.index?.count??spin.count)/3<16000,`${name}: wheel detail must remain within the mobile geometry budget`);
   const beforeBatch=new Box3().setFromObject(asset.scene);
   const cabinColors=[];

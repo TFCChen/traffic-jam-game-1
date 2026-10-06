@@ -124,7 +124,7 @@ def shrub(x,y,z,scale=.18):
         shade=rng.randrange(len(leaves))
         for j in range(4):
             faces.append((base+j,base+(j+1)%4,base+4));colours.append(shade)
-            faces.append((base+(j+1)%4,base+j,base+5));colours.append(shade)
+            # Double-sided folded leaves do not need a closed hidden underside.
     mesh=bpy.data.meshes.new('Folded fine foliage');mesh.from_pydata(vertices,[],faces);mesh.update()
     obj=bpy.data.objects.new('Individual courtyard leaves',mesh);bpy.context.collection.objects.link(obj)
     # Preserve the authored palette without multiplying material batches.
@@ -221,6 +221,15 @@ for xx in [1.88+i*.16 for i in range(13)]:cube('Pergola shade slat',(xx,-7.6,1.3
 for x in [1.5,3,4.5]:cube('Walkway light',(x,-6.30,.124),(.16,.045,.014),light,.005)
 cube('Storm water grille',(5.60,-5.83,.039),(.51,.13,.006),iron,.006)
 for x in [5.4+i*.05 for i in range(9)]:cube('Drain void',(x,-5.83,.044),(.013,.10,.004),stone_dark,.001)
+
+# A covered street passage occludes the car before it leaves the finite diorama.
+for xx in [8.59,10.10]:
+    cube('Passage stone pier',(xx,-9.16,.58),(.15,1.96,1.10),concrete,.035)
+cube('Passage solid roof',(9.345,-9.16,1.17),(1.72,1.96,.16),charcoal,.035)
+cube('Passage roof coping',(9.345,-9.16,1.265),(1.77,2.01,.04),brass,.01)
+cube('Passage shadowed end',(9.345,-10.12,.55),(1.40,.035,1.02),stone_dark,.005)
+for xx in [8.70,9.99]:
+    cube('Passage entry light',(xx,-8.175,.90),(.04,.018,.13),light,.008)
 
 garage=export('garage')
 compact_source=os.path.join(ROOT,'scripts','compact_environment.py')
