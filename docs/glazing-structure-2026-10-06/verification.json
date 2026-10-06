@@ -1,5 +1,5 @@
 {
-  "modelRevision": "ec9f75ebc76475a6",
+  "modelRevision": "2ea77007af5a6a23",
   "results": [
     "racer: side and front screenshots captured; clear thin-sheet optics confirmed.",
     "jeep: side and front screenshots captured; clear thin-sheet optics confirmed.",
@@ -17,54 +17,54 @@
   "performanceResults": [
     {
       "quality": "high",
-      "orbitFPS": 9.414718343009572,
+      "orbitFPS": 9.538702111024238,
       "profile": {
         "cpuMs": {
-          "samples": 60,
-          "median": 1.699999988079071,
-          "p95": 3
+          "samples": 61,
+          "median": 2.800000011920929,
+          "p95": 3.100000023841858
         },
         "gpuMs": {
-          "samples": 59,
-          "median": 20.325468,
-          "p95": 31.260312
+          "samples": 60,
+          "median": 20.448802,
+          "p95": 47.388645
         },
         "drawCalls": {
-          "samples": 60,
+          "samples": 61,
           "median": 100,
           "p95": 100
         },
         "triangles": {
-          "samples": 60,
-          "median": 206480,
-          "p95": 206480
+          "samples": 61,
+          "median": 254412,
+          "p95": 254412
         },
         "gpuTimer": true
       }
     },
     {
       "quality": "standard",
-      "orbitFPS": 8.945877441479052,
+      "orbitFPS": 8.585503166783955,
       "profile": {
         "cpuMs": {
-          "samples": 60,
-          "median": 2.700000047683716,
-          "p95": 3.199999988079071
+          "samples": 61,
+          "median": 2.899999976158142,
+          "p95": 3.299999952316284
         },
         "gpuMs": {
-          "samples": 58,
-          "median": 19.862135,
-          "p95": 28.045625
+          "samples": 60,
+          "median": 20.294635,
+          "p95": 25.992083
         },
         "drawCalls": {
-          "samples": 60,
+          "samples": 61,
           "median": 100,
           "p95": 100
         },
         "triangles": {
-          "samples": 60,
-          "median": 206480,
-          "p95": 206480
+          "samples": 61,
+          "median": 254412,
+          "p95": 254412
         },
         "gpuTimer": true
       }

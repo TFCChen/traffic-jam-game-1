@@ -10,6 +10,7 @@ import {
   prepareWheels,
   rollingMaterial,
   batchColoredMeshes,
+  vehicleContactTexture,
 } from "./garageMaterials.js";
 import { SCENE_THEMES } from "./sceneThemes.js";
 import { QUALITY } from "./gamePreferences.js";
@@ -25,6 +26,7 @@ import {
 import { createRenderProfiler } from "./renderProfiler.js";
 import { cacheLocalTransforms } from "./sceneTransforms.js";
 import { configureVehiclePaint, vehicleTrimSurface } from './vehicleFinish.js';
+import { VEHICLE_GROUND_HEIGHT, CONTACT_PLANE_OFFSET } from './contactShadow.js';
 import {
   DEFAULT_VIEW,
   ORTHOGRAPHIC_DISTANCE,
@@ -117,6 +119,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
   const glowTexture = detailTexture("glow"),
     skidTexture = detailTexture("skid");
   const contactGeometry = new THREE.PlaneGeometry(1, 1);
+  const contactTextures = new Map([2, 3].map(length => [length, vehicleContactTexture(length)]));
   const camera = new THREE.OrthographicCamera(-5, 5, 4, -4, 0.1, ORTHOGRAPHIC_FAR);
   const aim = new THREE.Vector3(3, 0.15, 3);
   const viewAim = aim.clone();
@@ -135,7 +138,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
   framingCamera.updateMatrixWorld();
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
-  const ground = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.055);
+  const ground = new THREE.Plane(new THREE.Vector3(0, 1, 0), -VEHICLE_GROUND_HEIGHT);
   const groups = new Map();
   const ownedMaterials = new Set(),
     ownedGeometries = new Set();
@@ -1260,16 +1263,16 @@ export function createGarageScene(canvas, getProps, callbacks) {
         const contact = new THREE.Mesh(
           contactGeometry,
           new THREE.MeshBasicMaterial({
-            map: glowTexture,
+            map: contactTextures.get(car.len),
             color: "#17232a",
             transparent: true,
-            opacity: 0.32,
+            opacity: 0.52,
             depthWrite: false,
           }),
         );
         contact.rotation.x = -Math.PI / 2;
-        contact.position.y = -0.014;
-        contact.scale.set(car.len - 0.12, 0.85, 1);
+        contact.position.y = CONTACT_PLANE_OFFSET;
+        contact.scale.set(car.len + 0.12, 1.08, 1);
         contact.raycast = () => {};
         group.add(contact);
         cacheLocalTransforms(group, new Set([group, body]));
@@ -1296,7 +1299,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
         scene.add(group);
         group.position.set(
           car.col + (car.dir === "H" ? car.len / 2 : 0.5),
-          0.055,
+          VEHICLE_GROUND_HEIGHT,
           car.row + (car.dir === "V" ? car.len / 2 : 0.5),
         );
       }
@@ -1310,7 +1313,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
         if (item)
           item.group.position.set(
             item.car.col + item.car.len / 2,
-            0.055,
+            VEHICLE_GROUND_HEIGHT,
             item.car.row + 0.5,
           );
       }
@@ -1430,7 +1433,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
         group.visible = t < 1;
       } else group.visible = true;
       const blend = isDrag || reduced.matches ? 1 : 1 - Math.exp(-18 * dt);
-      const height = 0.055;
+      const height = VEHICLE_GROUND_HEIGHT;
       if (
         Math.abs(group.position.x - x) > 0.001 ||
         Math.abs(group.position.z - z) > 0.001 ||
@@ -1885,6 +1888,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       ownedMaterials.forEach((m) => m.dispose());
       ownedGeometries.forEach((g) => g.dispose());
       contactGeometry.dispose();
+      contactTextures.forEach(texture => texture.dispose());
       hintArrow.dispose();
       roadTexture.dispose();
       glowTexture.dispose();

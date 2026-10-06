@@ -107,6 +107,10 @@ for(const [name,length]of Object.entries(lengths)){
   }
   if(name==='racer'){
     asset.scene.updateMatrixWorld(true);
+    for(const side of [-1,1]) {
+      const outerFender=new Raycaster(new Vector3(.82,2,side*.37),new Vector3(0,-1,0)).intersectObject(asset.scene,true)[0];
+      assert.ok(outerFender?.object.material.name.startsWith('Paint'),'Recessed wheel liners must not protrude through the front fender');
+    }
     for(const mirror of mirrors){
       const p=mirror.geometry.getAttribute('position');
       for(let i=0;i<p.count;i++)assert.ok(Math.abs(new Vector3().fromBufferAttribute(p,i).applyMatrix4(mirror.matrixWorld).z)>.38,'Coupe mirror lenses must sit outside the cabin glazing.');

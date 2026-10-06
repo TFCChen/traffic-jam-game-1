@@ -123,7 +123,10 @@ def export(name):
         for parent in list(obj.users_collection): parent.objects.unlink(obj)
         collection.objects.link(obj)
         obj.select_set(True)
-    bpy.ops.export_scene.gltf(filepath=os.path.join(OUT, name+'.glb'), export_format='GLB', use_selection=True, export_yup=True)
+    # Publish a complete GLB at once; dev-server reads cannot see a partial export.
+    staged_path=os.path.join(ROOT,'art',name+'.export.glb')
+    bpy.ops.export_scene.gltf(filepath=staged_path, export_format='GLB', use_selection=True, export_yup=True)
+    os.replace(staged_path,os.path.join(OUT,name+'.glb'))
     return list(objects)
 
 def wheel_colourize(obj, colour):
@@ -131,6 +134,27 @@ def wheel_colourize(obj, colour):
     for element in layer.data: element.color=colour.diffuse_color
     obj.data.materials.clear();obj.data.materials.append(wheel_material)
     return obj
+
+def wheel_ring(name,x,y,radius,tube,material):
+    bpy.ops.mesh.primitive_torus_add(major_segments=48,minor_segments=6,
+        major_radius=radius,minor_radius=tube,location=(x,y,.19),rotation=(math.pi/2,0,0))
+    obj=bpy.context.object;obj.name=name;obj.data.materials.append(material)
+    for polygon in obj.data.polygons:polygon.use_smooth=True
+    objects.append(obj)
+    return wheel_colourize(obj,material)
+
+def panel_seam(body,name,points,side=None):
+    # Project small seams onto the actual rounded shell, rather than floating lines.
+    projected=[]
+    for a,b in zip(points,points[1:]):
+        for i in range(6):
+            p=Vector(a).lerp(Vector(b),i/6)
+            origin=Vector((p.x,side*2,p.z)) if side else Vector((p.x,p.y,2))
+            direction=Vector((0,-side,0)) if side else Vector((0,0,-1))
+            hit,point,normal,index=body.ray_cast(origin,direction)
+            if hit:projected.append(point+normal*.0015)
+    for a,b in zip(projected,projected[1:]):
+        if (b-a).length<.15:strut(name,a,b,.0028,rubber)
 
 def shaped_cabin(name,position,size,material,taper=.68):
     obj=cube(name,position,size,material,0)
@@ -480,6 +504,19 @@ def midengine_coupe(paint):
             cutter=bpy.context.object;bpy.context.view_layer.objects.active=body
             mod=body.modifiers.new('Open wheel well','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter
             bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
+            # A recessed upper liner fills the exposed cavity without closing it.
+            vertices=[]
+            for i in range(25):
+                angle=math.pi*i/24
+                for y,r in ((side*.31,.197),(side*.35,.197),(side*.35,.207),(side*.31,.207)):
+                    vertices.append((x+math.cos(angle)*r,y,.19+math.sin(angle)*r))
+            faces=[]
+            for i in range(24):
+                for j in range(4):faces.append((i*4+j,i*4+(j+1)%4,(i+1)*4+(j+1)%4,(i+1)*4+j))
+            surface('Recessed coupe wheel liner',vertices,faces,rubber)
+    panel_seam(body,'Bonnet shut line',[(.33,-.275,0),(.66,-.255,0),(.87,-.20,0),(.89,0,0),(.87,.20,0),(.66,.255,0),(.33,.275,0),(.33,-.275,0)])
+    for side in (-1,1):
+        panel_seam(body,'Coupe door shut line',[(.23,0,.32),(.24,0,.19),(-.32,0,.18),(-.38,0,.31)],side)
     front_glazing=[(.285,.297,.349),(.19,.275,.448),(.08,.246,.535),(-.015,.216,.581)]
     rear_glazing=[(-.40,.199,.571),(-.49,.219,.478),(-.59,.255,.364)]
     ribbon('Curved wraparound windscreen',front_glazing,glass)
@@ -868,12 +905,18 @@ def car(kind, length, colour):
     for x in (-length/2+.33, length/2-.34):
         for y in (-.43,.43):
             wheel_colourize(cylinder('Wheel', (x,y,.19), .19,.13,rubber,'Y'),rubber)
-            wheel_colourize(cylinder('Hub', (x,y*1.13,.19), .09,.025,chrome,'Y'),chrome)
+            wheel_ring('Tyre sidewall shoulder',x,y*1.158,.167,.006,rubber)
+            wheel_ring('Alloy rim lip',x,y*1.158,.113,.006,chrome)
+            if kind=='racer':
+                wheel_ring('Recessed rim barrel',x,y*1.085,.106,.008,bed)
+                rotor=cylinder('Recessed brake rotor',(x,y*1.075,.19),.092,.009,chrome,'Y')
+                wheel_colourize(rotor,chrome)
+            else:wheel_colourize(cylinder('Hub', (x,y*1.13,.19), .09,.025,chrome,'Y'),chrome)
             # Different rim styles identify vehicle families, all retain one rolling batch.
             spokes=5 if kind=='racer' else 6 if kind in ('taxi','compact') else 4
             for spoke in range(spokes):
                 angle=spoke*math.tau/spokes
-                part=cube('Alloy spoke',(x+math.cos(angle)*.047,y*1.16,.19+math.sin(angle)*.047),(.077,.015,.017),chrome,0)
+                part=cube('Alloy spoke',(x+math.cos(angle)*.063,y*1.16,.19+math.sin(angle)*.063),(.092,.012,.014),chrome,0)
                 part.rotation_euler.y=-angle;wheel_colourize(part,chrome)
             wheel_colourize(cylinder('Hub cap',(x,y*1.18,.19),.027,.012,bed,'Y'),bed)
             for tread in range(12):
@@ -883,6 +926,7 @@ def car(kind, length, colour):
     for y in (-.26,.26):
         if not refined:cube('Headlight', (length/2-.065,y,.3), (.022,.15,.09), lamp, .02)
         cube('Taillight', (-length/2+.065,y,.28 if kind=='racer' else .3), (.022,.18 if kind=='racer' else .13,.035 if kind=='racer' else .07), redlamp, .012)
+        if kind=='racer':cube('Recessed tail lamp bezel',(-length/2+.074,y,.28),(.019,.193,.048),rubber,.008)
     if not refined:cube('Front bumper', (length/2-.06,0,.18), (.055,.57,.08), chrome, .025)
     exported = export(kind)
     return exported
