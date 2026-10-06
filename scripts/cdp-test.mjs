@@ -31,10 +31,13 @@ export async function connect(url, origin = 'http://localhost:4173') {
         }),
       );
     });
-  const targets = await send("Target.getTargets", {}, false),
-    page = targets.targetInfos.find(
-      (t) => t.type === "page" && t.url.startsWith(origin),
-    );
+  // A Vite reload can temporarily leave the page target without its URL.
+  let page;
+  for(let attempt=0;attempt<50&&!page;attempt++){
+    const targets=await send("Target.getTargets",{},false);
+    page=targets.targetInfos.find(t=>t.type==='page'&&t.url.startsWith(origin));
+    if(!page)await new Promise(resolve=>setTimeout(resolve,100));
+  }
   if (!page) throw Error("Open isolated localhost:4173 tab first");
   session = (
     await send(

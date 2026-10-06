@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { connect } from './cdp-test.mjs';
 const c = await connect(process.argv[2]);
-const dir = new URL('../docs/vehicle-effects-2026-10-06/', import.meta.url);
+const dir = new URL('../docs/lamp-placement-2026-10-06/', import.meta.url);
 mkdirSync(dir, {
   recursive: true
 });
@@ -10,6 +10,9 @@ const saved = await c.evaluate(`Object.fromEntries(Object.keys(localStorage).fil
 const errors = [];
 await c.send('Runtime.enable');
 c.onEvent('Runtime.exceptionThrown', e => errors.push(e.exceptionDetails.text));
+c.onEvent('Runtime.consoleAPICalled', e => {
+  if (e.type === 'error') errors.push(e.args.map(a => a.value ?? a.description ?? '').join(' '));
+});
 await c.send('Log.enable');
 c.onEvent('Log.entryAdded', e => {
   if (e.entry.level === 'error') errors.push(e.entry.text);
@@ -61,7 +64,8 @@ async function load(theme, quality = 'high', pitch = 50, fleet = false) {
   await c.until(`document.querySelector('.garage-canvas').garageInspection.snapshot().performance.frames>=12`);
   await c.sleep(700);
   const s = await snap();
-  assert(s.vehicleLighting.headlights.every(l => l.shadowMapReady) && s.vehicleLighting.rear.shadowMapReady, 'First frame must have valid depth samplers even while day lamps are off');
+  assert(s.vehicleLighting.headlights.every(l => l.shadowMapReady), 'Unlit daytime headlights still need valid depth samplers');
+  assert(s.cars.every(car => car.lampAnchors.head.every(Boolean) && car.lampAnchors.tail.every(Boolean)), 'Every model needs two real front and rear exterior lenses');
   assert.equal(s.settings.theme, theme);
   assert.equal(s.sceneKey, 'custom-effects-review-play');
   return s;
@@ -70,7 +74,7 @@ async function shot(name) {
   writeFileSync(new URL(name + '.png', dir), Buffer.from((await c.send('Page.captureScreenshot')).data, 'base64'));
 }
 async function points(id, delta) {
-  return c.evaluate(`(()=>{const a=document.querySelector('.garage-canvas').garageInspection,car=a.snapshot().cars.find(c=>c.id==='${id}'),[x,,z]=car.position;for(const h of [.35,.45,.55,.7,.9]){const p=a.project(x,h,z);if(a.pick(p.x,p.y)==='${id}')return {from:p,to:a.project(x+(car.dir==='H'?${delta}:0),h,z+(car.dir==='V'?${delta}:0))};}return null})()`);
+  return c.evaluate(`(()=>{const canvas=document.querySelector('.garage-canvas'),a=canvas.garageInspection,car=a.snapshot().cars.find(c=>c.id==='${id}'),[x,,z]=car.position;for(const h of [.35,.45,.55,.7,.9,1.05])for(const offset of [0,-.35,.35,-.7,.7]){const px=x+(car.dir==='H'?offset:0),pz=z+(car.dir==='V'?offset:0),p=a.project(px,h,pz);if(document.elementFromPoint(p.x,p.y)===canvas&&a.pick(p.x,p.y)==='${id}')return {from:p,to:a.project(px+(car.dir==='H'?${delta}:0),h,pz+(car.dir==='V'?${delta}:0))};}return null})()`);
 }
 async function drag(id, delta, name) {
   const p = await points(id, delta);
@@ -95,13 +99,16 @@ async function drag(id, delta, name) {
     await c.sleep(25);
     const s = await snap();
     assert.equal(s.vehicleLighting.owner, id);
+    assert.equal(s.guide.visible, false, 'No movement lane during gameplay');
     assert.equal(s.transmissionResolutionScale, 1);
     peak = Math.max(peak, s.exhaustSmoke.active);
   }
   const during = await snap();
   assert(peak > 0);
   assert(during.exhaustSmoke.capacity === 56 && during.exhaustSmoke.drawCalls === 1);
-  assert.equal(during.vehicleLighting.rear.color, 'ef3024');
+  assert.equal(during.cars.find(car => car.id === id).tailColor, 'ef3426', 'Red tail lenses remain red while reversing');
+  const litCar = during.cars.find(car => car.id === id);
+  for (let i = 0; i < 2; i++) assert(Math.hypot(...during.vehicleLighting.headlights[i].position.map((v, j) => v - litCar.lampOrigins.head[i][j])) < .014, 'Light starts at its actual model lens');
   if (name) await shot(name);
   await c.send('Input.dispatchMouseEvent', {
     type: 'mouseReleased',
@@ -128,7 +135,8 @@ try {
   });
   for (const theme of ['day', 'sunset', 'neon']) {
     const idle = await load(theme);
-    assert(idle.vehicleLighting.headlights.every(l => l.shadow && l.distance === 5.5 && l.decay === 2));
+    assert(idle.vehicleLighting.headlights.length === 2 && idle.vehicleLighting.headlights.every(l => l.shadow && l.distance === 5.5 && l.decay === 2 && l.intensity === 0));
+    assert(idle.cars.every(car => car.tailLight === 0 && car.lampState.head === 0));
     await shot(theme + '-idle');
     const d = await drag('target', 1, theme + '-moving');
     const light = d.during.vehicleLighting;
@@ -137,9 +145,16 @@ try {
     assert(light.rear.distance < light.headlights[0].distance);
     assert(light.rear.angle > light.headlights[0].angle);
     const back = await drag('target', -1, theme + '-reverse');
-    assert(back.during.vehicleLighting.rear.intensity >= 2);
+    assert(back.during.vehicleLighting.rear.intensity >= 1.8);
+    assert.equal(back.during.vehicleLighting.rear.color, 'eef4ff');
     assert.equal(await c.evaluate(`document.querySelector('.stats b').textContent`), '2');
     await c.click('復原');
+    // Undo itself moves the car; measure the fade after that motion settles.
+    const idleStart = Date.now();
+    await c.until(`(()=>{const s=document.querySelector('.garage-canvas').garageInspection.snapshot();return s.vehicleLighting.headlights.every(l=>l.intensity===0)&&s.vehicleLighting.taillights.every(l=>l.intensity===0)})()`);
+    assert(Date.now() - idleStart < 4500, 'Lights must not stay on indefinitely after settling');
+    const parked = await snap();
+    assert(parked.vehicleLighting.headlights.every(l => l.intensity === 0) && parked.vehicleLighting.taillights.every(l => l.intensity === 0));
     assert.equal(await c.evaluate(`document.querySelector('.stats b').textContent`), '1');
     await c.click('復原');
     results.push({
@@ -154,6 +169,38 @@ try {
   await load('neon');
   const vertical = await drag('blocker', 1, 'vertical-car');
   assert(vertical.during.vehicleLighting.headlights[0].target[2] > vertical.during.vehicleLighting.headlights[0].position[2]);
+  await load('neon', 'high', 55, true);
+  await c.click('重置');
+  const models = [];
+  for (const car of (await snap()).cars) {
+    const p = await points(car.id, 0);
+    assert(p, 'Every model must remain selectable');
+    await c.send('Input.dispatchMouseEvent', {
+      type: 'mousePressed',
+      x: p.from.x,
+      y: p.from.y,
+      button: 'left',
+      buttons: 1,
+      clickCount: 1
+    });
+    await c.sleep(100);
+    const s = await snap(),
+      lit = s.cars.find(c => c.id === car.id);
+    assert.equal(s.vehicleLighting.owner, car.id);
+    for (let i = 0; i < 2; i++) assert(Math.hypot(...s.vehicleLighting.headlights[i].position.map((v, j) => v - lit.lampOrigins.head[i][j])) < .014);
+    assert.equal(s.guide.visible, false);
+    models.push(lit.model);
+    await c.send('Input.dispatchMouseEvent', {
+      type: 'mouseReleased',
+      x: p.from.x,
+      y: p.from.y,
+      button: 'left',
+      clickCount: 1
+    });
+  }
+  results.push({
+    modelEmittersVerified: models
+  });
   for (const theme of ['day', 'neon']) for (const quality of ['high', 'standard']) {
     await load(theme, quality, 55, true);
     await c.evaluate(`document.querySelector('.garage-canvas').garageInspection.measure(true)`);

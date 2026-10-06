@@ -14,7 +14,7 @@ import {
 import { SCENE_THEMES } from "./sceneThemes.js";
 import { QUALITY } from "./gamePreferences.js";
 import { configureVehicleGlass, prepareVehicleGlass, VEHICLE_MIRROR } from "./vehicleGlass.js";
-import { createVehicleLights, createExhaustSmoke } from './vehicleEffects.js';
+import { createVehicleLights, createExhaustSmoke, collectLampAnchors, vehicleLampState } from './vehicleEffects.js';
 import { quadDistance, snapDragDelta } from "./pointerHelpers.js";
 import {
   stepSuspension,
@@ -390,6 +390,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
   // A bounded particle pool: never allocate meshes in the animation loop.
   const vehicleLights = createVehicleLights(scene);
   const exhaustSmoke = createExhaustSmoke(scene);
+  const reverseGeometry = new THREE.BoxGeometry(.014,.018,.038);
+  ownedGeometries.add(reverseGeometry);
   const particles = [];
   const smokeGeometry = new THREE.SphereGeometry(0.055, 6, 4);
   ownedGeometries.add(smokeGeometry);
@@ -949,6 +951,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     event.preventDefault();
     canvas.focus({ preventScroll: true });
     selected = id;
+    for(const [carId,item]of groups)item.lightUntil=carId===id?performance.now()+1600:0;
     callbacks.select(id);
     const car = props.cars.find((c) => c.id === id),
       legal = legalMovesForCar(props.cars, id);
@@ -1188,6 +1191,16 @@ export function createGarageScene(canvas, getProps, callbacks) {
             }
             if (material.name === "Tail lamp") {
               tailLamps.push(material);
+              // GLTF batches rear lenses with red buckles and roof markers.
+              // Only the rear exterior region may emit parking/brake light.
+              object.updateWorldMatrix(true,false);group.updateWorldMatrix(true,false);
+              const lampRoot=new THREE.Matrix4().copy(group.matrixWorld).invert().multiply(object.matrixWorld);
+              material.onBeforeCompile=shader=>{
+                shader.uniforms.lampRoot={value:lampRoot};shader.uniforms.lampRearLimit={value:-car.len/2+.18};
+                shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nuniform mat4 lampRoot;uniform float lampRearLimit;varying float rearLensMask;').replace('#include <begin_vertex>','#include <begin_vertex>\nrearLensMask=step((lampRoot*vec4(transformed,1.)).x,lampRearLimit);');
+                shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying float rearLensMask;').replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\ntotalEmissiveRadiance*=rearLensMask;');
+              };
+              material.customProgramCacheKey=()=> 'rear-lens-emission-v1';
             }
             if (material.name === "Rolling wheels") {
               rollingMaterial(material, wheelAngle, tyreCompression);
@@ -1199,11 +1212,12 @@ export function createGarageScene(canvas, getProps, callbacks) {
                 tyreCompression,
               );
             }
-            object.castShadow = !["Automotive glass", "Batched cabin"].includes(material.name);
+            object.castShadow = !["Automotive glass", "Batched cabin", "Headlamp", "Tail lamp"].includes(material.name);
             object.receiveShadow = material.name !== "Automotive glass";
             object.userData.carId = car.id;
           }
         });
+        const lightAnchors=collectLampAnchors(group,car.len);
         const body = new THREE.Group();
         body.position.y = 0.19;
         group.add(body);
@@ -1214,6 +1228,17 @@ export function createGarageScene(canvas, getProps, callbacks) {
             bodyMeshes.push(o);
         });
         bodyMeshes.forEach((mesh) => body.attach(mesh));
+        const reverseMaterial=new THREE.MeshStandardMaterial({color:'#9ba6a9',roughness:.22,emissive:'#eef4ff',emissiveIntensity:0});
+        const reverseLenses=new THREE.InstancedMesh(reverseGeometry,reverseMaterial,2);
+        reverseLenses.raycast=()=>{};body.add(reverseLenses);
+        lightAnchors.reverse=lightAnchors.tail.map((anchor,i)=>{
+          const rootPoint=anchor?group.worldToLocal(anchor.mesh.localToWorld(anchor.point.clone())):new THREE.Vector3(-car.len/2,.3,i?.26:-.26);
+          rootPoint.x-=.006;rootPoint.y-=.045;rootPoint.z-=Math.sign(rootPoint.z)*.025;
+          const node=new THREE.Object3D();node.position.copy(body.worldToLocal(group.localToWorld(rootPoint)));body.add(node);
+          node.updateMatrix();reverseLenses.setMatrixAt(i,node.matrix);
+          return {mesh:node,point:new THREE.Vector3()};
+        });
+        reverseLenses.instanceMatrix.needsUpdate=true;
         const contact = new THREE.Mesh(
           contactGeometry,
           new THREE.MeshBasicMaterial({
@@ -1238,12 +1263,15 @@ export function createGarageScene(canvas, getProps, callbacks) {
           model: vehicleModel(car).kind,
           lamps,
           tailLamps,
+          lightAnchors,
+          reverseMaterial,
           paints,
           windows,
           wheelAngle,
           tyreCompression,
           velocity: 0,
           brakeUntil: 0,
+          lightUntil: 0,
         };
         groups.set(car.id, item);
         scene.add(group);
@@ -1397,8 +1425,10 @@ export function createGarageScene(canvas, getProps, callbacks) {
           (car.dir === "H" ? group.position.x : group.position.z) - oldAxis,
         velocity = travelled / Math.max(0.008, dt);
       item.wheelAngle.value -= travelled / 0.19;
-      if (Math.abs(item.velocity) > 0.2 && Math.abs(velocity) < 0.12)
-        item.brakeUntil = now + 220;
+      if(Math.abs(velocity)>.12){item.lastMotionAt=now;item.stopBrake=false;}
+      else if(!item.stopBrake && now-(item.lastMotionAt??-Infinity)<300 && (!isDrag || now-drag.lastAt>140)){
+        item.brakeUntil=now+220;item.stopBrake=true;
+      }
       item.suspension = reduced.matches
         ? { pitch: 0, rate: 0, speed: 0, heave: 0, heaveRate: 0 }
         : stepSuspension(
@@ -1430,28 +1460,18 @@ export function createGarageScene(canvas, getProps, callbacks) {
       const reversing = velocity < -0.12 || (isDrag && item.gear === -1),
         braking = now < item.brakeUntil;
       item.reversing = reversing; item.braking = braking; item.isDrag = isDrag;
+      if(isDrag || Math.abs(velocity)>.08)item.lightUntil=now+1600;
+      const lampsState=vehicleLampState(item,settings.theme,now);
+      item.lampState=lampsState;
       item.lamps.forEach((material) => {
-        material.emissiveIntensity =
-          settings.theme === "neon"
-            ? 1.4
-            : isDrag || props.won
-              ? 0.8
-              : reduced.matches
-                ? 0.2
-                : 0.15 +
-                  (Math.sin(now * 0.001 + item.index) * 0.5 + 0.5) * 0.25;
+        material.emissiveIntensity=lampsState.head*1.2+(settings.theme==='day'?lampsState.activity*.12:0);
       });
       item.tailLamps.forEach((material) => {
         material.color.set("#df7460");
         material.emissive.set("#ef3426");
-        material.emissiveIntensity = reversing
-          ? 0.9
-          : braking
-            ? 1.3
-            : settings.theme === "neon"
-              ? 0.2
-              : 0.03;
+        material.emissiveIntensity = Math.max(lampsState.park,lampsState.brake*1.3);
       });
+      item.reverseMaterial.emissiveIntensity=lampsState.reverse*1.4;
       if (!props.editor && !props.won && !reduced.matches && quality.decor) {
         const tick = Math.floor(now / 1000 + item.index * 1.47);
         if (tick !== item.lastTick) {
@@ -1515,23 +1535,9 @@ export function createGarageScene(canvas, getProps, callbacks) {
         );
       }
     }
-    marker.visible = !!drag && !props.won;
+    marker.visible = false;
     ringMaterial.color.set("#f5d391");
     ringMaterial.opacity = 0.13;
-    if (drag) {
-      const { car, min, max } = drag,
-        span = car.len + max - min;
-      marker.position.set(
-        car.col + (car.dir === "H" ? (car.len + min + max) / 2 : 0.5),
-        0.05,
-        car.row + (car.dir === "V" ? (car.len + min + max) / 2 : 0.5),
-      );
-      marker.scale.set(
-        car.dir === "H" ? span - 0.08 : 0.92,
-        car.dir === "V" ? span - 0.08 : 0.92,
-        1,
-      );
-    }
     if (props.editor && props.editorStart) {
       marker.visible = true;
       ringMaterial.opacity = 0.25;
@@ -1789,6 +1795,10 @@ export function createGarageScene(canvas, getProps, callbacks) {
           wheelTilt: i.group.rotation.z,
           velocity: i.velocity,
           tailLight: i.tailLamps[0]?.emissiveIntensity,
+          tailColor: i.tailLamps[0]?.emissive.getHexString(),
+          lampState: i.lampState,
+          lampAnchors: {head:i.lightAnchors.head.map(a=>a?.mesh.name??null),tail:i.lightAnchors.tail.map(a=>a?.mesh.name??null)},
+          lampOrigins: Object.fromEntries(['head','tail','reverse'].map(kind=>[kind,i.lightAnchors[kind].map(a=>a?.mesh.localToWorld(a.point.clone()).toArray()??null)])),
         })),
         calls: renderer.info.render.calls,
         performance: {

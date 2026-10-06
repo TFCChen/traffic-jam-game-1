@@ -1,71 +1,204 @@
 import * as THREE from 'three';
-export function vehicleLightPower(theme, moving) {
-  return theme === 'neon' ? moving ? 22 : 15 : theme === 'sunset' ? moving ? 14 : 8 : moving ? 7 : 0;
+
+// Keep the puzzle's parked fleet dark. Activity stays lit briefly, then fades.
+export function vehicleLampState(item, theme, now) {
+  const active = item?.isDrag || Math.abs(item?.velocity ?? 0) > .08;
+  const fade = active ? 1 : Math.max(0, Math.min(1, ((item?.lightUntil ?? 0) - now) / 600));
+  const night = theme !== 'day';
+  const brake = item?.braking ? 1 : 0;
+  return {
+    head: night ? fade : 0,
+    park: night ? .12 * fade : 0,
+    brake,
+    reverse: item?.reversing ? 1 : 0,
+    activity: fade
+  };
+}
+export function vehicleLightPower(theme, active) {
+  return !active || theme === 'day' ? 0 : theme === 'neon' ? 13 : 8;
+}
+
+// Choose actual exterior lenses, excluding taxi signs and roof safety markers.
+export function collectLampAnchors(group, len) {
+  const candidates = {
+    head: [],
+    tail: []
+  };
+  group.updateWorldMatrix(true, true);
+  const inverse = group.matrixWorld.clone().invert();
+  group.traverse(mesh => {
+    if (!mesh.isMesh || !['Headlamp', 'Tail lamp'].includes(mesh.material.name)) return;
+    const kind = mesh.material.name === 'Headlamp' ? 'head' : 'tail';
+    const matrix = new THREE.Matrix4().multiplyMatrices(inverse, mesh.matrixWorld);
+    const vertices = mesh.geometry.getAttribute('position');
+    for (let i = 0; i < vertices.count; i++) {
+      const center = new THREE.Vector3().fromBufferAttribute(vertices, i).applyMatrix4(matrix);
+      if ((kind === 'head' ? center.x : -center.x) < len * .35 || Math.abs(center.z) < .12) continue;
+      candidates[kind].push({
+        mesh,
+        center
+      });
+    }
+  });
+  const choose = kind => [-1, 1].map(side => {
+    const all = candidates[kind].filter(a => Math.sign(a.center.z) === side);
+    const low = Math.min(...all.map(a => a.center.y));
+    const lowLenses = all.filter(a => a.center.y <= low + .12);
+    if (!lowLenses.length) return null;
+    const edge = kind === 'head' ? Math.max(...lowLenses.map(a => a.center.x)) : Math.min(...lowLenses.map(a => a.center.x));
+    const lens = lowLenses.filter(a => Math.abs(a.center.x - edge) < .035);
+    const rootPoint = lens.reduce((sum, a) => sum.add(a.center), new THREE.Vector3()).multiplyScalar(1 / lens.length);
+    rootPoint.x = edge;
+    rootPoint.y += .006;
+    const mesh = lens[0].mesh;
+    return {
+      mesh,
+      point: mesh.worldToLocal(group.localToWorld(rootPoint.clone()))
+    };
+  });
+  return {
+    head: choose('head'),
+    tail: choose('tail')
+  };
+}
+function beamMaterial() {
+  return new THREE.ShaderMaterial({
+    glslVersion: THREE.GLSL3,
+    transparent: true,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+    blending: THREE.AdditiveBlending,
+    uniforms: {
+      shadowDepth: {
+        value: null
+      },
+      shadowTransform: {
+        value: new THREE.Matrix4()
+      },
+      power: {
+        value: 0
+      },
+      tint: {
+        value: new THREE.Color('#ffeac7')
+      }
+    },
+    vertexShader: `varying vec3 worldPoint;varying vec3 beamNormal;varying float along;
+      void main(){worldPoint=(modelMatrix*vec4(position,1.)).xyz;beamNormal=normalize(mat3(modelMatrix)*normal);along=.5-position.y;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader: `uniform sampler2DShadow shadowDepth;uniform mat4 shadowTransform;uniform float power;uniform vec3 tint;
+      varying vec3 worldPoint;varying vec3 beamNormal;varying float along;out vec4 beamColor;
+      void main(){vec4 s=shadowTransform*vec4(worldPoint,1.);vec3 p=s.xyz/s.w;
+        float lit=all(greaterThanEqual(p,vec3(0.)))&&all(lessThanEqual(p,vec3(1.)))?texture(shadowDepth,vec3(p.xy,p.z-.002)):0.;
+        float edge=pow(abs(dot(normalize(beamNormal),normalize(cameraPosition-worldPoint))),1.4);
+        float fade=pow(1.-clamp(along,0.,1.),1.6)*smoothstep(0.,.035,along);
+        beamColor=vec4(tint,power*edge*fade*lit);}`
+  });
 }
 export function createVehicleLights(scene) {
-  // The two visible lenses share a merged broad beam beyond the bumper.
-  const heads = [0].map(side => {
-    const light = new THREE.SpotLight('#fff0d6', 0, 5.5, .55, .45, 2);
+  const headGeometry = new THREE.CylinderGeometry(.006, 1, 1, 12, 1, true);
+  const heads = [-1, 1].map(side => {
+    const light = new THREE.SpotLight('#fff0d6', 0, 5.5, .40, .50, 2);
     light.castShadow = true;
     light.shadow.mapSize.set(256, 256);
-    light.shadow.camera.near = .045;
+    light.shadow.camera.near = .025;
     light.shadow.bias = -.0002;
-    light.shadow.normalBias = .008;
+    light.shadow.normalBias = .006;
     light.shadow.autoUpdate = false;
-    // Allocate a valid depth texture even when the daytime lamp starts off.
     light.shadow.needsUpdate = true;
+    const beam = new THREE.Mesh(headGeometry, beamMaterial());
+    beam.visible = false;
+    beam.frustumCulled = false;
+    beam.raycast = () => {};
+    scene.add(light, light.target, beam);
+    return {
+      light,
+      side,
+      beam
+    };
+  });
+  // Short rear spill has no extra shadow maps; the two head maps remain bounded.
+  const tails = [-1, 1].map(side => {
+    const light = new THREE.SpotLight('#ef3024', 0, 1.2, .95, .9, 2);
     scene.add(light, light.target);
     return {
       light,
       side
     };
   });
-  const rear = new THREE.SpotLight('#ef3024', 0, 1.6, 1.0, .85, 2);
-  scene.add(rear, rear.target);
-  rear.castShadow = true;
-  rear.shadow.mapSize.set(256, 256);
-  rear.shadow.camera.near = .045;
-  rear.shadow.bias = -.0002;
-  rear.shadow.normalBias = .008;
-  rear.shadow.autoUpdate = false;
-  rear.shadow.needsUpdate = true;
-  const position = new THREE.Vector3();
+  const forward = new THREE.Vector3(),
+    local = new THREE.Vector3(),
+    tip = new THREE.Vector3(),
+    down = new THREE.Vector3(0, -1, 0);
+  const lights = [...heads, ...tails];
+  const previous = lights.map(() => ({
+    position: new THREE.Vector3(Infinity, 0, 0),
+    target: new THREE.Vector3(Infinity, 0, 0)
+  }));
   let owner = null,
+    previousOwner = null,
     lastShadow = 0,
-    lastPose = '',
-    pendingShadow = false;
+    pendingShadow = true;
+  function origin(item, kind, index, out) {
+    const anchor = item.lightAnchors?.[kind]?.[index];
+    if (anchor) anchor.mesh.localToWorld(out.copy(anchor.point));else item.group.localToWorld(out.set((kind === 'head' ? 1 : -1) * item.car.len / 2, .30, index ? .26 : -.26));
+    out.addScaledVector(forward, kind === 'head' ? .012 : -.012);
+  }
   return {
     update(item, settings, quality, now, castersChanged = false) {
       owner = item?.car.id ?? null;
-      const moving = !!item && (item.isDrag || Math.abs(item.velocity) > .08 || now < item.brakeUntil);
-      const power = item && quality.decor ? vehicleLightPower(settings.theme, moving) : 0;
-      for (const {
-        light,
-        side
-      } of heads) {
-        light.intensity = power;
+      const state = vehicleLampState(item, settings.theme, now);
+      if (item) {
+        item.group.updateWorldMatrix(true, false);
+        forward.set(1, 0, 0).transformDirection(item.group.matrixWorld);
+      }
+      for (let i = 0; i < 2; i++) {
+        const {
+          light,
+          beam
+        } = heads[i];
+        light.intensity = item && quality.decor ? vehicleLightPower(settings.theme, state.head > 0) * state.head : 0;
         if (item) {
-          light.position.copy(item.group.localToWorld(position.set(item.car.len / 2 + .018, .32, side)));
-          light.target.position.copy(item.group.localToWorld(position.set(item.car.len / 2 + 4, .10, side)));
+          origin(item, 'head', i, light.position);
+          light.target.position.copy(light.position).addScaledVector(forward, 4);
+          light.target.position.y -= .23;
           light.target.updateMatrixWorld();
         }
+        const depth = light.shadow.map?.depthTexture;
+        beam.visible = !!depth && light.intensity > 0 && quality.decor;
+        if (beam.visible) {
+          const length = 4.8,
+            radius = Math.tan(light.angle) * length;
+          tip.subVectors(light.target.position, light.position).normalize();
+          beam.position.copy(light.position).addScaledVector(tip, length / 2);
+          beam.quaternion.setFromUnitVectors(down, tip);
+          beam.scale.set(radius, length, radius);
+          beam.material.uniforms.shadowDepth.value = depth;
+          beam.material.uniforms.shadowTransform.value = light.shadow.matrix;
+          beam.material.uniforms.power.value = state.head * (settings.theme === 'neon' ? .065 : .035);
+        }
+        const rear = tails[i].light;
+        const reverse = state.reverse > 0;
+        rear.color.set(reverse ? '#eef4ff' : '#ef3024');
+        rear.intensity = item && quality.decor ? reverse ? 1.8 : state.brake ? 2.0 : state.park * 1.8 : 0;
+        if (item) {
+          origin(item, reverse ? 'reverse' : 'tail', i, rear.position);
+          rear.target.position.copy(rear.position).addScaledVector(forward, -1);
+          rear.target.position.y -= .18;
+          rear.target.updateMatrixWorld();
+        }
       }
-      rear.intensity = item && quality.decor ? item.braking ? 4 : item.reversing ? 2 : settings.theme === 'neon' ? .7 : settings.theme === 'sunset' ? .35 : 0 : 0;
-      if (item) {
-        rear.position.copy(item.group.localToWorld(position.set(-item.car.len / 2 - .035, .24, 0)));
-        rear.target.position.copy(item.group.localToWorld(position.set(-item.car.len / 2 - 1, .045, 0)));
-        rear.target.updateMatrixWorld();
+      if (owner !== previousOwner || castersChanged) pendingShadow = true;
+      previousOwner = owner;
+      for (let i = 0; i < lights.length; i++) {
+        const light = lights[i].light,
+          old = previous[i];
+        if (light.position.distanceToSquared(old.position) > 1e-6 || light.target.position.distanceToSquared(old.target) > 1e-6) pendingShadow = true;
+        old.position.copy(light.position);
+        old.target.copy(light.target.position);
       }
-      // A bounded front/rear pair follows the active car and respects occlusion;
-      // idle maps are cached, with moving shadows refreshed at most 20 Hz.
-      const pose = [...heads.map(h => h.light), rear].map(light => [...light.position.toArray(), ...light.target.position.toArray()].map(v => v.toFixed(3)).join(',')).join('|') + owner + settings.shadows;
-      if (pose !== lastPose || castersChanged) pendingShadow = true;
-      lastPose = pose;
-      if ((power > 0 || rear.intensity > 0) && settings.shadows && pendingShadow && now - lastShadow >= 1000 / 20) {
+      if (heads[0].light.intensity > 0 && settings.shadows && pendingShadow && now - lastShadow >= 1000 / 20) {
         for (const {
           light
         } of heads) light.shadow.needsUpdate = true;
-        rear.shadow.needsUpdate = true;
         pendingShadow = false;
         lastShadow = now;
         return true;
@@ -73,42 +206,41 @@ export function createVehicleLights(scene) {
       return false;
     },
     snapshot() {
+      const describe = ({
+        light
+      }) => ({
+        intensity: light.intensity,
+        color: light.color.getHexString(),
+        position: light.position.toArray(),
+        target: light.target.position.toArray(),
+        shadow: light.castShadow,
+        shadowMapReady: !!light.shadow.map,
+        angle: light.angle,
+        distance: light.distance,
+        decay: light.decay
+      });
       return {
         owner,
-        headlights: heads.map(({
-          light
-        }) => ({
-          intensity: light.intensity,
-          position: light.position.toArray(),
-          target: light.target.position.toArray(),
-          shadow: light.castShadow,
-          shadowMapReady: Boolean(light.shadow.map),
-          angle: light.angle,
-          distance: light.distance,
-          decay: light.decay
-        })),
-        rear: {
-          intensity: rear.intensity,
-          color: rear.color.getHexString(),
-          position: rear.position.toArray(),
-          target: rear.target.position.toArray(),
-          angle: rear.angle,
-          distance: rear.distance,
-          decay: rear.decay,
-          shadow: rear.castShadow,
-          shadowMapReady: Boolean(rear.shadow.map)
-        }
+        headlights: heads.map(describe),
+        taillights: tails.map(describe),
+        rear: describe(tails[0]),
+        beams: heads.map(h => h.beam.visible)
       };
     },
     dispose() {
       for (const {
         light
-      } of heads) {
+      } of lights) {
         scene.remove(light, light.target);
         light.dispose();
       }
-      scene.remove(rear, rear.target);
-      rear.dispose();
+      for (const {
+        beam
+      } of heads) {
+        scene.remove(beam);
+        beam.material.dispose();
+      }
+      headGeometry.dispose();
     }
   };
 }
