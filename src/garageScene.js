@@ -23,6 +23,7 @@ import {
   SUSPENSION_PROFILES,
 } from "./vehicleDynamics.js";
 import { createRenderProfiler } from "./renderProfiler.js";
+import { cacheLocalTransforms } from "./sceneTransforms.js";
 import {
   DEFAULT_VIEW,
   ORTHOGRAPHIC_DISTANCE,
@@ -102,6 +103,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.02;
   const scene = new THREE.Scene();
+  // The scene root never moves; composing it every frame dirties every branch.
+  scene.matrixAutoUpdate = false;
   const room = new RoomEnvironment(),
     pmrem = new THREE.PMREMGenerator(renderer);
   const environment = pmrem.fromScene(room, 0.04);
@@ -343,6 +346,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
   const accentGeometry = new THREE.BoxGeometry(0.13, 0.012, 0.035);
   ownedGeometries.add(accentGeometry);
   const roadLights = new THREE.InstancedMesh(accentGeometry, accentMaterial, 8);
+  let roadLightState = null;
   scene.add(roadLights);
   for (let i = 0; i < 8; i++) {
     instancePose.position.set(
@@ -1272,6 +1276,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
         contact.scale.set(car.len - 0.12, 0.85, 1);
         contact.raycast = () => {};
         group.add(contact);
+        cacheLocalTransforms(group, new Set([group, body]));
         item = {
           group,
           body,
@@ -1361,6 +1366,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
         }
       });
       scene.add(garage);
+      cacheLocalTransforms(garage);
       updateCamera();
       sync();
       await renderer.compileAsync(scene, camera);
@@ -1641,22 +1647,27 @@ export function createGarageScene(canvas, getProps, callbacks) {
       }
       leaves.instanceMatrix.needsUpdate = true;
     }
-    for (let i = 0; i < 8; i++) {
-      const lit = props.won && victoryAge > (i % 4) * 110;
-      roadLights.setColorAt(
-        i,
-        accentColour.set(
-          lit
-            ? "#a9efc4"
-            : settings.theme === "neon"
-              ? i < 4
-                ? "#79dfea"
-                : "#b591ef"
-              : "#78a58c",
-        ),
-      );
+    const roadLightMask = props.won ? Math.min(4, Math.max(0, Math.ceil(victoryAge / 110))) : 0;
+    const nextRoadLightState = `${settings.theme}:${roadLightMask}`;
+    if (roadLightState !== nextRoadLightState) {
+      for (let i = 0; i < 8; i++) {
+        const lit = i % 4 < roadLightMask;
+        roadLights.setColorAt(
+          i,
+          accentColour.set(
+            lit
+              ? "#a9efc4"
+              : settings.theme === "neon"
+                ? i < 4
+                  ? "#79dfea"
+                  : "#b591ef"
+                : "#78a58c",
+          ),
+        );
+      }
+      roadLights.instanceColor.needsUpdate = true;
+      roadLightState = nextRoadLightState;
     }
-    roadLights.instanceColor.needsUpdate = true;
     celebration.visible =
       quality.decor &&
       props.won &&

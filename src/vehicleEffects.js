@@ -148,7 +148,9 @@ export function createVehicleLights(scene) {
       owner = item?.car.id ?? null;
       const state = vehicleLampState(item, settings.theme, now);
       if (item) {
-        item.group.updateWorldMatrix(true, false);
+        // Refresh cached descendants before sampling lenses: localToWorld on a
+        // fixed child alone does not propagate a newly moved parent's matrix.
+        item.group.updateWorldMatrix(true, true);
         forward.set(1, 0, 0).transformDirection(item.group.matrixWorld);
       }
       for (let i = 0; i < 2; i++) {

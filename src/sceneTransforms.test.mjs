@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import * as THREE from 'three';
+import { cacheLocalTransforms } from './sceneTransforms.js';
+
+const scene = new THREE.Scene();
+scene.matrixAutoUpdate = false;
+const street = new THREE.Group();
+street.position.set(2, 0, 4);
+scene.add(street);
+cacheLocalTransforms(street);
+const car = new THREE.Group(), body = new THREE.Group();
+const lens = new THREE.Object3D();
+lens.position.set(1, .5, .2);
+car.add(body); body.add(lens); scene.add(car);
+cacheLocalTransforms(car, new Set([car, body]));
+let streetUpdates = 0;
+const update = street.matrixWorld.multiplyMatrices.bind(street.matrixWorld);
+street.matrixWorld.multiplyMatrices = (...args) => { streetUpdates++; return update(...args); };
+scene.updateMatrixWorld();
+streetUpdates = 0;
+for (let i = 0; i < 5; i++) scene.updateMatrixWorld();
+assert.equal(streetUpdates, 0, 'Static scenery must not rebuild its world matrix each frame');
+car.position.set(3, .055, 2); car.rotation.y = -Math.PI / 2;
+body.position.y = .19; body.rotation.z = .06;
+car.updateWorldMatrix(true, true);
+const expected = lens.position.clone().applyMatrix4(body.matrix).applyMatrix4(car.matrix);
+assert(lens.getWorldPosition(new THREE.Vector3()).distanceTo(expected) < 1e-12,
+  'Cached lens transform must follow vehicle movement, orientation and suspension');
+assert.equal(lens.matrixAutoUpdate, false);
+assert.equal(car.matrixAutoUpdate, true);
+assert.equal(body.matrixAutoUpdate, true);
+console.log('Static transform caching and moving suspension/lamp anchors passed.');

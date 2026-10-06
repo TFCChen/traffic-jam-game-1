@@ -5,14 +5,14 @@
       "idlePower": 0,
       "movingPower": 0.65,
       "peakSmoke": 13,
-      "brakePower": 0
+      "brakePower": 2
     },
     {
       "theme": "sunset",
       "idlePower": 0,
       "movingPower": 8,
-      "peakSmoke": 11,
-      "brakePower": 0.216
+      "peakSmoke": 13,
+      "brakePower": 2
     },
     {
       "theme": "neon",
@@ -39,28 +39,28 @@
     {
       "quality": "high",
       "theme": "day",
-      "continuousDragFPS": 9.507829977755417,
-      "calls": 247,
+      "continuousDragFPS": 9.44864384177003,
+      "calls": 167,
       "profile": {
         "cpuMs": {
           "samples": 34,
-          "median": 7.400000035762787,
-          "p95": 8.599999964237213
+          "median": 2.199999988079071,
+          "p95": 4.300000011920929
         },
         "gpuMs": {
           "samples": 33,
-          "median": 53.955468,
-          "p95": 62.172864
+          "median": 28.666406,
+          "p95": 35.001979
         },
         "drawCalls": {
           "samples": 34,
-          "median": 247,
-          "p95": 250
+          "median": 167,
+          "p95": 170
         },
         "triangles": {
           "samples": 34,
-          "median": 687024,
-          "p95": 692648
+          "median": 483548,
+          "p95": 489172
         },
         "gpuTimer": true
       }
@@ -68,28 +68,28 @@
     {
       "quality": "standard",
       "theme": "day",
-      "continuousDragFPS": 9.61919311951263,
-      "calls": 247,
+      "continuousDragFPS": 9.487666034092475,
+      "calls": 167,
       "profile": {
         "cpuMs": {
           "samples": 34,
-          "median": 6.800000011920929,
-          "p95": 8.399999976158142
+          "median": 2.199999988079071,
+          "p95": 4.199999988079071
         },
         "gpuMs": {
-          "samples": 33,
-          "median": 51.282187,
-          "p95": 59.146666
+          "samples": 31,
+          "median": 27.447343,
+          "p95": 39.471145
         },
         "drawCalls": {
           "samples": 34,
-          "median": 244,
-          "p95": 250
+          "median": 167,
+          "p95": 170
         },
         "triangles": {
           "samples": 34,
-          "median": 675324,
-          "p95": 692648
+          "median": 483548,
+          "p95": 489172
         },
         "gpuTimer": true
       }
@@ -97,28 +97,28 @@
     {
       "quality": "high",
       "theme": "neon",
-      "continuousDragFPS": 10.224658468109194,
-      "calls": 257,
+      "continuousDragFPS": 9.238004591069998,
+      "calls": 177,
       "profile": {
         "cpuMs": {
-          "samples": 36,
-          "median": 6,
-          "p95": 9.100000023841858
+          "samples": 33,
+          "median": 2.300000011920929,
+          "p95": 3.799999952316284
         },
         "gpuMs": {
-          "samples": 35,
-          "median": 65.858541,
-          "p95": 66.700833
+          "samples": 32,
+          "median": 34.47052,
+          "p95": 42.585937
         },
         "drawCalls": {
-          "samples": 36,
-          "median": 256,
-          "p95": 262
+          "samples": 33,
+          "median": 177,
+          "p95": 183
         },
         "triangles": {
-          "samples": 36,
-          "median": 689706,
-          "p95": 712426
+          "samples": 33,
+          "median": 486238,
+          "p95": 508958
         },
         "gpuTimer": true
       }
@@ -126,28 +126,28 @@
     {
       "quality": "standard",
       "theme": "neon",
-      "continuousDragFPS": 9.09581876578027,
-      "calls": 257,
+      "continuousDragFPS": 8.981195621637086,
+      "calls": 178,
       "profile": {
         "cpuMs": {
           "samples": 32,
-          "median": 7.199999988079071,
-          "p95": 113.40000003576279
+          "median": 3.400000035762787,
+          "p95": 4.400000035762787
         },
         "gpuMs": {
           "samples": 31,
-          "median": 62.957031,
-          "p95": 64.942864
+          "median": 32.26,
+          "p95": 39.498593
         },
         "drawCalls": {
           "samples": 32,
-          "median": 254,
-          "p95": 262
+          "median": 178,
+          "p95": 183
         },
         "triangles": {
           "samples": 32,
-          "median": 680876,
-          "p95": 712426
+          "median": 493030,
+          "p95": 508958
         },
         "gpuTimer": true
       }

@@ -1,0 +1,35 @@
+[
+  {
+    "name": "baseline",
+    "FPS": 9.128795395911888,
+    "profile": {
+      "cpuMs": {
+        "samples": 46,
+        "median": 2.5,
+        "p95": 2.800000011920929
+      },
+      "gpuMs": {
+        "samples": 45,
+        "median": 25.997916,
+        "p95": 36.461041
+      },
+      "drawCalls": {
+        "samples": 46,
+        "median": 100,
+        "p95": 100
+      },
+      "triangles": {
+        "samples": 46,
+        "median": 206480,
+        "p95": 206480
+      },
+      "gpuTimer": true
+    },
+    "raf": {
+      "callbacks": 17,
+      "elapsed": 2100.900000035763,
+      "FPS": 8.091770193588756,
+      "hidden": false
+    }
+  }
+]
