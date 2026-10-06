@@ -3,22 +3,22 @@
     {
       "theme": "day",
       "idlePower": 0,
-      "movingPower": 0,
-      "peakSmoke": 12,
-      "brakePower": 2
+      "movingPower": 0.65,
+      "peakSmoke": 13,
+      "brakePower": 0
     },
     {
       "theme": "sunset",
       "idlePower": 0,
       "movingPower": 8,
-      "peakSmoke": 12,
-      "brakePower": 2
+      "peakSmoke": 11,
+      "brakePower": 0.216
     },
     {
       "theme": "neon",
       "idlePower": 0,
       "movingPower": 13,
-      "peakSmoke": 13,
+      "peakSmoke": 12,
       "brakePower": 2
     },
     {
@@ -39,28 +39,28 @@
     {
       "quality": "high",
       "theme": "day",
-      "continuousDragFPS": 10.018645813040937,
-      "calls": 221,
+      "continuousDragFPS": 9.507829977755417,
+      "calls": 247,
       "profile": {
         "cpuMs": {
-          "samples": 36,
-          "median": 7.5,
-          "p95": 8.700000017881393
+          "samples": 34,
+          "median": 7.400000035762787,
+          "p95": 8.599999964237213
         },
         "gpuMs": {
-          "samples": 35,
-          "median": 55.326979,
-          "p95": 68.806197
+          "samples": 33,
+          "median": 53.955468,
+          "p95": 62.172864
         },
         "drawCalls": {
-          "samples": 36,
-          "median": 221,
-          "p95": 221
+          "samples": 34,
+          "median": 247,
+          "p95": 250
         },
         "triangles": {
-          "samples": 36,
-          "median": 551094,
-          "p95": 551094
+          "samples": 34,
+          "median": 687024,
+          "p95": 692648
         },
         "gpuTimer": true
       }
@@ -68,28 +68,28 @@
     {
       "quality": "standard",
       "theme": "day",
-      "continuousDragFPS": 10.049970687568772,
-      "calls": 221,
+      "continuousDragFPS": 9.61919311951263,
+      "calls": 247,
       "profile": {
         "cpuMs": {
-          "samples": 36,
-          "median": 6.9000000059604645,
-          "p95": 9.900000005960464
+          "samples": 34,
+          "median": 6.800000011920929,
+          "p95": 8.399999976158142
         },
         "gpuMs": {
-          "samples": 35,
-          "median": 54.756354,
-          "p95": 66.595781
+          "samples": 33,
+          "median": 51.282187,
+          "p95": 59.146666
         },
         "drawCalls": {
-          "samples": 36,
-          "median": 221,
-          "p95": 221
+          "samples": 34,
+          "median": 244,
+          "p95": 250
         },
         "triangles": {
-          "samples": 36,
-          "median": 551094,
-          "p95": 551094
+          "samples": 34,
+          "median": 675324,
+          "p95": 692648
         },
         "gpuTimer": true
       }
@@ -97,26 +97,26 @@
     {
       "quality": "high",
       "theme": "neon",
-      "continuousDragFPS": 9.120446901867204,
+      "continuousDragFPS": 10.224658468109194,
       "calls": 257,
       "profile": {
         "cpuMs": {
-          "samples": 32,
-          "median": 5.300000011920929,
-          "p95": 93
+          "samples": 36,
+          "median": 6,
+          "p95": 9.100000023841858
         },
         "gpuMs": {
-          "samples": 31,
-          "median": 65.682343,
-          "p95": 67.846354
+          "samples": 35,
+          "median": 65.858541,
+          "p95": 66.700833
         },
         "drawCalls": {
-          "samples": 32,
+          "samples": 36,
           "median": 256,
           "p95": 262
         },
         "triangles": {
-          "samples": 32,
+          "samples": 36,
           "median": 689706,
           "p95": 712426
         },
@@ -126,27 +126,27 @@
     {
       "quality": "standard",
       "theme": "neon",
-      "continuousDragFPS": 10.439296899246678,
+      "continuousDragFPS": 9.09581876578027,
       "calls": 257,
       "profile": {
         "cpuMs": {
-          "samples": 37,
-          "median": 7,
-          "p95": 9.900000005960464
+          "samples": 32,
+          "median": 7.199999988079071,
+          "p95": 113.40000003576279
         },
         "gpuMs": {
-          "samples": 36,
-          "median": 62.995781,
-          "p95": 64.229531
+          "samples": 31,
+          "median": 62.957031,
+          "p95": 64.942864
         },
         "drawCalls": {
-          "samples": 37,
-          "median": 256,
+          "samples": 32,
+          "median": 254,
           "p95": 262
         },
         "triangles": {
-          "samples": 37,
-          "median": 689706,
+          "samples": 32,
+          "median": 680876,
           "p95": 712426
         },
         "gpuTimer": true

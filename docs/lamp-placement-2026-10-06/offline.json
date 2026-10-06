@@ -5,8 +5,8 @@
   "rejectsWrongVersion": true,
   "progress": "level-17",
   "caches": [
-    "traffic-jam-3837a67d886fb227"
+    "traffic-jam-c00edbd7f870d2a1"
   ],
-  "appVersion": "aff8bbab",
+  "appVersion": "6b3a51fa",
   "updateCheck": "Network version matches loaded app; offline check reports unavailable"
 }

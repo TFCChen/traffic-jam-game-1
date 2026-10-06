@@ -193,6 +193,25 @@ function InstallApp() {
 }
 
 function App() {
+  const utilityMenu = useRef(null);
+  useEffect(() => {
+    const closeOutside = event => {
+      const menu = utilityMenu.current;
+      if (menu?.open && !menu.contains(event.target)) menu.open = false;
+    };
+    const closeEscape = event => {
+      if (event.key === 'Escape' && utilityMenu.current?.open) {
+        utilityMenu.current.open = false;
+        utilityMenu.current.querySelector('summary')?.focus();
+      }
+    };
+    document.addEventListener('pointerdown', closeOutside, true);
+    document.addEventListener('keydown', closeEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOutside, true);
+      document.removeEventListener('keydown', closeEscape);
+    };
+  }, []);
   const [levels, setLevels] = useState([]);
   const [current, setCurrent] = useState(DEFAULT_LEVEL);
   const [startCars, setStartCars] = useState(cloneCars(DEFAULT_LEVEL.cars));
@@ -619,6 +638,7 @@ function App() {
     };
     const validation = validateLevel([...editorCars, car]);
     if (!validation.valid) {
+      setEditorStart(null);
       setEditorConflict(car);
       setMessage(validation.errors[0]);
       return;
@@ -629,7 +649,13 @@ function App() {
 
   function editorCell(point) {
     if (loading) return;
+    const targetExists = editorCars.some(car => car.id === 'target');
+    setEditorConflict(null);
     if (!editorStart) {
+      if (!targetExists && point.row !== EXIT_ROW) {
+        setMessage('紅色主角車只能放在出口那一列（第 3 列），請在該列選起點。');
+        return;
+      }
       if (isPointOccupied(editorCars, point)) {
         setMessage("這一格已有車輛，不能作為新車的起點。請選擇空白格。");
         return;
@@ -637,10 +663,16 @@ function App() {
       setEditorValidation(null);
       setEditorStart(point);
       setMessage(
-        `已選起點：第 ${point.row + 1} 列、第 ${point.col + 1} 格。請再點同列或同欄的第 2／3 格。`,
+        targetExists ? `已選起點：第 ${point.row + 1} 列、第 ${point.col + 1} 格。請再點同列或同欄的第 2／3 格；重點起點可取消。` : '已選紅車起點；請點同列相鄰的格子完成放置，重點起點可取消。',
       );
       return;
     }
+
+    if (point.row === editorStart.row && point.col === editorStart.col) {
+      cancelEditorStart();
+      return;
+    }
+    setEditorStart(null);
 
     const sameRow = point.row === editorStart.row;
     const sameCol = point.col === editorStart.col;
@@ -651,11 +683,10 @@ function App() {
         : 0;
 
     if (![2, 3].includes(len)) {
-      setMessage("終點無效；起點已保留，請選同列或同欄的第 2／3 格。");
+      setMessage("終點無效，已取消選取；請重新選擇起點。車輛需佔同列或同欄的 2／3 格。");
       return;
     }
 
-    const targetExists = editorCars.some((car) => car.id === "target");
     const car = {
       id: targetExists ? `car-${Date.now()}` : "target",
       color: targetExists
@@ -1022,7 +1053,8 @@ function App() {
                 <label>
                   方向
                   <select
-                    value={editorTool.dir}
+                    value={editorCars.some(c=>c.id==='target')?editorTool.dir:'H'}
+                    disabled={!editorCars.some(c=>c.id==='target')}
                     onChange={(e) =>
                       setEditorTool((t) => ({ ...t, dir: e.target.value }))
                     }
@@ -1034,7 +1066,8 @@ function App() {
                 <label>
                   車長
                   <select
-                    value={editorTool.len}
+                    value={editorCars.some(c=>c.id==='target')?editorTool.len:2}
+                    disabled={!editorCars.some(c=>c.id==='target')}
                     onChange={(e) =>
                       setEditorTool((t) => ({
                         ...t,
@@ -1139,7 +1172,7 @@ function App() {
           )}
         </section>
 
-        <details className="utility-menu">
+        <details className="utility-menu" ref={utilityMenu}>
           <summary>選單</summary>
           <div className="utility-dock">
             <InstallApp />

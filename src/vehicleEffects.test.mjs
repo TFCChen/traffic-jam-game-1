@@ -114,7 +114,10 @@ const parked = {
 assert.equal(vehicleLampState(parked, 'neon', 1200).head, 2 / 3);
 assert.equal(vehicleLampState(parked, 'neon', 1700).head, 0);
 assert(vehicleLightPower('neon', true) > vehicleLightPower('sunset', true));
-assert.equal(vehicleLightPower('day', true), 0);
+assert(vehicleLightPower('day', true)>0 && vehicleLightPower('day', true)<vehicleLightPower('sunset', true)/10,'DRL casts a much weaker nearby light');
+lighting.update(car,{...settings,theme:'day'},{decor:true},750);
+assert(lighting.snapshot().headlights.every(l=>l.intensity>0&&l.distance<1));
+assert(lighting.snapshot().beams.every(visible=>!visible),'Daytime lamps have no atmospheric beam');
 lighting.update(car, settings, {
   decor: false
 }, 800);

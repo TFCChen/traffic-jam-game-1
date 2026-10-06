@@ -39,7 +39,7 @@ async function load(theme, quality = 'high', pitch = 50, fleet = false) {
     id: 'blocker',
     color: '#62b447',
     row: 1,
-    col: 5,
+    col: theme==='day'?3:5,
     len: 2,
     dir: 'V'
   }];
@@ -135,7 +135,7 @@ try {
   });
   for (const theme of ['day', 'sunset', 'neon']) {
     const idle = await load(theme);
-    assert(idle.vehicleLighting.headlights.length === 2 && idle.vehicleLighting.headlights.every(l => l.shadow && l.distance === 5.5 && l.decay === 2 && l.intensity === 0));
+    assert(idle.vehicleLighting.headlights.length === 2 && idle.vehicleLighting.headlights.every(l => l.shadow && l.distance === (theme==='day'?.85:5.5) && l.decay === 2 && l.intensity === 0));
     assert(idle.cars.every(car => car.tailLight === 0 && car.lampState.head === 0));
     await shot(theme + '-idle');
     const d = await drag('target', 1, theme + '-moving');
@@ -146,7 +146,8 @@ try {
     }
     assert(light.headlights[0].target[0] > light.headlights[0].position[0]);
     assert(light.rear.target[0] < light.rear.position[0]);
-    assert(light.rear.distance < light.headlights[0].distance);
+    if(theme!=='day') assert(light.rear.distance < light.headlights[0].distance);
+    else {assert(light.headlights.every(l=>l.distance===.85&&l.intensity>0));assert(light.beams.every(visible=>!visible));}
     assert(light.rear.angle > light.headlights[0].angle);
     const back = await drag('target', -1, theme + '-reverse');
     assert(back.during.vehicleLighting.rear.intensity > 0 && back.during.vehicleLighting.rear.intensity <= .22, 'Reversing spill remains visible without overpowering the ground');

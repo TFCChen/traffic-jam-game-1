@@ -15,7 +15,7 @@ export function vehicleLampState(item, theme, now) {
   };
 }
 export function vehicleLightPower(theme, active) {
-  return !active || theme === 'day' ? 0 : theme === 'neon' ? 13 : 8;
+  return !active ? 0 : theme === 'day' ? .65 : theme === 'neon' ? 13 : 8;
 }
 
 // Choose actual exterior lenses, excluding taxi signs and roof safety markers.
@@ -134,6 +134,7 @@ export function createVehicleLights(scene) {
     target: new THREE.Vector3(Infinity, 0, 0)
   }));
   let owner = null,
+    previousTheme = null,
     previousOwner = null,
     lastShadow = 0,
     pendingShadow = true;
@@ -155,7 +156,12 @@ export function createVehicleLights(scene) {
           light,
           beam
         } = heads[i];
-        light.intensity = item && quality.decor ? vehicleLightPower(settings.theme, state.head > 0) * state.head : 0;
+        const daylight = settings.theme === 'day';
+        const headActivity = daylight ? state.activity : state.head;
+        light.color.set(daylight ? '#e8f4ff' : '#fff0d6');
+        light.distance = daylight ? .85 : 5.5;
+        light.angle = daylight ? .65 : .40;
+        light.intensity = item && quality.decor ? vehicleLightPower(settings.theme, headActivity > 0) * headActivity : 0;
         if (item) {
           origin(item, 'head', i, light.position);
           light.target.position.copy(light.position).addScaledVector(forward, 4);
@@ -163,7 +169,7 @@ export function createVehicleLights(scene) {
           light.target.updateMatrixWorld();
         }
         const depth = light.shadow.map?.depthTexture;
-        beam.visible = !!depth && light.intensity > 0 && quality.decor;
+        beam.visible = !daylight && !!depth && light.intensity > 0 && quality.decor;
         if (beam.visible) {
           const length = 4.8,
             radius = Math.tan(light.angle) * length;
@@ -186,7 +192,8 @@ export function createVehicleLights(scene) {
           rear.target.updateMatrixWorld();
         }
       }
-      if (owner !== previousOwner || castersChanged) pendingShadow = true;
+      if (owner !== previousOwner || castersChanged || settings.theme !== previousTheme) pendingShadow = true;
+      previousTheme = settings.theme;
       previousOwner = owner;
       for (let i = 0; i < lights.length; i++) {
         const light = lights[i].light,

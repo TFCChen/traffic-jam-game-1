@@ -905,6 +905,11 @@ export function createGarageScene(canvas, getProps, callbacks) {
       return;
     const id = carAt(event);
     if (props.editor) {
+      if (id && props.editorStart) {
+        const point = planePoint(event);
+        if (point) props.onCellClick?.({row:Math.floor(point.z),col:Math.floor(point.x)});
+        return;
+      }
       if (id) {
         selected = id;
         callbacks.select(id);
@@ -934,6 +939,10 @@ export function createGarageScene(canvas, getProps, callbacks) {
       }
       const point = planePoint(event);
       if (point && point.x >= 0 && point.x < 6 && point.z >= 0 && point.z < 6) {
+        if (!props.cars.some(car=>car.id==='target') && !props.editorStart && Math.floor(point.z)!==2) {
+          props.onCellClick?.({row:Math.floor(point.z),col:Math.floor(point.x)});
+          return;
+        }
         editorDrag = {
           row: Math.floor(point.z),
           col: Math.floor(point.x),
