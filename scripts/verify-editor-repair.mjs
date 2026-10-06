@@ -43,7 +43,7 @@ try{
  await button('復原編輯',true);assert.equal((await snap()).cars.length,4);
  await button('清空',true);await cell(2,0);await cell(2,1);await button('驗證',true);await c.until(`document.querySelector('.instruction')?.textContent.includes('有解')`);await shot('editor-mobile-valid');
  await button('儲存',true);await c.until(`JSON.parse(localStorage.getItem('traffic-jam-custom-levels-v2')||'[]').length===1`);
- await button('試玩',true);await ready();await button('返回草稿',true);await ready();assert.equal((await snap()).cars.length,1,'Trial retains draft');await button('返回遊戲',true);await ready();
+ await button('試玩',true);await ready();await button('返回編輯器',true);await ready();assert.equal((await snap()).cars.length,1,'Trial retains draft');await button('返回遊戲',true);await ready();
  assert.deepEqual((await snap()).cars.map(v=>v.id),original.map(v=>v.id),'Return restores original level');assert.equal((await snap()).settings.pitch,65);assert.equal((await snap()).settings.yaw,15);
  await c.send('Emulation.setTouchEmulationEnabled',{enabled:false});await c.send('Emulation.setDeviceMetricsOverride',{width:1440,height:950,deviceScaleFactor:1,mobile:false});
  const cars=[{id:'target',color:'#e54848',row:2,col:1,len:2,dir:'H'}];

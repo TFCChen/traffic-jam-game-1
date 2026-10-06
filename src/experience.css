@@ -883,3 +883,42 @@ button.selected, .tabs button.active, .quality-options button[aria-pressed="true
 }
 @media(max-height:540px) and (min-width:701px) { .editor-shell .editor-actions { bottom:10px; padding:6px; }.editor-shell .vehicle-picker { bottom:128px; } }
 @media(max-width:700px) { .editor-shell .vehicle-picker { bottom:180px; } }
+
+/* Distinct results and an intentional verify → play → save workflow. */
+.editor-shell .instruction.validation-result { justify-content:flex-start; text-align:left; gap:10px; padding:12px 16px; border-width:1px 1px 1px 4px; box-shadow:0 8px 24px #0002; }
+.validation-result::before { content:'✓'; flex:none; font-size:21px; font-weight:800; }
+.editor-shell .instruction.validation-success { background:#263e3a; color:#e6fff5; border-color:#8ddac1; }
+.editor-shell .instruction.validation-warning { background:#49372c; color:#fff0d1; border-color:#f2bc71; }
+.validation-warning::before { content:'!'; }
+.editor-exit { position:absolute; z-index:7; top:max(18px,env(safe-area-inset-top)); right:max(104px,calc(env(safe-area-inset-right) + 90px)); min-height:44px; display:flex; align-items:center; gap:7px; padding:10px 14px; color:var(--ink); background:#22252deb; border:1px solid #ffffff25; border-radius:12px; box-shadow:0 6px 20px #0002; font-size:12px; }
+.editor-exit svg { color:var(--gold); width:16px; height:16px; }
+.editor-completion { display:flex; gap:6px; align-items:center; padding-left:12px; margin-left:6px; border-left:1px solid #ffffff25; }
+.editor-completion button { min-height:44px; min-width:64px; padding:9px 12px; border-radius:9px; box-shadow:none; font-size:12px; }
+.editor-completion .accent { background:#514632; border-color:#b69b67; color:#fff0cc; }
+.editor-completion .editor-test { background:#303e4b; border-color:#8fa9bd; color:#e3f1ff; }
+.editor-completion .editor-save { background:var(--gold); border-color:var(--gold); color:#22252d; font-weight:700; }
+@media(min-width:701px) {
+ .editor-shell .editor-actions > label:first-child { width:auto; flex-wrap:nowrap; }
+ .editor-shell .editor-actions > label:first-child input { width:170px; flex-basis:auto; }
+}
+.game-sheet .custom-item,.game-sheet .custom-item.editing { background:#303440; border-color:#ffffff30; }
+.game-sheet .custom-item.editing { border-color:#c8a764; }
+.game-sheet .custom-play { background:transparent; color:#f5f2ec; }
+.game-sheet .custom-play span { color:#c2c7d3; }
+.game-sheet .custom-actions .icon-action { background:#242833; color:#ebcf94; border-color:#ffffff30; }
+.game-sheet .custom-actions .danger { color:#ffb8af; }
+@media(max-width:700px) {
+ .editor-shell .game-hud { width:auto; right:auto; gap:12px; padding:10px; }
+ .editor-shell .game-hud .stage-heading h2 { font-size:16px; }
+ .editor-shell .game-hud .stats span { min-width:30px; padding:0 6px; }
+ .editor-shell .game-hud .stats span:first-child { display:block; }
+ .editor-exit { top:max(10px,env(safe-area-inset-top)); right:max(76px,calc(env(safe-area-inset-right) + 66px)); padding:10px; font-size:11px; gap:4px; }
+ .editor-shell .editor-actions > label { grid-column:1/-1; }
+ .editor-completion { grid-column:1/-1; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); padding:6px 0 0; margin:0; border-left:0; border-top:1px solid #ffffff25; }
+ .editor-completion button { min-width:0; font-size:11px; }
+ .editor-shell .instruction.validation-result { padding:10px 12px; max-height:72px; }
+}
+@media(max-width:360px) {
+ .editor-shell .game-hud .stats { display:none; }
+ .editor-shell .game-hud .stage-heading h2 { font-size:14px; }
+}

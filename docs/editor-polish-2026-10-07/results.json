@@ -1,0 +1,14 @@
+{
+  "warningAndSuccessResults": true,
+  "verifyPlaySaveOrder": true,
+  "saveAndUpdate": true,
+  "separateExit": true,
+  "unobscuredCellsAndExit390And320": true,
+  "trialWinReturnsEditor": true,
+  "draftPreserved": true,
+  "customContrast": {
+    "title": 11.01680217106043,
+    "details": 7.335635939216233
+  },
+  "errors": []
+}

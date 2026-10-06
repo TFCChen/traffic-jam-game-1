@@ -81,6 +81,7 @@ export function WinDialog({
   onRetry,
   onNext,
   hasNext,
+  nextLabel,
   rewards = [],
   finale = false,
   summary,
@@ -272,7 +273,7 @@ export function WinDialog({
             再玩一次
           </button>
           <button className="accent win-next" onClick={onNext}>
-            {hasNext ? "下一關" : "選擇關卡"}
+            {nextLabel || (hasNext ? "下一關" : "選擇關卡")}
             <Icon name="arrow" />
           </button>
         </div>

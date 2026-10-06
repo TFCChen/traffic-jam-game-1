@@ -709,7 +709,7 @@ function App() {
         reason: solution.reason || "找不到可行解。",
         explored: solution.explored,
       });
-      setMessage(solution.reason || "驗證完成：目前關卡無解。");
+      setMessage(`驗證完成：目前關卡無解。${solution.reason || ''}`);
       return;
     }
 
@@ -897,7 +897,7 @@ function App() {
           </header>
 
           <div
-            className={`instruction ${(!message || message === "已接續上次的停車場。") && !loading && mode === "play" ? "quiet" : ""} ${loading ? "loading" : ""}`}
+            className={`instruction ${(!message || message === "已接續上次的停車場。") && !loading && mode === "play" ? "quiet" : ""} ${loading ? "loading" : ""} ${mode === 'editor' && !loading && /^驗證/.test(message) && editorValidation ? `validation-result ${editorValidation.solvable ? 'validation-success' : 'validation-warning'}` : ''}`}
             role="status"
             aria-live="polite"
           >
@@ -946,7 +946,7 @@ function App() {
             onReplace={(id,color) => editCars(editorCars.map(c=>c.id===id && id!=='target'?{...c,color}:c))}
           />
           <div className="toolbar">
-            {mode === 'play' && trial && <button onClick={() => enterEditor(null, true)}><Icon name="undo" />返回草稿</button>}
+            {mode === 'play' && trial && <button onClick={() => enterEditor(null, true)}><Icon name="undo" />返回編輯器</button>}
             {mode === "play" ? (
               <>
                 <button onClick={undo} disabled={!history.length || loading}>
@@ -984,8 +984,8 @@ function App() {
 
           {mode === "editor" && (
             <>
+              <button className="editor-exit" onClick={leaveEditor}><Icon name="undo" />返回遊戲</button>
               <div className="editor-actions" aria-label="編輯工具">
-                <button onClick={leaveEditor}><Icon name="undo" />返回遊戲</button>
                 <label>
                   關卡名稱
                   <input
@@ -1015,9 +1015,7 @@ function App() {
                 <button onClick={clearEditor} disabled={loading}>
                   清空
                 </button>
-                <button onClick={saveCustom} disabled={loading}>
-                  {editingCustomId ? "更新關卡" : "儲存"}
-                </button>
+                <div className="editor-completion" role="group" aria-label="完成關卡：驗證、試玩、儲存">
                 <button
                   className="accent"
                   onClick={validateCustom}
@@ -1026,6 +1024,7 @@ function App() {
                   {loading ? "分析中…" : "驗證"}
                 </button>
                 <button
+                  className="editor-test"
                   onClick={async () => {
                     if (!validateLevel(editorCars).valid) {
                       setMessage(validateLevel(editorCars).errors[0]);
@@ -1045,6 +1044,10 @@ function App() {
                   <Icon name="arrow" />
                   試玩
                 </button>
+                <button className="editor-save" onClick={saveCustom} disabled={loading}>
+                  {editingCustomId ? "更新關卡" : "儲存"}
+                </button>
+                </div>
 
               </div>
             </>
@@ -1389,7 +1392,8 @@ function App() {
           }}
           onClose={() => setWinOpen(false)}
           onRetry={reset}
-          onNext={nextLevel}
+          onNext={trial ? () => enterEditor(null, true) : nextLevel}
+          nextLabel={trial ? '返回編輯器' : null}
           hasNext={hasNext}
         />
       )}
