@@ -495,12 +495,18 @@ def midengine_coupe(paint):
     for i in range(len(sections)-1):
         for j in range(12):faces.append((i*12+j,i*12+(j+1)%12,(i+1)*12+(j+1)%12,(i+1)*12+j))
     faces.append(tuple(range((len(sections)-1)*12,len(sections)*12)))
-    body=surface('Continuous mid-engine coachwork',vertices,faces,paint,1)
+    body=surface('Continuous mid-engine coachwork',vertices,faces,paint,2)
     open_cabin_tub(body,'racer')
+    # Boolean intersections must follow planar faces. Cutting the coarse,
+    # non-planar loft quads left concave polygons that glTF triangulated into
+    # visible notches along the wheel arches.
+    triangulate=body.modifiers.new('Planar coachwork before wheel cuts','TRIANGULATE')
+    triangulate.quad_method='BEAUTY';triangulate.ngon_method='BEAUTY'
+    bpy.ops.object.modifier_apply(modifier=triangulate.name)
     # Actual wheel openings replace the previous applied decorative rings.
     for x in (-.67,.66):
         for side in (-1,1):
-            bpy.ops.mesh.primitive_cylinder_add(vertices=40,radius=.205,depth=.30,location=(x,side*.44,.19),rotation=(math.pi/2,0,0))
+            bpy.ops.mesh.primitive_cylinder_add(vertices=96,radius=.205,depth=.42,location=(x,side*.44,.19),rotation=(math.pi/2,0,0))
             cutter=bpy.context.object;bpy.context.view_layer.objects.active=body
             mod=body.modifiers.new('Open wheel well','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter
             bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
