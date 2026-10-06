@@ -3,7 +3,7 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { legalMovesForCar } from "./gameEngine.js";
 import { vehicleModel } from "./vehicleModels.js";
-import { placementAt, legalPlacements } from './editorPlacement.js';
+import { placementBetween, drawingCells } from './editorPlacement.js';
 import {
   asphaltTexture,
   sceneryTexture,
@@ -1061,7 +1061,10 @@ export function createGarageScene(canvas, getProps, callbacks) {
       if (!transferring && canvas.hasPointerCapture(event.pointerId))
         canvas.releasePointerCapture(event.pointerId);
       if (!cancel)
-        (active.moved ? getProps().onPlace : getProps().onCellClick)?.(active.moved && editorHover ? editorHover : { row: active.row, col: active.col });
+        if (active.moved) {
+          if (editorHover) getProps().onPlace?.({start:{row:active.row,col:active.col},end:editorHover});
+          else getProps().onEditorCancel?.();
+        } else getProps().onCellClick?.({row:active.row,col:active.col});
       return;
     }
     if (!drag || event.pointerId !== drag.pointerId) return;
@@ -1185,6 +1188,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
           (mesh) =>
             ![
               "Automotive glass",
+              "Lamp crystal",
               VEHICLE_MIRROR,
               "Batched cabin",
               "Headlamp",
@@ -1212,6 +1216,11 @@ export function createGarageScene(canvas, getProps, callbacks) {
             if (material.name === "Automotive glass") {
               windows.push(material);
               configureVehicleGlass(material, settings.quality);
+            }
+            if (material.name === 'Lamp crystal') {
+              material.transmission=0;material.transparent=true;material.opacity=.22;
+              material.depthWrite=false;material.roughness=.025;material.clearcoat=1;
+              material.clearcoatRoughness=.02;material.envMapIntensity=1.5;
             }
             if (material.name === VEHICLE_MIRROR) {
               material.metalness = 1;
@@ -1254,7 +1263,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
                 tyreCompression,
               );
             }
-            object.castShadow = !["Automotive glass", "Batched cabin", "Headlamp", "Tail lamp"].includes(material.name);
+            object.castShadow = !["Automotive glass", "Lamp crystal", "Batched cabin", "Headlamp", "Tail lamp"].includes(material.name);
             object.receiveShadow = material.name !== "Automotive glass";
             object.userData.carId = car.id;
           }
@@ -1581,10 +1590,10 @@ export function createGarageScene(canvas, getProps, callbacks) {
       }
     }
     marker.visible = false;
-    const nextPlacementKey = props.editor ? JSON.stringify([props.cars, props.editorTool]) : '';
+    const nextPlacementKey = props.editor ? JSON.stringify([props.cars, props.editorStart, editorDrag?.row, editorDrag?.col]) : '';
     if (nextPlacementKey !== placementKey) {
       placementKey = nextPlacementKey;
-      availablePlacements = props.editor ? legalPlacements(props.cars, props.editorTool) : [];
+      availablePlacements = props.editor ? drawingCells(props.cars, props.editorStart ?? (editorDrag ? {row:editorDrag.row,col:editorDrag.col}:null)) : [];
       placementCells.count = availablePlacements.length;
       availablePlacements.forEach((p, i) => {
         placementPose.position.set(p.col + .5, .048, p.row + .5);
@@ -1595,9 +1604,9 @@ export function createGarageScene(canvas, getProps, callbacks) {
       placementCells.instanceMatrix.needsUpdate = true;
     }
     placementCells.visible = !!props.editor && !drag;
-    const origin = editorDrag && editorHover ? editorHover : props.editorStart ?? editorHover;
-    previewPlacement = props.editor && origin && !drag ? placementAt(props.cars, props.editorTool, origin) : null;
-    placementGhost.visible = !!previewPlacement && !cameraGesture;
+    const origin = props.editorStart ?? (editorDrag ? {row:editorDrag.row,col:editorDrag.col}:null);
+    previewPlacement = props.editor && origin && editorHover && !drag ? placementBetween(props.cars, origin, editorHover) : null;
+    placementGhost.visible = !!previewPlacement && previewPlacement.len >= 2 && !cameraGesture;
     if (previewPlacement) {
       const p = previewPlacement, horizontal = p.dir === 'H';
       ghostMaterial.color.set(p.valid ? p.color : '#ff6e61');

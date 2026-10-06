@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./styles.css";
 import "./experience.css";
 import Board from "./Board.jsx";
-import EditorTray from './EditorTray.jsx';
+import { placementBetween } from './editorPlacement.js';
 import LevelBrowser from "./LevelBrowser.jsx";
 import { DIFFICULTIES, DIFFICULTY_LABELS } from "./levelCatalog.js";
 import OfflineStatus, { PwaVersion } from "./OfflineStatus.jsx";
@@ -247,8 +247,6 @@ function App() {
     setEditorHistory,
     editorFuture,
     setEditorFuture,
-    editorTool,
-    setEditorTool,
     editCars,
     undoEditor,
     redoEditor,
@@ -256,6 +254,7 @@ function App() {
   useEffect(() => {
     if (mode !== 'editor') return;
     const handler = event => {
+      if (event.key === 'Escape') { setEditorStart(null); return; }
       if (!(event.ctrlKey || event.metaKey) || event.altKey || event.target.closest?.('input,textarea,select,[contenteditable="true"]')) return;
       if (event.key.toLowerCase() === 'z') {
         event.preventDefault(); if (!loading) (event.shiftKey ? redoEditor : undoEditor)();
@@ -271,6 +270,7 @@ function App() {
   const [tutorial, setTutorial] = useState(false),
     [tutorialStep, setTutorialStep] = useState(0);
   const [trial, setTrial] = useState(false);
+  const editorReturn = useRef(null);
   const importFile = useRef(null),
     officialSolutions = useRef({});
   const solverCache = useRef(new Map());
@@ -613,15 +613,20 @@ function App() {
     finally { setLevelTransition(false); }
   }
 
-  function enterEditor(level = null) {
+  function leaveEditor() {
+    const saved=editorReturn.current;
+    if (saved) { setCurrent(saved.current);setStartCars(saved.startCars);setCars(saved.cars);setHistory(saved.history);setMoves(saved.moves);setAnalysis(saved.analysis);setInitialized(saved.initialized); }
+    cancelPending();setTrial(false);setMode('play');setWinOpen(false);setPanel('none');setMessage('');
+  }
+  function enterEditor(level = null, resume = false) {
+    if (mode==='play' && !trial && current.id!=='editor') editorReturn.current={current,startCars:cloneCars(startCars),cars:cloneCars(cars),history:history.map(cloneCars),moves,analysis,initialized};
     cancelPending();
     const savedCustom =
       level && customLevels.find((item) => item.id === level.id);
     setMode("editor");
     setPanel("none");
-    if (level || !draft.current) {
-      const source = level ?? current;
-      setEditorCars(cloneCars(source.cars));
+    if (!resume) {
+      setEditorCars(cloneCars(level?.cars ?? []));
       setEditorTitle(savedCustom?.title ?? "");
       setEditingCustomId(savedCustom?.id ?? null);
       setEditorHistory([]);
@@ -632,7 +637,7 @@ function App() {
     setMessage(
       savedCustom
         ? `正在編輯「${savedCustom.title}」。修改後請按「更新關卡」。`
-        : "草稿會自動保留。選擇車長與方向，拖拉空白格放車；也可點起點與終點。",
+        : "點兩個空格，自動判斷方向與 2／3 格車長。先在出口列放置紅車。",
     );
   }
 
@@ -641,24 +646,18 @@ function App() {
     setMessage("已取消起點選擇。請重新選擇車輛起點。");
   }
 
-  function placeEditorCar(point) {
-    const targetExists = editorCars.some((c) => c.id === "target");
-    const car = {
-      id: targetExists ? `car-${crypto.randomUUID()}` : "target",
-      color: targetExists ? editorTool.color : "#e53935",
-      ...point,
-      dir: targetExists ? editorTool.dir : "H",
-      len: targetExists ? editorTool.len : 2,
-    };
-    const validation = validateLevel([...editorCars, car]);
-    if (!validation.valid) {
-      setEditorStart(null);
-      setEditorConflict(car);
-      setMessage(validation.errors[0]);
+  function placeEditorCar({start, end}) {
+    const placement=placementBetween(editorCars,start,end);
+    const targetExists=editorCars.some(c=>c.id==='target');
+    setEditorStart(null);
+    if (!placement.valid) {
+      if (placement.len>=2 && placement.len<=3) setEditorConflict(placement);
+      setMessage('無法放置，已取消選取。請選同列或同欄的 2／3 格空位；紅車固定在出口列、水平 2 格。');
       return;
     }
-    editCars([...editorCars, car]);
-    setMessage("車輛已放置；草稿自動保留。");
+    const {row,col,dir,len,color}=placement;
+    editCars([...editorCars,{id:targetExists? 'car-'+crypto.randomUUID() : 'target',row,col,dir,len,color}]);
+    setMessage('已放置；繼續點起點與終點。點車輛可移動、換車種或移除。');
   }
 
   function editorCell(point) {
@@ -686,57 +685,7 @@ function App() {
       cancelEditorStart();
       return;
     }
-    setEditorStart(null);
-
-    const sameRow = point.row === editorStart.row;
-    const sameCol = point.col === editorStart.col;
-    const len = sameRow
-      ? Math.abs(point.col - editorStart.col) + 1
-      : sameCol
-        ? Math.abs(point.row - editorStart.row) + 1
-        : 0;
-
-    if (![2, 3].includes(len)) {
-      setMessage("終點無效，已取消選取；請重新選擇起點。車輛需佔同列或同欄的 2／3 格。");
-      return;
-    }
-    if (targetExists && (len !== editorTool.len || (sameRow ? 'H' : 'V') !== editorTool.dir)) {
-      setMessage(`終點不符合所選車型，已取消選取。請放置${editorTool.dir === 'H' ? '水平' : '垂直'} ${editorTool.len} 格車輛。`);
-      return;
-    }
-
-    const car = {
-      id: targetExists ? `car-${Date.now()}` : "target",
-      color: targetExists ? editorTool.color : "#e53935",
-      row: sameRow ? point.row : Math.min(point.row, editorStart.row),
-      col: sameRow ? Math.min(point.col, editorStart.col) : point.col,
-      len,
-      dir: sameRow ? "H" : "V",
-    };
-
-    const validation = validateLevel([...editorCars, car]);
-    const overlapOnly = validation.errors.filter(
-      (error) =>
-        !error.includes("必須恰好") && !error.includes("紅色目標車必須"),
-    );
-
-    if (overlapOnly.length) {
-      setEditorConflict(car);
-      setMessage(overlapOnly[0]);
-    } else if (
-      !targetExists &&
-      (car.row !== EXIT_ROW || car.dir !== "H" || car.len !== 2)
-    ) {
-      setMessage("第一台紅色目標車必須是第 3 列的水平 2 格車。");
-    } else {
-      editCars([...editorCars, car]);
-      setEditorValidation(null);
-      setMessage(
-        car.id === "target"
-          ? "紅車已放置。請繼續選擇其他車輛的起點。"
-          : "車輛已放置。請選擇下一台車的起點。",
-      );
-    }
+    placeEditorCar({start:editorStart,end:point});
   }
 
   async function validateCustom() {
@@ -774,7 +723,7 @@ function App() {
       explored: difficulty.explored,
     });
     setMessage(
-      `驗證完成：此關卡有解，最佳 ${solution.moves.length} 步，推估難度 ${difficulty.label}。`,
+      `驗證完成：此關卡有解，最佳 ${solution.moves.length} 步，推估難度 ${DIFFICULTY_LABELS[difficulty.label] ?? difficulty.label}。`,
     );
   }
 
@@ -980,8 +929,8 @@ function App() {
             editor={mode === "editor"}
             editorStart={editorStart}
             editorConflict={editorConflict}
-            editorTool={editorTool}
             onPlace={placeEditorCar}
+            onEditorCancel={() => setEditorStart(null)}
             onEditMove={(move) => {
               const next = applyMove(editorCars, move);
               if (
@@ -994,8 +943,10 @@ function App() {
             }}
             onCellClick={editorCell}
             onRemove={removeEditorCar}
+            onReplace={(id,color) => editCars(editorCars.map(c=>c.id===id && id!=='target'?{...c,color}:c))}
           />
           <div className="toolbar">
+            {mode === 'play' && trial && <button onClick={() => enterEditor(null, true)}><Icon name="undo" />返回草稿</button>}
             {mode === "play" ? (
               <>
                 <button onClick={undo} disabled={!history.length || loading}>
@@ -1011,19 +962,8 @@ function App() {
                   提示
                 </button>
               </>
-            ) : (
-              <button
-                onClick={() => {
-                  cancelPending();
-                  setMode("play");
-                  setMessage("草稿已保留，可隨時返回編輯。");
-                }}
-              >
-                <Icon name="undo" />
-                返回遊戲
-              </button>
-            )}
-            <button
+            ) : null}
+            {mode === "play" && !trial && <> <button
               className={panel === "levels" ? "selected" : ""}
               onClick={() => setPanel(panel === "levels" ? "none" : "levels")}
               aria-expanded={panel === "levels"}
@@ -1039,12 +979,13 @@ function App() {
             >
               <Icon name="edit" />
               編輯器
-            </button>
+            </button></>}
           </div>
 
           {mode === "editor" && (
             <>
-              <div className="editor-actions">
+              <div className="editor-actions" aria-label="編輯工具">
+                <button onClick={leaveEditor}><Icon name="undo" />返回遊戲</button>
                 <label>
                   關卡名稱
                   <input
@@ -1068,8 +1009,6 @@ function App() {
                 >
                   <Icon name="reset" />重做編輯
                 </button>
-                <EditorTray cars={editorCars} tool={editorTool} disabled={loading}
-                  onChange={setEditorTool} onCancel={() => { setEditorStart(null); setEditorConflict(null); }} />
                 {editorStart && (
                   <button onClick={cancelEditorStart}>取消選點</button>
                 )}
@@ -1106,42 +1045,7 @@ function App() {
                   <Icon name="arrow" />
                   試玩
                 </button>
-              {editorValidation && (
-                <section
-                  className="analysis-card editor-validation"
-                  aria-live="polite"
-                >
-                  <h3>
-                    {editorValidation.solvable
-                      ? "✓ 關卡有解"
-                      : editorValidation.valid
-                        ? "關卡無解"
-                        : "設定不完整"}
-                  </h3>
 
-                  {editorValidation.solvable ? (
-                    <dl>
-                      <div>
-                        <dt>最佳解</dt>
-                        <dd>{editorValidation.optimalMoves} 步</dd>
-                      </div>
-                      <div>
-                        <dt>推估難度</dt>
-                        <dd>
-                          {DIFFICULTY_LABELS[editorValidation.label] ??
-                            "尚待判定"}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt>主要阻擋車</dt>
-                        <dd>{editorValidation.blockers ?? "—"}</dd>
-                      </div>
-                    </dl>
-                  ) : (
-                    <p>{editorValidation.reason}</p>
-                  )}
-                </section>
-              )}
               </div>
             </>
           )}
@@ -1174,7 +1078,6 @@ function App() {
             >
               操作指南
             </button>
-            {trial && <button onClick={() => enterEditor()}>返回草稿</button>}
             <button
               onClick={() =>
                 downloadBackup({ progress, customLevels, draft: draft.current })

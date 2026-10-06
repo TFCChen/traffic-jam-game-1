@@ -125,9 +125,11 @@ for(const [name,length]of Object.entries(lengths)){
       const hit=new Raycaster(new Vector3(x,2,z),new Vector3(0,-1,0)).intersectObject(asset.scene,true)[0];
       assert.ok(hit?.object.material.name.startsWith('Paint')&&hit.point.y>.38,'The fender must cover the tyre crown, leaving an opening only at the side.');
     }
-    for(const z of [-.35,.35]){
-      const hit=new Raycaster(new Vector3(.8,2,z),new Vector3(0,-1,0)).intersectObject(asset.scene,true)[0];
-      assert.equal(hit?.object.material.name,'Headlamp','LED lenses must sit above their housing and remain exposed.');
+    for(const z of [-.32,.32]){
+      const hits=new Raycaster(new Vector3(.785,2,z),new Vector3(0,-1,0)).intersectObject(asset.scene,true);
+      assert.equal(hits[0]?.object.material.name,'Lamp crystal','A continuous optical cover must enclose the headlamp housing.');
+      const pocket=hits.find(hit=>hit.object.material.name==='Tyre rubber');
+      assert.ok(pocket && hits[0].point.y-pocket.point.y>.02,'Headlamps need a real recessed pocket beneath the clear cover.');
     }
   }
   const stationaryBrakes=[];

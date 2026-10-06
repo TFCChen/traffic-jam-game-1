@@ -44,6 +44,9 @@ chrome = mat('Wheel hubs', 'c4d9da', .35, .4)
 white = mat('Warm white trim', 'f7efd5', .5)
 lamp = mat('Headlamp', 'ffdf9c', .25)
 redlamp = mat('Tail lamp', 'df7460', .35)
+lamp_crystal=mat('Lamp crystal','d9edf0',.025)
+lamp_crystal.node_tree.nodes.get('Principled BSDF').inputs['Transmission Weight'].default_value=.5
+lamp_crystal.node_tree.nodes.get('Principled BSDF').inputs['IOR'].default_value=1.48
 yellow = mat('Barrier orange', 'e7af6c', .5)
 bed = mat('Pickup bed', '526263', .8)
 wheel_material = mat('Rolling wheels', 'ffffff', .72, .05)
@@ -624,28 +627,43 @@ def midengine_coupe(paint):
         cube('Coupe mirror',(.19,side*.435,.365),(.135,.068,.053),paint,.016)
         surface('Sculpted side intake',[(-.43,side*.382,.328),(-.19,side*.364,.30),(-.34,side*.379,.225),(-.49,side*.40,.261)],[(0,1,2,3)],rubber)
         cube('Flush door handle',(-.13,side*.36,.31),(.07,.009,.014),chrome,.003)
-        led_points=[]
-        for x,y in ((.73,.39),(.80,.35),(.86,.30)):
-            hit,point,normal,index=body.ray_cast(Vector((x,side*y,2)),Vector((0,0,-1)))
-            if not hit:raise RuntimeError('Headlamp must follow the intact fender surface')
-            led_points.append((x,side*y,point.z+.010))
-        for a,b in zip(led_points,led_points[1:]):
-            dx,dy=b[0]-a[0],b[1]-a[1];span=math.hypot(dx,dy);nx,ny=-dy/span,dx/span
-            for label,width,offset,material in [('Inset lamp surround',.026,-.003,rubber),('Sculpted LED signature',.013,.002,lamp)]:
-                vertices=[(a[0]-nx*width/2,a[1]-ny*width/2,a[2]+offset),(b[0]-nx*width/2,b[1]-ny*width/2,b[2]+offset),
-                          (b[0]+nx*width/2,b[1]+ny*width/2,b[2]+offset),(a[0]+nx*width/2,a[1]+ny*width/2,a[2]+offset)]
-                surface(label,vertices,[(0,1,2,3)],material)
-        # Project each optical layer onto the curved fender: no raised coin-shaped lens.
-        for name,rx,ry,lift,material in [('Flush coupe optical pocket',.041,.025,.002,rubber),
-                                      ('Inset coupe reflector',.030,.019,.003,chrome),
-                                      ('Coupe projector optic',.024,.015,.004,lamp)]:
-            points=[]
-            for i in range(24):
-                angle=2*math.pi*i/24;x=.745+math.cos(angle)*rx;y=side*.333+math.sin(angle)*ry
-                hit,optical,normal,index=body.ray_cast(Vector((x,y,2)),Vector((0,0,-1)))
-                if not hit:raise RuntimeError('Coupe optical pocket must follow the fender')
-                points.append((x,y,optical.z+lift))
-            surface(name,points,[tuple(range(24))],material)
+        # One sealed, recessed lamp assembly per side, with the DRL inside its cover.
+        cx,cy=.785,side*.320;angle=side*-.60
+        def lamp_point(u,v,lift):
+            x=cx+u*math.cos(angle)-v*math.sin(angle);y=cy+u*math.sin(angle)+v*math.cos(angle)
+            hit,p,n,index=body.ray_cast(Vector((x,y,2)),Vector((0,0,-1)))
+            if not hit:raise RuntimeError('Lamp housing must follow the fender')
+            return (x,y,p.z+lift)
+        rings=[]
+        for radius,lift in [(1.12,.005),(1.0,.006),(.93,-.023),(.0,-.028)]:
+            rings.append([lamp_point(math.cos(2*math.pi*i/32)*.075*radius,math.sin(2*math.pi*i/32)*.030*radius,lift) for i in range(32)])
+        lens_rings=[]
+        for radius,lift in [(1.01,.009),(.65,.014),(.0,.017)]:
+            lens_rings.append([lamp_point(math.cos(2*math.pi*i/32)*.075*radius,math.sin(2*math.pi*i/32)*.030*radius,lift) for i in range(32)])
+        optics=[]
+        for u in (-.025,.028):
+            optics.append(lamp_point(u,0,-.013))
+        daylight=[lamp_point(u,-.020,-.008) for u in (-.052,0,.052)]
+        # Cut a real pocket instead of layering flat stickers over intact coachwork.
+        centre=lamp_point(0,0,-.020)
+        bpy.ops.mesh.primitive_cylinder_add(vertices=48,radius=1,depth=.30,location=(centre[0],centre[1],centre[2]+.08))
+        cutter=bpy.context.object;cutter.scale=(.075,.030,1);cutter.rotation_euler.z=angle
+        bpy.context.view_layer.objects.active=cutter;bpy.ops.object.transform_apply(location=False,rotation=False,scale=True)
+        bpy.context.view_layer.objects.active=body
+        mod=body.modifiers.new('Recessed headlamp pocket','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter
+        bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
+        vertices=sum(rings,[]);faces=[]
+        for r in range(3):
+            for i in range(32):faces.append((r*32+i,r*32+(i+1)%32,(r+1)*32+(i+1)%32,(r+1)*32+i))
+        surface('Integrated dark headlamp housing',vertices,faces,rubber)
+        for x,y,z in optics:
+            cylinder('Headlamp reflector barrel',(x,y,z-.004),.023,.012,chrome,'Z')
+            cylinder('Headlamp optical projector',(x,y,z+.003),.015,.007,lamp,'Z')
+        for p,q in zip(daylight,daylight[1:]):strut('Internal DRL blade',p,q,.009,lamp)
+        vertices=sum(lens_rings,[]);faces=[]
+        for r in range(2):
+            for i in range(32):faces.append((r*32+i,r*32+(i+1)%32,(r+1)*32+(i+1)%32,(r+1)*32+i))
+        surface('Domed clear headlamp cover',vertices,faces,lamp_crystal)
         strut('Lower side blade',(-.42,side*.378,.13),(.40,side*.389,.13),.025,rubber)
     ribbon('Engine cover',[(-.61,.235,.36),(-.74,.244,.355),(-.85,.237,.343)],panel_glass)
     for x in (-.66,-.715,-.77,-.825):cube('Engine cooling louvre',(x,0,.366),(.012,.38,.012),rubber,.002)

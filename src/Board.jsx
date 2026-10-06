@@ -53,6 +53,15 @@ function readSettings() {
 }
 
 export default function Board(props) {
+  const editorView = useRef(null);
+  const [replaceOpen, setReplaceOpen] = useState(false);
+  const picker = useRef(null);
+  useEffect(() => {
+    if (!replaceOpen) return;
+    const close = e => { if (e.type==='keydown' ? e.key==='Escape' : !picker.current?.contains(e.target)) setReplaceOpen(false); };
+    document.addEventListener('pointerdown',close); document.addEventListener('keydown',close);
+    return () => { document.removeEventListener('pointerdown',close); document.removeEventListener('keydown',close); };
+  }, [replaceOpen]);
   const canvas = useRef(null),
     engine = useRef(null),
     latest = useRef(props);
@@ -62,6 +71,15 @@ export default function Board(props) {
     [retry, setRetry] = useState(0);
   const [settings, setSettings] = useState(readSettings),
     [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (props.editor && !editorView.current) {
+      editorView.current=settings;
+      setSettings({...settings,pitch:85,yaw:0,zoom:window.innerWidth<=700?.9:.72,focusX:0,focusZ:0,panX:0,panY:window.innerWidth<=700?0:-.35});
+    } else if (!props.editor && editorView.current) {
+      setSettings(editorView.current);editorView.current=null;
+    }
+    setReplaceOpen(false);
+  }, [props.editor]);
   const [feedback, setFeedback] = useState("");
   latest.current = { ...props, disabled: props.disabled || open };
   useEffect(() => {
@@ -122,7 +140,6 @@ export default function Board(props) {
     props.hint,
     props.editorStart,
     props.editorConflict,
-    props.editorTool,
     props.sceneKey,
     props.editor,
   ]);
@@ -132,7 +149,7 @@ export default function Board(props) {
   useEffect(() => {
     engine.current?.settings({ ...settings, theme });
     try {
-      localStorage.setItem("traffic-jam-scene", JSON.stringify(settings));
+      if (!props.editor) localStorage.setItem("traffic-jam-scene", JSON.stringify(settings));
     } catch {
       /* Session-only settings still work. */
     }
@@ -388,9 +405,10 @@ export default function Board(props) {
       {props.editor && props.cars.length > 0 && (
         <div
           className="vehicle-picker"
+          ref={picker}
           aria-label={props.editor ? "編輯車輛" : "鍵盤選取車輛"}
         >
-          {props.cars.map((car, index) => (
+          <div className="placed-car-list">{props.cars.map((car, index) => (
             <button
               key={car.id}
               className={selected === car.id ? "selected" : ""}
@@ -398,7 +416,7 @@ export default function Board(props) {
               style={{ "--car-color": car.color }}
               aria-label={`選取${car.id === "target" ? "紅色目標" : `車輛 ${index + 1}，`}${vehicleModel(car).name}，第${car.row + 1}列第${car.col + 1}格，${car.dir === "H" ? "水平" : "垂直"}${car.len}格`}
               aria-pressed={selected === car.id}
-              onClick={() => engine.current?.select(car.id)}
+              onClick={() => { setReplaceOpen(false); engine.current?.select(car.id); }}
             >
               <span
                 className={`mini-car ${vehicleModel(car).kind}`}
@@ -406,10 +424,12 @@ export default function Board(props) {
               />
               {index + 1} {vehicleModel(car).name}
             </button>
-          ))}
+          ))}</div>
           {props.editor &&
             selected &&
             props.cars.some((c) => c.id === selected) && (
+              <div className="selected-car-actions">
+              {selected !== 'target' && <button disabled={props.disabled} aria-expanded={replaceOpen} onClick={() => setReplaceOpen(v=>!v)}>更換車種</button>}
               <button
                 className="remove-selected"
                 disabled={props.disabled}
@@ -420,6 +440,11 @@ export default function Board(props) {
               >
                 移除選取車輛
               </button>
+              {replaceOpen && selected !== 'target' && <div className="vehicle-variants" role="group" aria-label="相同長度的車種">
+                {(props.cars.find(c=>c.id===selected).len===3 ? [['城市巴士','#2563eb'],['露營車','#059669'],['校車','#fdd835'],['貨運卡車','#9333ea']] : [['小轎車','#38bdf8'],['越野車','#43a047'],['皮卡','#fb8c00'],['計程車','#ec4899']]).map(([name,color]) =>
+                  <button key={color} aria-pressed={props.cars.find(c=>c.id===selected).color===color} onClick={() => { props.onReplace?.(selected,color); setReplaceOpen(false); }}><i style={{background:color}} />{name}</button>)}
+              </div>}
+              </div>
             )}
         </div>
       )}

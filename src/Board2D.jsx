@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { GRID, legalMovesForCar } from "./gameEngine.js";
 import { vehicleModel } from "./vehicleModels.js";
-import { placementAt, legalPlacements } from './editorPlacement.js';
+import { placementBetween, drawingCells } from './editorPlacement.js';
 
 const CELL = 58;
 const SCENE_WIDTH = 520;
@@ -9,10 +9,10 @@ const SCENE_HEIGHT = 424;
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
 // A stable colour-to-model mapping keeps the same vehicle recognisable in every level.
-export default function Board({ cars, onMove, hint, editor, editorStart, onCellClick, onRemove, won, disabled, editorTool }) {
+export default function Board({ cars, onMove, hint, editor, editorStart, onCellClick, onRemove, won, disabled }) {
   const [hover, setHover] = useState(null);
-  const placements = editor ? legalPlacements(cars, editorTool) : [];
-  const preview = editor && (editorStart || hover) ? placementAt(cars, editorTool, editorStart || hover) : null;
+  const placements = editor ? drawingCells(cars, editorStart) : [];
+  const preview = editor && editorStart && hover ? placementBetween(cars, editorStart, hover) : null;
   const viewport = useRef(null);
   const planeOrigin = useRef(null);
   const planeX = useRef(null);
@@ -140,7 +140,7 @@ export default function Board({ cars, onMove, hint, editor, editorStart, onCellC
           onPointerMove={event => { if (!editor) return; const p=boardPoint(event); setHover({row:Math.floor(p.y/CELL),col:Math.floor(p.x/CELL)}); }}
           onPointerLeave={() => setHover(null)} aria-label={editor ? "關卡編輯棋盤" : "停車場棋盤"}>
           {placements.map(p => <span key={`${p.row}-${p.col}`} className="fallback-legal-cell" style={{left:p.col*CELL+5,top:p.row*CELL+5,width:CELL-10,height:CELL-10}} />)}
-          {preview && <span className="fallback-placement-preview" style={{left:preview.col*CELL+4,top:preview.row*CELL+4,width:(preview.dir==='H'?preview.len:1)*CELL-8,height:(preview.dir==='V'?preview.len:1)*CELL-8,background:preview.valid?preview.color:'#ff6e61'}} />}
+          {preview && preview.len >= 2 && <span className="fallback-placement-preview" style={{left:preview.col*CELL+4,top:preview.row*CELL+4,width:(preview.dir==='H'?preview.len:1)*CELL-8,height:(preview.dir==='V'?preview.len:1)*CELL-8,background:preview.valid?preview.color:'#ff6e61'}} />}
           <span ref={planeOrigin} className="plane-probe" aria-hidden="true" style={{ left: 0, top: 0 }} />
           <span ref={planeX} className="plane-probe" aria-hidden="true" style={{ left: GRID * CELL, top: 0 }} />
           <span ref={planeY} className="plane-probe" aria-hidden="true" style={{ left: 0, top: GRID * CELL }} />
