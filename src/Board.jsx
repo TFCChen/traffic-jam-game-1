@@ -8,11 +8,10 @@ import {
 } from "./sceneThemes.js";
 import { QUALITY } from "./gamePreferences.js";
 import { Icon, Sheet } from "./GameUI.jsx";
-import { DEFAULT_VIEW, normalizeView } from "./cameraControls.js";
+import { DEFAULT_VIEW, restoreView } from "./cameraControls.js";
 
 const DEFAULT = {
-  pitch: 60,
-  yaw: -12,
+  ...DEFAULT_VIEW,
   light: -40,
   intensity: 3,
   shadows: true,
@@ -32,7 +31,7 @@ function readSettings() {
     );
     if (!value) return DEFAULT;
     return {
-      ...normalizeView(value),
+      ...restoreView(value),
       light: Math.max(
         -180,
         Math.min(
@@ -290,8 +289,6 @@ export default function Board(props) {
                   setSettings((s) => ({
                     ...s,
                     ...DEFAULT_VIEW,
-                    pitch: 70,
-                    yaw: -12,
                   }))
                 }
               >
@@ -329,7 +326,7 @@ export default function Board(props) {
                 aria-label="俯視角"
                 type="range"
                 min="30"
-                max="80"
+                max="90"
                 value={settings.pitch}
                 onChange={(e) => change("pitch", Number(e.target.value))}
               />

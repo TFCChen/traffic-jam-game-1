@@ -4,8 +4,8 @@ const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 export const ORTHOGRAPHIC_DISTANCE = 200;
 export const ORTHOGRAPHIC_FAR = 400;
 export const DEFAULT_VIEW = {
-  pitch: 60,
-  yaw: -12,
+  pitch: 90,
+  yaw: 0,
   zoom: 1,
   panX: 0,
   panY: 0,
@@ -17,7 +17,7 @@ const number = (v, fallback) =>
 export function normalizeView(value = {}) {
   const yaw = number(value.yaw, DEFAULT_VIEW.yaw);
   return {
-    pitch: clamp(number(value.pitch, DEFAULT_VIEW.pitch), 30, 80),
+    pitch: clamp(number(value.pitch, DEFAULT_VIEW.pitch), 30, 90),
     yaw: ((((yaw + 180) % 360) + 360) % 360) - 180,
     zoom: clamp(number(value.zoom, 1), 0.65, 4),
     // Conservative storage limits; scene bounds account for orbit focus offsets.
@@ -26,6 +26,18 @@ export function normalizeView(value = {}) {
     focusX: clamp(number(value.focusX, 0), -32, 32),
     focusZ: clamp(number(value.focusZ, 0), -32, 32),
   };
+}
+// A yaw-aware up vector remains well-defined at an exact vertical view.
+// World Y as camera.up becomes parallel to the viewing ray at 90 degrees.
+export function viewUp(view) {
+  const p = view.pitch * Math.PI / 180, y = view.yaw * Math.PI / 180;
+  return [-Math.sin(y) * Math.sin(p), Math.cos(p), -Math.cos(y) * Math.sin(p)];
+}
+export function restoreView(value = {}) {
+  const oldPreset = [60, 70].includes(value.pitch) && value.yaw === -12 &&
+    (value.zoom ?? 1) === 1 &&
+    ['panX', 'panY', 'focusX', 'focusZ'].every(k => (value[k] ?? 0) === 0);
+  return oldPreset ? {...DEFAULT_VIEW} : normalizeView(value);
 }
 export function rotateView(view, dx, dy) {
   return normalizeView({

@@ -27,6 +27,7 @@ import {
   ORTHOGRAPHIC_DISTANCE,
   ORTHOGRAPHIC_FAR,
   normalizeView,
+  viewUp,
   rotateView,
   panView,
   zoomView,
@@ -125,6 +126,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     aim.y + Math.sin(framingPitch) * 14,
     aim.z + Math.cos(framingYaw) * Math.cos(framingPitch) * 14,
   );
+  framingCamera.up.fromArray(viewUp(DEFAULT_VIEW));
   framingCamera.lookAt(aim);
   framingCamera.updateMatrixWorld();
   const raycaster = new THREE.Raycaster();
@@ -168,8 +170,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
   const scratchPosition = new THREE.Vector3(),
     scratchDirection = new THREE.Vector3();
   const settings = {
-    pitch: 60,
-    yaw: -12,
+    ...DEFAULT_VIEW,
     light: -40,
     intensity: 3,
     shadows: true,
@@ -449,6 +450,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       viewAim.y + Math.sin(pitch) * ORTHOGRAPHIC_DISTANCE,
       viewAim.z + Math.cos(yaw) * Math.cos(pitch) * ORTHOGRAPHIC_DISTANCE,
     );
+    camera.up.fromArray(viewUp(settings));
     camera.lookAt(viewAim);
     camera.updateMatrixWorld();
     const rect = canvas.getBoundingClientRect(),

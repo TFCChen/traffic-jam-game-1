@@ -1,0 +1,24 @@
+{
+  "results": [
+    "Legacy play preset migrates to 90/0 while preserving quality; board axes align with screen axes.",
+    "Play preset, slider, exact-vertical orbit and reset work through the real UI without auto zoom.",
+    "Actual pointer car selection and legal drag at 90 degrees record a move and undo correctly."
+  ],
+  "axes": [
+    {
+      "x": 326.3535911602211,
+      "y": 81.35359116022485,
+      "depth": 0.0002250562640657705
+    },
+    {
+      "x": 457.56906077348066,
+      "y": 81.35359116022485,
+      "depth": 0.0002250562640657705
+    },
+    {
+      "x": 326.3535911602211,
+      "y": 212.56906077348455,
+      "depth": 0.0002250562640657705
+    }
+  ]
+}
