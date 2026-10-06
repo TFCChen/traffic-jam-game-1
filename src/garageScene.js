@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { createHintGuide } from './hintGuide.js';
 import { exitPose, EXIT_COMPLETE_MS } from './exitChoreography.js';
-import { continueGroundUV } from './groundUV.js';
+import { vegetationShadowProxy } from './environmentShadows.js';
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { legalMovesForCar } from "./gameEngine.js";
@@ -165,6 +165,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     nextFrame = 0,
     lastHover = 0;
   const sceneryLamps = [];
+  let vegetationShadows;
   const stats = { frames: 0, shadowUpdates: 0, renderedSceneKey: null };
   const inputSamples = [];
   let pendingInputAt = null,
@@ -211,11 +212,13 @@ export function createGarageScene(canvas, getProps, callbacks) {
   garageFill.visible = false;
   scene.add(garageFill, garageFill.target);
   const streetLights = [
-    [-0.7, 0.2],
-    [6.65, 5.45],
+    [-0.45, 0.16],
+    [6.43, 5.45],
+    [4.88, -0.74],
+    [2.06, 7.0],
   ].map(([x, z]) => {
     const light = new THREE.PointLight("#ffd4a4", 3, 2.4, 2);
-    light.position.set(x, 1.05, z);
+    light.position.set(x, 1.36, z);
     light.visible = false;
     scene.add(light);
     return light;
@@ -291,19 +294,19 @@ export function createGarageScene(canvas, getProps, callbacks) {
   let editorHover = null, previewPlacement = null, placementKey = '', availablePlacements = [];
   const hintGuide = createHintGuide(scene);
   const gate = new THREE.Group();
-  gate.position.set(6.43, 0.34, 1.98);
+  gate.position.set(6.2, 0.415, 1.94);
   scene.add(gate);
-  const gateGeometry = new THREE.BoxGeometry(0.07, 0.07, 0.98);
+  const gateGeometry = new THREE.BoxGeometry(0.034, 0.034, 1.12);
   ownedGeometries.add(gateGeometry);
   for (let i = 0; i < 7; i++) {
     const m = new THREE.MeshStandardMaterial({
-      color: i % 2 ? "#e9ad78" : "#fff1d4",
-      roughness: 0.5,
+      color: i % 2 ? "#b19a70" : "#d1cec2",
+      roughness: 0.4,
     });
     ownedMaterials.add(m);
     const piece = new THREE.Mesh(gateGeometry, m);
     piece.scale.z = 1 / 7;
-    piece.position.z = ((i + 0.5) * 0.98) / 7;
+    piece.position.z = ((i + 0.5) * 1.12) / 7;
     piece.castShadow = true;
     gate.add(piece);
   }
@@ -323,10 +326,10 @@ export function createGarageScene(canvas, getProps, callbacks) {
     blending: THREE.AdditiveBlending,
   });
   ownedMaterials.add(glowMaterial);
-  const lightPools = new THREE.InstancedMesh(glowGeometry, glowMaterial, 2);
+  const lightPools = new THREE.InstancedMesh(glowGeometry, glowMaterial, streetLights.length);
   scene.add(lightPools);
-  for (let i = 0; i < 2; i++) {
-    instancePose.position.set(i ? 6.65 : -0.7, 0.045, i ? 5.45 : 0.2);
+  for (let i = 0; i < streetLights.length; i++) {
+    instancePose.position.set(streetLights[i].position.x, 0.115, streetLights[i].position.z);
     instancePose.rotation.set(-Math.PI / 2, 0, 0);
     instancePose.updateMatrix();
     lightPools.setMatrixAt(i, instancePose.matrix);
@@ -480,9 +483,9 @@ export function createGarageScene(canvas, getProps, callbacks) {
         ]
       : [
           [
-            [-1.15, 7.7],
+            [-1.9, 8.4],
             [-0.48, 0.2],
-            [-0.4, 6.4],
+            [-1.2, 8.0],
           ],
           [
             [0, 6],
@@ -490,9 +493,9 @@ export function createGarageScene(canvas, getProps, callbacks) {
             [0, 6],
           ],
           [
-            [-0.9, 6.9],
-            [0.2, 1.4],
-            [0.1, 6],
+            [-1.8, 6.3],
+            [0.2, 1.6],
+            [-0.8, 7.9],
           ],
         ];
     let minX = Infinity,
@@ -1200,6 +1203,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
           paints = [],
           windows = [],
           wheelAngle = { value: 0 },
+          wheelSteering = { value: 0 },
           tyreCompression = { value: [0, 0] };
         group.traverse((object) => {
           if (object.isMesh) {
@@ -1251,13 +1255,14 @@ export function createGarageScene(canvas, getProps, callbacks) {
               material.customProgramCacheKey=()=> 'rear-lens-emission-v1';
             }
             if (material.name === "Rolling wheels") {
-              rollingMaterial(material, wheelAngle, tyreCompression);
+              rollingMaterial(material, wheelAngle, tyreCompression, wheelSteering);
               object.customDepthMaterial = rollingMaterial(
                 new THREE.MeshDepthMaterial({
                   depthPacking: THREE.RGBADepthPacking,
                 }),
                 wheelAngle,
                 tyreCompression,
+                wheelSteering,
               );
             }
             object.castShadow = !["Automotive glass", "Lamp crystal", "Batched cabin", "Headlamp", "Tail lamp"].includes(material.name);
@@ -1317,6 +1322,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
           paints,
           windows,
           wheelAngle,
+          wheelSteering,
           tyreCompression,
           velocity: 0,
           brakeUntil: 0,
@@ -1355,6 +1361,13 @@ export function createGarageScene(canvas, getProps, callbacks) {
       if (!alive) return;
       library = models;
       const garage = library.garage.clone(true);
+      const pavingMaterial = material=>material.name.startsWith('Limestone paver')||material.name==='Recessed mortar';
+      // Thin paving joints need to receive shadows, but must not generate tiny
+      // self-shadow fragments across the otherwise flat walking surface.
+      const pavingBatch=batchColoredMeshes(garage,mesh=>pavingMaterial(mesh.material),{
+        name:'Courtyard paving',roughness:.86,metalness:0,atlas:sceneryAtlas,
+      });
+      ownedGeometries.add(pavingBatch.geometry);
       const streetBatch = batchColoredMeshes(
         garage,
         (mesh) =>
@@ -1363,12 +1376,16 @@ export function createGarageScene(canvas, getProps, callbacks) {
             "Street asphalt",
             "Automotive glass",
             "Streetlamp glow",
-          ].includes(mesh.material.name),
+            "Architectural glazing",
+            "Courtyard paving",
+            "Courtyard foliage detail",
+          ].includes(mesh.material.name) && !mesh.material.name.startsWith('Streetlamp glow'),
         {
           roughness: 0.85,
           metalness: 0.02,
           name: "Batched scenery",
           atlas: sceneryAtlas,
+          surface: material=>[material.roughness??.8,material.metalness??0],
         },
       );
       ownedGeometries.add(streetBatch.geometry);
@@ -1385,33 +1402,18 @@ export function createGarageScene(canvas, getProps, callbacks) {
             o.material.bumpScale = 0.003;
             o.material.roughnessMap = roadTexture;
           }
-          if (o.material.name === "Streetlamp glow")
+          if (o.material.name.startsWith('Streetlamp glow'))
             sceneryLamps.push(o.material);
           o.receiveShadow = true;
-          o.castShadow = true;
+          o.castShadow = !['Courtyard paving','Asphalt blue slate','Street asphalt','Courtyard foliage detail'].includes(o.material.name);
+          if(o.material.name==='Courtyard foliage detail') {
+            vegetationShadows=vegetationShadowProxy(o);
+            ownedGeometries.add(vegetationShadows.geometry);ownedMaterials.add(vegetationShadows.material);
+            scene.add(vegetationShadows);cacheLocalTransforms(vegetationShadows);
+          }
         }
       });
       scene.add(garage);
-      // Give the two-cell coupe enough turning clearance after its rear clears
-      // the gate. Reuse the street's material and texture for a continuous lane.
-      let streetMaterial,streetSource;
-      garage.traverse(o=>{if(o.isMesh&&o.material.name==='Street asphalt'){streetMaterial=o.material;streetSource=o;}});
-      if(streetMaterial){
-        const extension=new THREE.Group();
-        for(const [x,z,w,l] of [[8.325,4.5,1.25,9.7],[7.13,7.85,1.14,3]]){
-          const geometry=new THREE.BoxGeometry(w,.05,l);ownedGeometries.add(geometry);
-          const road=new THREE.Mesh(geometry,streetMaterial);road.position.set(x,.065,z);road.receiveShadow=true;extension.add(road);continueGroundUV(road,streetSource);
-        }
-        const stripeMaterial=new THREE.MeshStandardMaterial({color:'#e9e7d6',roughness:.9});ownedMaterials.add(stripeMaterial);
-        const stripeGeometry=new THREE.BoxGeometry(1.25,.008,.09);ownedGeometries.add(stripeGeometry);
-        for(const z of [3.35,3.55,3.75,3.95]){const stripe=new THREE.Mesh(stripeGeometry,stripeMaterial);stripe.position.set(8.325,.099,z);extension.add(stripe);}
-        const dashGeometry=new THREE.BoxGeometry(.035,.008,.3);ownedGeometries.add(dashGeometry);
-        for(const z of [6.6,7.3,8,8.7]){const dash=new THREE.Mesh(dashGeometry,stripeMaterial);dash.position.set(7.45,.099,z);extension.add(dash);}
-        const curbGeometry=new THREE.BoxGeometry(.12,.13,9.7);ownedGeometries.add(curbGeometry);
-        const curb=new THREE.Mesh(curbGeometry,stripeMaterial);curb.position.set(8.99,.1,4.5);curb.receiveShadow=true;extension.add(curb);
-        const details=batchColoredMeshes(extension,o=>o.material!==streetMaterial,{roughness:.9,metalness:0,name:'Exit street details'});ownedGeometries.add(details.geometry);
-        scene.add(extension);cacheLocalTransforms(extension);
-      }
       cacheLocalTransforms(garage);
       updateCamera();
       sync();
@@ -1477,7 +1479,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       if(exit){x=exit.x;z=exit.z;group.rotation.y=exit.yaw;group.visible=exit.visible;if(exit.complete&&!item.exitReported){item.exitReported=true;callbacks.exitComplete?.();}}
       else {group.visible=true;item.exitReported=false;item.exitDistance=0;}
       const blend = isDrag || reduced.matches || exiting ? 1 : 1 - Math.exp(-18 * dt);
-      const height = VEHICLE_GROUND_HEIGHT + (exiting ? clamp((x-6)/1.2,0,1)*.0545 : 0);
+      const height = VEHICLE_GROUND_HEIGHT;
       if (
         Math.abs(group.position.x - x) > 0.001 ||
         Math.abs(group.position.z - z) > 0.001 ||
@@ -1492,6 +1494,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
           (car.dir === "H" ? group.position.x : group.position.z) - oldAxis,
         velocity = travelled / Math.max(0.008, dt);
       item.wheelAngle.value -= travelled / 0.19;
+      item.wheelSteering.value=exit?.steering??0;
+      if(exiting && now-escapeStart>4750 && velocity>.08)item.brakeUntil=now+140;
       if(exiting)item.exitDistance=exit.distance;
       item.body.rotation.x=(exit?.bank??0)*(settings.motion??1);
       if(Math.abs(velocity)>.12){item.lastMotionAt=now;item.stopBrake=false;}
@@ -1893,6 +1897,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
             optics: m.userData.optics,
           })),
           wheelAngle: i.wheelAngle.value,
+          wheelSteering: i.wheelSteering.value,
           tilt: i.body.rotation.z,
           compression: i.body.position.y - 0.19,
           wheelTilt: i.group.rotation.z,
@@ -1968,6 +1973,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       celebration.dispose();
       placementCells.dispose(); placementGhost.dispose();
       lightPools.dispose();
+      vegetationShadows?.dispose();
       skidMarks.dispose();
       // Cached asset geometry is shared by current and future scene instances.
       profiler.dispose();

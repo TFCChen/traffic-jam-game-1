@@ -38,7 +38,7 @@ npm run preview
 
 ## Blender 素材
 
-`art/toy-garage.blend` 是可編輯的模型原始檔，包含停車場與九種車型。遊戲讀取 `public/models/` 的 GLB，修改 .blend 不會直接更新遊戲；需將對應模型匯出為相同檔名的 GLB。保留車型尺寸、原點、Paint 材質名稱，以及 GLB 的 Y-up 轉換。Rolling wheels 材質批次需保留頂點色；本地四輪中心依車長、固定輪距與 .19 格輪半徑設定於 garageMaterials.js。若改變輪距或半徑，需同步修改動畫參數。
+`art/toy-garage.blend` 是九種車型與舊場地的可編輯原檔；重建後的街區原檔為 `art/street-courtyard.blend`。遊戲讀取 `public/models/` 的 GLB，修改 .blend 不會直接更新遊戲；需將對應模型匯出為相同檔名的 GLB。保留車型尺寸、原點、Paint 材質名稱，以及 GLB 的 Y-up 轉換。Rolling wheels 材質批次需保留頂點色；本地四輪中心依車長、固定輪距與 .19 格輪半徑設定於 garageMaterials.js。若改變輪距或半徑，需同步修改動畫參數。
 
 `scripts/build_models.py` 可用 Blender 4.5 重新產生全部素材：
 
@@ -47,6 +47,8 @@ npm run preview
 ```
 
 重新產生會覆寫 .blend 與 GLB。若已手動修改，先另存原始檔，或將修改整合回產生腳本。車型沿本地 X 軸向前；Blender Z-up 匯出後為 Three.js Y-up，長度 2 或 3 格、寬度小於 1 格。
+
+只重建場地可執行 `scripts/build_environment.py`，不會覆寫車輛 GLB。它產生完整正方形街區、石材鋪面、咖啡店、細葉植栽與休憩區，並保存 `art/street-courtyard.blend`。匯出後自動透過 `scripts/compact_environment.py` 壓縮顏色與法線儲存格式，頂點位置保持完整精度；GLB 使用標準 `KHR_mesh_quantization`，由既有 Three.js loader 讀取。詳細驗證與截圖見 [街區重建報告](docs/courtyard-2026-10-07/README.md)。
 
 ## 驗證
 

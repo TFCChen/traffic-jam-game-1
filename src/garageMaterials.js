@@ -49,8 +49,8 @@ export function batchColoredMeshes(
       geometry.computeBoundingBox();
       const b = geometry.boundingBox,
         size = b.getSize(new THREE.Vector3()),
-        name = mesh.material.name;
-      const tile = name.includes("wood")
+        name = mesh.material.name.toLowerCase();
+      const tile = /wood|oak|timber/.test(name)
         ? 0
         : name.includes("foliage")
           ? 2
@@ -144,9 +144,9 @@ export function sceneryTexture() {
     context.fillRect(x, y, 256, 256);
     for (let i = 0; i < 1500; i++) {
       seed = (seed * 1664525 + 1013904223) >>> 0;
-      const px = x + (seed % 256);
+      const px = x + ((seed >>> 16) % 256);
       seed = (seed * 1664525 + 1013904223) >>> 0;
-      const py = y + (seed % 256);
+      const py = y + ((seed >>> 16) % 256);
       context.fillStyle =
         tile === 2 ? "rgba(35,48,28,.055)" : "rgba(40,42,37,.04)";
       context.fillRect(px, py, tile === 0 ? 12 : 2, tile === 0 ? 1 : 2);
@@ -317,13 +317,15 @@ export function rollingMaterial(
   material,
   angle,
   compression = { value: [0, 0] },
+  steering = { value: 0 },
 ) {
   material.onBeforeCompile = (shader) => {
     if (!material.isMeshDepthMaterial) surfaceShader(shader, 'wheelSurface');
     shader.uniforms.wheelAngle = angle;
     shader.uniforms.tyreCompression = compression;
+    shader.uniforms.wheelSteering = steering;
     shader.vertexShader =
-      "uniform float wheelAngle;\nuniform vec2 tyreCompression;\nattribute vec3 wheelPivot;\nattribute float wheelSpin;\n" +
+      "uniform float wheelAngle;\nuniform float wheelSteering;\nuniform vec2 tyreCompression;\nattribute vec3 wheelPivot;\nattribute float wheelSpin;\n" +
       shader.vertexShader;
     shader.vertexShader = shader.vertexShader.replace(
       "#include <begin_vertex>",
@@ -331,6 +333,10 @@ export function rollingMaterial(
       float wc=cos(wheelAngle*wheelSpin), ws=sin(wheelAngle*wheelSpin);
       vec2 wp=transformed.xy-wheelPivot.xy;
       transformed.xy=vec2(wc*wp.x-ws*wp.y,ws*wp.x+wc*wp.y)+wheelPivot.xy;
+      float steer=wheelPivot.x>0.0?wheelSteering:0.0;
+      float sc=cos(steer),ss=sin(steer);
+      vec2 axleOffset=transformed.xz-wheelPivot.xz;
+      transformed.xz=vec2(sc*axleOffset.x+ss*axleOffset.y,-ss*axleOffset.x+sc*axleOffset.y)+wheelPivot.xz;
       float load=wheelPivot.x>0.0?tyreCompression.x:tyreCompression.y;
       transformed.y-=load*smoothstep(0.0,0.38,transformed.y);
       transformed.x+=(transformed.x-wheelPivot.x)*load*2.0*(1.0-smoothstep(0.0,0.15,transformed.y));`,
@@ -339,9 +345,12 @@ export function rollingMaterial(
       "#include <beginnormal_vertex>",
       `#include <beginnormal_vertex>
       float nc=cos(wheelAngle*wheelSpin), ns=sin(wheelAngle*wheelSpin);
-      objectNormal.xy=vec2(nc*objectNormal.x-ns*objectNormal.y,ns*objectNormal.x+nc*objectNormal.y);`,
+      objectNormal.xy=vec2(nc*objectNormal.x-ns*objectNormal.y,ns*objectNormal.x+nc*objectNormal.y);
+      float normalSteer=wheelPivot.x>0.0?wheelSteering:0.0;
+      float normalSC=cos(normalSteer),normalSS=sin(normalSteer);
+      objectNormal.xz=vec2(normalSC*objectNormal.x+normalSS*objectNormal.z,-normalSS*objectNormal.x+normalSC*objectNormal.z);`,
     );
   };
-  material.customProgramCacheKey = () => "rolling-wheels-fixed-brakes-v4";
+  material.customProgramCacheKey = () => "rolling-wheels-steering-v5";
   return material;
 }

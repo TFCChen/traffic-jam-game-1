@@ -1,0 +1,2060 @@
+{
+  "results": [
+    {
+      "name": "desktop",
+      "samples": [
+        {
+          "age": 231.69999998807907,
+          "yaw": 0,
+          "position": [
+            5.000410341975544,
+            0.038,
+            2.5
+          ],
+          "wheel": -21.054791273555498,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0,
+          "win": false
+        },
+        {
+          "age": 355.19999998807907,
+          "yaw": 0,
+          "position": [
+            5.013091735536427,
+            0.038,
+            2.5
+          ],
+          "wheel": -21.12153545019172,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0,
+          "win": false
+        },
+        {
+          "age": 480.80000001192093,
+          "yaw": 0,
+          "position": [
+            5.058292898324029,
+            0.038,
+            2.5
+          ],
+          "wheel": -21.35943630696858,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.0000026529892462462,
+          "win": false
+        },
+        {
+          "age": 605.8000000119209,
+          "yaw": 0,
+          "position": [
+            5.178494515383843,
+            0.038,
+            2.5
+          ],
+          "wheel": -21.99207639675707,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.009697176516674406,
+          "win": false
+        },
+        {
+          "age": 729,
+          "yaw": 0,
+          "position": [
+            5.345002443424507,
+            0.038,
+            2.5
+          ],
+          "wheel": -22.868433912760565,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.057480928824686243,
+          "win": false
+        },
+        {
+          "age": 852.6000000238419,
+          "yaw": 0,
+          "position": [
+            5.605225308747125,
+            0.038,
+            2.5
+          ],
+          "wheel": -24.23802794077434,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.20860413975623449,
+          "win": false
+        },
+        {
+          "age": 976.4000000357628,
+          "yaw": 0,
+          "position": [
+            5.875615116382764,
+            0.038,
+            2.5
+          ],
+          "wheel": -25.661132191488228,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.4548782055549642,
+          "win": false
+        },
+        {
+          "age": 1102.6000000238419,
+          "yaw": 0,
+          "position": [
+            6.201530684003489,
+            0.038,
+            2.5
+          ],
+          "wheel": -27.37647728422889,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.8577401332534094,
+          "win": false
+        },
+        {
+          "age": 1226.5,
+          "yaw": 0,
+          "position": [
+            6.48366644198997,
+            0.038,
+            2.5
+          ],
+          "wheel": -28.861402326263,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.2720315772219055,
+          "win": false
+        },
+        {
+          "age": 1352.6000000238419,
+          "yaw": 0,
+          "position": [
+            6.8160945776821205,
+            0.038,
+            2.5
+          ],
+          "wheel": -30.61102409306379,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.750374833391314,
+          "win": false
+        },
+        {
+          "age": 1476.699999988079,
+          "yaw": 0,
+          "position": [
+            7.079396524919976,
+            0.038,
+            2.5
+          ],
+          "wheel": -31.996823815368295,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 1603.4000000357628,
+          "yaw": -0.005709132861576501,
+          "position": [
+            7.31975725040835,
+            0.038,
+            2.500230836931728
+          ],
+          "wheel": -33.26188238367544,
+          "steering": -0.12463450565559861,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 1726.300000011921,
+          "yaw": -0.05767265180934558,
+          "position": [
+            7.591323927388494,
+            0.038,
+            2.507684243859738
+          ],
+          "wheel": -34.69188422247098,
+          "steering": -0.35929787287470094,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 1851.9000000357628,
+          "yaw": -0.1304564913483055,
+          "position": [
+            7.801329459610988,
+            0.038,
+            2.527046080222946
+          ],
+          "wheel": -35.8021123743574,
+          "steering": -0.49317539210960654,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 1975.800000011921,
+          "yaw": -0.24380019688663174,
+          "position": [
+            8.041483790977388,
+            0.038,
+            2.5719363372047583
+          ],
+          "wheel": -37.08866852204991,
+          "steering": -0.6036802685813217,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 2621.600000023842,
+          "yaw": -1.030634018868973,
+          "position": [
+            9.000247359330805,
+            0.038,
+            3.2601176244384957
+          ],
+          "wheel": -43.46959510514151,
+          "steering": -0.7219555021677654,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 2748,
+          "yaw": -1.1741671133461042,
+          "position": [
+            9.101433300546866,
+            0.038,
+            3.4605740672538987
+          ],
+          "wheel": -44.65244396116079,
+          "steering": -0.6825757988017799,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 2874.5,
+          "yaw": -1.3154177146407589,
+          "position": [
+            9.180081020226472,
+            0.038,
+            3.694551099649898
+          ],
+          "wheel": -45.95269717013484,
+          "steering": -0.6116953485622151,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 2998.300000011921,
+          "yaw": -1.4169098897793713,
+          "position": [
+            9.222518695783938,
+            0.038,
+            3.900751685366505
+          ],
+          "wheel": -47.061189935949436,
+          "steering": -0.5223309439640693,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 3124.600000023842,
+          "yaw": -1.5124985262694512,
+          "position": [
+            9.249678179080037,
+            0.038,
+            4.16395999035602
+          ],
+          "wheel": -48.454388257679355,
+          "steering": -0.3609107557997531,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 3847.100000023842,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            5.505767539593178
+          ],
+          "wheel": -55.517257881864126,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 3973.400000035763,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            5.7789552387848175
+          ],
+          "wheel": -56.9550878776096,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 4099.300000011921,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            6.100183213570139
+          ],
+          "wheel": -58.645761429111296,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 4225.699999988079,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            6.43606510292447
+          ],
+          "wheel": -60.41356084676567,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 4351.300000011921,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            6.736728922334194
+          ],
+          "wheel": -61.99600200155369,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 4475,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            7.078501379810726
+          ],
+          "wheel": -63.79480440932491,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 4600.699999988079,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            7.430099463492878
+          ],
+          "wheel": -65.64532063923097,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 4727.5,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            7.71504262345584
+          ],
+          "wheel": -67.1450214811413,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 4850.800000011921,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            8.062157009155367
+          ],
+          "wheel": -68.97193930061249,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.7968300027910928,
+          "win": false
+        },
+        {
+          "age": 4976.100000023842,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            8.397743890922957
+          ],
+          "wheel": -70.73818604675769,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.724084646840777,
+          "win": false
+        },
+        {
+          "age": 5103.600000023842,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            8.627363485070486
+          ],
+          "wheel": -71.94671022648151,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.604456474338017,
+          "win": false
+        },
+        {
+          "age": 5230.900000035763,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            8.843524219986492
+          ],
+          "wheel": -73.0843983049868,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.397351183195777,
+          "win": false
+        },
+        {
+          "age": 5356.5,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            8.961572202768979
+          ],
+          "wheel": -73.70570347752621,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.1874327313196786,
+          "win": false
+        },
+        {
+          "age": 5482.100000023842,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.022825858851842
+          ],
+          "wheel": -74.02809114112023,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.9741751311812368,
+          "win": false
+        },
+        {
+          "age": 5609.100000023842,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.04852902239328
+          ],
+          "wheel": -74.16337094923304,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.7092105584490437,
+          "win": false
+        },
+        {
+          "age": 5736.800000011921,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.05
+          ],
+          "wheel": -74.17111293663683,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.5015425066009835,
+          "win": false
+        },
+        {
+          "age": 5863.5,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.05
+          ],
+          "wheel": -74.17111293663683,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.2796605971027538,
+          "win": false
+        },
+        {
+          "age": 5991,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.05
+          ],
+          "wheel": -74.17111293663683,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.1121190911644393,
+          "win": false
+        },
+        {
+          "age": 6118.699999988079,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.05
+          ],
+          "wheel": -74.17111293663683,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.028749307950573132,
+          "win": false
+        },
+        {
+          "age": 6244.600000023842,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.05
+          ],
+          "wheel": -74.17111293663683,
+          "steering": 0,
+          "visible": true,
+          "complete": true,
+          "follow": 0,
+          "win": false
+        },
+        {
+          "age": 6371,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.05
+          ],
+          "wheel": -74.17111293663683,
+          "steering": 0,
+          "visible": true,
+          "complete": true,
+          "follow": 0,
+          "win": true
+        }
+      ]
+    },
+    {
+      "name": "mobile",
+      "samples": [
+        {
+          "age": 233.30000001192093,
+          "yaw": 0,
+          "position": [
+            5.000245191335887,
+            0.038,
+            2.5
+          ],
+          "wheel": -21.05392205966256,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0,
+          "win": false
+        },
+        {
+          "age": 358.60000002384186,
+          "yaw": 0,
+          "position": [
+            5.01565926480678,
+            0.038,
+            2.5
+          ],
+          "wheel": -21.135048762140944,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0,
+          "win": false
+        },
+        {
+          "age": 483.5,
+          "yaw": 0,
+          "position": [
+            5.06893241372254,
+            0.038,
+            2.5
+          ],
+          "wheel": -21.415433756434417,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.00008822812516952573,
+          "win": false
+        },
+        {
+          "age": 608,
+          "yaw": 0,
+          "position": [
+            5.194072541076491,
+            0.038,
+            2.5
+          ],
+          "wheel": -22.07406600566574,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.01246621916176794,
+          "win": false
+        },
+        {
+          "age": 733.5,
+          "yaw": 0,
+          "position": [
+            5.363677715659307,
+            0.038,
+            2.5
+          ],
+          "wheel": -22.966724819259504,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.06530581659280373,
+          "win": false
+        },
+        {
+          "age": 857.5,
+          "yaw": 0,
+          "position": [
+            5.627249803103144,
+            0.038,
+            2.5
+          ],
+          "wheel": -24.3539463321218,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.2254080757177202,
+          "win": false
+        },
+        {
+          "age": 981,
+          "yaw": 0,
+          "position": [
+            5.889563231152807,
+            0.038,
+            2.5
+          ],
+          "wheel": -25.734543321856872,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.4698554770148924,
+          "win": false
+        },
+        {
+          "age": 1104.5,
+          "yaw": 0,
+          "position": [
+            6.174656268514671,
+            0.038,
+            2.5
+          ],
+          "wheel": -27.23503299218247,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.8207220572843626,
+          "win": false
+        },
+        {
+          "age": 1230,
+          "yaw": 0,
+          "position": [
+            6.506093879383428,
+            0.038,
+            2.5
+          ],
+          "wheel": -28.979441470439095,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.3061211323802009,
+          "win": false
+        },
+        {
+          "age": 1354.9000000357628,
+          "yaw": 0,
+          "position": [
+            6.7846075636607885,
+            0.038,
+            2.5
+          ],
+          "wheel": -30.44530296663573,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.7218232435005907,
+          "win": false
+        },
+        {
+          "age": 1478.5,
+          "yaw": 0,
+          "position": [
+            7.085780437435709,
+            0.038,
+            2.5
+          ],
+          "wheel": -32.030423354924785,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 1602.5,
+          "yaw": -0.007201189340497255,
+          "position": [
+            7.334700921196627,
+            0.038,
+            2.5003272907716756
+          ],
+          "wheel": -33.340534940586245,
+          "steering": -0.13936611669418464,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 1726.7000000476837,
+          "yaw": -0.05891626309065775,
+          "position": [
+            7.595699071947896,
+            0.038,
+            2.5079345310820083
+          ],
+          "wheel": -34.7149489474948,
+          "steering": -0.3624941160370724,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 1851.5,
+          "yaw": -0.13790523657728826,
+          "position": [
+            7.819383443934974,
+            0.038,
+            2.529479135656286
+          ],
+          "wheel": -35.897992709050364,
+          "steering": -0.5029368197678882,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 1977.300000011921,
+          "yaw": -0.2525310002262718,
+          "position": [
+            8.05770305379859,
+            0.038,
+            2.57603878977439
+          ],
+          "wheel": -37.17672178664937,
+          "steering": -0.6097643796913725,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 2196.800000011921,
+          "yaw": -0.49528865929142596,
+          "position": [
+            8.437916683714906,
+            0.038,
+            2.7233790556058124
+          ],
+          "wheel": -39.32815655454548,
+          "steering": -0.7122002379457618,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 2322.100000023842,
+          "yaw": -0.6574014788117314,
+          "position": [
+            8.640878574114529,
+            0.038,
+            2.855082624190614
+          ],
+          "wheel": -40.60297215371265,
+          "steering": -0.7387069799614953,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 2446.900000035763,
+          "yaw": -0.8108296971229424,
+          "position": [
+            8.805651509935291,
+            0.038,
+            3.003737682559447
+          ],
+          "wheel": -41.77212383522055,
+          "steering": -0.7444365955705068,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 2569.5,
+          "yaw": -0.9587305028034494,
+          "position": [
+            8.941844960146033,
+            0.038,
+            3.170181557944729
+          ],
+          "wheel": -42.905075841234044,
+          "steering": -0.7336104824119428,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 2695.100000023842,
+          "yaw": -1.1205743053569848,
+          "position": [
+            9.06608897406609,
+            0.038,
+            3.3821105287838753
+          ],
+          "wheel": -44.19945883256035,
+          "steering": -0.7001976389468598,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 2819,
+          "yaw": -1.2514728848507568,
+          "position": [
+            9.147151673286068,
+            0.038,
+            3.5829613865626992
+          ],
+          "wheel": -45.3402377954375,
+          "steering": -0.6491145301760197,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 2942.5,
+          "yaw": -1.3822445354802049,
+          "position": [
+            9.209462977275836,
+            0.038,
+            3.825101301523234
+          ],
+          "wheel": -46.657123287746806,
+          "steering": -0.5584474747558222,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 3065.300000011921,
+          "yaw": -1.469837658155022,
+          "position": [
+            9.239310836875317,
+            0.038,
+            4.032582310731844
+          ],
+          "wheel": -47.76072420552162,
+          "steering": -0.4489178376771877,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 3188.2000000476837,
+          "yaw": -1.5415012753800175,
+          "position": [
+            9.254755357014227,
+            0.038,
+            4.281886812188538
+          ],
+          "wheel": -49.07565295861501,
+          "steering": -0.26803462820961255,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 3387.900000035763,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            4.654572506326838
+          ],
+          "wheel": -51.0372840225676,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 3513.7000000476837,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            4.876339545362315
+          ],
+          "wheel": -52.20447896485958,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 3640,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            5.124323444347791
+          ],
+          "wheel": -53.50965738057262,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 3765.5,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            5.353638899048178
+          ],
+          "wheel": -54.71658082636412,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 3891.900000035763,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            5.624709911677975
+          ],
+          "wheel": -56.14327036652095,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 4017.5,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            5.893342751194956
+          ],
+          "wheel": -57.557127416610314,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 4142.600000023842,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            6.225777310229233
+          ],
+          "wheel": -59.30678299047492,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 4265.400000035763,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            6.524279319327514
+          ],
+          "wheel": -60.87784619625535,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 4391.700000047684,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            6.880395510876587
+          ],
+          "wheel": -62.75214194125047,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 4516.5,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            7.19056663001613
+          ],
+          "wheel": -64.38462151566911,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 4640.100000023842,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            7.5466791906035695
+          ],
+          "wheel": -66.25889815033985,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 4763.600000023842,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            7.853886560191732
+          ],
+          "wheel": -67.87577904290912,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 4888.100000023842,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            8.194830319299614
+          ],
+          "wheel": -69.67021988031902,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.7800554934559103,
+          "win": false
+        },
+        {
+          "age": 5013.5,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            8.460803931506659
+          ],
+          "wheel": -71.0700809971982,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.6981085560272637,
+          "win": false
+        },
+        {
+          "age": 5138.700000047684,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            8.712231879369208
+          ],
+          "wheel": -72.39338598594846,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.5384449255279542,
+          "win": false
+        },
+        {
+          "age": 5262.900000035763,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            8.872044391299237
+          ],
+          "wheel": -73.23450446979072,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.357093472211507,
+          "win": false
+        },
+        {
+          "age": 5388.5,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            8.977306411640193
+          ],
+          "wheel": -73.78851510316417,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.145969358410392,
+          "win": false
+        },
+        {
+          "age": 5512.400000035763,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.035244070991032
+          ],
+          "wheel": -74.09345015237913,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.8938286143726782,
+          "win": false
+        },
+        {
+          "age": 5636.700000047684,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.049358634959223
+          ],
+          "wheel": -74.16773733115907,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.6721490414295536,
+          "win": false
+        },
+        {
+          "age": 5762.900000035763,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.05
+          ],
+          "wheel": -74.17111293663685,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.4292993800149506,
+          "win": false
+        },
+        {
+          "age": 5887.600000023842,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.05
+          ],
+          "wheel": -74.17111293663685,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.2513559809988665,
+          "win": false
+        },
+        {
+          "age": 6014.100000023842,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.05
+          ],
+          "wheel": -74.17111293663685,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.09754628634839516,
+          "win": false
+        },
+        {
+          "age": 6138.5,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.05
+          ],
+          "wheel": -74.17111293663685,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.015615985709571945,
+          "win": false
+        },
+        {
+          "age": 6262.5,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.05
+          ],
+          "wheel": -74.17111293663685,
+          "steering": 0,
+          "visible": true,
+          "complete": true,
+          "follow": 0,
+          "win": false
+        },
+        {
+          "age": 6388.900000035763,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.05
+          ],
+          "wheel": -74.17111293663685,
+          "steering": 0,
+          "visible": true,
+          "complete": true,
+          "follow": 0,
+          "win": true
+        }
+      ]
+    },
+    {
+      "name": "low-angle",
+      "samples": [
+        {
+          "age": 312,
+          "yaw": 0,
+          "position": [
+            5.00437873991528,
+            0.038,
+            2.5
+          ],
+          "wheel": -21.075677302514407,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0,
+          "win": false
+        },
+        {
+          "age": 437.4000000357628,
+          "yaw": 0,
+          "position": [
+            5.044362682053876,
+            0.038,
+            2.5
+          ],
+          "wheel": -21.286119103243863,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0,
+          "win": false
+        },
+        {
+          "age": 564.1000000238419,
+          "yaw": 0,
+          "position": [
+            5.144199214069744,
+            0.038,
+            2.5
+          ],
+          "wheel": -21.811574534906324,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.004859046798685698,
+          "win": false
+        },
+        {
+          "age": 690.5,
+          "yaw": 0,
+          "position": [
+            5.286466744749265,
+            0.038,
+            2.5
+          ],
+          "wheel": -22.56035101216696,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.036145580312078485,
+          "win": false
+        },
+        {
+          "age": 815.9000000357628,
+          "yaw": 0,
+          "position": [
+            5.510199322821433,
+            0.038,
+            2.5
+          ],
+          "wheel": -23.737890896757314,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.14312225201602943,
+          "win": false
+        },
+        {
+          "age": 941.3000000119209,
+          "yaw": 0,
+          "position": [
+            5.796960017338976,
+            0.038,
+            2.5
+          ],
+          "wheel": -25.24715771000754,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.37446460773534546,
+          "win": false
+        },
+        {
+          "age": 1066.199999988079,
+          "yaw": 0,
+          "position": [
+            6.105027101129036,
+            0.038,
+            2.5
+          ],
+          "wheel": -26.868563414165745,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.7276374145334967,
+          "win": false
+        },
+        {
+          "age": 1192,
+          "yaw": 0,
+          "position": [
+            6.416525663374889,
+            0.038,
+            2.5
+          ],
+          "wheel": -28.508029531249186,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.1704899776272673,
+          "win": false
+        },
+        {
+          "age": 1316.4000000357628,
+          "yaw": 0,
+          "position": [
+            6.727292744060136,
+            0.038,
+            2.5
+          ],
+          "wheel": -30.14364574538207,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.6391619432277036,
+          "win": false
+        },
+        {
+          "age": 1442.800000011921,
+          "yaw": 0,
+          "position": [
+            7.019225386028525,
+            0.038,
+            2.5
+          ],
+          "wheel": -31.68013333468938,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.7993975436576,
+          "win": false
+        },
+        {
+          "age": 1566.800000011921,
+          "yaw": -0.0029733785893992044,
+          "position": [
+            7.2861354371148,
+            0.038,
+            2.5000856944921086
+          ],
+          "wheel": -33.084923480466244,
+          "steering": -0.09078364309192079,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 1692.199999988079,
+          "yaw": -0.02795729771453977,
+          "position": [
+            7.469055237407704,
+            0.038,
+            2.5025407629722247
+          ],
+          "wheel": -34.04777139623208,
+          "steering": -0.2624805836657096,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 1816.6000000238419,
+          "yaw": -0.1058287749903728,
+          "position": [
+            7.7381441957335,
+            0.038,
+            2.519549222449919
+          ],
+          "wheel": -35.46721672114867,
+          "steering": -0.4569334289561321,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 1938.9000000357628,
+          "yaw": -0.20904362448563543,
+          "position": [
+            7.9742806962845805,
+            0.038,
+            2.556461722253206
+          ],
+          "wheel": -36.72569312116111,
+          "steering": -0.5767314443457541,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 2458.600000023842,
+          "yaw": -0.8049060710416709,
+          "position": [
+            8.799753982109108,
+            0.038,
+            2.997545932172926
+          ],
+          "wheel": -41.72711855703421,
+          "steering": -0.7445322582725213,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 2584.699999988079,
+          "yaw": -0.9734421338747207,
+          "position": [
+            8.954206847964501,
+            0.038,
+            3.188075540139968
+          ],
+          "wheel": -43.01954480914461,
+          "steering": -0.7315952041090138,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 2710.699999988079,
+          "yaw": -1.1383784405201547,
+          "position": [
+            9.078157415195182,
+            0.038,
+            3.4076583657991004
+          ],
+          "wheel": -44.348170736749395,
+          "steering": -0.6947766154611825,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 2837.199999988079,
+          "yaw": -1.2800772089286607,
+          "position": [
+            9.162454810398438,
+            0.038,
+            3.63154009952954
+          ],
+          "wheel": -45.60831079179722,
+          "steering": -0.6336781410897002,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 2959.600000023842,
+          "yaw": -1.3825064382515249,
+          "position": [
+            9.209566077113594,
+            0.038,
+            3.825649358963188
+          ],
+          "wheel": -46.66005812035035,
+          "steering": -0.5582005185192076,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 3083.199999988079,
+          "yaw": -1.4800378849505509,
+          "position": [
+            9.242068436596714,
+            0.038,
+            4.061262909510255
+          ],
+          "wheel": -47.91237121853453,
+          "steering": -0.4310317436227413,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 3206.400000035763,
+          "yaw": -1.5454369787840394,
+          "position": [
+            9.255297153837871,
+            0.038,
+            4.3015837081423145
+          ],
+          "wheel": -49.179359860838076,
+          "steering": -0.25119714461766235,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 3694.699999988079,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            5.200328455861349
+          ],
+          "wheel": -53.909683480972696,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 3819.300000011921,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            5.454671671138973
+          ],
+          "wheel": -55.24833198243387,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 3943.600000023842,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            5.727962660456139
+          ],
+          "wheel": -56.68670561041895,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 4069.900000035763,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            6.037804573212242
+          ],
+          "wheel": -58.31745251966159,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 4196.199999988079,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            6.367045857753137
+          ],
+          "wheel": -60.05030138566631,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 4309.100000023842,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            6.664778605078196
+          ],
+          "wheel": -61.61731584527188,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 4435.300000011921,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            6.963780554828528
+          ],
+          "wheel": -63.191010317642046,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 4559.300000011921,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            7.303959667514961
+          ],
+          "wheel": -64.98142670020223,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 4685.400000035763,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            7.647856584711635
+          ],
+          "wheel": -66.79141047492155,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.8,
+          "win": false
+        },
+        {
+          "age": 4812.600000023842,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            7.991527632275162
+          ],
+          "wheel": -68.60020546209799,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.7998692605803206,
+          "win": false
+        },
+        {
+          "age": 4933.100000023842,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            8.268786265231407
+          ],
+          "wheel": -70.0594614250256,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.7641499562997087,
+          "win": false
+        },
+        {
+          "age": 5058.900000035763,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            8.556234254736765
+          ],
+          "wheel": -71.57234558031696,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.6494351809037902,
+          "win": false
+        },
+        {
+          "age": 5185.5,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            8.75297033363921
+          ],
+          "wheel": -72.60779862717195,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.5007529602482506,
+          "win": false
+        },
+        {
+          "age": 5312.800000011921,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            8.920717827215308
+          ],
+          "wheel": -73.49068017230928,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.275395764721721,
+          "win": false
+        },
+        {
+          "age": 5441,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.008208696417144
+          ],
+          "wheel": -73.95115843126634,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 1.042182650728863,
+          "win": false
+        },
+        {
+          "age": 5567.900000035763,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.044860754259505
+          ],
+          "wheel": -74.1440639988577,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.7905059737727413,
+          "win": false
+        },
+        {
+          "age": 5695.900000035763,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.05
+          ],
+          "wheel": -74.17111266064978,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.5350801603486883,
+          "win": false
+        },
+        {
+          "age": 5822.900000035763,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.05
+          ],
+          "wheel": -74.17111266064978,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.34200273197886283,
+          "win": false
+        },
+        {
+          "age": 5947.600000023842,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.05
+          ],
+          "wheel": -74.17111266064978,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.1664660031533528,
+          "win": false
+        },
+        {
+          "age": 6072.300000011921,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.05
+          ],
+          "wheel": -74.17111266064978,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.04943232360000029,
+          "win": false
+        },
+        {
+          "age": 6198.800000011921,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.05
+          ],
+          "wheel": -74.17111266064978,
+          "steering": 0,
+          "visible": true,
+          "complete": false,
+          "follow": 0.0002633652000001652,
+          "win": false
+        },
+        {
+          "age": 6322.699999988079,
+          "yaw": -1.5707963267948966,
+          "position": [
+            9.257488542038999,
+            0.038,
+            9.05
+          ],
+          "wheel": -74.17111266064978,
+          "steering": 0,
+          "visible": true,
+          "complete": true,
+          "follow": 0,
+          "win": true
+        }
+      ]
+    }
+  ],
+  "replayRestored": true,
+  "reducedMotion": true,
+  "trialReturn": true,
+  "officialNext": true,
+  "officialPerformance": {
+    "frames": 529,
+    "shadowUpdates": 296,
+    "renderedSceneKey": "1-play",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "inputToSubmission": {
+      "count": 108,
+      "median": 3.900000035762787,
+      "p95": 6.300000011920929
+    },
+    "pixelRatio": 1.0000000149011612,
+    "shadowSize": 2048,
+    "shadows": true,
+    "inView": true,
+    "profile": {
+      "cpuMs": {
+        "samples": 300,
+        "median": 3.400000035762787,
+        "p95": 5
+      },
+      "gpuMs": {
+        "samples": 300,
+        "median": 24.209895,
+        "p95": 27.880833
+      },
+      "drawCalls": {
+        "samples": 300,
+        "median": 106,
+        "p95": 150
+      },
+      "triangles": {
+        "samples": 300,
+        "median": 496982,
+        "p95": 731792
+      },
+      "gpuTimer": true
+    }
+  },
+  "errors": []
+}
