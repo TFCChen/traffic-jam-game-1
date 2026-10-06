@@ -11,7 +11,7 @@ Dedicated small white reversing lenses are installed under the red tail lenses a
 | State | Headlights | Red rear lenses | Reversing lenses |
 | --- | --- | --- | --- |
 | Parked, never selected | Off | Off | Off |
-| Daytime forward input | Visible daytime lens glow (.75 emission); no headlight projection | Off | Off |
+| Daytime forward input | Cool white lens glow (3.2 emission); no headlight projection | Off | Off |
 | Dusk/night input | Two forward beams | Dim position light | Off |
 | Reversing | Day/night policy retained | Dim at night; no brake brightness merely for reversing | White lenses and rear spill |
 | Braking/blocked feedback | Day/night policy retained | Short bright red pulse | Off once reversing ends |
@@ -20,7 +20,9 @@ Dedicated small white reversing lenses are installed under the red tail lenses a
 
 The active car uses four fixed SpotLights. Only the two headlights have shadow maps (256×256, cached, maximum 20 Hz updates); rear spill uses short directional falloff without extra maps. While reversing, the dominant rear spill is white at the reversing lenses; dim red position-lens emission can remain at night. This deliberately limits real-time lighting cost.
 
-Brightness tuning after player review: daytime running-lamp emission increased from .12 to .75; reversing spill reduced from 1.8 to .65 per lamp and reversing-lens emission from 1.4 to .65. Brake and nighttime headlight settings are unchanged.
+Second brightness tuning after player review: daytime running lamps use cool white emission at 3.2; reversing spill is .22 per lamp and reversing-lens emission .3. Front emission is masked to exterior lenses so shared roof signs do not glow. Brake and nighttime headlight settings are unchanged.
+
+The menu displays an automatic eight-character build fingerprint. Production builds include version.json; the check-update action fetches a fresh query URL instead of trusting the installed worker's cache. It reports the network version, waits for an available worker download and provides an update action. Offline/failed checks never claim the installed version is current.
 
 ## Verification
 

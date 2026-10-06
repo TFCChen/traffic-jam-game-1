@@ -1188,6 +1188,15 @@ export function createGarageScene(canvas, getProps, callbacks) {
             if (material.name === "Headlamp") {
               material.emissive.set("#ffd994");
               lamps.push(material);
+              // Shared lamp meshes also contain roof signs; only front lenses glow.
+              object.updateWorldMatrix(true,false);group.updateWorldMatrix(true,false);
+              const lampRoot=new THREE.Matrix4().copy(group.matrixWorld).invert().multiply(object.matrixWorld);
+              material.onBeforeCompile=shader=>{
+                shader.uniforms.lampRoot={value:lampRoot};shader.uniforms.lampFrontLimit={value:car.len*.35};
+                shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nuniform mat4 lampRoot;uniform float lampFrontLimit;varying float frontLensMask;').replace('#include <begin_vertex>','#include <begin_vertex>\nvec3 lampPoint=(lampRoot*vec4(transformed,1.)).xyz;frontLensMask=step(lampFrontLimit,lampPoint.x)*step(.12,abs(lampPoint.z));');
+                shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying float frontLensMask;').replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\ntotalEmissiveRadiance*=frontLensMask;');
+              };
+              material.customProgramCacheKey=()=> 'front-lens-emission-v1';
             }
             if (material.name === "Tail lamp") {
               tailLamps.push(material);
@@ -1464,14 +1473,15 @@ export function createGarageScene(canvas, getProps, callbacks) {
       const lampsState=vehicleLampState(item,settings.theme,now);
       item.lampState=lampsState;
       item.lamps.forEach((material) => {
-        material.emissiveIntensity=lampsState.head*1.2+(settings.theme==='day'?lampsState.activity*.75:0);
+        material.emissive.set(settings.theme==='day'?'#e8f4ff':'#ffd994');
+        material.emissiveIntensity=lampsState.head*1.2+(settings.theme==='day'?lampsState.activity*3.2:0);
       });
       item.tailLamps.forEach((material) => {
         material.color.set("#df7460");
         material.emissive.set("#ef3426");
         material.emissiveIntensity = Math.max(lampsState.park,lampsState.brake*1.3);
       });
-      item.reverseMaterial.emissiveIntensity=lampsState.reverse*.65;
+      item.reverseMaterial.emissiveIntensity=lampsState.reverse*.3;
       if (!props.editor && !props.won && !reduced.matches && quality.decor) {
         const tick = Math.floor(now / 1000 + item.index * 1.47);
         if (tick !== item.lastTick) {
@@ -1795,6 +1805,9 @@ export function createGarageScene(canvas, getProps, callbacks) {
           wheelTilt: i.group.rotation.z,
           velocity: i.velocity,
           tailLight: i.tailLamps[0]?.emissiveIntensity,
+          headLight: i.lamps[0]?.emissiveIntensity,
+          headColor: i.lamps[0]?.emissive.getHexString(),
+          reverseLight: i.reverseMaterial.emissiveIntensity,
           tailColor: i.tailLamps[0]?.emissive.getHexString(),
           lampState: i.lampState,
           lampAnchors: {head:i.lightAnchors.head.map(a=>a?.mesh.name??null),tail:i.lightAnchors.tail.map(a=>a?.mesh.name??null)},

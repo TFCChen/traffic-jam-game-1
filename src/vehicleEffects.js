@@ -178,7 +178,7 @@ export function createVehicleLights(scene) {
         const rear = tails[i].light;
         const reverse = state.reverse > 0;
         rear.color.set(reverse ? '#eef4ff' : '#ef3024');
-        rear.intensity = item && quality.decor ? reverse ? .65 : state.brake ? 2.0 : state.park * 1.8 : 0;
+        rear.intensity = item && quality.decor ? reverse ? .22 : state.brake ? 2.0 : state.park * 1.8 : 0;
         if (item) {
           origin(item, reverse ? 'reverse' : 'tail', i, rear.position);
           rear.target.position.copy(rear.position).addScaledVector(forward, -1);

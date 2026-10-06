@@ -5,7 +5,7 @@ import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
 import { connect } from './cdp-test.mjs';
-import { modelRevision } from '../vite.config.js';
+import { modelRevision, appVersion } from '../vite.config.js';
 const root = resolve('dist');
 const fixture = readFileSync(new URL('./fixtures/cache-recovery-worker.js',import.meta.url),'utf8').replace('if(sessionStorage.recover)', 'navigator.serviceWorker.addEventListener("controllerchange",()=>location.reload());if(sessionStorage.recover)');
 const mime = {'.html':'text/html','.js':'application/javascript','.css':'text/css','.glb':'model/gltf-binary','.json':'application/json','.webmanifest':'application/manifest+json','.svg':'image/svg+xml','.png':'image/png'};
@@ -45,11 +45,21 @@ try {
   await c.until(`document.title==='玩具車庫・交通解謎' && !!document.querySelector('canvas')`);
   await c.until(`navigator.serviceWorker.controller?.scriptURL.endsWith('/sw.js')`);
   await c.sleep(2000);
+  await c.evaluate(`document.querySelector('.utility-menu').open=true`);
+  assert((await c.evaluate(`document.querySelector('.pwa-version').textContent`)).includes(appVersion));
+  await c.click('檢查更新');
+  await c.until(`document.querySelector('.pwa-version').textContent.includes('已是最新版')`);
+  const serverVersion=await c.evaluate(`(async()=> (await (await fetch('/version.json?verification='+Date.now(),{cache:'no-store'})).json()).version)()`);
+  assert.equal(serverVersion,appVersion);
   offline = true;
   await c.send('Network.enable');
   await c.send('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});
   await c.send('Page.reload');
   await c.until(`document.title==='玩具車庫・交通解謎' && !!document.querySelector('canvas')`);
+  await c.evaluate(`document.querySelector('.utility-menu').open=true`);
+  await c.click('檢查更新');
+  await c.until(`/目前離線|暫時無法確認/.test(document.querySelector('.pwa-version').textContent)`);
+  assert(!(await c.evaluate(`document.querySelector('.pwa-version').textContent`)).includes('已是最新版'));
   const result=await c.evaluate(`(async()=>{
     const r=await fetch('/models/racer.glb?v=${modelRevision}');
     const hash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',await r.arrayBuffer()))].map(b=>b.toString(16).padStart(2,'0')).join('');
@@ -61,6 +71,8 @@ try {
   assert.equal(result.progress,'level-17');
   assert(result.rejectsWrongVersion);
   assert(!result.caches.includes('traffic-jam-legacy-test'));
+  result.appVersion=appVersion;
+  result.updateCheck='Network version matches loaded app; offline check reports unavailable';
   writeFileSync(process.argv[2] || 'docs/cache-recovery-2026-10-06/production-verification.json',JSON.stringify(result,null,2));
   console.log(JSON.stringify(result,null,2));
 } finally {

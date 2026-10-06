@@ -1,4 +1,42 @@
 import React, { useEffect, useRef, useState } from "react";
+
+export function PwaVersion() {
+  const [status, setStatus] = useState(''), [busy, setBusy] = useState(false), [waiting, setWaiting] = useState(null);
+  const mounted = useRef(true);
+  useEffect(()=>{ mounted.current=true;return()=>{mounted.current=false;}; },[]);
+  async function check() {
+    setBusy(true);setWaiting(null);setStatus('正在檢查更新…');
+    try {
+      const response=await fetch(`/version.json?check=${Date.now()}`, {cache:'no-store',signal:AbortSignal.timeout(15000)});
+      if(!response.ok)throw new Error('Version unavailable');
+      const latest=await response.json();
+      if(typeof latest.version!=='string')throw new Error('Invalid version');
+      if(latest.version===__APP_VERSION__) {
+        if(mounted.current)setStatus('已是最新版');
+      } else {
+        const reg=await navigator.serviceWorker?.getRegistration();
+        if(!reg)throw new Error('Worker unavailable');
+        await reg.update();
+        if(reg.installing)await new Promise((resolve,reject)=>{
+          const worker=reg.installing;
+          const cleanup=()=>{clearTimeout(timer);worker.removeEventListener('statechange',change);};
+          const change=()=>{if(worker.state==='installed'||worker.state==='activated'){cleanup();resolve();}else if(worker.state==='redundant'){cleanup();reject(new Error('Download failed'));}};
+          const timer=setTimeout(()=>{cleanup();reject(new Error('Download timeout'));},30000);
+          worker.addEventListener('statechange',change);change();
+        });
+        if(mounted.current){setWaiting(reg.waiting||{postMessage:()=>location.reload()});setStatus(`新版 ${latest.version} 已準備好`);}
+      }
+    } catch {
+      if(mounted.current)setStatus(navigator.onLine?'暫時無法確認版本，請稍後重試':'目前離線，連線後再檢查');
+    } finally {if(mounted.current)setBusy(false);}
+  }
+  return <div className="pwa-version">
+    <span>版本 {__APP_VERSION__}{import.meta.env.DEV?' · 本機開發版':''}</span>
+    {!import.meta.env.DEV&&<button disabled={busy} onClick={waiting?()=>waiting.postMessage('ACTIVATE_UPDATE'):check}>{waiting?'更新並重新開啟':busy?'檢查中…':'檢查更新'}</button>}
+    {status&&<span role="status">{status}</span>}
+  </div>;
+}
+
 export default function OfflineStatus() {
   const updateRequested = useRef(false);
   const [registration, setRegistration] = useState(null),

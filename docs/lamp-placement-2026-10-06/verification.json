@@ -4,21 +4,21 @@
       "theme": "day",
       "idlePower": 0,
       "movingPower": 0,
-      "peakSmoke": 14,
+      "peakSmoke": 12,
       "brakePower": 2
     },
     {
       "theme": "sunset",
       "idlePower": 0,
       "movingPower": 8,
-      "peakSmoke": 11,
+      "peakSmoke": 12,
       "brakePower": 2
     },
     {
       "theme": "neon",
       "idlePower": 0,
       "movingPower": 13,
-      "peakSmoke": 11,
+      "peakSmoke": 13,
       "brakePower": 2
     },
     {
@@ -39,26 +39,26 @@
     {
       "quality": "high",
       "theme": "day",
-      "continuousDragFPS": 9.657993409839792,
+      "continuousDragFPS": 10.018645813040937,
       "calls": 221,
       "profile": {
         "cpuMs": {
-          "samples": 34,
-          "median": 7,
-          "p95": 9.800000011920929
+          "samples": 36,
+          "median": 7.5,
+          "p95": 8.700000017881393
         },
         "gpuMs": {
-          "samples": 33,
-          "median": 53.025625,
-          "p95": 58.280468
+          "samples": 35,
+          "median": 55.326979,
+          "p95": 68.806197
         },
         "drawCalls": {
-          "samples": 34,
+          "samples": 36,
           "median": 221,
           "p95": 221
         },
         "triangles": {
-          "samples": 34,
+          "samples": 36,
           "median": 551094,
           "p95": 551094
         },
@@ -68,26 +68,26 @@
     {
       "quality": "standard",
       "theme": "day",
-      "continuousDragFPS": 9.491638982735427,
+      "continuousDragFPS": 10.049970687568772,
       "calls": 221,
       "profile": {
         "cpuMs": {
-          "samples": 34,
-          "median": 5.9000000059604645,
-          "p95": 9.200000017881393
+          "samples": 36,
+          "median": 6.9000000059604645,
+          "p95": 9.900000005960464
         },
         "gpuMs": {
-          "samples": 33,
-          "median": 50.99427,
-          "p95": 56.118958
+          "samples": 35,
+          "median": 54.756354,
+          "p95": 66.595781
         },
         "drawCalls": {
-          "samples": 34,
+          "samples": 36,
           "median": 221,
           "p95": 221
         },
         "triangles": {
-          "samples": 34,
+          "samples": 36,
           "median": 551094,
           "p95": 551094
         },
@@ -97,26 +97,26 @@
     {
       "quality": "high",
       "theme": "neon",
-      "continuousDragFPS": 9.993432886959997,
+      "continuousDragFPS": 9.120446901867204,
       "calls": 257,
       "profile": {
         "cpuMs": {
-          "samples": 36,
-          "median": 7.0999999940395355,
-          "p95": 9.799999982118607
+          "samples": 32,
+          "median": 5.300000011920929,
+          "p95": 93
         },
         "gpuMs": {
-          "samples": 35,
-          "median": 65.421875,
-          "p95": 67.492239
+          "samples": 31,
+          "median": 65.682343,
+          "p95": 67.846354
         },
         "drawCalls": {
-          "samples": 36,
+          "samples": 32,
           "median": 256,
           "p95": 262
         },
         "triangles": {
-          "samples": 36,
+          "samples": 32,
           "median": 689706,
           "p95": 712426
         },
@@ -126,26 +126,26 @@
     {
       "quality": "standard",
       "theme": "neon",
-      "continuousDragFPS": 10.177253837621354,
+      "continuousDragFPS": 10.439296899246678,
       "calls": 257,
       "profile": {
         "cpuMs": {
-          "samples": 36,
-          "median": 5.4000000059604645,
-          "p95": 9
+          "samples": 37,
+          "median": 7,
+          "p95": 9.900000005960464
         },
         "gpuMs": {
-          "samples": 35,
-          "median": 62.849531,
-          "p95": 63.75901
+          "samples": 36,
+          "median": 62.995781,
+          "p95": 64.229531
         },
         "drawCalls": {
-          "samples": 36,
+          "samples": 37,
           "median": 256,
           "p95": 262
         },
         "triangles": {
-          "samples": 36,
+          "samples": 37,
           "median": 689706,
           "p95": 712426
         },

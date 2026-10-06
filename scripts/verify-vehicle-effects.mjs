@@ -140,13 +140,18 @@ try {
     await shot(theme + '-idle');
     const d = await drag('target', 1, theme + '-moving');
     const light = d.during.vehicleLighting;
+    if(theme==='day') {
+      const lamp=d.during.cars.find(c=>c.id==='target');
+      assert(lamp.headLight>=3 && lamp.headColor==='e8f4ff','Daytime lenses visibly emit cool white');
+    }
     assert(light.headlights[0].target[0] > light.headlights[0].position[0]);
     assert(light.rear.target[0] < light.rear.position[0]);
     assert(light.rear.distance < light.headlights[0].distance);
     assert(light.rear.angle > light.headlights[0].angle);
     const back = await drag('target', -1, theme + '-reverse');
-    assert(back.during.vehicleLighting.rear.intensity > 0 && back.during.vehicleLighting.rear.intensity <= .65, 'Reversing spill remains visible without overpowering the ground');
+    assert(back.during.vehicleLighting.rear.intensity > 0 && back.during.vehicleLighting.rear.intensity <= .22, 'Reversing spill remains visible without overpowering the ground');
     assert.equal(back.during.vehicleLighting.rear.color, 'eef4ff');
+    assert(back.during.cars.find(c=>c.id==='target').reverseLight<=.3,'Reverse lens emission stays subdued');
     assert.equal(await c.evaluate(`document.querySelector('.stats b').textContent`), '2');
     await c.click('復原');
     // Undo itself moves the car; measure the fade after that motion settles.

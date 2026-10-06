@@ -1,7 +1,8 @@
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
-import { modelRevision } from '../vite.config.js';
+import { modelRevision, appVersion } from '../vite.config.js';
 const root = new URL("../dist/", import.meta.url);
+writeFileSync(new URL('version.json', root), JSON.stringify({version:appVersion}));
 const walk = (dir = "") =>
   readdirSync(new URL(dir, root), { withFileTypes: true }).flatMap((f) =>
     f.isDirectory()

@@ -5,7 +5,7 @@ import "./experience.css";
 import Board from "./Board.jsx";
 import LevelBrowser from "./LevelBrowser.jsx";
 import { DIFFICULTIES, DIFFICULTY_LABELS } from "./levelCatalog.js";
-import OfflineStatus from "./OfflineStatus.jsx";
+import OfflineStatus, { PwaVersion } from "./OfflineStatus.jsx";
 import { useEditorState } from "./useEditorState.js";
 import { mergeBackup } from "./backupState.js";
 import { restoreSession } from "./sessionState.js";
@@ -1160,6 +1160,7 @@ function App() {
               匯出備份
             </button>
             <button onClick={() => importFile.current.click()}>匯入備份</button>
+            <PwaVersion />
             <input
               ref={importFile}
               type="file"
