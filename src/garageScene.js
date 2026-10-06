@@ -1464,14 +1464,14 @@ export function createGarageScene(canvas, getProps, callbacks) {
       const lampsState=vehicleLampState(item,settings.theme,now);
       item.lampState=lampsState;
       item.lamps.forEach((material) => {
-        material.emissiveIntensity=lampsState.head*1.2+(settings.theme==='day'?lampsState.activity*.12:0);
+        material.emissiveIntensity=lampsState.head*1.2+(settings.theme==='day'?lampsState.activity*.75:0);
       });
       item.tailLamps.forEach((material) => {
         material.color.set("#df7460");
         material.emissive.set("#ef3426");
         material.emissiveIntensity = Math.max(lampsState.park,lampsState.brake*1.3);
       });
-      item.reverseMaterial.emissiveIntensity=lampsState.reverse*1.4;
+      item.reverseMaterial.emissiveIntensity=lampsState.reverse*.65;
       if (!props.editor && !props.won && !reduced.matches && quality.decor) {
         const tick = Math.floor(now / 1000 + item.index * 1.47);
         if (tick !== item.lastTick) {

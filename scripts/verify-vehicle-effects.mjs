@@ -145,7 +145,7 @@ try {
     assert(light.rear.distance < light.headlights[0].distance);
     assert(light.rear.angle > light.headlights[0].angle);
     const back = await drag('target', -1, theme + '-reverse');
-    assert(back.during.vehicleLighting.rear.intensity >= 1.8);
+    assert(back.during.vehicleLighting.rear.intensity > 0 && back.during.vehicleLighting.rear.intensity <= .65, 'Reversing spill remains visible without overpowering the ground');
     assert.equal(back.during.vehicleLighting.rear.color, 'eef4ff');
     assert.equal(await c.evaluate(`document.querySelector('.stats b').textContent`), '2');
     await c.click('復原');
@@ -171,6 +171,7 @@ try {
   assert(vertical.during.vehicleLighting.headlights[0].target[2] > vertical.during.vehicleLighting.headlights[0].position[2]);
   await load('neon', 'high', 55, true);
   await c.click('重置');
+  await c.sleep(700);
   const models = [];
   for (const car of (await snap()).cars) {
     const p = await points(car.id, 0);
@@ -183,7 +184,7 @@ try {
       buttons: 1,
       clickCount: 1
     });
-    await c.sleep(100);
+    await c.until(`document.querySelector('.garage-canvas').garageInspection.snapshot().vehicleLighting.owner===${JSON.stringify(car.id)}`);
     const s = await snap(),
       lit = s.cars.find(c => c.id === car.id);
     assert.equal(s.vehicleLighting.owner, car.id);
