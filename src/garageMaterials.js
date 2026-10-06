@@ -260,9 +260,10 @@ export function prepareWheels(root, length) {
   root.updateMatrixWorld(true);
   const wheels = [];
   root.traverse((mesh) => {
-    if (mesh.isMesh && mesh.material.name === "Rolling wheels")
+    if (mesh.isMesh && ["Rolling wheels", "Wheel brake calipers"].includes(mesh.material.name))
       wheels.push(mesh);
   });
+  const prepared = [];
   for (const mesh of wheels) {
     const matrix = new THREE.Matrix4()
       .copy(root.matrixWorld)
@@ -284,24 +285,32 @@ export function prepareWheels(root, length) {
       );
     }
     geometry.setAttribute("wheelPivot", new THREE.BufferAttribute(pivots, 3));
+    const fixed = mesh.material.name === 'Wheel brake calipers';
+    geometry.setAttribute('wheelSpin', new THREE.BufferAttribute(new Float32Array(position.count).fill(fixed ? 0 : 1), 1));
     const colors = geometry.getAttribute('color');
     const surfaces = new Float32Array(position.count * 2);
     for (let i = 0; i < position.count; i++) {
       // Authored wheel vertex colours separate bright alloy from dark rubber.
-      const alloy = colors && Math.max(colors.getX(i), colors.getY(i), colors.getZ(i)) > .3;
-      surfaces.set(alloy ? [.24, .9] : [.84, 0], i * 2);
-      if (alloy) colors.setXYZ(i, .58, .61, .64);
+      const brightness = colors ? Math.max(colors.getX(i), colors.getY(i), colors.getZ(i)) : 0;
+      const alloy = brightness > .3, steel = brightness > .14;
+      surfaces.set(fixed ? [.32, .35] : alloy ? [.24, .9] : steel ? [.48, .75] : [.88, 0], i * 2);
     }
     geometry.setAttribute('wheelSurface', new THREE.BufferAttribute(surfaces, 2));
     geometry.computeBoundingBox();
     geometry.computeBoundingSphere();
-    mesh.geometry = geometry;
-    root.add(mesh);
-    mesh.position.set(0, 0, 0);
-    mesh.rotation.set(0, 0, 0);
-    mesh.scale.set(1, 1, 1);
-    mesh.updateMatrix();
+    for (const name of Object.keys(geometry.attributes))
+      if (!['position', 'normal', 'color', 'wheelPivot', 'wheelSpin', 'wheelSurface'].includes(name)) geometry.deleteAttribute(name);
+    prepared.push(geometry);
   }
+  if (!prepared.length) return;
+  const geometry = mergeGeometries(prepared);
+  if (!geometry) throw Error('Wheel and stationary brake geometry could not be batched');
+  prepared.forEach(g => g.dispose());
+  const material = wheels.find(mesh => mesh.material.name === 'Rolling wheels').material;
+  wheels.forEach(mesh => mesh.removeFromParent());
+  const batch = new THREE.Mesh(geometry, material);
+  batch.name = 'Rolling wheels with fixed brakes';
+  root.add(batch);
 }
 
 export function rollingMaterial(
@@ -314,12 +323,12 @@ export function rollingMaterial(
     shader.uniforms.wheelAngle = angle;
     shader.uniforms.tyreCompression = compression;
     shader.vertexShader =
-      "uniform float wheelAngle;\nuniform vec2 tyreCompression;\nattribute vec3 wheelPivot;\n" +
+      "uniform float wheelAngle;\nuniform vec2 tyreCompression;\nattribute vec3 wheelPivot;\nattribute float wheelSpin;\n" +
       shader.vertexShader;
     shader.vertexShader = shader.vertexShader.replace(
       "#include <begin_vertex>",
       `#include <begin_vertex>
-      float wc=cos(wheelAngle), ws=sin(wheelAngle);
+      float wc=cos(wheelAngle*wheelSpin), ws=sin(wheelAngle*wheelSpin);
       vec2 wp=transformed.xy-wheelPivot.xy;
       transformed.xy=vec2(wc*wp.x-ws*wp.y,ws*wp.x+wc*wp.y)+wheelPivot.xy;
       float load=wheelPivot.x>0.0?tyreCompression.x:tyreCompression.y;
@@ -329,10 +338,10 @@ export function rollingMaterial(
     shader.vertexShader = shader.vertexShader.replace(
       "#include <beginnormal_vertex>",
       `#include <beginnormal_vertex>
-      float nc=cos(wheelAngle), ns=sin(wheelAngle);
+      float nc=cos(wheelAngle*wheelSpin), ns=sin(wheelAngle*wheelSpin);
       objectNormal.xy=vec2(nc*objectNormal.x-ns*objectNormal.y,ns*objectNormal.x+nc*objectNormal.y);`,
     );
   };
-  material.customProgramCacheKey = () => "rolling-wheels-v3";
+  material.customProgramCacheKey = () => "rolling-wheels-fixed-brakes-v4";
   return material;
 }

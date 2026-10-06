@@ -130,7 +130,16 @@ for(const [name,length]of Object.entries(lengths)){
       assert.equal(hit?.object.material.name,'Headlamp','LED lenses must sit above their housing and remain exposed.');
     }
   }
+  const stationaryBrakes=[];
+  asset.scene.traverse(o=>{if(o.isMesh&&o.material.name==='Wheel brake calipers')stationaryBrakes.push(o);});
   prepareWheels(asset.scene,length);
+  const rollingBatches=[];
+  asset.scene.traverse(o=>{if(o.isMesh&&o.material.name==='Rolling wheels')rollingBatches.push(o);});
+  assert.equal(rollingBatches.length,1,`${name}: brakes must share the wheel draw call`);
+  const spin=rollingBatches[0].geometry.getAttribute('wheelSpin');
+  assert.ok(spin&&Array.from(spin.array).some(v=>v===1));
+  assert.equal(Array.from(spin.array).some(v=>v===0),stationaryBrakes.length>0,`${name}: calipers must remain fixed while rims rotate`);
+  assert.ok((rollingBatches[0].geometry.index?.count??spin.count)/3<16000,`${name}: wheel detail must remain within the mobile geometry budget`);
   const beforeBatch=new Box3().setFromObject(asset.scene);
   const cabinColors=[];
   asset.scene.traverse(o=>{if(o.isMesh&&o.material.name==='Tailored cabin leather'){

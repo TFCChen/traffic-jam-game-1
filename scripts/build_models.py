@@ -51,6 +51,14 @@ wheel_bsdf=wheel_material.node_tree.nodes.get('Principled BSDF')
 wheel_colour=wheel_material.node_tree.nodes.new('ShaderNodeVertexColor')
 wheel_colour.layer_name='Col'
 wheel_material.node_tree.links.new(wheel_colour.outputs['Color'],wheel_bsdf.inputs['Base Color'])
+tyre_compound = mat('Wheel tyre compound', '24282c', .88)
+tyre_groove = mat('Recessed tyre grooves', '14181c', .95)
+brake_enamel = mat('Brake enamel gold', 'c79842', .32, .35)
+rotor_steel = mat('Brake rotor steel', '70787e', .48, .75)
+caliper_material = mat('Wheel brake calipers', 'ffffff', .32, .35)
+caliper_colour=caliper_material.node_tree.nodes.new('ShaderNodeVertexColor')
+caliper_colour.layer_name='Col'
+caliper_material.node_tree.links.new(caliper_colour.outputs['Color'],caliper_material.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
 foliage=mat('Garden foliage','688a68',.95)
 leaf_light=mat('Sunlit foliage','7b966d',.95)
 leaf_dark=mat('Shaded foliage','526e58',.95)
@@ -136,12 +144,89 @@ def wheel_colourize(obj, colour):
     return obj
 
 def wheel_ring(name,x,y,radius,tube,material):
-    bpy.ops.mesh.primitive_torus_add(major_segments=48,minor_segments=6,
+    bpy.ops.mesh.primitive_torus_add(major_segments=32,minor_segments=4,
         major_radius=radius,minor_radius=tube,location=(x,y,.19),rotation=(math.pi/2,0,0))
     obj=bpy.context.object;obj.name=name;obj.data.materials.append(material)
     for polygon in obj.data.polygons:polygon.use_smooth=True
     objects.append(obj)
     return wheel_colourize(obj,material)
+
+def wheel_profile(name,x,y,profile,material,segments=48):
+    # Revolve a closed section around the axle: real rim depth and a rounded
+    # tyre shoulder, with longitudinal grooves built into the rubber itself.
+    side=1 if y>0 else -1
+    vertices=[(x+math.cos(i*math.tau/segments)*r,y+side*offset,
+               .19+math.sin(i*math.tau/segments)*r)
+              for i in range(segments) for offset,r in profile]
+    n=len(profile)
+    faces=[(i*n+j,((i+1)%segments)*n+j,((i+1)%segments)*n+(j+1)%n,i*n+(j+1)%n)
+           for i in range(segments) for j in range(n)]
+    return wheel_colourize(surface(name,vertices,faces,material),material)
+
+def detailed_wheel(kind,x,y):
+    side=1 if y>0 else -1
+    sport=kind=='racer';utility=kind in ('jeep','pickup')
+    commercial=kind in ('coach','schoolbus','delivery','camper')
+    rim=.121 if sport else .094 if utility else .105 if commercial else .112
+    tyre=[(-.055,rim),(-.066,.144),(-.061,.169),(-.045,.184),(-.034,.19),
+          (-.021,.19),(-.018,.184),(-.014,.184),(-.011,.19),
+          (.011,.19),(.014,.184),(.018,.184),(.021,.19),
+          (.034,.19),(.045,.184),(.061,.169),(.067,.145),(.057,rim)]
+    wheel_profile('Rounded grooved tyre',x,y,tyre,tyre_compound)
+    wheel_ring('Sidewall moulding',x,y+side*.066,.153,.0018,tyre_compound)
+    # Short diagonal sipes stay within the tread silhouette. Off-road tyres
+    # have fewer, wider cuts; road tyres have staggered, closely spaced cuts.
+    count=24 if utility else 36
+    for i in range(count):
+        for shoulder in (-1,1):
+            angle=i*math.tau/count+shoulder*.035
+            vertices=[]
+            for offset,a in [(shoulder*.023,angle), (shoulder*.034,angle+.04),
+                             (shoulder*.034,angle+.065), (shoulder*.023,angle+.025)]:
+                vertices.append((x+math.cos(a)*.1903,y+offset,.19+math.sin(a)*.1903))
+            wheel_colourize(surface('Tread sipe',vertices,[(0,1,2,3)],tyre_groove),tyre_groove)
+    wheel_profile('Deep alloy barrel',x,y,[(-.024,rim-.008),(.051,rim-.008),
+                  (.061,rim-.002),(.056,rim+.003),(-.024,rim+.003)],chrome,32)
+    if commercial:
+        wheel_profile('Pressed commercial hub',x,y,[(.049,.028),(.057,.070),
+                      (.051,.093),(.041,.093),(.041,.028)],chrome,32)
+        for i in range(8):
+            a=i*math.tau/8
+            vent=cube('Steel hub ventilation',(x+math.cos(a)*.079,y+side*.055,.19+math.sin(a)*.079),(.022,.004,.011),tyre_groove,0)
+            vent.rotation_euler.y=-a;wheel_colourize(vent,tyre_groove)
+    else:
+        rotor_r=rim-.014
+        wheel_profile('Ventilated brake disc',x,y,[(.022,.027),(.022,rotor_r),
+                      (.031,rotor_r),(.031,.027)],rotor_steel,32)
+        wheel_ring('Rotor wear ring',x,y+side*.032,rotor_r-.008,.0014,bed)
+        if sport:
+            for i in range(18):
+                a=i*math.tau/18
+                wheel_colourize(surface('Drilled disc detail',
+                    [(x+math.cos(a)*.083+math.cos(j*math.tau/6)*.002,
+                      y+side*.032,.19+math.sin(a)*.083+math.sin(j*math.tau/6)*.002) for j in range(6)],
+                    [tuple(range(6))],tyre_groove),tyre_groove)
+        spokes=5 if sport else 6 if utility else 8 if kind=='taxi' else 6
+        for i in range(spokes):
+            a=i*math.tau/spokes
+            for split in ((-.10,.10) if sport else (0,)):
+                angle=a+split
+                points=[]
+                for radius,half_width,offset in [(.023,.009,.059),(rim-.009,.005 if sport else .011,.050)]:
+                    for edge in (-1,1):
+                        points.append((x+math.cos(angle)*radius-math.sin(angle)*half_width*edge,
+                                       y+side*offset,.19+math.sin(angle)*radius+math.cos(angle)*half_width*edge))
+                vertices=points+[(px,py-side*.010,pz) for px,py,pz in points]
+                wheel_colourize(surface('Sculpted alloy spoke',vertices,
+                    [(0,2,3,1),(4,5,7,6),(0,4,6,2),(1,3,7,5),(0,1,5,4),(2,6,7,3)],chrome),chrome)
+        caliper=cube('Fixed brake caliper',(x-.065,y+side*.038,.225),(.041,.026,.067),brake_enamel,.008)
+        wheel_colourize(caliper,brake_enamel);caliper.data.materials.clear();caliper.data.materials.append(caliper_material)
+    wheel_profile('Axle centre cap',x,y,[(.048,.001),(.048,.026),(.062,.026),(.062,.001)],chrome,24)
+    for i in range(5 if sport else 6):
+        a=i*math.tau/(5 if sport else 6)
+        wheel_colourize(surface('Lug bolt',[(x+math.cos(a)*.019+math.cos(j*math.tau/6)*.003,
+            y+side*.064,.19+math.sin(a)*.019+math.sin(j*math.tau/6)*.003) for j in range(6)],
+            [tuple(range(6))],bed),bed)
 
 def panel_seam(body,name,points,side=None):
     # Project small seams onto the actual rounded shell, rather than floating lines.
@@ -910,25 +995,7 @@ def car(kind, length, colour):
     for y in (-.075,-.025,.025,.075): cube('Plate marks', (-length/2+.035,y,.24), (.012,.025,.047), rubber, .002)
     for x in (-length/2+.33, length/2-.34):
         for y in (-.43,.43):
-            wheel_colourize(cylinder('Wheel', (x,y,.19), .19,.13,rubber,'Y'),rubber)
-            wheel_ring('Tyre sidewall shoulder',x,y*1.158,.167,.006,rubber)
-            wheel_ring('Alloy rim lip',x,y*1.158,.113,.006,chrome)
-            if kind=='racer':
-                wheel_ring('Recessed rim barrel',x,y*1.085,.106,.008,bed)
-                rotor=cylinder('Recessed brake rotor',(x,y*1.075,.19),.092,.009,chrome,'Y')
-                wheel_colourize(rotor,chrome)
-            else:wheel_colourize(cylinder('Hub', (x,y*1.13,.19), .09,.025,chrome,'Y'),chrome)
-            # Different rim styles identify vehicle families, all retain one rolling batch.
-            spokes=5 if kind=='racer' else 6 if kind in ('taxi','compact') else 4
-            for spoke in range(spokes):
-                angle=spoke*math.tau/spokes
-                part=cube('Alloy spoke',(x+math.cos(angle)*.063,y*1.16,.19+math.sin(angle)*.063),(.092,.012,.014),chrome,0)
-                part.rotation_euler.y=-angle;wheel_colourize(part,chrome)
-            wheel_colourize(cylinder('Hub cap',(x,y*1.18,.19),.027,.012,bed,'Y'),bed)
-            for tread in range(12):
-                angle=tread*math.tau/12
-                part=cube('Tyre tread',(x+math.cos(angle)*.178,y,.19+math.sin(angle)*.178),(.019,.105,.012),bed,0)
-                part.rotation_euler.y=math.pi/2-angle;wheel_colourize(part,bed)
+            detailed_wheel(kind,x,y)
     for y in (-.26,.26):
         if not refined:cube('Headlight', (length/2-.065,y,.3), (.022,.15,.09), lamp, .02)
         cube('Taillight', (-length/2+.065,y,.28 if kind=='racer' else .3), (.022,.18 if kind=='racer' else .13,.035 if kind=='racer' else .07), redlamp, .012)

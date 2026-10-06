@@ -1,0 +1,157 @@
+{
+  "results": [
+    {
+      "device": "desktop",
+      "profile": {
+        "cpuMs": {
+          "samples": 43,
+          "median": 1,
+          "p95": 2.599999964237213
+        },
+        "gpuMs": {
+          "samples": 42,
+          "median": 20.024531,
+          "p95": 20.286197
+        },
+        "drawCalls": {
+          "samples": 43,
+          "median": 90,
+          "p95": 90
+        },
+        "triangles": {
+          "samples": 43,
+          "median": 269598,
+          "p95": 269598
+        },
+        "gpuTimer": true
+      },
+      "calls": 90,
+      "memory": {
+        "geometries": 76,
+        "textures": 14
+      },
+      "geometryVersion": "http://localhost:4173/models/racer.glb?v=bb1693cb6f7fa9c0"
+    },
+    {
+      "device": "mobile",
+      "profile": {
+        "cpuMs": {
+          "samples": 40,
+          "median": 0.8999999761581421,
+          "p95": 1.800000011920929
+        },
+        "gpuMs": {
+          "samples": 39,
+          "median": 9.250781,
+          "p95": 11.927031
+        },
+        "drawCalls": {
+          "samples": 40,
+          "median": 90,
+          "p95": 90
+        },
+        "triangles": {
+          "samples": 40,
+          "median": 269598,
+          "p95": 269598
+        },
+        "gpuTimer": true
+      },
+      "calls": 90,
+      "memory": {
+        "geometries": 76,
+        "textures": 14
+      },
+      "geometryVersion": "http://localhost:4173/models/racer.glb?v=bb1693cb6f7fa9c0"
+    },
+    {
+      "actualDragAndUndo": true,
+      "dragPerformance": {
+        "frames": 91,
+        "shadowUpdates": 43,
+        "renderedSceneKey": "custom-wheel-detail-play",
+        "viewport": {
+          "width": 1440,
+          "height": 950
+        },
+        "inputToSubmission": {
+          "count": 24,
+          "median": 1.5999999642372131,
+          "p95": 2
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 60,
+            "median": 0.9000000357627869,
+            "p95": 1.600000023841858
+          },
+          "gpuMs": {
+            "samples": 52,
+            "median": 21.345156,
+            "p95": 23.39552
+          },
+          "drawCalls": {
+            "samples": 60,
+            "median": 27,
+            "p95": 41
+          },
+          "triangles": {
+            "samples": 60,
+            "median": 123606,
+            "p95": 242406
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "actualTouchDragAndUndo": true,
+      "dragPerformance": {
+        "frames": 112,
+        "shadowUpdates": 47,
+        "renderedSceneKey": "custom-wheel-detail-play",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "inputToSubmission": {
+          "count": 24,
+          "median": 6.199999988079071,
+          "p95": 12.400000035762787
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 76,
+            "median": 0.3999999761581421,
+            "p95": 0.5999999642372131
+          },
+          "gpuMs": {
+            "samples": 75,
+            "median": 6.640156,
+            "p95": 8.716666
+          },
+          "drawCalls": {
+            "samples": 76,
+            "median": 27,
+            "p95": 32
+          },
+          "triangles": {
+            "samples": 76,
+            "median": 123606,
+            "p95": 182834
+          },
+          "gpuTimer": true
+        }
+      }
+    }
+  ],
+  "errors": []
+}
