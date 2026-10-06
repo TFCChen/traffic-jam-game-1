@@ -3,6 +3,7 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { legalMovesForCar } from "./gameEngine.js";
 import { vehicleModel } from "./vehicleModels.js";
+import { placementAt, legalPlacements } from './editorPlacement.js';
 import {
   asphaltTexture,
   sceneryTexture,
@@ -269,6 +270,21 @@ export function createGarageScene(canvas, getProps, callbacks) {
   marker.position.y = 0.047;
   marker.visible = false;
   scene.add(marker);
+  const placementMaterial = new THREE.MeshBasicMaterial({ color: '#efc777', transparent: true, opacity: .12, depthWrite: false });
+  ownedMaterials.add(placementMaterial);
+  const placementCells = new THREE.InstancedMesh(ringGeometry, placementMaterial, 36);
+  placementCells.frustumCulled = false;
+  placementCells.visible = false;
+  scene.add(placementCells);
+  const ghostMaterial = new THREE.MeshBasicMaterial({ color: '#efc777', transparent: true, opacity: .38, depthWrite: false });
+  const ghostGeometry = new THREE.BoxGeometry(1, 1, 1);
+  ownedMaterials.add(ghostMaterial); ownedGeometries.add(ghostGeometry);
+  const placementGhost = new THREE.InstancedMesh(ghostGeometry, ghostMaterial, 6);
+  placementGhost.frustumCulled = false;
+  placementGhost.visible = false;
+  scene.add(placementGhost);
+  const placementPose = new THREE.Object3D();
+  let editorHover = null, previewPlacement = null, placementKey = '', availablePlacements = [];
   const hintArrow = new THREE.ArrowHelper(
     new THREE.Vector3(1, 0, 0),
     new THREE.Vector3(),
@@ -997,6 +1013,12 @@ export function createGarageScene(canvas, getProps, callbacks) {
   }
   function move(event) {
     if (cameraMove(event)) return;
+    if (getProps().editor && !drag) {
+      const point = planePoint(event);
+      editorHover = point && point.x >= 0 && point.x < 6 && point.z >= 0 && point.z < 6
+        ? { row: Math.floor(point.z), col: Math.floor(point.x) } : null;
+      dirty = true;
+    }
     if (editorDrag?.pointerId === event.pointerId) {
       editorDrag.moved =
         Math.hypot(
@@ -1039,10 +1061,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       if (!transferring && canvas.hasPointerCapture(event.pointerId))
         canvas.releasePointerCapture(event.pointerId);
       if (!cancel)
-        (active.moved ? getProps().onPlace : getProps().onCellClick)?.({
-          row: active.row,
-          col: active.col,
-        });
+        (active.moved ? getProps().onPlace : getProps().onCellClick)?.(active.moved && editorHover ? editorHover : { row: active.row, col: active.col });
       return;
     }
     if (!drag || event.pointerId !== drag.pointerId) return;
@@ -1094,6 +1113,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
   const handlers = {
     pointerdown: down,
     pointermove: move,
+    pointerleave: () => { if (!editorDrag) { editorHover = null; dirty = true; } },
     pointerup: (e) => finish(e),
     pointercancel: (e) => finish(e, true),
     lostpointercapture: (e) => {
@@ -1125,6 +1145,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     sceneKey = props.sceneKey;
     if (changed) {
       cancelCamera();
+      editorHover = null;
       escapeStart = null;
       cameraFollow = 0;
       selected = null;
@@ -1394,7 +1415,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       !!drag ||
       !!cameraGesture ||
       now < settlingUntil ||
-      (escapeStart != null && now - escapeStart < 1900);
+      (escapeStart != null && now - escapeStart < 2300);
     // Cap high-refresh displays too; retain ambient life without rendering at 120/144 Hz.
     const budget = 1000 / (active ? quality.activeFPS : quality.idleFPS);
     if (
@@ -1428,7 +1449,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       if (props.won && car.id === "target") {
         const t = reduced.matches
           ? 1
-          : clamp((now - escapeStart - 320) / 1050, 0, 1);
+          : clamp((now - escapeStart - 350) / 1300, 0, 1);
         x += 4 * t * t;
         group.visible = t < 1;
       } else group.visible = true;
@@ -1560,6 +1581,37 @@ export function createGarageScene(canvas, getProps, callbacks) {
       }
     }
     marker.visible = false;
+    const nextPlacementKey = props.editor ? JSON.stringify([props.cars, props.editorTool]) : '';
+    if (nextPlacementKey !== placementKey) {
+      placementKey = nextPlacementKey;
+      availablePlacements = props.editor ? legalPlacements(props.cars, props.editorTool) : [];
+      placementCells.count = availablePlacements.length;
+      availablePlacements.forEach((p, i) => {
+        placementPose.position.set(p.col + .5, .048, p.row + .5);
+        placementPose.rotation.set(-Math.PI / 2, 0, 0);
+        placementPose.scale.set(.76, .76, 1); placementPose.updateMatrix();
+        placementCells.setMatrixAt(i, placementPose.matrix);
+      });
+      placementCells.instanceMatrix.needsUpdate = true;
+    }
+    placementCells.visible = !!props.editor && !drag;
+    const origin = editorDrag && editorHover ? editorHover : props.editorStart ?? editorHover;
+    previewPlacement = props.editor && origin && !drag ? placementAt(props.cars, props.editorTool, origin) : null;
+    placementGhost.visible = !!previewPlacement && !cameraGesture;
+    if (previewPlacement) {
+      const p = previewPlacement, horizontal = p.dir === 'H';
+      ghostMaterial.color.set(p.valid ? p.color : '#ff6e61');
+      const parts = [[0,.24,0,p.len-.12,.30,.73],[-.1,.47,0,p.len*.46,.22,.56],
+        [-p.len/2+.34,.16,-.38,.22,.25,.10],[-p.len/2+.34,.16,.38,.22,.25,.10],
+        [p.len/2-.34,.16,-.38,.22,.25,.10],[p.len/2-.34,.16,.38,.22,.25,.10]];
+      parts.forEach(([x,y,z,sx,sy,sz],i) => {
+        placementPose.position.set(p.col+(horizontal?p.len/2:.5)+(horizontal?x:z), y, p.row+(horizontal?.5:p.len/2)+(horizontal?z:x));
+        placementPose.rotation.set(0,horizontal?0:Math.PI/2,0);
+        placementPose.scale.set(sx,sy,sz); placementPose.updateMatrix();
+        placementGhost.setMatrixAt(i, placementPose.matrix);
+      });
+      placementGhost.instanceMatrix.needsUpdate = true;
+    }
     ringMaterial.color.set("#f5d391");
     ringMaterial.opacity = 0.13;
     if (props.editor && props.editorStart) {
@@ -1614,7 +1666,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     const victoryAge = escapeStart == null ? 0 : now - escapeStart;
     const follow =
       props.won && !reduced.matches
-        ? 0.26 * Math.sin(Math.PI * clamp(victoryAge / 1500, 0, 1))
+        ? 0.52 * Math.sin(Math.PI * clamp(victoryAge / 2000, 0, 1))
         : 0;
     camera.position.x += follow - cameraFollow;
     cameraFollow = follow;
@@ -1858,6 +1910,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
           opacity: ringMaterial.opacity,
         },
         celebration: celebration.visible,
+        editorPlacement: { legalStarts: availablePlacements.length, preview: previewPlacement },
         cameraFollow,
         cameraGesture: cameraGesture?.mode ?? null,
         touchPointers: touches.size,
@@ -1899,6 +1952,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       roadLights.dispose();
       leaves.dispose();
       celebration.dispose();
+      placementCells.dispose(); placementGhost.dispose();
       lightPools.dispose();
       skidMarks.dispose();
       // Cached asset geometry is shared by current and future scene instances.

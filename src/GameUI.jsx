@@ -84,6 +84,7 @@ export function WinDialog({
   rewards = [],
   finale = false,
   summary,
+  nextTitle,
 }) {
   const dialog = useRef(null);
   useEffect(() => {
@@ -151,7 +152,7 @@ export function WinDialog({
           ✦
         </div>
         <p className="eyebrow">一路暢通</p>
-        <h2 id="win-title">{finale ? "四十關之旅完成！" : "自由了！"}</h2>
+        <h2 id="win-title">{finale ? "四十關之旅完成！" : best != null && moves === best ? "完美出庫" : "順利出庫"}</h2>
         <p className="win-copy">
           {finale
             ? "最後一台紅車已出庫，看看你的車庫收藏。"
@@ -178,6 +179,7 @@ export function WinDialog({
           </span>
         </div>
         <p className="win-level">{title}</p>
+        {best != null && <p className="win-performance">{moves === best ? '每一步都恰到好處 · 最佳解達成' : `距離最佳解 ${Math.max(0, moves - best)} 步 · 再挑戰一次？`}</p>}
         {finale && summary && (
           <p className="journey-summary">
             完成 {summary.completed}/40 關 · 共 {summary.stars} 星 ·{" "}
@@ -274,6 +276,7 @@ export function WinDialog({
             <Icon name="arrow" />
           </button>
         </div>
+        {nextTitle && <p className="win-up-next">下一站 · {nextTitle}</p>}
       </section>
     </div>
   );

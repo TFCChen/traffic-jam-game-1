@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import { placementAt, legalPlacements } from './editorPlacement.js';
+const tool={dir:'V',len:3,color:'#2563eb'};
+assert.equal(legalPlacements([],tool).length,5);
+assert.equal(placementAt([],tool,{row:0,col:0}).valid,false);
+assert.deepEqual(placementAt([],tool,{row:2,col:4}).cells,[{row:2,col:4},{row:2,col:5}]);
+const cars=[{id:'target',row:2,col:0,dir:'H',len:2}];
+assert.equal(placementAt(cars,tool,{row:0,col:0}).valid,false,'Footprint crosses occupied cell');
+assert.equal(placementAt(cars,tool,{row:4,col:3}).valid,false,'Footprint extends past edge');
+assert.equal(placementAt(cars,tool,{row:1,col:3}).valid,true);
+assert.equal(placementAt(cars,{...tool,dir:'H'},{row:0,col:4}).valid,false);
+assert.equal(legalPlacements(cars,tool).length,18);
+console.log('Editor placement respects exit lane, orientation, full footprint and grid bounds.');

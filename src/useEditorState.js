@@ -12,7 +12,7 @@ export function useEditorState(mode) {
     [editorValidation, setEditorValidation] = useState(null),
     [editorHistory, setEditorHistory] = useState([]),
     [editorFuture, setEditorFuture] = useState([]),
-    [editorTool, setEditorTool] = useState({ dir: "H", len: 2 });
+    [editorTool, setEditorTool] = useState({ dir: "H", len: 2, color: '#38bdf8' });
   useEffect(() => {
     if (!editorConflict) return;
     const timer = setTimeout(() => setEditorConflict(null), 1800);

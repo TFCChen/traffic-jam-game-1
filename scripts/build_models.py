@@ -635,6 +635,17 @@ def midengine_coupe(paint):
                 vertices=[(a[0]-nx*width/2,a[1]-ny*width/2,a[2]+offset),(b[0]-nx*width/2,b[1]-ny*width/2,b[2]+offset),
                           (b[0]+nx*width/2,b[1]+ny*width/2,b[2]+offset),(a[0]+nx*width/2,a[1]+ny*width/2,a[2]+offset)]
                 surface(label,vertices,[(0,1,2,3)],material)
+        # Project each optical layer onto the curved fender: no raised coin-shaped lens.
+        for name,rx,ry,lift,material in [('Flush coupe optical pocket',.041,.025,.002,rubber),
+                                      ('Inset coupe reflector',.030,.019,.003,chrome),
+                                      ('Coupe projector optic',.024,.015,.004,lamp)]:
+            points=[]
+            for i in range(24):
+                angle=2*math.pi*i/24;x=.745+math.cos(angle)*rx;y=side*.333+math.sin(angle)*ry
+                hit,optical,normal,index=body.ray_cast(Vector((x,y,2)),Vector((0,0,-1)))
+                if not hit:raise RuntimeError('Coupe optical pocket must follow the fender')
+                points.append((x,y,optical.z+lift))
+            surface(name,points,[tuple(range(24))],material)
         strut('Lower side blade',(-.42,side*.378,.13),(.40,side*.389,.13),.025,rubber)
     ribbon('Engine cover',[(-.61,.235,.36),(-.74,.244,.355),(-.85,.237,.343)],panel_glass)
     for x in (-.66,-.715,-.77,-.825):cube('Engine cooling louvre',(x,0,.366),(.012,.38,.012),rubber,.002)
@@ -711,7 +722,11 @@ def passenger_car(kind,paint):
         else:
             strut('Hatch lamp signature',(-.865,side*.365,.398),(-.893,side*.315,.324),.025,redlamp)
         cube('Inset lamp housing',(.897,side*.25,.378 if suv else .321),(.035,.17,.073),rubber,.018)
-        cube('LED lens',(.919,side*.25,.382 if suv else .329),(.015,.132,.030),lamp,.007)
+        height=.378 if suv else .321
+        for offset in (-.038,.038):
+            cylinder('Projector satin barrel',(.923,side*.25+offset,height),.026,.017,chrome,'X')
+            cylinder('Clear projector optic',(.934,side*.25+offset,height),.019,.008,lamp,'X')
+        cube('Separate daylight blade',(.938,side*.25,height+.036),(.012,.133,.010),lamp,.003)
     cube('Front grille',(.94,0,.325 if suv else .272),(.024,.25,.11 if suv else .065),rubber,.015)
     if suv:
         for y in (-.08,-.04,0,.04,.08):cube('Grille satin bar',(.955,y,.326),(.014,.013,.078),chrome,.004)
@@ -807,7 +822,12 @@ def leisure_vehicle(kind,paint):
         cube('Pickup front grille',(.944,0,.30),(.018,.40,.11),rubber,.009)
         for y in (-.12,0,.12):cube('Grille rib',(.956,y,.30),(.013,.021,.083),chrome,.004)
         front=.955
-    for side in (-1,1):cube('Utility LED lamp',(front,side*.26,.365 if camper else .365),(.02,.16,.045),lamp,.009)
+    for side in (-1,1):
+        cube('Utility inset bezel',(front-.008,side*.26,.365),(.032,.178,.089),rubber,.012)
+        for offset in (-.041,.041):
+            cylinder('Utility reflector',(front+.012,side*.26+offset,.366),.030,.012,chrome,'X')
+            cylinder('Utility projector',(front+.020,side*.26+offset,.366),.022,.006,lamp,'X')
+        cube('Utility daylight underline',(front+.023,side*.26,.332),(.013,.146,.010),lamp,.003)
 
 def commercial_vehicle(kind,paint):
     school=kind=='schoolbus';truck=kind=='delivery'
@@ -930,7 +950,11 @@ def commercial_vehicle(kind,paint):
         cube('Commercial mirror body base',(mx,side*.438,.516),(.070,.035,.038),paint,.007)
         strut('Extended mirror support',(mx,side*.449,.523),(mx,side*.49,.659),.018,rubber)
         cube('Commercial mirror',(mx,side*.49,.70),(.095,.063,.12),rubber,.017)
-        cube('Commercial LED',(1.445,side*.27,.36),(.016,.15,.045),lamp,.01)
+        cube('Commercial inset bezel',(1.44,side*.27,.36),(.025,.17,.085),rubber,.012)
+        for offset in (-.042,.042):
+            cube('Commercial reflector',(1.454,side*.27+offset,.365),(.009,.056,.041),chrome,.007)
+            cube('Commercial optical lens',(1.461,side*.27+offset,.365),(.007,.037,.028),lamp,.005)
+        cube('Commercial running light',(1.465,side*.27,.330),(.008,.139,.010),lamp,.003)
     cube('Front bumper lip',(1.435,0,.17),(.043,.62,.055),rubber,.012)
     cube('Commercial grille',(1.441,0,.28),(.023,.26,.079),rubber,.015)
 
@@ -998,8 +1022,13 @@ def car(kind, length, colour):
             detailed_wheel(kind,x,y)
     for y in (-.26,.26):
         if not refined:cube('Headlight', (length/2-.065,y,.3), (.022,.15,.09), lamp, .02)
-        cube('Taillight', (-length/2+.065,y,.28 if kind=='racer' else .3), (.022,.18 if kind=='racer' else .13,.035 if kind=='racer' else .07), redlamp, .012)
-        if kind=='racer':cube('Recessed tail lamp bezel',(-length/2+.074,y,.28),(.019,.193,.048),rubber,.008)
+        rear=-length/2+.052; height=.28 if kind=='racer' else .3
+        width=.18 if kind=='racer' else .13
+        cube('Recessed tail lamp bezel',(rear+.014,y,height),(.025,width+.023,.054 if kind=='racer' else .088),rubber,.009)
+        for offset in (-.010,.010):
+            cube('Layered tail light blade',(rear-.004,y,height+offset),(.013,width,.008),redlamp,.003)
+        for offset in (-width*.32,0,width*.32):
+            cube('Optical tail light separator',(rear-.011,y+offset,height),(.008,.008,.022),rubber,.002)
     if not refined:cube('Front bumper', (length/2-.06,0,.18), (.055,.57,.08), chrome, .025)
     exported = export(kind)
     return exported

@@ -1,0 +1,18 @@
+{
+  "legalRedStarts": 5,
+  "invalidPreview": true,
+  "modelSelection": true,
+  "undoRedo": true,
+  "undoShortcut": true,
+  "validation": true,
+  "mobileOverflow": false,
+  "actualTouchPlacement": true,
+  "actualTouchValidationButton": true,
+  "unobscuredTrialAndNextButtons": true,
+  "trialWin": true,
+  "optimalOfficialWin": true,
+  "nextLevel": true,
+  "replay": true,
+  "reducedMotion": true,
+  "finalEmptyPickerHidden": true
+}

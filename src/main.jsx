@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./styles.css";
 import "./experience.css";
 import Board from "./Board.jsx";
+import EditorTray from './EditorTray.jsx';
 import LevelBrowser from "./LevelBrowser.jsx";
 import { DIFFICULTIES, DIFFICULTY_LABELS } from "./levelCatalog.js";
 import OfflineStatus, { PwaVersion } from "./OfflineStatus.jsx";
@@ -41,16 +42,6 @@ import {
 } from "./storage.js";
 import { solveInBackground } from "./solverClient.js";
 
-const COLORS = [
-  "#8b5cf6",
-  "#22c55e",
-  "#f59e0b",
-  "#ec4899",
-  "#3b82f6",
-  "#14b8a6",
-  "#84cc16",
-  "#f97316",
-];
 const DEFAULT_LEVEL = {
   id: "demo",
   title: "暫時車庫",
@@ -229,6 +220,9 @@ function App() {
   const winPresented = useRef(false);
   const [winReady, setWinReady] = useState(false);
   const [winOpen, setWinOpen] = useState(false);
+  const [levelTransition, setLevelTransition] = useState(false);
+  const transitionTimer = useRef(null);
+  useEffect(() => () => clearTimeout(transitionTimer.current), []);
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState(null);
   const [hint, setHint] = useState(null);
@@ -259,6 +253,19 @@ function App() {
     undoEditor,
     redoEditor,
   } = useEditorState(mode);
+  useEffect(() => {
+    if (mode !== 'editor') return;
+    const handler = event => {
+      if (!(event.ctrlKey || event.metaKey) || event.altKey || event.target.closest?.('input,textarea,select,[contenteditable="true"]')) return;
+      if (event.key.toLowerCase() === 'z') {
+        event.preventDefault(); if (!loading) (event.shiftKey ? redoEditor : undoEditor)();
+      } else if (event.key.toLowerCase() === 'y') {
+        event.preventDefault(); if (!loading) redoEditor();
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [mode, loading, editorHistory, editorFuture, editorCars]);
   const [initialized, setInitialized] = useState(false),
     [storageError, setStorageError] = useState(getStorageIssue);
   const [tutorial, setTutorial] = useState(false),
@@ -394,7 +401,7 @@ function App() {
         setWinReady(true);
         setWinOpen(true);
       },
-      reduced ? 120 : 1550,
+      reduced ? 120 : 2100,
     );
     return () => clearTimeout(timer);
   }, [won, mode, current.id, panel, garageSettingsOpen]);
@@ -590,11 +597,20 @@ function App() {
     setMessage(`將發光的車輛往${direction}移動 ${Math.abs(move.delta)} 格。`);
   }
 
-  function nextLevel() {
-    setWinOpen(false);
+  async function nextLevel() {
+    if (levelTransition) return;
     const index = levels.findIndex((level) => level.id === current.id);
-    if (index >= 0 && index < levels.length - 1) loadLevel(levels[index + 1]);
-    else setPanel("levels");
+    if (index < 0 || index >= levels.length - 1) {
+      setWinOpen(false);
+      setPanel("levels");
+      return;
+    }
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setWinOpen(false);
+    setLevelTransition(true);
+    if (!reduced) await new Promise(resolve => { transitionTimer.current = setTimeout(resolve, 240); });
+    try { await loadLevel(levels[index + 1]); }
+    finally { setLevelTransition(false); }
   }
 
   function enterEditor(level = null) {
@@ -629,9 +645,7 @@ function App() {
     const targetExists = editorCars.some((c) => c.id === "target");
     const car = {
       id: targetExists ? `car-${crypto.randomUUID()}` : "target",
-      color: targetExists
-        ? COLORS[editorCars.length % COLORS.length]
-        : "#e53935",
+      color: targetExists ? editorTool.color : "#e53935",
       ...point,
       dir: targetExists ? editorTool.dir : "H",
       len: targetExists ? editorTool.len : 2,
@@ -686,12 +700,14 @@ function App() {
       setMessage("終點無效，已取消選取；請重新選擇起點。車輛需佔同列或同欄的 2／3 格。");
       return;
     }
+    if (targetExists && (len !== editorTool.len || (sameRow ? 'H' : 'V') !== editorTool.dir)) {
+      setMessage(`終點不符合所選車型，已取消選取。請放置${editorTool.dir === 'H' ? '水平' : '垂直'} ${editorTool.len} 格車輛。`);
+      return;
+    }
 
     const car = {
       id: targetExists ? `car-${Date.now()}` : "target",
-      color: targetExists
-        ? COLORS[editorCars.length % COLORS.length]
-        : "#e53935",
+      color: targetExists ? editorTool.color : "#e53935",
       row: sameRow ? point.row : Math.min(point.row, editorStart.row),
       col: sameRow ? Math.min(point.col, editorStart.col) : point.col,
       len,
@@ -884,7 +900,7 @@ function App() {
   }
 
   return (
-    <div className={`app-shell ${mode === "play" ? "immersive-play" : "editor-shell"}`}>
+    <div className={`app-shell immersive-play ${mode === "editor" ? "editor-shell" : ""} ${levelTransition ? "level-transition" : ""}`}>
       <div className="ambient-scene" aria-hidden="true">
         <i />
         <i />
@@ -960,7 +976,7 @@ function App() {
             onMove={commitMove}
             hint={hint}
             won={mode === "play" && won}
-            disabled={loading}
+            disabled={loading || levelTransition}
             editor={mode === "editor"}
             editorStart={editorStart}
             editorConflict={editorConflict}
@@ -1040,45 +1056,20 @@ function App() {
                 </label>
                 <button
                   onClick={undoEditor}
+                  title="Ctrl / ⌘ Z"
                   disabled={!editorHistory.length || loading}
                 >
-                  復原編輯
+                  <Icon name="undo" />復原編輯
                 </button>
                 <button
                   onClick={redoEditor}
+                  title="Ctrl / ⌘ Shift Z"
                   disabled={!editorFuture.length || loading}
                 >
-                  重做編輯
+                  <Icon name="reset" />重做編輯
                 </button>
-                <label>
-                  方向
-                  <select
-                    value={editorCars.some(c=>c.id==='target')?editorTool.dir:'H'}
-                    disabled={!editorCars.some(c=>c.id==='target')}
-                    onChange={(e) =>
-                      setEditorTool((t) => ({ ...t, dir: e.target.value }))
-                    }
-                  >
-                    <option value="H">水平</option>
-                    <option value="V">垂直</option>
-                  </select>
-                </label>
-                <label>
-                  車長
-                  <select
-                    value={editorCars.some(c=>c.id==='target')?editorTool.len:2}
-                    disabled={!editorCars.some(c=>c.id==='target')}
-                    onChange={(e) =>
-                      setEditorTool((t) => ({
-                        ...t,
-                        len: Number(e.target.value),
-                      }))
-                    }
-                  >
-                    <option value={2}>2 格</option>
-                    <option value={3}>3 格</option>
-                  </select>
-                </label>
+                <EditorTray cars={editorCars} tool={editorTool} disabled={loading}
+                  onChange={setEditorTool} onCancel={() => { setEditorStart(null); setEditorConflict(null); }} />
                 {editorStart && (
                   <button onClick={cancelEditorStart}>取消選點</button>
                 )}
@@ -1115,8 +1106,6 @@ function App() {
                   <Icon name="arrow" />
                   試玩
                 </button>
-              </div>
-
               {editorValidation && (
                 <section
                   className="analysis-card editor-validation"
@@ -1153,6 +1142,7 @@ function App() {
                   )}
                 </section>
               )}
+              </div>
             </>
           )}
 
@@ -1481,6 +1471,7 @@ function App() {
           moves={moves}
           stars={starsForPerformance(moves, analysis?.optimalMoves)}
           best={analysis?.optimalMoves}
+          nextTitle={hasNext ? `第 ${String(levels[levels.findIndex(level => level.id === current.id) + 1].id).padStart(2, '0')} 關` : null}
           title={currentTitle}
           rewards={rewards}
           finale={current.id === 40}

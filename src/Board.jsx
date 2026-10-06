@@ -122,6 +122,7 @@ export default function Board(props) {
     props.hint,
     props.editorStart,
     props.editorConflict,
+    props.editorTool,
     props.sceneKey,
     props.editor,
   ]);
@@ -384,7 +385,7 @@ export default function Board(props) {
           </div>
         </Sheet>
       )}
-      {props.editor && (
+      {props.editor && props.cars.length > 0 && (
         <div
           className="vehicle-picker"
           aria-label={props.editor ? "編輯車輛" : "鍵盤選取車輛"}
