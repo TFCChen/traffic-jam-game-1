@@ -17,25 +17,25 @@
   "performanceResults": [
     {
       "quality": "high",
-      "orbitFPS": 9.278977791299058,
+      "orbitFPS": 8.474576271186441,
       "profile": {
         "cpuMs": {
-          "samples": 61,
-          "median": 1.5,
-          "p95": 2.199999988079071
+          "samples": 60,
+          "median": 1.699999988079071,
+          "p95": 3.199999988079071
         },
         "gpuMs": {
-          "samples": 60,
-          "median": 21.541458,
-          "p95": 40.04177
+          "samples": 59,
+          "median": 19.838072,
+          "p95": 26.86927
         },
         "drawCalls": {
-          "samples": 61,
+          "samples": 60,
           "median": 100,
           "p95": 100
         },
         "triangles": {
-          "samples": 61,
+          "samples": 60,
           "median": 206480,
           "p95": 206480
         },
@@ -44,17 +44,17 @@
     },
     {
       "quality": "standard",
-      "orbitFPS": 8.588605782994561,
+      "orbitFPS": 9.646302250803858,
       "profile": {
         "cpuMs": {
           "samples": 60,
-          "median": 2.5,
-          "p95": 3
+          "median": 1.600000023841858,
+          "p95": 3.200000047683716
         },
         "gpuMs": {
           "samples": 57,
-          "median": 20.451666,
-          "p95": 39.50552
+          "median": 23.155989,
+          "p95": 43.453541
         },
         "drawCalls": {
           "samples": 60,

@@ -60,13 +60,16 @@ export function configureVehicleGlass(material, quality, optics = 'thin-sheet') 
     shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>',`
       float paneCos=max(.001,abs(dot(geometryNormal,geometryViewDir)));
       float paneFresnel=.04+.96*pow(1.-paneCos,5.);
-      float paneAlpha=clamp(.10/max(.30,paneCos)+paneFresnel,.10,.94);
+      // Smoked solar film absorbs light without scattering the cabin image.
+      // Beer-Lambert absorption deepens smoothly along oblique viewing paths.
+      float paneAbsorption=1.-exp(-.28/max(.30,paneCos));
+      float paneAlpha=clamp(paneAbsorption+(1.-paneAbsorption)*paneFresnel,.04,.94);
       outgoingLight=(totalSpecular+totalEmissiveRadiance)/paneAlpha;
       diffuseColor.a=paneAlpha;
       #include <opaque_fragment>
     `);
   };
-  material.customProgramCacheKey=()=>refractive?'refractive-glass-v1':'thin-sheet-glass-v1';
+  material.customProgramCacheKey=()=>refractive?'refractive-glass-v1':'thin-sheet-glass-v2';
   if (wasRefractive !== refractive || wasTransparent !== material.transparent || wasSide !== material.side)
     material.needsUpdate = true;
   if(previousOptics!==material.userData.optics) material.needsUpdate=true;
