@@ -1,0 +1,145 @@
+{
+  "results": [
+    {
+      "theme": "day",
+      "idlePower": 0,
+      "movingPower": 7,
+      "peakSmoke": 13,
+      "brakePower": 4
+    },
+    {
+      "theme": "sunset",
+      "idlePower": 8,
+      "movingPower": 14,
+      "peakSmoke": 11,
+      "brakePower": 4
+    },
+    {
+      "theme": "neon",
+      "idlePower": 15,
+      "movingPower": 22,
+      "peakSmoke": 12,
+      "brakePower": 4
+    }
+  ],
+  "perf": [
+    {
+      "quality": "high",
+      "theme": "day",
+      "continuousDragFPS": 9.078271723989836,
+      "calls": 248,
+      "profile": {
+        "cpuMs": {
+          "samples": 32,
+          "median": 5.4000000059604645,
+          "p95": 8.199999988079071
+        },
+        "gpuMs": {
+          "samples": 31,
+          "median": 46.632604,
+          "p95": 57.703541
+        },
+        "drawCalls": {
+          "samples": 32,
+          "median": 252,
+          "p95": 256
+        },
+        "triangles": {
+          "samples": 32,
+          "median": 664030,
+          "p95": 675582
+        },
+        "gpuTimer": true
+      }
+    },
+    {
+      "quality": "standard",
+      "theme": "day",
+      "continuousDragFPS": 10.046885465438843,
+      "calls": 251,
+      "profile": {
+        "cpuMs": {
+          "samples": 36,
+          "median": 7.0999999940395355,
+          "p95": 9
+        },
+        "gpuMs": {
+          "samples": 35,
+          "median": 43.169583,
+          "p95": 46.170468
+        },
+        "drawCalls": {
+          "samples": 36,
+          "median": 252,
+          "p95": 255
+        },
+        "triangles": {
+          "samples": 36,
+          "median": 664030,
+          "p95": 675546
+        },
+        "gpuTimer": true
+      }
+    },
+    {
+      "quality": "high",
+      "theme": "neon",
+      "continuousDragFPS": 10.135705839309763,
+      "calls": 247,
+      "profile": {
+        "cpuMs": {
+          "samples": 36,
+          "median": 5.199999988079071,
+          "p95": 8.299999982118607
+        },
+        "gpuMs": {
+          "samples": 35,
+          "median": 61.880364,
+          "p95": 68.152604
+        },
+        "drawCalls": {
+          "samples": 36,
+          "median": 250,
+          "p95": 255
+        },
+        "triangles": {
+          "samples": 36,
+          "median": 661066,
+          "p95": 675710
+        },
+        "gpuTimer": true
+      }
+    },
+    {
+      "quality": "standard",
+      "theme": "neon",
+      "continuousDragFPS": 10.226110669224818,
+      "calls": 247,
+      "profile": {
+        "cpuMs": {
+          "samples": 36,
+          "median": 6.799999982118607,
+          "p95": 9.099999994039536
+        },
+        "gpuMs": {
+          "samples": 35,
+          "median": 54.193854,
+          "p95": 60.428281
+        },
+        "drawCalls": {
+          "samples": 36,
+          "median": 250,
+          "p95": 254
+        },
+        "triangles": {
+          "samples": 36,
+          "median": 661066,
+          "p95": 675534
+        },
+        "gpuTimer": true
+      }
+    }
+  ],
+  "vertical": "Forward +Z and rear -Z verified",
+  "errors": []
+}

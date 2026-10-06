@@ -14,6 +14,7 @@ import {
 import { SCENE_THEMES } from "./sceneThemes.js";
 import { QUALITY } from "./gamePreferences.js";
 import { configureVehicleGlass, prepareVehicleGlass, VEHICLE_MIRROR } from "./vehicleGlass.js";
+import { createVehicleLights, createExhaustSmoke } from './vehicleEffects.js';
 import { quadDistance, snapDragDelta } from "./pointerHelpers.js";
 import {
   stepSuspension,
@@ -110,8 +111,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
   const roadTexture = asphaltTexture();
   const sceneryAtlas = sceneryTexture();
   const glowTexture = detailTexture("glow"),
-    skidTexture = detailTexture("skid"),
-    beamTexture = detailTexture("beam");
+    skidTexture = detailTexture("skid");
   const contactGeometry = new THREE.PlaneGeometry(1, 1);
   const camera = new THREE.OrthographicCamera(-5, 5, 4, -4, 0.1, ORTHOGRAPHIC_FAR);
   const aim = new THREE.Vector3(3, 0.15, 3);
@@ -210,6 +210,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
   });
   const sun = new THREE.DirectionalLight(0xffefce, settings.intensity);
   sun.castShadow = true;
+  sun.shadow.autoUpdate = false;
+  sun.shadow.needsUpdate = true;
   sun.shadow.mapSize.set(1024, 1024);
   sun.shadow.camera.left = -8;
   sun.shadow.camera.right = 8;
@@ -305,26 +307,6 @@ export function createGarageScene(canvas, getProps, callbacks) {
   ownedMaterials.add(glowMaterial);
   const lightPools = new THREE.InstancedMesh(glowGeometry, glowMaterial, 2);
   scene.add(lightPools);
-  const beamGeometry = new THREE.PlaneGeometry(0.62, 1.05);
-  ownedGeometries.add(beamGeometry);
-  const beamMaterial = new THREE.MeshBasicMaterial({
-    map: beamTexture,
-    color: "#ffe6b0",
-    transparent: true,
-    opacity: 0.32,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-  });
-  ownedMaterials.add(beamMaterial);
-  const headlightBeams = new THREE.InstancedMesh(
-    beamGeometry,
-    beamMaterial,
-    40,
-  );
-  headlightBeams.count = 0;
-  headlightBeams.frustumCulled = false;
-  headlightBeams.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-  scene.add(headlightBeams);
   for (let i = 0; i < 2; i++) {
     instancePose.position.set(i ? 6.65 : -0.7, 0.045, i ? 5.45 : 0.2);
     instancePose.rotation.set(-Math.PI / 2, 0, 0);
@@ -406,10 +388,12 @@ export function createGarageScene(canvas, getProps, callbacks) {
       accentColour.set(["#ffc857", "#72d2bd", "#ee7f75", "#8a9df1"][i % 4]),
     );
   // A bounded particle pool: never allocate meshes in the animation loop.
+  const vehicleLights = createVehicleLights(scene);
+  const exhaustSmoke = createExhaustSmoke(scene);
   const particles = [];
   const smokeGeometry = new THREE.SphereGeometry(0.055, 6, 4);
   ownedGeometries.add(smokeGeometry);
-  for (let i = 0; i < 28; i++) {
+  for (let i = 0; i < 8; i++) {
     const material = new THREE.MeshBasicMaterial({
       color: "#d7dfd2",
       transparent: true,
@@ -424,17 +408,18 @@ export function createGarageScene(canvas, getProps, callbacks) {
   }
   function puff(position, direction, spark = false) {
     if (reduced.matches) return;
+    if (!spark) { exhaustSmoke.emit(position, direction); return; }
     const p = particles.find((item) => item.life <= 0);
     if (!p) return;
-    p.life = spark ? 0.32 : 1.1;
+    p.life = 0.32;
     p.duration = p.life;
     p.spark = spark;
     p.mesh.position.copy(position);
     p.mesh.visible = true;
-    p.mesh.material.color.set(spark ? "#ffd281" : "#d7dfd2");
-    p.mesh.scale.setScalar(spark ? 0.5 : 0.6);
-    p.velocity.copy(direction).multiplyScalar(spark ? 1.5 : 0.3);
-    p.velocity.y = spark ? 0.2 : 0.2;
+    p.mesh.material.color.set("#ffd281");
+    p.mesh.scale.setScalar(0.5);
+    p.velocity.copy(direction).multiplyScalar(1.5);
+    p.velocity.y = 0.2;
   }
   function updateCamera(viewOnly = false) {
     cameraFollow = 0;
@@ -1444,6 +1429,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       if (Math.abs(velocity) > 0.12) item.gear = Math.sign(velocity);
       const reversing = velocity < -0.12 || (isDrag && item.gear === -1),
         braking = now < item.brakeUntil;
+      item.reversing = reversing; item.braking = braking; item.isDrag = isDrag;
       item.lamps.forEach((material) => {
         material.emissiveIntensity =
           settings.theme === "neon"
@@ -1456,8 +1442,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
                   (Math.sin(now * 0.001 + item.index) * 0.5 + 0.5) * 0.25;
       });
       item.tailLamps.forEach((material) => {
-        material.color.set(reversing ? "#e9f1e5" : "#df7460");
-        material.emissive.set(reversing ? "#e7f0df" : "#ef3426");
+        material.color.set("#df7460");
+        material.emissive.set("#ef3426");
         material.emissiveIntensity = reversing
           ? 0.9
           : braking
@@ -1472,7 +1458,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
           item.lastTick = tick;
           if (tick % 4 === 0)
             puff(
-              group.localToWorld(scratchPosition.set(-car.len / 2, 0.19, 0.2)),
+              group.localToWorld(scratchPosition.set(-car.len / 2+.015, 0.16, -0.23)),
               scratchDirection.set(
                 car.dir === "H" ? -1 : 0,
                 0,
@@ -1481,10 +1467,15 @@ export function createGarageScene(canvas, getProps, callbacks) {
             );
         }
       }
+      if (quality.decor && !reduced.matches && isDrag && now-(item.lastExhaust??0)>110) {
+        item.lastExhaust=now;
+        puff(group.localToWorld(scratchPosition.set(-car.len/2+.015,.16,-.23)),
+          scratchDirection.set(car.dir==='H'?-1:0,0,car.dir==='V'?-1:0));
+      }
       if (
         quality.decor &&
         isDrag &&
-        Math.abs(drag.speed) > 1 &&
+        Math.abs(drag.speed) > 7 &&
         now - drag.lastAt < 140 &&
         now - drag.lastPuff > 65
       ) {
@@ -1519,9 +1510,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       ) {
         item.lastExitPuff = now;
         puff(
-          scratchPosition
-            .copy(group.position)
-            .add(scratchDirection.set(-0.85, 0.13, 0.2)),
+          group.localToWorld(scratchPosition.set(-car.len/2+.015,.16,-.23)),
           scratchDirection.set(-1, 0, 0),
         );
       }
@@ -1603,59 +1592,10 @@ export function createGarageScene(canvas, getProps, callbacks) {
       scratchPosition.copy(viewAim).add(scratchDirection.set(follow, 0, 0)),
     );
     camera.updateMatrixWorld();
-    headlightBeams.visible = settings.theme === "neon" && quality.decor;
-    headlightBeams.count = 0;
-    if (headlightBeams.visible) {
-      for (const { group, car } of groups.values()) {
-        if (!group.visible) continue;
-        const axis = car.dir === "H" ? "x" : "z",
-          lateral = car.dir === "H" ? "z" : "x",
-          front = group.position[axis] + car.len / 2;
-        let reach =
-          props.won && car.id === "target" ? 1.05 : Math.min(1.05, 6 - front);
-        for (const other of groups.values()) {
-          if (other.car.id === car.id || !other.group.visible) continue;
-          const along = other.car.dir === car.dir ? other.car.len : 0.9,
-            across = other.car.dir === car.dir ? 0.9 : other.car.len;
-          if (
-            Math.abs(other.group.position[lateral] - group.position[lateral]) <
-              (across + 0.6) / 2 &&
-            other.group.position[axis] + along / 2 > front
-          )
-            reach = Math.min(
-              reach,
-              Math.max(
-                0,
-                other.group.position[axis] - along / 2 - front - 0.025,
-              ),
-            );
-        }
-        if (reach < 0.08) continue;
-        for (const side of [-0.24, 0.24]) {
-          if (headlightBeams.count >= 40) break;
-          group.localToWorld(
-            scratchPosition.set(car.len / 2 + reach / 2, 0, side),
-          );
-          instancePose.position.set(
-            scratchPosition.x,
-            0.052,
-            scratchPosition.z,
-          );
-          instancePose.rotation.set(
-            -Math.PI / 2,
-            0,
-            car.dir === "H" ? -Math.PI / 2 : Math.PI,
-          );
-          instancePose.scale.set(0.7 + reach * 0.3, reach / 1.05, 1);
-          instancePose.updateMatrix();
-          headlightBeams.setMatrixAt(
-            headlightBeams.count++,
-            instancePose.matrix,
-          );
-        }
-      }
-      headlightBeams.instanceMatrix.needsUpdate = true;
-    }
+    const litCar=groups.get(drag?.car.id ?? (props.won?'target':selected??'target'));
+    // Headlight refreshes must not force an unchanged sun map to render again.
+    if (renderer.shadowMap.needsUpdate) sun.shadow.needsUpdate = true;
+    if (vehicleLights.update(props.editor?null:litCar,settings,quality,now,shadowChanged||renderer.shadowMap.needsUpdate)) renderer.shadowMap.needsUpdate=true;
     leaves.visible =
       quality.decor &&
       !reduced.matches &&
@@ -1715,6 +1655,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       }
       celebration.instanceMatrix.needsUpdate = true;
     }
+    exhaustSmoke.update(dt,now,camera,!reduced.matches&&quality.decor&&!props.editor,settings.theme);
     particles.forEach((p) => {
       if (reduced.matches || !quality.decor) {
         p.life = 0;
@@ -1726,10 +1667,11 @@ export function createGarageScene(canvas, getProps, callbacks) {
       p.mesh.visible = p.life > 0;
       p.mesh.position.addScaledVector(p.velocity, dt);
       p.mesh.material.opacity = Math.max(0, p.life / p.duration) * 0.38;
-      if (!p.spark) p.mesh.scale.addScalar(dt * 0.6);
     });
-    if (shadowChanged && now - lastShadow >= 1000 / 30 - 0.5)
+    if (shadowChanged && now - lastShadow >= 1000 / 30 - 0.5) {
+      sun.shadow.needsUpdate = true;
       renderer.shadowMap.needsUpdate = true;
+    }
     if (renderer.shadowMap.needsUpdate) {
       lastShadow = now;
       stats.shadowUpdates++;
@@ -1825,6 +1767,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
           position: camera.position.toArray(),
         },
         transmissionResolutionScale: renderer.transmissionResolutionScale,
+        vehicleLighting: vehicleLights.snapshot(),
+        exhaustSmoke: exhaustSmoke.snapshot(),
         viewCenter: screenCenterPoint()?.toArray(),
         cars: [...groups.values()].map((i) => ({
           id: i.car.id,
@@ -1897,13 +1841,13 @@ export function createGarageScene(canvas, getProps, callbacks) {
       roadTexture.dispose();
       glowTexture.dispose();
       skidTexture.dispose();
-      beamTexture.dispose();
+      vehicleLights.dispose();
+      exhaustSmoke.dispose();
       environment.dispose();
       roadLights.dispose();
       leaves.dispose();
       celebration.dispose();
       lightPools.dispose();
-      headlightBeams.dispose();
       skidMarks.dispose();
       // Cached asset geometry is shared by current and future scene instances.
       profiler.dispose();
