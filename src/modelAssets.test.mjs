@@ -7,6 +7,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { vehicleModel } from './vehicleModels.js';
 import { prepareWheels,batchColoredMeshes } from './garageMaterials.js';
 import { configureVehicleGlass, prepareVehicleGlass } from './vehicleGlass.js';
+import { configureVehiclePaint, vehicleTrimSurface } from './vehicleFinish.js';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const lengths={racer:2,jeep:2,pickup:2,compact:2,taxi:2,schoolbus:3,coach:3,camper:3,delivery:3};
@@ -131,8 +132,11 @@ for(const [name,length]of Object.entries(lengths)){
   asset.scene.traverse(o=>{if(o.isMesh&&o.material.name==='Tailored cabin leather'){
     const c=o.geometry.getAttribute('color');cabinColors.push([c.getX(0)*o.material.color.r,c.getY(0)*o.material.color.g,c.getZ(0)*o.material.color.b]);
   }});
-  const batch=batchColoredMeshes(asset.scene,mesh=>!['Automotive glass','Mirror silver','Headlamp','Tail lamp','Rolling wheels'].includes(mesh.material.name)&&!mesh.material.name.startsWith('Paint'));
+  const batch=batchColoredMeshes(asset.scene,mesh=>!['Automotive glass','Mirror silver','Headlamp','Tail lamp','Rolling wheels'].includes(mesh.material.name)&&!mesh.material.name.startsWith('Paint'),{surface:vehicleTrimSurface});
   assert.ok(batch?.geometry.getAttribute('color'),`${name}: trim colours must survive batching`);
+  const surfaces=batch.geometry.getAttribute('surfaceResponse');
+  assert.equal(surfaces.count,batch.geometry.getAttribute('position').count);
+  assert.ok(Array.from(surfaces.array).some((v,i)=>i%2===1&&v>.9),`${name}: satin metal must retain its metallic response in the batch`);
   const batchColors=batch.geometry.getAttribute('color');
   for(const colour of cabinColors){
     let found=false;
@@ -144,9 +148,19 @@ for(const [name,length]of Object.entries(lengths)){
   let rolling=false;
   let painted=false;
   asset.scene.traverse(object=>{if(object.isMesh){
-    if(object.material.name.startsWith('Paint'))painted=true;
+    if(object.material.name.startsWith('Paint')){
+      painted=true;
+      configureVehiclePaint(object.material,name,'high','#e54848');
+      assert.equal(object.material.clearcoat,.92);
+      configureVehiclePaint(object.material,name,'saver','#e54848');
+      assert.equal(object.material.clearcoat,0);
+      configureVehiclePaint(object.material,name,'standard','#e54848');
+      assert.equal(object.material.clearcoat,.55);
+    }
     if(object.material.name==='Rolling wheels'){
       rolling=true;assert.ok(object.geometry.getAttribute('color'),`${name}: wheel spokes require vertex colours`);
+      const surface=object.geometry.getAttribute('wheelSurface');
+      assert.ok(Array.from(surface.array).some((v,i)=>i%2===1&&v>.8)&&Array.from(surface.array).some((v,i)=>i%2===1&&v===0),`${name}: rolling rims and rubber require separate reflectance`);
       const pivots=object.geometry.getAttribute('wheelPivot'),centres=new Set();
       for(let i=0;i<pivots.count;i++)centres.add(`${pivots.getX(i).toFixed(2)}:${pivots.getY(i).toFixed(2)}:${pivots.getZ(i).toFixed(2)}`);
       assert.equal(centres.size,4,`${name}: four independent wheel centres required`);

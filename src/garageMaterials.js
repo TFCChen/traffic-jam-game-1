@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import { surfaceShader } from './vehicleFinish.js';
 
 export function batchColoredMeshes(
   root,
@@ -9,6 +10,7 @@ export function batchColoredMeshes(
     metalness = 0.12,
     name = "Batched trim",
     atlas = null,
+    surface = null,
   } = {},
 ) {
   root.updateMatrixWorld(true);
@@ -79,6 +81,12 @@ export function batchColoredMeshes(
       colors[i + 2] = color.b * (sourceColors?.getZ(i / 3) ?? 1);
     }
     geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    if (surface) {
+      const response = surface(mesh.material);
+      const values = new Float32Array(geometry.getAttribute('position').count * 2);
+      for (let i = 0; i < values.length; i += 2) values.set(response, i);
+      geometry.setAttribute('surfaceResponse', new THREE.BufferAttribute(values, 2));
+    }
     geometries.push(geometry);
   }
   const geometry = mergeGeometries(geometries);
@@ -92,6 +100,10 @@ export function batchColoredMeshes(
     metalness,
   });
   material.name = name;
+  if (surface) {
+    material.onBeforeCompile = shader => surfaceShader(shader);
+    material.customProgramCacheKey = () => 'batched-surface-response-v1';
+  }
   if (atlas) {
     material.map = atlas;
     material.roughnessMap = atlas;
@@ -256,6 +268,15 @@ export function prepareWheels(root, length) {
       );
     }
     geometry.setAttribute("wheelPivot", new THREE.BufferAttribute(pivots, 3));
+    const colors = geometry.getAttribute('color');
+    const surfaces = new Float32Array(position.count * 2);
+    for (let i = 0; i < position.count; i++) {
+      // Authored wheel vertex colours separate bright alloy from dark rubber.
+      const alloy = colors && Math.max(colors.getX(i), colors.getY(i), colors.getZ(i)) > .3;
+      surfaces.set(alloy ? [.24, .9] : [.84, 0], i * 2);
+      if (alloy) colors.setXYZ(i, .58, .61, .64);
+    }
+    geometry.setAttribute('wheelSurface', new THREE.BufferAttribute(surfaces, 2));
     geometry.computeBoundingBox();
     geometry.computeBoundingSphere();
     mesh.geometry = geometry;
@@ -273,6 +294,7 @@ export function rollingMaterial(
   compression = { value: [0, 0] },
 ) {
   material.onBeforeCompile = (shader) => {
+    if (!material.isMeshDepthMaterial) surfaceShader(shader, 'wheelSurface');
     shader.uniforms.wheelAngle = angle;
     shader.uniforms.tyreCompression = compression;
     shader.vertexShader =
@@ -295,6 +317,6 @@ export function rollingMaterial(
       objectNormal.xy=vec2(nc*objectNormal.x-ns*objectNormal.y,ns*objectNormal.x+nc*objectNormal.y);`,
     );
   };
-  material.customProgramCacheKey = () => "rolling-wheels-v2";
+  material.customProgramCacheKey = () => "rolling-wheels-v3";
   return material;
 }

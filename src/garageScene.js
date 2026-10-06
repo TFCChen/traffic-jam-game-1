@@ -24,6 +24,7 @@ import {
 } from "./vehicleDynamics.js";
 import { createRenderProfiler } from "./renderProfiler.js";
 import { cacheLocalTransforms } from "./sceneTransforms.js";
+import { configureVehiclePaint, vehicleTrimSurface } from './vehicleFinish.js';
 import {
   DEFAULT_VIEW,
   ORTHOGRAPHIC_DISTANCE,
@@ -1167,6 +1168,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
               "Rolling wheels",
             ].includes(mesh.material.name) &&
             !mesh.material.name.startsWith("Paint"),
+          { surface: vehicleTrimSurface },
         );
         const lamps = [],
           tailLamps = [],
@@ -1181,13 +1183,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
             const material = object.material;
             if (material.name.startsWith("Paint")) {
               paints.push(material);
-              material.color.set(car.color);
-              material.roughness = 0.3;
-              material.metalness = 0.06;
-              if ("clearcoat" in material) {
-                material.clearcoat = quality === QUALITY.high ? 0.55 : 0;
-                material.clearcoatRoughness = 0.2;
-              }
+              configureVehiclePaint(material, vehicleModel(car).kind, settings.quality, car.color);
             }
             if (material.name === "Automotive glass") {
               windows.push(material);
@@ -1761,13 +1757,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       quality = QUALITY[settings.quality] ?? QUALITY.high;
       for (const item of groups.values())
         for (const paint of item.paints) {
-          if ("clearcoat" in paint) {
-            const coat = quality === QUALITY.high ? 0.55 : 0;
-            if (paint.clearcoat !== coat) {
-              paint.clearcoat = coat;
-              paint.needsUpdate = true;
-            }
-          }
+          configureVehiclePaint(paint, item.model, settings.quality, item.car.color);
         }
       for (const item of groups.values())
         for (const glass of item.windows)
@@ -1823,6 +1813,9 @@ export function createGarageScene(canvas, getProps, callbacks) {
           dir: i.car.dir,
           len: i.car.len,
           position: i.group.position.toArray(),
+          finish: i.paints.map(m => ({ physical: m.isMeshPhysicalMaterial === true,
+            roughness: m.roughness, metalness: m.metalness,
+            clearcoat: m.clearcoat, clearcoatRoughness: m.clearcoatRoughness })),
           glazing: i.windows.map((m) => ({
             physical: m.isMeshPhysicalMaterial === true,
             transmission: m.transmission,

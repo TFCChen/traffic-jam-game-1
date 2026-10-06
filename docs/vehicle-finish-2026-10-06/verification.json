@@ -1,0 +1,122 @@
+{
+  "results": [
+    {
+      "theme": "day",
+      "quality": "saver",
+      "finish": [
+        {
+          "physical": true,
+          "roughness": 0.27,
+          "metalness": 0.16,
+          "clearcoat": 0,
+          "clearcoatRoughness": 0.11
+        }
+      ]
+    },
+    {
+      "theme": "day",
+      "quality": "standard",
+      "finish": [
+        {
+          "physical": true,
+          "roughness": 0.27,
+          "metalness": 0.16,
+          "clearcoat": 0.55,
+          "clearcoatRoughness": 0.11
+        }
+      ]
+    },
+    {
+      "theme": "day",
+      "quality": "high",
+      "finish": [
+        {
+          "physical": true,
+          "roughness": 0.27,
+          "metalness": 0.16,
+          "clearcoat": 0.92,
+          "clearcoatRoughness": 0.11
+        }
+      ]
+    },
+    {
+      "theme": "sunset",
+      "quality": "saver",
+      "finish": [
+        {
+          "physical": true,
+          "roughness": 0.27,
+          "metalness": 0.16,
+          "clearcoat": 0,
+          "clearcoatRoughness": 0.11
+        }
+      ]
+    },
+    {
+      "theme": "sunset",
+      "quality": "standard",
+      "finish": [
+        {
+          "physical": true,
+          "roughness": 0.27,
+          "metalness": 0.16,
+          "clearcoat": 0.55,
+          "clearcoatRoughness": 0.11
+        }
+      ]
+    },
+    {
+      "theme": "sunset",
+      "quality": "high",
+      "finish": [
+        {
+          "physical": true,
+          "roughness": 0.27,
+          "metalness": 0.16,
+          "clearcoat": 0.92,
+          "clearcoatRoughness": 0.11
+        }
+      ]
+    },
+    {
+      "theme": "neon",
+      "quality": "saver",
+      "finish": [
+        {
+          "physical": true,
+          "roughness": 0.27,
+          "metalness": 0.16,
+          "clearcoat": 0,
+          "clearcoatRoughness": 0.11
+        }
+      ]
+    },
+    {
+      "theme": "neon",
+      "quality": "standard",
+      "finish": [
+        {
+          "physical": true,
+          "roughness": 0.27,
+          "metalness": 0.16,
+          "clearcoat": 0.55,
+          "clearcoatRoughness": 0.11
+        }
+      ]
+    },
+    {
+      "theme": "neon",
+      "quality": "high",
+      "finish": [
+        {
+          "physical": true,
+          "roughness": 0.27,
+          "metalness": 0.16,
+          "clearcoat": 0.92,
+          "clearcoatRoughness": 0.11
+        }
+      ]
+    }
+  ],
+  "errors": []
+}
