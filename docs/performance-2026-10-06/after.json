@@ -1,0 +1,110 @@
+[
+  {
+    "name": "baseline",
+    "FPS": 8.73535834822315,
+    "profile": {
+      "cpuMs": {
+        "samples": 44,
+        "median": 2.300000011920929,
+        "p95": 2.699999988079071
+      },
+      "gpuMs": {
+        "samples": 43,
+        "median": 26.123437,
+        "p95": 36.166822
+      },
+      "drawCalls": {
+        "samples": 44,
+        "median": 100,
+        "p95": 100
+      },
+      "triangles": {
+        "samples": 44,
+        "median": 206480,
+        "p95": 206480
+      },
+      "gpuTimer": true
+    }
+  },
+  {
+    "name": "no-shadows",
+    "FPS": 9.830908375933936,
+    "profile": {
+      "cpuMs": {
+        "samples": 50,
+        "median": 1.4000000357627869,
+        "p95": 2.199999988079071
+      },
+      "gpuMs": {
+        "samples": 49,
+        "median": 28.320729,
+        "p95": 56.473854
+      },
+      "drawCalls": {
+        "samples": 50,
+        "median": 100,
+        "p95": 100
+      },
+      "triangles": {
+        "samples": 50,
+        "median": 206480,
+        "p95": 206480
+      },
+      "gpuTimer": true
+    }
+  },
+  {
+    "name": "no-glass",
+    "FPS": 8.384907167099222,
+    "profile": {
+      "cpuMs": {
+        "samples": 42,
+        "median": 2,
+        "p95": 2.699999988079071
+      },
+      "gpuMs": {
+        "samples": 39,
+        "median": 25.589427,
+        "p95": 44.963853
+      },
+      "drawCalls": {
+        "samples": 42,
+        "median": 91,
+        "p95": 91
+      },
+      "triangles": {
+        "samples": 42,
+        "median": 203612,
+        "p95": 203612
+      },
+      "gpuTimer": true
+    }
+  },
+  {
+    "name": "refractive-reference",
+    "FPS": 9.875567845151096,
+    "profile": {
+      "cpuMs": {
+        "samples": 50,
+        "median": 5.199999988079071,
+        "p95": 7.799999952316284
+      },
+      "gpuMs": {
+        "samples": 49,
+        "median": 52.906197,
+        "p95": 58.808177
+      },
+      "drawCalls": {
+        "samples": 50,
+        "median": 180,
+        "p95": 180
+      },
+      "triangles": {
+        "samples": 50,
+        "median": 409956,
+        "p95": 409956
+      },
+      "gpuTimer": true
+    }
+  }
+]

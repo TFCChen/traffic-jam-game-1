@@ -99,6 +99,7 @@ export default function Board(props) {
             pick: instance.pick,
             snapshot: instance.snapshot,
             measure: instance.measure,
+            ...(import.meta.env.DEV ? {probeGlass:instance.probeGlass} : {}),
           };
         } catch {
           setFallback(true);

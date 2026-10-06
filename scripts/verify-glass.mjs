@@ -21,7 +21,7 @@ async function load(spec){
 async function shot(name){writeFileSync(new URL(name+'.png',dir),Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));}
 function checkGlass(s,quality){
  assert.equal(s.cars.length,9);
- for(const c of s.cars){assert.ok(c.glazing.length&&c.glazing.every(g=>g.physical&&g.ior===1.48));assert.ok(c.glazing.every(g=>quality==='saver'?g.transmission===0&&g.opacity<1:g.transmission>=.85&&g.opacity===1));}
+ for(const c of s.cars){assert.ok(c.glazing.length&&c.glazing.every(g=>g.physical&&g.ior===1.48));assert.ok(c.glazing.every(g=>g.transmission===0&&g.optics==='thin-sheet'));}
 }
 async function dragPoint(){
  const moves=cars.filter(c=>c.id!=='target').flatMap(c=>legalMovesForCar(cars,c.id));
@@ -77,3 +77,4 @@ try{
  await evaluate(`(()=>{for(const k of Object.keys(localStorage))if(k.startsWith('traffic-jam-'))localStorage.removeItem(k);for(const [k,v]of Object.entries(${JSON.stringify(saved)}))localStorage.setItem(k,v);location.reload()})()`);
  await send('Network.setBypassServiceWorker',{bypass:false});await send('Network.setCacheDisabled',{cacheDisabled:false});close();
 }
+

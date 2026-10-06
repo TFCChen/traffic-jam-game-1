@@ -29,10 +29,10 @@ export function prepareVehicleGlass(geometry) {
   return result;
 }
 
-// Transmission renders the opaque scene once, shared by all vehicle windows.
-// Saver mode retains see-through windows without the extra framebuffer pass.
-export function configureVehicleGlass(material, quality) {
-  const refractive = quality !== "saver";
+// Thin optical sheets use angle-dependent absorption and physical reflections.
+// The refractive path is retained only for isolated visual/performance comparisons.
+export function configureVehicleGlass(material, quality, optics = 'thin-sheet') {
+  const refractive = optics === 'refractive' && quality !== "saver";
   const wasRefractive = material.transmission > 0;
   const wasTransparent = material.transparent;
   const wasSide = material.side;
@@ -51,6 +51,23 @@ export function configureVehicleGlass(material, quality) {
   material.depthWrite = refractive;
   material.side = THREE.FrontSide;
   material.forceSinglePass = true;
+  const previousOptics=material.userData.optics;
+  material.userData.optics=refractive?'refractive':'thin-sheet';
+  material.onBeforeCompile=refractive?()=>{}:shader=>{
+    // A 4 mm pane barely displaces the cabin image. Render its PBR reflection
+    // over the existing scene, rather than re-rendering every opaque object.
+    // Fresnel reflection and longer tinted paths at grazing angles remain.
+    shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>',`
+      float paneCos=max(.001,abs(dot(geometryNormal,geometryViewDir)));
+      float paneFresnel=.04+.96*pow(1.-paneCos,5.);
+      float paneAlpha=clamp(.10/max(.30,paneCos)+paneFresnel,.10,.94);
+      outgoingLight=(totalSpecular+totalEmissiveRadiance)/paneAlpha;
+      diffuseColor.a=paneAlpha;
+      #include <opaque_fragment>
+    `);
+  };
+  material.customProgramCacheKey=()=>refractive?'refractive-glass-v1':'thin-sheet-glass-v1';
   if (wasRefractive !== refractive || wasTransparent !== material.transparent || wasSide !== material.side)
     material.needsUpdate = true;
+  if(previousOptics!==material.userData.optics) material.needsUpdate=true;
 }

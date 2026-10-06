@@ -32,7 +32,10 @@ for(const [name,length]of Object.entries(lengths)){
   for(const quality of ['high','standard','saver','high'])for(const window of glazing){
     configureVehicleGlass(window.material,quality);
     assert.equal(window.material.roughness,.003,`${name}: tint must not turn glass into a rough frosted material`);
-    assert.equal(window.material.transmission,quality==='saver'?0:1);
+    assert.equal(window.material.transmission,0,'Thin panes must not trigger a second opaque-scene render');
+    assert.equal(window.material.userData.optics,'thin-sheet');
+    assert.equal(window.material.transparent,true);
+    assert.equal(window.material.depthWrite,false,'Front glass must not hide farther windows');
   }
   assert.ok(mirrors.length&&mirrors.every(o=>o.material.metalness===1),`${name}: reflective mirror lenses must survive export`);
   assert.ok(interior.length,`${name}: a visible cabin must contain actual interior geometry`);

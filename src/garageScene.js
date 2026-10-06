@@ -1724,6 +1724,17 @@ export function createGarageScene(canvas, getProps, callbacks) {
       inputSamples.length = 0;
       profiler.set(value);
     },
+    // Isolated profiling can exclude optical panes to measure the shared
+    // transmission pass. Never changes stored quality or live player settings.
+    probeGlass(hidden = false) {
+      for (const item of groups.values()) item.group.traverse(mesh=>{
+        if(mesh.isMesh && mesh.material.name==='Automotive glass') {
+          mesh.visible=hidden!==true;
+          if(typeof hidden==='string')configureVehicleGlass(mesh.material,settings.quality,hidden);
+        }
+      });
+      dirty=true;
+    },
     cancelInput,
     settings(next) {
       if (
@@ -1807,6 +1818,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
             opacity: m.opacity,
             roughness: m.roughness,
             ior: m.ior,
+            optics: m.userData.optics,
           })),
           wheelAngle: i.wheelAngle.value,
           tilt: i.body.rotation.z,

@@ -25,7 +25,7 @@ async function load(kind,quality='high',pitch=32,yaw=180){
  assert.equal(s.sceneKey,'custom-structure-review-play');
  const revisions=await c.evaluate(`performance.getEntriesByType('resource').filter(r=>r.name.includes('.glb')).map(r=>new URL(r.name).searchParams.get('v'))`);
  assert(revisions.length&&revisions.every(v=>v===modelRevision),'Browser must render this exact model release');
- for(const car of s.cars)for(const g of car.glazing){assert.equal(g.roughness,.003);assert.equal(g.transmission,quality==='saver'?0:1);}
+ for(const car of s.cars)for(const g of car.glazing){assert.equal(g.roughness,.003);assert.equal(g.transmission,0);assert.equal(g.optics,'thin-sheet');}
  return s;
 }
 async function shot(name){writeFileSync(new URL(name+'.png',dir),Buffer.from((await c.send('Page.captureScreenshot')).data,'base64'));}
@@ -35,14 +35,14 @@ try{
    await load(kind);await shot(kind+'-side');
    await load(kind,'high',40,135);await shot(kind+'-front');
    if(['coach','schoolbus','camper'].includes(kind)){await load(kind,'high',32,0);await shot(kind+'-entry');}
-   results.push(kind+': side and front screenshots captured; clear transmission confirmed.');
+   results.push(kind+': side and front screenshots captured; clear thin-sheet optics confirmed.');
  }
  for(const quality of ['high','standard']){
    const before=await load('racer',quality,38,180);assert.equal(before.transmissionResolutionScale,1);
    await c.send('Input.dispatchMouseEvent',{type:'mousePressed',x:700,y:440,button:'right',buttons:2,clickCount:1});
    for(let i=1;i<=25;i++){
      await c.send('Input.dispatchMouseEvent',{type:'mouseMoved',x:700+i*4,y:440+i,button:'right',buttons:2});await c.sleep(16);
-     const s=await snap();assert.equal(s.transmissionResolutionScale,1);assert(s.cars.every(car=>car.glazing.every(g=>g.transmission===1&&g.roughness===.003)));
+     const s=await snap();assert.equal(s.transmissionResolutionScale,1);assert(s.cars.every(car=>car.glazing.every(g=>g.optics==='thin-sheet'&&g.transmission===0&&g.roughness===.003)));
      if(i===15)await shot(quality+'-during-orbit');
    }
    await c.send('Input.dispatchMouseEvent',{type:'mouseReleased',x:800,y:465,button:'right',clickCount:1});
@@ -81,3 +81,4 @@ try{
  await c.evaluate(`for(const k of Object.keys(localStorage))if(k.startsWith('traffic-jam-'))localStorage.removeItem(k);for(const [k,v]of Object.entries(${JSON.stringify(saved)}))localStorage.setItem(k,v);location.reload()`);
  c.close();
 }
+
