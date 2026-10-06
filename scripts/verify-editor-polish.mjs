@@ -17,7 +17,7 @@ try{
  const time=await c.evaluate('performance.timeOrigin');await c.evaluate(`for(const k of Object.keys(localStorage))if(k.startsWith('traffic-jam-'))localStorage.removeItem(k);localStorage.setItem('traffic-jam-tutorial-v1',JSON.stringify({schema:1,data:true}));location.reload()`);await c.until(`performance.timeOrigin!==${time}`);await ready();
  await button('編輯器');await ready();await button('驗證');assert(await c.evaluate(`document.querySelector('.instruction').classList.contains('validation-warning')`));await shot('validation-warning');
  await cell(2,0);await cell(2,1);await button('驗證');await c.until(`document.querySelector('.instruction.validation-success')?.textContent.includes('有解')`);await shot('validation-desktop');
- await button(await c.evaluate(`document.querySelector('.placed-car-list button').getAttribute('aria-label')`));await shot('validation-desktop');
+ await button(await c.evaluate(`document.querySelector('.fleet-toggle').textContent.trim()`));await button(await c.evaluate(`document.querySelector('.placed-car-list button').getAttribute('aria-label')`));await shot('validation-desktop');
  assert.deepEqual(await c.evaluate(`[...document.querySelector('.editor-completion').children].map(b=>b.textContent.trim())`),['驗證','試玩','儲存']);
  assert(await c.evaluate(`!document.querySelector('.editor-actions').contains(document.querySelector('.editor-exit'))`));
  for(const width of [390,320]){

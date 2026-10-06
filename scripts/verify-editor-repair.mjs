@@ -28,10 +28,10 @@ try{
  await cell(3,0);await cell(4,1);assert.equal((await snap()).cars.length,4);assert.equal(await c.evaluate(`!!document.querySelector('.editor-start-marker')`),false);
  await cell(3,0);await cell(3,0);assert.equal((await snap()).cars.length,4);
  const coach=(await snap()).cars.find(v=>v.model==='coach');
- await c.evaluate(`[...document.querySelectorAll('.placed-car-list button')].find(b=>b.textContent.includes('巴士')).click()`);await button('更換車種');await shot('editor-model-menu');await button('露營車');await ready();
+ await button(await c.evaluate(`document.querySelector('.fleet-toggle').textContent.trim()`));await c.evaluate(`[...document.querySelectorAll('.placed-car-list button')].find(b=>b.textContent.includes('巴士')).click()`);await button('更換車種');await shot('editor-model-menu');await button('露營車');await ready();
  const camper=(await snap()).cars.find(v=>v.id===coach.id);assert.equal(camper.model,'camper');assert.deepEqual(camper.position,coach.position);assert.equal(camper.len,coach.len);assert.equal(camper.dir,coach.dir);
  await button('復原編輯');await ready();assert.equal((await snap()).cars.find(v=>v.id===coach.id).model,'coach');await button('重做編輯');await ready();
- await c.evaluate(`document.querySelector('.placed-car-list button').click()`);assert.equal(await c.evaluate(`[...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='更換車種')`),false);
+ await button(await c.evaluate(`document.querySelector('.fleet-toggle').textContent.trim()`));await c.evaluate(`document.querySelector('.placed-car-list button').click()`);assert.equal(await c.evaluate(`[...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='更換車種')`),false);
  await shot('editor-desktop');
  for(let row=0;row<6;row++)for(let col=0;col<6;col++){const p=await point(row,col);assert(await c.evaluate(`document.elementFromPoint(${p.x},${p.y})?.classList.contains('garage-canvas')`),`Desktop cell ${row},${col} is unobscured`);}
  await c.send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});await c.sleep(600);await shot('editor-mobile');

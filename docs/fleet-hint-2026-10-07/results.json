@@ -1,0 +1,15 @@
+{
+  "compactFleet": {
+    "width": 115.5999984741211,
+    "height": 59.60000228881836
+  },
+  "fleetCount": 8,
+  "collapsedByDefault": true,
+  "boundedPopup390And320": true,
+  "selectedActions": true,
+  "verticalHintDestination": true,
+  "horizontalHintDestination": true,
+  "nativeHintedMove": true,
+  "guideClearsAfterMove": true,
+  "errors": []
+}

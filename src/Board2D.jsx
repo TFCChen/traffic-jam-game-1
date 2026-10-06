@@ -148,6 +148,7 @@ export default function Board({ cars, onMove, hint, editor, editorStart, onCellC
           <span className="drain drain-top" aria-hidden="true" /><span className="drain drain-bottom" aria-hidden="true" />
           {drag && <div className={`drag-lane ${drag.car.dir}`} style={{ left: (drag.car.col + (drag.car.dir === "H" ? min : 0)) * CELL, top: (drag.car.row + (drag.car.dir === "V" ? min : 0)) * CELL, width: (drag.car.dir === "H" ? drag.car.len + max - min : 1) * CELL, height: (drag.car.dir === "V" ? drag.car.len + max - min : 1) * CELL, "--car-color": drag.car.color }} />}
           {editor && editorStart && <span className="editor-start-marker" aria-label="已選取的車輛起點" style={{ left: editorStart.col * CELL + 4, top: editorStart.row * CELL + 4, width: CELL - 8, height: CELL - 8 }} />}
+          {!editor && !won && hint && cars.filter(c=>c.id===hint.carId).map(c=><span key="hint-goal" className="fallback-hint-goal" style={{left:(c.col+(c.dir==='H'?hint.delta:0))*CELL+4,top:(c.row+(c.dir==='V'?hint.delta:0))*CELL+4,width:(c.dir==='H'?c.len:1)*CELL-8,height:(c.dir==='V'?c.len:1)*CELL-8}} />)}
           {cars.map((car, index) => {
             const dragging = drag?.car.id === car.id;
             const hinted = hint?.carId === car.id;
@@ -173,7 +174,7 @@ export default function Board({ cars, onMove, hint, editor, editorStart, onCellC
                   {dragging && drag.speed > 20 && <span className="drive-effects"><i /><i /><i /><b /><b /><b /><b /></span>}
                 </span>
                 {car.id === "target" && <span className="target-arrow" aria-hidden="true">→</span>}
-                {hinted && <span className="hint-arrow" aria-hidden="true">{car.dir === "H" ? (hint.delta > 0 ? "→" : "←") : (hint.delta > 0 ? "↓" : "↑")}</span>}
+                {hinted && !won && <span className="hint-arrow" aria-hidden="true">{car.dir === "H" ? (hint.delta > 0 ? "→" : "←") : (hint.delta > 0 ? "↓" : "↑")} {Math.abs(hint.delta)} 格</span>}
                 {escaping && <span className="exhaust" aria-hidden="true"><i /><i /><i /></span>}
                 {editor && <button className="remove" disabled={disabled} onClick={event => { event.stopPropagation(); onRemove(car.id); }} aria-label={`移除 ${car.id}`}>×</button>}
               </div>

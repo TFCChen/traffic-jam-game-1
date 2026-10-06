@@ -922,3 +922,18 @@ button.selected, .tabs button.active, .quality-options button[aria-pressed="true
  .editor-shell .game-hud .stats { display:none; }
  .editor-shell .game-hud .stage-heading h2 { font-size:14px; }
 }
+/* Fleet size does not change the compact selection toolbar. */
+.editor-shell .vehicle-picker { width:max-content; max-width:calc(100% - 24px); flex-direction:row; align-items:center; gap:7px; padding:7px; }
+.editor-shell .vehicle-picker .fleet-toggle { min-width:100px; white-space:nowrap; }
+.fleet-toggle span { color:var(--muted); }
+.editor-shell .placed-car-list { position:absolute; bottom:calc(100% + 8px); left:0; width:300px; max-width:calc(100vw - 24px); max-height:220px; padding:8px; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; background:#22252df7; border:1px solid #ffffff30; border-radius:13px; box-shadow:0 8px 28px #0004; overflow:auto; }
+.editor-shell .placed-car-list button { min-width:0; text-align:left; }
+.editor-shell .selected-car-actions { flex:none; position:static; }
+.editor-shell .placed-car-list,.editor-shell .vehicle-variants { left:50%; transform:translateX(-50%); }
+.editor-shell .vehicle-variants { bottom:calc(100% + 8px); }
+.fallback-hint-goal { position:absolute; pointer-events:none; z-index:5; border:3px dashed #ffe5a0; border-radius:10px; background:#ffe5a019; }
+.vehicle .hint-arrow { background:#222733; color:#fff2cf; border:1px solid #efd08b; padding:4px 8px; border-radius:7px; font-size:14px; width:max-content; }
+@media(max-width:700px) {
+ .editor-shell .vehicle-picker button { min-width:0; padding:8px 7px; font-size:10px; }
+ .editor-shell .vehicle-picker .fleet-toggle { min-width:84px; }
+}

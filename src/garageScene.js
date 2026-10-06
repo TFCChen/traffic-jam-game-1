@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { createHintGuide } from './hintGuide.js';
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { legalMovesForCar } from "./gameEngine.js";
@@ -285,16 +286,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
   scene.add(placementGhost);
   const placementPose = new THREE.Object3D();
   let editorHover = null, previewPlacement = null, placementKey = '', availablePlacements = [];
-  const hintArrow = new THREE.ArrowHelper(
-    new THREE.Vector3(1, 0, 0),
-    new THREE.Vector3(),
-    1.1,
-    0xffecaa,
-    0.3,
-    0.2,
-  );
-  hintArrow.visible = false;
-  scene.add(hintArrow);
+  const hintGuide = createHintGuide(scene);
   const gate = new THREE.Group();
   gate.position.set(6.43, 0.34, 1.98);
   scene.add(gate);
@@ -1650,21 +1642,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       );
     }
     const hinted = props.cars.find((car) => car.id === props.hint?.carId);
-    hintArrow.visible = !!hinted && !props.won;
-    if (hinted) {
-      const direction = new THREE.Vector3(
-        hinted.dir === "H" ? Math.sign(props.hint.delta) : 0,
-        0,
-        hinted.dir === "V" ? Math.sign(props.hint.delta) : 0,
-      );
-      hintArrow.setDirection(direction);
-      hintArrow.position.set(
-        hinted.col + (hinted.dir === "H" ? hinted.len / 2 : 0.5),
-        1.4,
-        hinted.row + (hinted.dir === "V" ? hinted.len / 2 : 0.5),
-      );
-      hintArrow.position.addScaledVector(direction, -0.55);
-    }
+    hintGuide.update(hinted, props.hint?.delta, !props.won && !props.editor, (camera.right-camera.left)/Math.max(1,canvas.clientWidth)*112);
     const opening = props.won ? Math.PI / 2 : 0;
     if (Math.abs(gate.rotation.x + opening) > 0.001) shadowChanged = true;
     gate.rotation.x = THREE.MathUtils.lerp(
@@ -1859,6 +1837,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
         sceneKey,
         memory: { ...renderer.info.memory },
         ready,
+        hintGuide: hintGuide.snapshot(),
         settings: { ...settings },
         cameraFrustum: {
           width: camera.right - camera.left,
@@ -1951,7 +1930,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       ownedGeometries.forEach((g) => g.dispose());
       contactGeometry.dispose();
       contactTextures.forEach(texture => texture.dispose());
-      hintArrow.dispose();
+      hintGuide.dispose();
       roadTexture.dispose();
       glowTexture.dispose();
       skidTexture.dispose();

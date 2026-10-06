@@ -55,13 +55,14 @@ function readSettings() {
 export default function Board(props) {
   const editorView = useRef(null);
   const [replaceOpen, setReplaceOpen] = useState(false);
+  const [fleetOpen, setFleetOpen] = useState(false);
   const picker = useRef(null);
   useEffect(() => {
-    if (!replaceOpen) return;
-    const close = e => { if (e.type==='keydown' ? e.key==='Escape' : !picker.current?.contains(e.target)) setReplaceOpen(false); };
+    if (!replaceOpen && !fleetOpen) return;
+    const close = e => { if (e.type==='keydown' ? e.key==='Escape' : !picker.current?.contains(e.target)) { setReplaceOpen(false); setFleetOpen(false); } };
     document.addEventListener('pointerdown',close); document.addEventListener('keydown',close);
     return () => { document.removeEventListener('pointerdown',close); document.removeEventListener('keydown',close); };
-  }, [replaceOpen]);
+  }, [replaceOpen, fleetOpen]);
   const canvas = useRef(null),
     engine = useRef(null),
     latest = useRef(props);
@@ -79,6 +80,7 @@ export default function Board(props) {
       setSettings(editorView.current);editorView.current=null;
     }
     setReplaceOpen(false);
+    setFleetOpen(false);
   }, [props.editor]);
   const [feedback, setFeedback] = useState("");
   latest.current = { ...props, disabled: props.disabled || open };
@@ -408,7 +410,10 @@ export default function Board(props) {
           ref={picker}
           aria-label={props.editor ? "編輯車輛" : "鍵盤選取車輛"}
         >
-          <div className="placed-car-list">{props.cars.map((car, index) => (
+          <button className="fleet-toggle" aria-expanded={fleetOpen} aria-controls="placed-car-list" onClick={() => {setFleetOpen(v=>!v);setReplaceOpen(false);}}>
+            {selected && props.cars.some(c=>c.id===selected) ? vehicleModel(props.cars.find(c=>c.id===selected)).name : '選取車輛'} <span>· {props.cars.length} 台</span>
+          </button>
+          {fleetOpen && <div className="placed-car-list" id="placed-car-list">{props.cars.map((car, index) => (
             <button
               key={car.id}
               className={selected === car.id ? "selected" : ""}
@@ -416,7 +421,7 @@ export default function Board(props) {
               style={{ "--car-color": car.color }}
               aria-label={`選取${car.id === "target" ? "紅色目標" : `車輛 ${index + 1}，`}${vehicleModel(car).name}，第${car.row + 1}列第${car.col + 1}格，${car.dir === "H" ? "水平" : "垂直"}${car.len}格`}
               aria-pressed={selected === car.id}
-              onClick={() => { setReplaceOpen(false); engine.current?.select(car.id); }}
+              onClick={() => { setReplaceOpen(false); setFleetOpen(false); engine.current?.select(car.id); }}
             >
               <span
                 className={`mini-car ${vehicleModel(car).kind}`}
@@ -424,7 +429,7 @@ export default function Board(props) {
               />
               {index + 1} {vehicleModel(car).name}
             </button>
-          ))}</div>
+          ))}</div>}
           {props.editor &&
             selected &&
             props.cars.some((c) => c.id === selected) && (
