@@ -109,6 +109,7 @@ export default function Board(props) {
             error: () => setFallback(true),
             select: setSelected,
             feedback: setFeedback,
+            exitComplete: () => latest.current.onExitComplete?.(),
             cameraChange: (view) =>
               setSettings((current) => ({ ...current, ...view })),
           });
@@ -163,6 +164,11 @@ export default function Board(props) {
       engine.current = null;
     }
   }, [fallback]);
+  useEffect(()=>{
+    if(!fallback||!props.won)return;
+    const timer=setTimeout(()=>latest.current.onExitComplete?.(),window.matchMedia('(prefers-reduced-motion: reduce)').matches?120:1800);
+    return()=>clearTimeout(timer);
+  },[fallback,props.won,props.sceneKey]);
   function change(key, value) {
     setSettings((current) => ({ ...current, [key]: value }));
   }

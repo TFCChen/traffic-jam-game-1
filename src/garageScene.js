@@ -1,5 +1,7 @@
 import * as THREE from "three";
 import { createHintGuide } from './hintGuide.js';
+import { exitPose, EXIT_COMPLETE_MS } from './exitChoreography.js';
+import { continueGroundUV } from './groundUV.js';
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { legalMovesForCar } from "./gameEngine.js";
@@ -159,6 +161,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     settlingUntil = 0,
     lastShadow = 0,
     cameraFollow = 0,
+    cameraFollowZ = 0,
     nextFrame = 0,
     lastHover = 0;
   const sceneryLamps = [];
@@ -441,6 +444,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
   }
   function updateCamera(viewOnly = false) {
     cameraFollow = 0;
+    cameraFollowZ = 0;
     viewAim.set(
       aim.x + (settings.focusX ?? 0),
       aim.y,
@@ -1143,6 +1147,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       editorHover = null;
       escapeStart = null;
       cameraFollow = 0;
+      cameraFollowZ = 0;
       selected = null;
       callbacks.select(null);
       editorDrag = null;
@@ -1387,6 +1392,26 @@ export function createGarageScene(canvas, getProps, callbacks) {
         }
       });
       scene.add(garage);
+      // Give the two-cell coupe enough turning clearance after its rear clears
+      // the gate. Reuse the street's material and texture for a continuous lane.
+      let streetMaterial,streetSource;
+      garage.traverse(o=>{if(o.isMesh&&o.material.name==='Street asphalt'){streetMaterial=o.material;streetSource=o;}});
+      if(streetMaterial){
+        const extension=new THREE.Group();
+        for(const [x,z,w,l] of [[8.325,4.5,1.25,9.7],[7.13,7.85,1.14,3]]){
+          const geometry=new THREE.BoxGeometry(w,.05,l);ownedGeometries.add(geometry);
+          const road=new THREE.Mesh(geometry,streetMaterial);road.position.set(x,.065,z);road.receiveShadow=true;extension.add(road);continueGroundUV(road,streetSource);
+        }
+        const stripeMaterial=new THREE.MeshStandardMaterial({color:'#e9e7d6',roughness:.9});ownedMaterials.add(stripeMaterial);
+        const stripeGeometry=new THREE.BoxGeometry(1.25,.008,.09);ownedGeometries.add(stripeGeometry);
+        for(const z of [3.35,3.55,3.75,3.95]){const stripe=new THREE.Mesh(stripeGeometry,stripeMaterial);stripe.position.set(8.325,.099,z);extension.add(stripe);}
+        const dashGeometry=new THREE.BoxGeometry(.035,.008,.3);ownedGeometries.add(dashGeometry);
+        for(const z of [6.6,7.3,8,8.7]){const dash=new THREE.Mesh(dashGeometry,stripeMaterial);dash.position.set(7.45,.099,z);extension.add(dash);}
+        const curbGeometry=new THREE.BoxGeometry(.12,.13,9.7);ownedGeometries.add(curbGeometry);
+        const curb=new THREE.Mesh(curbGeometry,stripeMaterial);curb.position.set(8.99,.1,4.5);curb.receiveShadow=true;extension.add(curb);
+        const details=batchColoredMeshes(extension,o=>o.material!==streetMaterial,{roughness:.9,metalness:0,name:'Exit street details'});ownedGeometries.add(details.geometry);
+        scene.add(extension);cacheLocalTransforms(extension);
+      }
       cacheLocalTransforms(garage);
       updateCamera();
       sync();
@@ -1416,7 +1441,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       !!drag ||
       !!cameraGesture ||
       now < settlingUntil ||
-      (escapeStart != null && now - escapeStart < 2300);
+      (escapeStart != null && now - escapeStart < EXIT_COMPLETE_MS + 100);
     // Cap high-refresh displays too; retain ambient life without rendering at 120/144 Hz.
     const budget = 1000 / (active ? quality.activeFPS : quality.idleFPS);
     if (
@@ -1447,15 +1472,12 @@ export function createGarageScene(canvas, getProps, callbacks) {
           car.row +
           (car.dir === "V" ? car.len / 2 : 0.5) +
           (car.dir === "V" ? delta : 0);
-      if (props.won && car.id === "target") {
-        const t = reduced.matches
-          ? 1
-          : clamp((now - escapeStart - 350) / 1300, 0, 1);
-        x += 4 * t * t;
-        group.visible = t < 1;
-      } else group.visible = true;
-      const blend = isDrag || reduced.matches ? 1 : 1 - Math.exp(-18 * dt);
-      const height = VEHICLE_GROUND_HEIGHT;
+      const exiting=props.won && car.id==='target';
+      const exit=exiting?exitPose(now-escapeStart,x,z,reduced.matches):null;
+      if(exit){x=exit.x;z=exit.z;group.rotation.y=exit.yaw;group.visible=exit.visible;if(exit.complete&&!item.exitReported){item.exitReported=true;callbacks.exitComplete?.();}}
+      else {group.visible=true;item.exitReported=false;item.exitDistance=0;}
+      const blend = isDrag || reduced.matches || exiting ? 1 : 1 - Math.exp(-18 * dt);
+      const height = VEHICLE_GROUND_HEIGHT + (exiting ? clamp((x-6)/1.2,0,1)*.0545 : 0);
       if (
         Math.abs(group.position.x - x) > 0.001 ||
         Math.abs(group.position.z - z) > 0.001 ||
@@ -1466,10 +1488,12 @@ export function createGarageScene(canvas, getProps, callbacks) {
       group.position.x = THREE.MathUtils.lerp(group.position.x, x, blend);
       group.position.z = THREE.MathUtils.lerp(group.position.z, z, blend);
       group.position.y = height;
-      const travelled =
+      const travelled = exiting ? exit.distance-(item.exitDistance??0) :
           (car.dir === "H" ? group.position.x : group.position.z) - oldAxis,
         velocity = travelled / Math.max(0.008, dt);
       item.wheelAngle.value -= travelled / 0.19;
+      if(exiting)item.exitDistance=exit.distance;
+      item.body.rotation.x=(exit?.bank??0)*(settings.motion??1);
       if(Math.abs(velocity)>.12){item.lastMotionAt=now;item.stopBrake=false;}
       else if(!item.stopBrake && now-(item.lastMotionAt??-Infinity)<300 && (!isDrag || now-drag.lastAt>140)){
         item.brakeUntil=now+220;item.stopBrake=true;
@@ -1577,7 +1601,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
         item.lastExitPuff = now;
         puff(
           group.localToWorld(scratchPosition.set(-car.len/2+.015,.16,-.23)),
-          scratchDirection.set(-1, 0, 0),
+          scratchDirection.set(-1, 0, 0).applyQuaternion(group.quaternion),
         );
       }
     }
@@ -1651,14 +1675,15 @@ export function createGarageScene(canvas, getProps, callbacks) {
       reduced.matches ? 1 : 1 - Math.exp(-7 * dt),
     );
     const victoryAge = escapeStart == null ? 0 : now - escapeStart;
-    const follow =
-      props.won && !reduced.matches
-        ? 0.52 * Math.sin(Math.PI * clamp(victoryAge / 2000, 0, 1))
-        : 0;
+    const exitTarget=groups.get('target');
+    const followWeight=props.won?exitPose(victoryAge,5,2.5,reduced.matches).follow:0;
+    const follow=followWeight*Math.min(1.8,Math.max(0,(exitTarget?.group.position.x??5)-5));
+    const followZ=followWeight*Math.min(1.8,Math.max(0,(exitTarget?.group.position.z??2.5)-2.5));
     camera.position.x += follow - cameraFollow;
-    cameraFollow = follow;
+    camera.position.z += followZ-(cameraFollowZ??0);
+    cameraFollow = follow;cameraFollowZ=followZ;
     camera.lookAt(
-      scratchPosition.copy(viewAim).add(scratchDirection.set(follow, 0, 0)),
+      scratchPosition.copy(viewAim).add(scratchDirection.set(follow, 0, followZ)),
     );
     camera.updateMatrixWorld();
     const litCar=groups.get(drag?.car.id ?? (props.won?'target':selected??'target'));
@@ -1900,6 +1925,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
         celebration: celebration.visible,
         editorPlacement: { legalStarts: availablePlacements.length, preview: previewPlacement },
         cameraFollow,
+        exit:{age:escapeStart==null?null:performance.now()-escapeStart,complete:groups.get('target')?.exitReported??false,visible:groups.get('target')?.group.visible??false,yaw:groups.get('target')?.group.rotation.y??0},
         cameraGesture: cameraGesture?.mode ?? null,
         touchPointers: touches.size,
       };

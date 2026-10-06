@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./styles.css";
 import "./experience.css";
 import Board from "./Board.jsx";
+import { EXIT_COMPLETE_MS } from './exitChoreography.js';
 import { placementBetween } from './editorPlacement.js';
 import LevelBrowser from "./LevelBrowser.jsx";
 import { DIFFICULTIES, DIFFICULTY_LABELS } from "./levelCatalog.js";
@@ -219,6 +220,7 @@ function App() {
   const previousProgress = useRef(progress);
   const winPresented = useRef(false);
   const [winReady, setWinReady] = useState(false);
+  const [exitFinished,setExitFinished]=useState(false);
   const [winOpen, setWinOpen] = useState(false);
   const [levelTransition, setLevelTransition] = useState(false);
   const transitionTimer = useRef(null);
@@ -381,11 +383,13 @@ function App() {
   useEffect(() => {
     winPresented.current = false;
     setWinReady(false);
+    setExitFinished(false);
     setWinOpen(false);
   }, [won, mode, current.id]);
   useEffect(() => {
     if (
       !won ||
+      !exitFinished ||
       mode !== "play" ||
       panel !== "none" ||
       garageSettingsOpen ||
@@ -401,10 +405,17 @@ function App() {
         setWinReady(true);
         setWinOpen(true);
       },
-      reduced ? 120 : 2100,
+      reduced ? 0 : 100,
     );
     return () => clearTimeout(timer);
-  }, [won, mode, current.id, panel, garageSettingsOpen]);
+  }, [won, mode, current.id, panel, garageSettingsOpen, exitFinished]);
+  useEffect(()=>{
+    if(!won||mode!=='play'||exitFinished)return;
+    // Recovery for a lost graphics context or a suspended browser; normal 3D
+    // completion is signalled by the renderer after the car and camera finish.
+    const timer=setTimeout(()=>setExitFinished(true),EXIT_COMPLETE_MS+2200);
+    return()=>clearTimeout(timer);
+  },[won,mode,current.id,exitFinished]);
 
   useEffect(() => {
     (async () => {
@@ -605,11 +616,15 @@ function App() {
       setPanel("levels");
       return;
     }
+    await transitionScene(()=>loadLevel(levels[index + 1]));
+  }
+  async function transitionScene(action) {
+    if(levelTransition)return;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     setWinOpen(false);
     setLevelTransition(true);
     if (!reduced) await new Promise(resolve => { transitionTimer.current = setTimeout(resolve, 240); });
-    try { await loadLevel(levels[index + 1]); }
+    try { await action(); }
     finally { setLevelTransition(false); }
   }
 
@@ -925,6 +940,7 @@ function App() {
             onMove={commitMove}
             hint={hint}
             won={mode === "play" && won}
+            onExitComplete={() => setExitFinished(true)}
             disabled={loading || levelTransition}
             editor={mode === "editor"}
             editorStart={editorStart}
@@ -946,7 +962,7 @@ function App() {
             onReplace={(id,color) => editCars(editorCars.map(c=>c.id===id && id!=='target'?{...c,color}:c))}
           />
           <div className="toolbar">
-            {mode === 'play' && trial && <button onClick={() => enterEditor(null, true)}><Icon name="undo" />返回編輯器</button>}
+            {mode === 'play' && trial && <button onClick={() => transitionScene(()=>enterEditor(null, true))}><Icon name="undo" />返回編輯器</button>}
             {mode === "play" ? (
               <>
                 <button onClick={undo} disabled={!history.length || loading}>
@@ -1053,7 +1069,7 @@ function App() {
             </>
           )}
 
-          {mode === "play" && won && (
+          {mode === "play" && won && winReady && (
             <div className="board-footer">
               {won && (
                 <button
@@ -1391,8 +1407,8 @@ function App() {
             ).length,
           }}
           onClose={() => setWinOpen(false)}
-          onRetry={reset}
-          onNext={trial ? () => enterEditor(null, true) : nextLevel}
+          onRetry={() => transitionScene(reset)}
+          onNext={trial ? () => transitionScene(()=>enterEditor(null, true)) : nextLevel}
           nextLabel={trial ? '返回編輯器' : null}
           hasNext={hasNext}
         />
