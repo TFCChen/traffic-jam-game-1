@@ -12,6 +12,8 @@ export function createVehicleLights(scene) {
     light.shadow.bias = -.0002;
     light.shadow.normalBias = .008;
     light.shadow.autoUpdate = false;
+    // Allocate a valid depth texture even when the daytime lamp starts off.
+    light.shadow.needsUpdate = true;
     scene.add(light, light.target);
     return {
       light,
@@ -26,6 +28,7 @@ export function createVehicleLights(scene) {
   rear.shadow.bias = -.0002;
   rear.shadow.normalBias = .008;
   rear.shadow.autoUpdate = false;
+  rear.shadow.needsUpdate = true;
   const position = new THREE.Vector3();
   let owner = null,
     lastShadow = 0,
@@ -79,6 +82,7 @@ export function createVehicleLights(scene) {
           position: light.position.toArray(),
           target: light.target.position.toArray(),
           shadow: light.castShadow,
+          shadowMapReady: Boolean(light.shadow.map),
           angle: light.angle,
           distance: light.distance,
           decay: light.decay
@@ -91,7 +95,8 @@ export function createVehicleLights(scene) {
           angle: rear.angle,
           distance: rear.distance,
           decay: rear.decay,
-          shadow: rear.castShadow
+          shadow: rear.castShadow,
+          shadowMapReady: Boolean(rear.shadow.map)
         }
       };
     },

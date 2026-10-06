@@ -4,6 +4,8 @@ The active/selected car (the target car by default) now owns real front and rear
 
 The previous flat additive headlight decals have been removed. A fixed two-light pool prevents every parked vehicle from adding lights and shadow passes. Each map is 256×256, cached while stationary and updated at most 20 Hz during motion. Sun shadows are cached independently so headlight refreshes do not force redundant sun-map rendering. Saver mode disables these decorative effects.
 
+Both new shadow textures are initialized once even with the daytime lamps off. Otherwise an uninitialized depth sampler can prevent PBR meshes from appearing until the first drag. The regression suite checks this condition, and the first-load daytime screenshot confirms complete scenery before any input.
+
 Exhaust emits at the model's rear outlet, including vertical cars and the exit animation. Soft procedural noise sprites replace sphere smoke. Puffs rise, drift, expand, rotate and fade over 1.8–2.4 seconds. All 56 reusable particles use one instanced draw call; small fast-movement sparks retain a separate eight-particle pool. Reduced-motion preferences suppress smoke.
 
 ## Verification

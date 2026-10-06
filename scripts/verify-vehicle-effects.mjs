@@ -58,8 +58,10 @@ async function load(theme, quality = 'high', pitch = 50, fleet = false) {
   await c.until(`performance.timeOrigin!==${origin}`);
   await c.until(`document.querySelector('.garage-canvas')?.garageInspection?.snapshot().ready===true`);
   await c.until(`document.querySelector('.garage-canvas').garageInspection.snapshot().calls>20`);
+  await c.until(`document.querySelector('.garage-canvas').garageInspection.snapshot().performance.frames>=12`);
   await c.sleep(700);
   const s = await snap();
+  assert(s.vehicleLighting.headlights.every(l => l.shadowMapReady) && s.vehicleLighting.rear.shadowMapReady, 'First frame must have valid depth samplers even while day lamps are off');
   assert.equal(s.settings.theme, theme);
   assert.equal(s.sceneKey, 'custom-effects-review-play');
   return s;
@@ -157,10 +159,17 @@ try {
     await c.evaluate(`document.querySelector('.garage-canvas').garageInspection.measure(true)`);
     const before = await snap();
     const p = await points('target', 1);
-    await c.send('Input.dispatchMouseEvent', {type:'mousePressed', x:p.from.x, y:p.from.y, button:'left', buttons:1, clickCount:1});
+    await c.send('Input.dispatchMouseEvent', {
+      type: 'mousePressed',
+      x: p.from.x,
+      y: p.from.y,
+      button: 'left',
+      buttons: 1,
+      clickCount: 1
+    });
     // Drive continuous motion inside RAF so CDP round trips do not cap input/FPS.
     // Real CDP pointer selection/release and drag/undo are verified above.
-    const elapsed=await c.evaluate(`new Promise(resolve=>{const p=${JSON.stringify(p)},canvas=document.querySelector('.garage-canvas'),start=performance.now();function step(now){const elapsed=now-start,t=.5-.5*Math.cos(elapsed*.004);canvas.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerId:1,pointerType:'mouse',isPrimary:true,button:-1,buttons:1,clientX:p.from.x+(p.to.x-p.from.x)*t,clientY:p.from.y+(p.to.y-p.from.y)*t}));if(elapsed>=3500)resolve(elapsed);else requestAnimationFrame(step);}requestAnimationFrame(step);})`);
+    const elapsed = await c.evaluate(`new Promise(resolve=>{const p=${JSON.stringify(p)},canvas=document.querySelector('.garage-canvas'),start=performance.now();function step(now){const elapsed=now-start,t=.5-.5*Math.cos(elapsed*.004);canvas.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerId:1,pointerType:'mouse',isPrimary:true,button:-1,buttons:1,clientX:p.from.x+(p.to.x-p.from.x)*t,clientY:p.from.y+(p.to.y-p.from.y)*t}));if(elapsed>=3500)resolve(elapsed);else requestAnimationFrame(step);}requestAnimationFrame(step);})`);
     const after = await snap();
     perf.push({
       quality,
@@ -169,7 +178,13 @@ try {
       calls: after.calls,
       profile: after.performance.profile
     });
-    await c.send('Input.dispatchMouseEvent', {type:'mouseReleased', x:p.from.x,y:p.from.y,button:'left',clickCount:1});
+    await c.send('Input.dispatchMouseEvent', {
+      type: 'mouseReleased',
+      x: p.from.x,
+      y: p.from.y,
+      button: 'left',
+      clickCount: 1
+    });
     await shot('fleet-' + theme + '-' + quality);
   }
   await load('neon', 'high', 90);

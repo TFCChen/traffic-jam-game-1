@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { createVehicleLights, createExhaustSmoke, vehicleLightPower } from './vehicleEffects.js';
 const scene = new THREE.Scene();
 const lighting = createVehicleLights(scene);
+assert(scene.children.filter(o => o.isLight).every(o => o.shadow.needsUpdate), 'Unlit daytime lamps must initialize shadow textures before PBR rendering');
 const group = new THREE.Group();
 group.position.set(2, .055, 3);
 const car = {
