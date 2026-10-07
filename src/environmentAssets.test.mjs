@@ -17,13 +17,9 @@ const asphalt=[];scene.traverse(o=>{if(o.isMesh&&['Asphalt blue slate','Street a
 const ground=(x,z)=>new Raycaster(new Vector3(x,2,z),new Vector3(0,-1,0)).intersectObjects(asphalt)[0];
 for(let row=0;row<6;row++)for(let col=0;col<6;col++)assert(Math.abs(ground(col+.5,row+.5)?.point.y-.0355)<.003,'Puzzle surface maintains original vehicle datum');
 for(let age=0;age<=EXIT_COMPLETE_MS;age+=20){const p=exitPose(age);assert(Math.abs(ground(p.x,p.z)?.point.y-.0355)<.003,'Exit route has continuous asphalt support');}
-const hidden=exitPose(5700);
-assert(!hidden.visible);
-for(const dx of [-.44,.44])for(const dz of [-1,1]){
-  const hit=new Raycaster(new Vector3(hidden.x+dx,2,hidden.z+dz),new Vector3(0,-1,0)).intersectObject(scene,true)[0];
-  // Before removal the complete vehicle footprint is covered, except its front
-  // which has already passed through the far end into the adjoining street.
-  if(hidden.z+dz<10.14)assert(hit?.point.y>1,'Street passage hides the departing car naturally');
+for(const x of [8.70,9.30,9.90])for(const z of [8.3,9.2,10]){
+  const hit=new Raycaster(new Vector3(x,2,z),new Vector3(0,-1,0)).intersectObject(scene,true)[0];
+  assert(hit?.point.y<.08,'Street end remains open, without a building hiding the car');
 }
 assert(bytes.length<5_000_000,'Environment retains a bounded download size');
 let foliage;scene.traverse(o=>{if(o.isMesh&&o.material.name==='Courtyard foliage detail')foliage=o;});

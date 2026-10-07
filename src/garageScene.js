@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { cullUnlitPixels } from './localLightCulling.js';
 cullUnlitPixels();
 import { createHintGuide } from './hintGuide.js';
-import { exitPose, EXIT_COMPLETE_MS } from './exitChoreography.js';
+import { exitPose, exitSceneFade, EXIT_COMPLETE_MS } from './exitChoreography.js';
 import { vegetationShadowProxy } from './environmentShadows.js';
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
@@ -114,6 +114,15 @@ export function createGarageScene(canvas, getProps, callbacks) {
   const scene = new THREE.Scene();
   // The scene root never moves; composing it every frame dirties every branch.
   scene.matrixAutoUpdate = false;
+  const exitFadeMaterial=new THREE.MeshBasicMaterial({color:'#131a22',transparent:true,opacity:0,depthTest:false,depthWrite:false,toneMapped:false,fog:false});
+  exitFadeMaterial.onBeforeCompile=shader=>{
+    shader.vertexShader=shader.vertexShader.replace('#include <project_vertex>','gl_Position=vec4(position.xy,0.,1.);');
+  };
+  exitFadeMaterial.customProgramCacheKey=()=> 'exit-shot-fade-v1';
+  const exitFadeGeometry=new THREE.PlaneGeometry(2,2);
+  const exitFade=new THREE.Mesh(exitFadeGeometry,exitFadeMaterial);
+  exitFade.frustumCulled=false;exitFade.renderOrder=1000000;exitFade.visible=false;exitFade.raycast=()=>{};
+  scene.add(exitFade);
   const room = new RoomEnvironment(),
     pmrem = new THREE.PMREMGenerator(renderer);
   const environment = pmrem.fromScene(room, 0.04);
@@ -1437,7 +1446,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       !!drag ||
       !!cameraGesture ||
       now < settlingUntil ||
-      (escapeStart != null && now - escapeStart < EXIT_COMPLETE_MS + 100);
+      (escapeStart != null && now - escapeStart < EXIT_COMPLETE_MS + 700);
     // Cap high-refresh displays too; retain ambient life without rendering at 120/144 Hz.
     const budget = 1000 / (active ? quality.activeFPS : quality.idleFPS);
     if (
@@ -1672,6 +1681,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
       reduced.matches ? 1 : 1 - Math.exp(-7 * dt),
     );
     const victoryAge = escapeStart == null ? 0 : now - escapeStart;
+    exitFadeMaterial.opacity=props.won?exitSceneFade(victoryAge,reduced.matches):0;
+    exitFade.visible=exitFadeMaterial.opacity>0;
     const exitTarget=groups.get('target');
     const followWeight=props.won?exitPose(victoryAge,5,2.5,reduced.matches).follow:0;
     const follow=followWeight*Math.min(1.8,Math.max(0,(exitTarget?.group.position.x??5)-5));
@@ -1904,7 +1915,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
         celebration: celebration.visible,
         editorPlacement: { legalStarts: availablePlacements.length, preview: previewPlacement },
         cameraFollow,
-        exit:{age:escapeStart==null?null:performance.now()-escapeStart,complete:groups.get('target')?.exitReported??false,visible:groups.get('target')?.group.visible??false,yaw:groups.get('target')?.group.rotation.y??0},
+        exit:{age:escapeStart==null?null:performance.now()-escapeStart,fade:exitFadeMaterial.opacity,complete:groups.get('target')?.exitReported??false,visible:groups.get('target')?.group.visible??false,yaw:groups.get('target')?.group.rotation.y??0},
         cameraGesture: cameraGesture?.mode ?? null,
         touchPointers: touches.size,
       };
@@ -1952,6 +1963,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       // Cached asset geometry is shared by current and future scene instances.
       profiler.dispose();
       renderer.dispose();
+      exitFadeGeometry.dispose();exitFadeMaterial.dispose();
       sceneryAtlas.dispose();
     },
   };

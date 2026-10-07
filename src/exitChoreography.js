@@ -1,4 +1,7 @@
-export const EXIT_COMPLETE_MS = 6200;
+export const EXIT_COMPLETE_MS = 5650;
+export function exitSceneFade(age,reduced=false){
+  return reduced?0:smooth((age-4850)/500)*(1-smooth((age-5800)/450));
+}
 const clamp = v => Math.max(0, Math.min(1, v));
 const smooth = v => { v=clamp(v); return v*v*(3-2*v); };
 const WHEELBASE=1.33, HALF_TRACK=.43, REAR_OFFSET=.67;
@@ -38,6 +41,7 @@ export function exitPose(age,originX=5,originZ=2.5,reduced=false){
     if(distance>straight+TURN_LENGTH){z+=distance-straight-TURN_LENGTH;curvature=0;}
   }
   const steeringPair=steeringAngles(curvature);
-  // The entire car is occluded by the street portal before visibility changes.
-  return {x,z,yaw,distance,bank:-curvature*.01,steering:steeringPair[1],steeringPair,visible:z<9.27,complete:age>=EXIT_COMPLETE_MS,follow:smooth((age-450)/1000)*(1-smooth((age-4800)/1400))};
+  // Cut while the car is still driving, with the entire shot fully faded.
+  // It never reaches the miniature street's exposed edge on screen.
+  return {x,z,yaw,distance,bank:-curvature*.01,steering:steeringPair[1],steeringPair,visible:age<5400,complete:age>=EXIT_COMPLETE_MS,follow:smooth((age-450)/1000)*(1-smooth((age-4500)/1000))};
 }
