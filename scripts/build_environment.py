@@ -35,7 +35,9 @@ leaf_detail.node_tree.links.new(leaf_colour.outputs['Color'],leaf_detail.node_tr
 stone_dark = mat('Rain drain and rubber', '2b3537', .86)
 
 # Continuous street / apron / lot, on one datum; no runtime road patches.
-cube('Courtyard plinth',(4,-4.05,-.24),(12.4,12.4,.48),edge,.12)
+# Stone reveal is the visible top. Keep the dark structural slab below it;
+# coincident top faces at zero caused a flickering black rim around the lot.
+cube('Courtyard plinth',(4,-4.05,-.27),(12.4,12.4,.42),edge,.12)
 cube('Limestone perimeter reveal',(4,-4.05,-.035),(12.34,12.34,.07),concrete,.04)
 cube('Parking court',(3,-3,.018),(6,6,.035),asphalt,.012)
 cube('Full neighbourhood street',(8.3,-4.05,.018),(3.7,12.32,.035),street,.015)

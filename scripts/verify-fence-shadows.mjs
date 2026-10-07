@@ -55,6 +55,10 @@ try{
       assert.equal(after.fenceShadows.cast,false,'Fence cannot enter any shadow caster pass');
       assert.equal(after.fenceShadows.receive,false,'Fence cannot self-shadow');
     }
+    if(process.env.VERIFY_FENCE_SHADOWS==='on'){
+      assert(after.fenceShadows?.visible&&after.fenceShadows.triangles>0);
+      assert(after.fenceShadows.cast&&after.fenceShadows.receive,'Normal fence shadows must be restored after the overlap repair');
+    }
     reports.push({name,before:before.settings,after:after.settings,fenceShadows:after.fenceShadows,shadowUpdatesDuringMovement:after.performance.shadowUpdates-before.performance.shadowUpdates});
   }
   assert.deepEqual(errors,[]);writeFileSync(new URL('inspection.json',dir),JSON.stringify({reports,errors},null,2));console.log(JSON.stringify({reports,errors}));

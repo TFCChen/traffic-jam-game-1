@@ -12,6 +12,15 @@ scene.updateMatrixWorld(true);
 const bounds=new Box3().setFromObject(scene),size=bounds.getSize(new Vector3());
 assert(Math.abs(size.x-size.z)<.1,'Courtyard must have a square footprint');
 assert(size.x>12&&size.x<12.6,'Scene is a complete expanded block');
+// The only exposed perimeter datum must be stone. Previously the dark slab
+// and light reveal both had top faces at zero, competing in the depth buffer.
+for(let t=.3;t<5.9;t+=.2)for(const [x,z]of [[-.08,t],[6.08,t],[t,-.08],[t,6.08]]){
+  const hits=new Raycaster(new Vector3(x,2,z),new Vector3(0,-1,0)).intersectObject(scene,true);
+  const top=hits.find(h=>h.object.material.name==='Honed warm limestone');
+  const slab=hits.find(h=>h.object.material.name==='Basalt foundation');
+  assert(top&&slab,'Both perimeter structural layers remain present');
+  assert(top.point.y-slab.point.y>.04,'Visible stone and dark foundation cannot be coplanar anywhere on the four lot edges');
+}
 const sun=new DirectionalLight();configureCourtyardSunShadow(sun.shadow);
 sun.target.position.set(3,.15,3);sun.target.updateMatrixWorld(true);
 for(let angle=-180;angle<=180;angle+=15){

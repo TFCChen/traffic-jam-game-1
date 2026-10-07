@@ -1361,8 +1361,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
       if (!alive) return;
       library = models;
       const garage = library.garage.clone(true);
-      // Keep the subpixel-width fence out of both shadow passes. It still uses
-      // the same PBR lighting, but cannot cast/receive unstable fine shadows.
+      // Keep the fence independently inspectable after the shadow isolation
+      // test. Its normal shadows are restored once the slab overlap is fixed.
       const fenceBatch=batchColoredMeshes(garage,mesh=>mesh.material.name.startsWith('Fence '),{
         name:'Courtyard fence',roughness:.55,metalness:.2,atlas:sceneryAtlas,
         surface:material=>[material.roughness??.8,material.metalness??0],
@@ -1413,8 +1413,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
           }
           if (o.material.name.startsWith('Streetlamp glow'))
             sceneryLamps.push(o.material);
-          o.receiveShadow = o.material.name !== 'Courtyard fence';
-          o.castShadow = !['Courtyard fence','Courtyard paving','Asphalt blue slate','Street asphalt','Courtyard foliage detail'].includes(o.material.name);
+          o.receiveShadow = true;
+          o.castShadow = !['Courtyard paving','Asphalt blue slate','Street asphalt','Courtyard foliage detail'].includes(o.material.name);
           if(o.material.name==='Courtyard foliage detail') {
             vegetationShadows=vegetationShadowProxy(o);
             ownedGeometries.add(vegetationShadows.geometry);ownedMaterials.add(vegetationShadows.material);
