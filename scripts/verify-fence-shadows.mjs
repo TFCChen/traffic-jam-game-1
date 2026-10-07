@@ -2,11 +2,12 @@ import assert from 'node:assert/strict';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {connect} from './cdp-test.mjs';
 const c=await connect(process.argv[2]);
-const dir=new URL('../docs/fence-shadow-2026-10-07/',import.meta.url);mkdirSync(dir,{recursive:true});
+const dir=new URL(process.env.VERIFY_SHADOW_OUTPUT_DIR??'../docs/fence-shadow-2026-10-07/',import.meta.url);mkdirSync(dir,{recursive:true});
 const saved=await c.evaluate(`Object.fromEntries(Object.keys(localStorage).filter(k=>k.startsWith('traffic-jam-')).map(k=>[k,localStorage.getItem(k)]))`);
 const progress=Object.fromEntries(Array.from({length:20},(_,i)=>[i+1,{completed:true,stars:3,bestMoves:10}]));
 const errors=[],reports=[];
 await c.send('Runtime.enable');
+await c.send('Network.enable');await c.send('Network.setBypassServiceWorker',{bypass:true});await c.send('Network.setCacheDisabled',{cacheDisabled:true});
 c.onEvent('Runtime.exceptionThrown',e=>errors.push(e.exceptionDetails.exception?.description??e.exceptionDetails.text));
 c.onEvent('Runtime.consoleAPICalled',e=>{if(e.type==='error')errors.push(e.args.map(a=>a.value??a.description).join(' '));});
 const snap=()=>c.evaluate(`document.querySelector('.garage-canvas').garageInspection.snapshot()`);
@@ -18,9 +19,9 @@ async function drag(x,y,dx,dy,button){
   await c.send('Input.dispatchMouseEvent',{type:'mouseReleased',x:x+dx,y:y+dy,button,buttons:0});await c.sleep(200);
 }
 try{
-  const cases=[['day','high',55,35,1440,1000],['standard','standard',45,-65,1440,1000],['sunset','high',35,120,1440,1000],['neon','high',55,35,1440,1000],['mobile','high',75,0,390,844]];
+  const cases=[['day','high',55,35,1440,1000],['standard','standard',45,-65,1440,1000],['sunset','high',35,120,1440,1000],['neon','high',55,35,1440,1000],['mobile','high',45,-25,393,844]];
   for(const[name,quality,pitch,yaw,width,height]of cases){
-    await c.send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:width<500});
+    await c.send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:width<500?3:1,mobile:width<500});
     const settings={pitch,yaw,zoom:1.2,quality,theme:['sunset','neon'].includes(name)?name:'day'};
     const origin=await c.evaluate('performance.timeOrigin');
     await c.evaluate(`localStorage.removeItem('traffic-jam-session-v1');localStorage.setItem('traffic-jam-progress-v2',JSON.stringify(${JSON.stringify(progress)}));localStorage.setItem('traffic-jam-tutorial-v1',JSON.stringify({schema:1,data:true}));localStorage.setItem('traffic-jam-scene',JSON.stringify(${JSON.stringify(settings)}));location.reload()`);
@@ -34,6 +35,12 @@ try{
       await c.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:width/2,y:height*.45,deltaX:0,deltaY:-90});await c.sleep(300);
     }else{
       await c.send('Emulation.setTouchEmulationEnabled',{enabled:true});
+      await c.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{id:1,x:160,y:150}]});
+      for(let i=1;i<=8;i++){
+        await c.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{id:1,x:160+i*5,y:150-i*2}]});await c.sleep(70);await shot(name+'-orbit-'+i);
+      }
+      await c.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await c.sleep(200);
+      assert.notEqual((await snap()).settings.yaw,before.settings.yaw);
       await c.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{id:1,x:180,y:150},{id:2,x:240,y:150}]});
       for(let i=1;i<=8;i++){await c.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{id:1,x:180+i*2,y:150+i},{id:2,x:240+i*3,y:150+i}]});await c.sleep(70);}
       await c.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await c.sleep(300);

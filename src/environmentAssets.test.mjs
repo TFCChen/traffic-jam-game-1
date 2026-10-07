@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {Box3,Raycaster,Vector3,Mesh,DirectionalLight} from 'three';
+import {Box3,Raycaster,Vector3,Mesh,DirectionalLight,ShaderChunk} from 'three';
+import {stableShadowSource,stabilizeShadowFilter} from './stableShadowFilter.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {exitPose,EXIT_COMPLETE_MS} from './exitChoreography.js';
 import {vegetationShadowProxy,configureCourtyardSunShadow} from './environmentShadows.js';
@@ -21,7 +22,13 @@ for(let angle=-180;angle<=180;angle+=15){
     assert(-point.z>sun.shadow.camera.near&&-point.z<sun.shadow.camera.far,'Sun depth range covers courtyard at every lighting angle');
   }
 }
-assert(sun.shadow.bias>=0&&sun.shadow.bias*(sun.shadow.camera.far-sun.shadow.camera.near)<.005,'Depth bias avoids acne without detaching small fence shadows');
+assert(sun.shadow.bias<=0&&Math.abs(sun.shadow.bias)*(sun.shadow.camera.far-sun.shadow.camera.near)<.005,'Receiver depth moves toward the light without detaching small fence shadows');
+const originalPCF=ShaderChunk.shadowmap_pars_fragment;
+stabilizeShadowFilter();const stablePCF=ShaderChunk.shadowmap_pars_fragment;
+assert(!stablePCF.includes('interleavedGradientNoise( gl_FragCoord.xy )'),'PCF sampling cannot depend on the pixel where a world shadow is displayed');
+assert.equal((stablePCF.match(/texture\( shadowMap/g)??[]).length,(originalPCF.match(/texture\( shadowMap/g)??[]).length,'Stable shadows retain the original texture fetch budget');
+stabilizeShadowFilter();assert.equal(ShaderChunk.shadowmap_pars_fragment,stablePCF,'Initialization is safe when multiple garage instances mount');
+assert.throws(()=>stableShadowSource('changed upstream shader'),'Three upgrades must explicitly review the filter patch');
 let cornerTriangles=0;
 scene.traverse(o=>{
   if(!o.isMesh||!['Honed warm limestone','Graphite powdercoat','Satin brass accents'].includes(o.material.name))return;

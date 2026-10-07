@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import { cullUnlitPixels } from './localLightCulling.js';
 cullUnlitPixels();
+import {stabilizeShadowFilter} from './stableShadowFilter.js';
+stabilizeShadowFilter();
 import { createHintGuide } from './hintGuide.js';
 import { exitPose, exitSceneFade, EXIT_COMPLETE_MS } from './exitChoreography.js';
 import { vegetationShadowProxy, configureCourtyardSunShadow } from './environmentShadows.js';
@@ -239,7 +241,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
   sun.shadow.autoUpdate = false;
   sun.shadow.needsUpdate = true;
   sun.shadow.mapSize.set(1024, 1024);
-    configureCourtyardSunShadow(sun.shadow);
+  configureCourtyardSunShadow(sun.shadow);
   sun.target.position.copy(aim);
   scene.add(sun, sun.target);
   const floorMaterial = new THREE.MeshStandardMaterial({

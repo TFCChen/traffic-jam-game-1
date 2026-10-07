@@ -1,0 +1,14 @@
+{
+  "rotating": {
+    "roi_pixels": 34176,
+    "changed_pixels": 481,
+    "mean_max_rgb_change": 0.11873829588014981,
+    "p95_max_rgb_change": 1.0
+  },
+  "fixed": {
+    "roi_pixels": 34176,
+    "changed_pixels": 0,
+    "mean_max_rgb_change": 0.0,
+    "p95_max_rgb_change": 0.0
+  }
+}

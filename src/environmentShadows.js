@@ -6,7 +6,9 @@ export function configureCourtyardSunShadow(shadow) {
   Object.assign(shadow.camera, {left:-8,right:8,top:8,bottom:-8,near:1,far:32});
   shadow.camera.updateProjectionMatrix();
   shadow.normalBias = 0.008;
-  shadow.bias = 0.00015;
+  // Standard depth compares add bias to receiver depth: negative moves it
+  // toward the light, leaving the small rail surfaces free of shadow acne.
+  shadow.bias = -0.0001;
 }
 
 // Static canopy clusters cast soft silhouettes using ~80 triangles each.
