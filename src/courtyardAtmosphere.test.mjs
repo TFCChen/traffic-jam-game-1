@@ -1,6 +1,39 @@
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { createCourtyardAtmosphere, leafPose } from './courtyardAtmosphere.js';
+import {dripPose,createRainMotion,rainDripSources} from './rainMotion.js';
+import fs from 'node:fs';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {TREE_ANCHORS} from './courtyardAtmosphere.js';
+
+const bytes=fs.readFileSync(new URL('../public/models/garage.glb',import.meta.url));
+const asset=await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),'');
+const sources=rainDripSources(asset.scene,TREE_ANCHORS);
+assert.equal(sources.filter(s=>s.kind==='leaf').length,4,'Each real tree must supply an attached leaf-tip source');
+assert.equal(sources.filter(s=>s.kind==='canopy').length,3);
+let maxActive=0;
+for(let t=0;t<90;t+=.02){
+  let active=0;
+  for(let i=0;i<sources.length;i++){
+    const source=sources[i],p=dripPose(t,i,source);
+    assert(p.x<-.25||p.x>6.25||p.z<-.25||p.z>6.25,'Water effects must stay outside the puzzle');
+    assert(p.y>=source.floor&&p.y<=source.y+.003,'Drops must stop at the receiving surface');
+    assert(p.impactAlpha===0||p.dropAlpha===0,'A landed drop must not remain airborne');
+    if(p.dropAlpha>0||p.impactAlpha>0)active++;
+  }
+  maxActive=Math.max(maxActive,active);
+}
+assert(maxActive<=3,'Residual rain must be occasional, not a continuous shower');
+for(const source of sources.filter(s=>s.kind==='leaf')){
+  const ray=new THREE.Raycaster(new THREE.Vector3(source.x,source.y+.05,source.z),new THREE.Vector3(0,-1,0));
+  assert(ray.intersectObject(asset.scene,true).some(h=>h.object.material.name==='Courtyard foliage detail'&&Math.abs(h.point.y-source.y)<.06),
+    'Leaf sources must be attached to the shipped geometry');
+}
+const waterScene=new THREE.Scene(),motion=createRainMotion(waterScene,asset.scene,TREE_ANCHORS);
+motion.update(.1,true);const clock=motion.snapshot().time;
+motion.update(20,false);assert.equal(motion.snapshot().time,clock,'Disabled effects must not simulate or accumulate time');
+assert.equal(motion.snapshot().visible,false);assert.equal(motion.snapshot().active,0);
+motion.pause();motion.dispose();assert.equal(waterScene.children.length,0);
 
 for (let t = 0; t < 80; t += .05) {
   let count = 0;

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {createRainMotion,courtyardWind} from './rainMotion.js';
 
 // World-space tree anchors. Each path stays on the surrounding sidewalks.
 export const TREE_ANCHORS = [[-.68, 5.6], [5.66, -.73], [6, 7.25], [-1.5, 6.95]];
@@ -96,13 +97,7 @@ export function createCourtyardAtmosphere(scene, garage) {
   const pose = new THREE.Object3D();
   for (let i = 0; i < 8; i++) leaves.setColorAt(i, new THREE.Color(i % 2 ? '#9eac6e' : '#d8b17b'));
   scene.add(leaves);
-  // Residual runoff from the cafe canopy, rather than a screen rain overlay.
-  const dripGeometry=new THREE.SphereGeometry(1,5,4);
-  const dripMaterial=new THREE.MeshStandardMaterial({color:'#cce5ee',roughness:.04,metalness:.1,transparent:true,opacity:.5,depthWrite:false});
-  const drips=new THREE.InstancedMesh(dripGeometry,dripMaterial,6);
-  drips.visible=false;
-  drips.name='Residual canopy drips';drips.raycast=()=>{};drips.frustumCulled=false;
-  drips.instanceMatrix.setUsage(THREE.DynamicDrawUsage);scene.add(drips);
+  const rainMotion=createRainMotion(scene,garage,TREE_ANCHORS);
   const cafeLight = new THREE.PointLight('#ffc17b', 0, 1.5, 2);
   cafeLight.name = 'Cafe window spill'; cafeLight.position.set(-.55, .63, 1.08); scene.add(cafeLight);
 
@@ -115,20 +110,10 @@ export function createCourtyardAtmosphere(scene, garage) {
     update(dt, settings, quality, reduced, editor) {
       enabled = quality.decor && !reduced && !editor;
       leaves.visible = enabled;
-      drips.visible=enabled&&settings.theme==='rain';
+      rainMotion.update(dt,enabled&&settings.theme==='rain',time+Math.min(dt,.1));
       if (!enabled) { wind.value.set(0, 0, 0, 0); activeLeaves = 0; return; }
       time += Math.min(dt, .1);
-      if(drips.visible)for(let i=0;i<6;i++){
-        const phase=(time+i*.63)%3.7,fall=Math.max(0,phase-2.9);
-        const y=.9-1.7*fall*fall,visible=phase>2.9&&y>.11;
-        pose.position.set(-.38,y,.6+i*.18);
-        pose.rotation.set(0,0,0);pose.scale.set(visible?.005:0,visible?.007+fall*.013:0,visible?.005:0);
-        pose.updateMatrix();drips.setMatrixAt(i,pose.matrix);
-      }
-      if(drips.visible)drips.instanceMatrix.needsUpdate=true;
-      const gust = .7 + .3 * Math.sin(time * .31);
-      wind.value.set(Math.sin(time * .7) * .017 * gust, Math.cos(time * .53) * .011 * gust,
-        Math.sin(time * 1.7) * .003, Math.sin(time * 1.1) * .002);
+      wind.value.fromArray(courtyardWind(time));
       activeLeaves = 0;
       for (let i = 0; i < 8; i++) {
         const leaf = leafPose(time, i);
@@ -140,18 +125,18 @@ export function createCourtyardAtmosphere(scene, garage) {
       }
       leaves.instanceMatrix.needsUpdate = true; fade.needsUpdate = true;
     },
-    snapshot() { return { enabled, activeLeaves, leafCapacity: 8, residualDrips:drips.visible, dripCapacity:6, wind: wind.value.toArray(), cafeGlow: cafeGlow.value, cafeLight: cafeLight.intensity, animatedShadowUpdates: 0 }; },
+    snapshot() { const rain=rainMotion.snapshot();return { enabled, activeLeaves, leafCapacity: 8, residualDrips:rain.visible, dripCapacity:rain.capacity, rainMotion:rain, wind: wind.value.toArray(), cafeGlow: cafeGlow.value, cafeLight: cafeLight.intensity, animatedShadowUpdates: 0 }; },
     pause() {
       const wasEnabled = enabled;
       enabled = false; activeLeaves = 0; leaves.visible = false; wind.value.set(0, 0, 0, 0);
-      drips.visible=false;
+      rainMotion.pause();
       return wasEnabled;
     },
     dispose() {
       for (const [mesh, original] of changed) mesh.geometry = original;
       geometries.forEach(g => g.dispose()); scene.remove(leaves, cafeLight);
       leaves.dispose(); geometry.dispose(); material.dispose(); cafeLight.dispose();
-      scene.remove(drips);drips.dispose();dripGeometry.dispose();dripMaterial.dispose();
+      rainMotion.dispose();
     },
   };
 }

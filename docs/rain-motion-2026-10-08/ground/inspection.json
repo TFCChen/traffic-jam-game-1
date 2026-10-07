@@ -1,0 +1,1346 @@
+{
+  "reports": [
+    {
+      "name": "dry",
+      "settings": {
+        "pitch": 55,
+        "yaw": 25,
+        "zoom": 0.85,
+        "panX": 0,
+        "panY": 0,
+        "focusX": 0,
+        "focusZ": 0,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "day",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "ground": {
+        "wet": false,
+        "materials": 5,
+        "reflectionPassesPerFrame": 0,
+        "reflectionCaptures": 0,
+        "macroSize": 384,
+        "drainage": false,
+        "flowTime": 0
+      },
+      "rainSurfaces": {
+        "wet": false,
+        "detail": true,
+        "materials": 29,
+        "kinds": [
+          "leaf",
+          "bark",
+          "glass",
+          "metal",
+          "scenery",
+          "paint",
+          "trim"
+        ]
+      },
+      "performance": {
+        "frames": 47,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "drawCalls": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "triangles": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "rain",
+      "settings": {
+        "pitch": 55,
+        "yaw": 25,
+        "zoom": 0.85,
+        "panX": 0,
+        "panY": 0,
+        "focusX": 0,
+        "focusZ": 0,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "rain",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "ground": {
+        "wet": true,
+        "materials": 5,
+        "reflectionPassesPerFrame": 0,
+        "reflectionCaptures": 0,
+        "macroSize": 384,
+        "drainage": true,
+        "flowTime": 1.1665999999999999
+      },
+      "rainSurfaces": {
+        "wet": true,
+        "detail": true,
+        "materials": 29,
+        "kinds": [
+          "leaf",
+          "bark",
+          "glass",
+          "metal",
+          "scenery",
+          "paint",
+          "trim"
+        ]
+      },
+      "performance": {
+        "frames": 40,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "drawCalls": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "triangles": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "road-dry",
+      "settings": {
+        "pitch": 35,
+        "yaw": -55,
+        "zoom": 2.5,
+        "panX": 0,
+        "panY": 0,
+        "focusX": 5,
+        "focusZ": 2.4,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "day",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "ground": {
+        "wet": false,
+        "materials": 5,
+        "reflectionPassesPerFrame": 0,
+        "reflectionCaptures": 0,
+        "macroSize": 384,
+        "drainage": false,
+        "flowTime": 0
+      },
+      "rainSurfaces": {
+        "wet": false,
+        "detail": true,
+        "materials": 29,
+        "kinds": [
+          "leaf",
+          "bark",
+          "glass",
+          "metal",
+          "scenery",
+          "paint",
+          "trim"
+        ]
+      },
+      "performance": {
+        "frames": 52,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "drawCalls": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "triangles": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "road-wet",
+      "settings": {
+        "pitch": 35,
+        "yaw": -55,
+        "zoom": 2.5,
+        "panX": 0,
+        "panY": 0,
+        "focusX": 5,
+        "focusZ": 2.4,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "rain",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "ground": {
+        "wet": true,
+        "materials": 5,
+        "reflectionPassesPerFrame": 0,
+        "reflectionCaptures": 0,
+        "macroSize": 384,
+        "drainage": true,
+        "flowTime": 1.3124000000000005
+      },
+      "rainSurfaces": {
+        "wet": true,
+        "detail": true,
+        "materials": 29,
+        "kinds": [
+          "leaf",
+          "bark",
+          "glass",
+          "metal",
+          "scenery",
+          "paint",
+          "trim"
+        ]
+      },
+      "performance": {
+        "frames": 50,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "drawCalls": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "triangles": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "car-dry",
+      "settings": {
+        "pitch": 40,
+        "yaw": 25,
+        "zoom": 3.5,
+        "panX": 0,
+        "panY": 0,
+        "focusX": 0,
+        "focusZ": -0.5,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "day",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "ground": {
+        "wet": false,
+        "materials": 5,
+        "reflectionPassesPerFrame": 0,
+        "reflectionCaptures": 0,
+        "macroSize": 384,
+        "drainage": false,
+        "flowTime": 0
+      },
+      "rainSurfaces": {
+        "wet": false,
+        "detail": true,
+        "materials": 29,
+        "kinds": [
+          "leaf",
+          "bark",
+          "glass",
+          "metal",
+          "scenery",
+          "paint",
+          "trim"
+        ]
+      },
+      "performance": {
+        "frames": 46,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "drawCalls": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "triangles": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "car-wet",
+      "settings": {
+        "pitch": 40,
+        "yaw": 25,
+        "zoom": 3.5,
+        "panX": 0,
+        "panY": 0,
+        "focusX": 0,
+        "focusZ": -0.5,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "rain",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "ground": {
+        "wet": true,
+        "materials": 5,
+        "reflectionPassesPerFrame": 0,
+        "reflectionCaptures": 0,
+        "macroSize": 384,
+        "drainage": true,
+        "flowTime": 1.371
+      },
+      "rainSurfaces": {
+        "wet": true,
+        "detail": true,
+        "materials": 29,
+        "kinds": [
+          "leaf",
+          "bark",
+          "glass",
+          "metal",
+          "scenery",
+          "paint",
+          "trim"
+        ]
+      },
+      "performance": {
+        "frames": 45,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "drawCalls": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "triangles": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "rain-glint",
+      "settings": {
+        "pitch": 55,
+        "yaw": 140,
+        "zoom": 0.85,
+        "panX": 0,
+        "panY": 0,
+        "focusX": 0,
+        "focusZ": 0,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "rain",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "ground": {
+        "wet": true,
+        "materials": 5,
+        "reflectionPassesPerFrame": 0,
+        "reflectionCaptures": 0,
+        "macroSize": 384,
+        "drainage": true,
+        "flowTime": 1.2832999999999997
+      },
+      "rainSurfaces": {
+        "wet": true,
+        "detail": true,
+        "materials": 29,
+        "kinds": [
+          "leaf",
+          "bark",
+          "glass",
+          "metal",
+          "scenery",
+          "paint",
+          "trim"
+        ]
+      },
+      "performance": {
+        "frames": 46,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "drawCalls": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "triangles": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "rain-cafe",
+      "settings": {
+        "pitch": 35,
+        "yaw": 70,
+        "zoom": 2,
+        "panX": 0,
+        "panY": 0,
+        "focusX": -3.7,
+        "focusZ": -1.9,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "rain",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "ground": {
+        "wet": true,
+        "materials": 5,
+        "reflectionPassesPerFrame": 0,
+        "reflectionCaptures": 0,
+        "macroSize": 384,
+        "drainage": true,
+        "flowTime": 1.2458000000000002
+      },
+      "rainSurfaces": {
+        "wet": true,
+        "detail": true,
+        "materials": 29,
+        "kinds": [
+          "leaf",
+          "bark",
+          "glass",
+          "metal",
+          "scenery",
+          "paint",
+          "trim"
+        ]
+      },
+      "performance": {
+        "frames": 44,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "drawCalls": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "triangles": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "sunset",
+      "settings": {
+        "pitch": 55,
+        "yaw": 25,
+        "zoom": 0.85,
+        "panX": 0,
+        "panY": 0,
+        "focusX": 0,
+        "focusZ": 0,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "sunset",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "ground": {
+        "wet": false,
+        "materials": 5,
+        "reflectionPassesPerFrame": 0,
+        "reflectionCaptures": 0,
+        "macroSize": 384,
+        "drainage": false,
+        "flowTime": 0
+      },
+      "rainSurfaces": {
+        "wet": false,
+        "detail": true,
+        "materials": 29,
+        "kinds": [
+          "leaf",
+          "bark",
+          "glass",
+          "metal",
+          "scenery",
+          "paint",
+          "trim"
+        ]
+      },
+      "performance": {
+        "frames": 39,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "drawCalls": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "triangles": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "night",
+      "settings": {
+        "pitch": 55,
+        "yaw": 25,
+        "zoom": 0.85,
+        "panX": 0,
+        "panY": 0,
+        "focusX": 0,
+        "focusZ": 0,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "neon",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "ground": {
+        "wet": false,
+        "materials": 5,
+        "reflectionPassesPerFrame": 0,
+        "reflectionCaptures": 0,
+        "macroSize": 384,
+        "drainage": false,
+        "flowTime": 0
+      },
+      "rainSurfaces": {
+        "wet": false,
+        "detail": true,
+        "materials": 29,
+        "kinds": [
+          "leaf",
+          "bark",
+          "glass",
+          "metal",
+          "scenery",
+          "paint",
+          "trim"
+        ]
+      },
+      "performance": {
+        "frames": 39,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "drawCalls": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "triangles": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "rain-overhead",
+      "settings": {
+        "pitch": 90,
+        "yaw": 0,
+        "zoom": 1,
+        "panX": 0,
+        "panY": 0,
+        "focusX": 0,
+        "focusZ": 0,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "rain",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "ground": {
+        "wet": true,
+        "materials": 5,
+        "reflectionPassesPerFrame": 0,
+        "reflectionCaptures": 0,
+        "macroSize": 384,
+        "drainage": true,
+        "flowTime": 1.2709000000000004
+      },
+      "rainSurfaces": {
+        "wet": true,
+        "detail": true,
+        "materials": 29,
+        "kinds": [
+          "leaf",
+          "bark",
+          "glass",
+          "metal",
+          "scenery",
+          "paint",
+          "trim"
+        ]
+      },
+      "performance": {
+        "frames": 45,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "drawCalls": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "triangles": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "mobile-rain",
+      "settings": {
+        "pitch": 70,
+        "yaw": 0,
+        "zoom": 1,
+        "panX": 0,
+        "panY": 0,
+        "focusX": 0,
+        "focusZ": 0,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "rain",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "ground": {
+        "wet": true,
+        "materials": 5,
+        "reflectionPassesPerFrame": 0,
+        "reflectionCaptures": 0,
+        "macroSize": 384,
+        "drainage": true,
+        "flowTime": 1.3791000000000004
+      },
+      "rainSurfaces": {
+        "wet": true,
+        "detail": true,
+        "materials": 29,
+        "kinds": [
+          "leaf",
+          "bark",
+          "glass",
+          "metal",
+          "scenery",
+          "paint",
+          "trim"
+        ]
+      },
+      "performance": {
+        "frames": 45,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 393,
+          "height": 844
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 2,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "drawCalls": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "triangles": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "rain-saver",
+      "settings": {
+        "pitch": 70,
+        "yaw": 0,
+        "zoom": 1,
+        "panX": 0,
+        "panY": 0,
+        "focusX": 0,
+        "focusZ": 0,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "rain",
+        "quality": "saver",
+        "motion": 1.2
+      },
+      "ground": {
+        "wet": true,
+        "materials": 5,
+        "reflectionPassesPerFrame": 0,
+        "reflectionCaptures": 0,
+        "macroSize": 384,
+        "drainage": false,
+        "flowTime": 0
+      },
+      "rainSurfaces": {
+        "wet": true,
+        "detail": false,
+        "materials": 29,
+        "kinds": [
+          "leaf",
+          "bark",
+          "glass",
+          "metal",
+          "scenery",
+          "paint",
+          "trim"
+        ]
+      },
+      "performance": {
+        "frames": 14,
+        "shadowUpdates": 14,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 393,
+          "height": 844
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 512,
+        "shadows": false,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "drawCalls": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "triangles": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuTimer": true
+        }
+      }
+    }
+  ],
+  "idle": {
+    "idleFPS": 30,
+    "idleShadowUpdates": 0,
+    "offscreenFrames": 0,
+    "pixelRatio": 1,
+    "shadowSize": 2048
+  },
+  "profiles": [
+    {
+      "name": "dry",
+      "ground": {
+        "wet": false,
+        "materials": 5,
+        "reflectionPassesPerFrame": 0,
+        "reflectionCaptures": 0,
+        "macroSize": 384,
+        "drainage": false,
+        "flowTime": 0
+      },
+      "performance": {
+        "frames": 190,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 151,
+            "median": 1.300000011920929,
+            "p95": 3.199999988079071
+          },
+          "gpuMs": {
+            "samples": 150,
+            "median": 14.138645,
+            "p95": 14.652343
+          },
+          "drawCalls": {
+            "samples": 151,
+            "median": 100,
+            "p95": 100
+          },
+          "triangles": {
+            "samples": 151,
+            "median": 401422,
+            "p95": 401422
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "wet",
+      "ground": {
+        "wet": true,
+        "materials": 5,
+        "reflectionPassesPerFrame": 0,
+        "reflectionCaptures": 0,
+        "macroSize": 384,
+        "drainage": true,
+        "flowTime": 6.016700000000002
+      },
+      "performance": {
+        "frames": 187,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 151,
+            "median": 1.800000011920929,
+            "p95": 2.699999988079071
+          },
+          "gpuMs": {
+            "samples": 150,
+            "median": 16.620208,
+            "p95": 20.291145
+          },
+          "drawCalls": {
+            "samples": 151,
+            "median": 102,
+            "p95": 102
+          },
+          "triangles": {
+            "samples": 151,
+            "median": 401934,
+            "p95": 401934
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "mobile-wet",
+      "ground": {
+        "wet": true,
+        "materials": 5,
+        "reflectionPassesPerFrame": 0,
+        "reflectionCaptures": 0,
+        "macroSize": 384,
+        "drainage": true,
+        "flowTime": 5.991700000000003
+      },
+      "performance": {
+        "frames": 189,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 393,
+          "height": 844
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 2,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 150,
+            "median": 1.699999988079071,
+            "p95": 3.599999964237213
+          },
+          "gpuMs": {
+            "samples": 149,
+            "median": 15.433802,
+            "p95": 15.75552
+          },
+          "drawCalls": {
+            "samples": 150,
+            "median": 102,
+            "p95": 102
+          },
+          "triangles": {
+            "samples": 150,
+            "median": 401934,
+            "p95": 401934
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "dry-orbit",
+      "ground": {
+        "wet": false,
+        "materials": 5,
+        "reflectionPassesPerFrame": 0,
+        "reflectionCaptures": 0,
+        "macroSize": 384,
+        "drainage": false,
+        "flowTime": 0
+      },
+      "performance": {
+        "frames": 452,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 300,
+            "median": 2.5,
+            "p95": 4.5
+          },
+          "gpuMs": {
+            "samples": 300,
+            "median": 14.048489,
+            "p95": 14.701457
+          },
+          "drawCalls": {
+            "samples": 300,
+            "median": 100,
+            "p95": 100
+          },
+          "triangles": {
+            "samples": 300,
+            "median": 401422,
+            "p95": 401422
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "wet-orbit",
+      "ground": {
+        "wet": true,
+        "materials": 5,
+        "reflectionPassesPerFrame": 0,
+        "reflectionCaptures": 0,
+        "macroSize": 384,
+        "drainage": true,
+        "flowTime": 8.491800000000017
+      },
+      "performance": {
+        "frames": 446,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 300,
+            "median": 2.599999964237213,
+            "p95": 5.300000011920929
+          },
+          "gpuMs": {
+            "samples": 300,
+            "median": 16.245416,
+            "p95": 21.377916
+          },
+          "drawCalls": {
+            "samples": 300,
+            "median": 102,
+            "p95": 102
+          },
+          "triangles": {
+            "samples": 300,
+            "median": 401934,
+            "p95": 401934
+          },
+          "gpuTimer": true
+        }
+      }
+    }
+  ],
+  "rainSelectableWithoutProgress": true,
+  "errors": []
+}

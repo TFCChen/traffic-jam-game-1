@@ -72,7 +72,7 @@ export function createGroundSurface(renderer,garage) {
   sky.minFilter=sky.magFilter=THREE.LinearFilter;sky.wrapS=THREE.RepeatWrapping;
   sky.needsUpdate=true;textures.push(sky);sky.mapping=THREE.EquirectangularReflectionMapping;
   const pmrem=new THREE.PMREMGenerator(renderer),reflection=pmrem.fromEquirectangular(sky);pmrem.dispose();
-  const weather={value:0},items=[];
+  const weather={value:0},drainage={value:0},flowTime={value:0},items=[];
   const kinds={'Asphalt blue slate':0,'Street asphalt':0,'Courtyard paving':1,'Courtyard stone':2,'Parking markings':3};
   garage.traverse(mesh=>{
     if(!mesh.isMesh||!(mesh.material.name in kinds))return;
@@ -84,11 +84,12 @@ export function createGroundSurface(renderer,garage) {
     material.onBeforeCompile=(shader,gl)=>{
       before.call(material,shader,gl);
       shader.uniforms.groundMacro={value:macro};shader.uniforms.groundGrain={value:grain};shader.uniforms.groundWeather=weather;
+      shader.uniforms.groundDrainage=drainage;shader.uniforms.groundFlowTime=flowTime;
       shader.vertexShader='varying vec3 groundWorld; varying float groundFacing;\n'+shader.vertexShader;
       shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
         groundWorld=(modelMatrix*vec4(transformed,1.)).xyz;
         groundFacing=abs(normalize(mat3(modelMatrix)*normal).y);`);
-      shader.fragmentShader=`varying vec3 groundWorld; varying float groundFacing; uniform sampler2D groundMacro; uniform sampler2D groundGrain; uniform float groundWeather;\n`+shader.fragmentShader;
+      shader.fragmentShader=`varying vec3 groundWorld; varying float groundFacing; uniform sampler2D groundMacro; uniform sampler2D groundGrain; uniform float groundWeather;uniform float groundDrainage;uniform float groundFlowTime;\n`+shader.fragmentShader;
       shader.fragmentShader=shader.fragmentShader.replace('#include <bumpmap_pars_fragment>',THREE.ShaderChunk.bumpmap_pars_fragment.replaceAll('vBumpMapUv','(groundWorld.xz*1.3)'));
       // The reflection sky is an optical reference, not extra ambient light.
       // Keep its diffuse contribution low so dark wet asphalt stays asphalt.
@@ -111,6 +112,16 @@ export function createGroundSurface(renderer,garage) {
         roughnessFactor=mix(roughnessFactor,.105,pool);`);
       shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
         normal=normalize(mix(normal,nonPerturbedNormal,max(wet*.08,pool*.94)));
+        ${kind===0?`
+        float curbDistance=min(abs(groundWorld.x-6.79),abs(groundWorld.x-9.77));
+        float gutter=(1.-smoothstep(.018,.075,curbDistance))*smoothstep(-1.7,-1.4,groundWorld.z)*(1.-smoothstep(9.6,9.85,groundWorld.z))*wet*groundDrainage;
+        if(groundDrainage>.001){
+          float flow=texture2D(groundGrain,vec2(groundWorld.x*1.3,groundWorld.z*.7+groundFlowTime*.035)).r;
+          float filmHeight=flow*gutter*.00005;
+          vec3 px=dFdx(-vViewPosition),py=dFdy(-vViewPosition);
+          vec3 r1=cross(py,normal),r2=cross(normal,px);float det=dot(px,r1);
+          normal=normalize(abs(det)*normal-sign(det)*(dFdx(filmHeight)*r1+dFdy(filmHeight)*r2));
+        }`:''}
         `);
     };
     material.customProgramCacheKey=()=>`courtyard-ground-v1-${kind}`;
@@ -125,8 +136,8 @@ export function createGroundSurface(renderer,garage) {
         material.envMapIntensity=weather.value?.32:1.1;
       }
     },
-    snapshot(){return {wet:weather.value>0,materials:items.length,reflectionPassesPerFrame:0,reflectionCaptures:0,macroSize:384};},
-    update(){},
+    snapshot(){return {wet:weather.value>0,materials:items.length,reflectionPassesPerFrame:0,reflectionCaptures:0,macroSize:384,drainage:drainage.value>0,flowTime:flowTime.value};},
+    update(dt,settings,quality,reduced,editor){drainage.value=settings.theme==='rain'&&quality.decor&&!reduced&&!editor?1:0;if(drainage.value)flowTime.value+=Math.min(dt,.1);},
     dispose(){for(const{mesh,original,material}of items){mesh.material=original;material.dispose();}textures.forEach(t=>t.dispose());reflection.dispose();},
   };
 }
