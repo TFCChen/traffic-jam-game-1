@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { surfaceShader } from './vehicleFinish.js';
 import { contactOpacity } from './contactShadow.js';
+import { sceneryAtlasData, sceneryTile } from './sceneryAtlas.js';
 
 export function vehicleContactTexture(length) {
   const width = 128, height = 64;
@@ -50,13 +51,7 @@ export function batchColoredMeshes(
       const b = geometry.boundingBox,
         size = b.getSize(new THREE.Vector3()),
         name = mesh.material.name.toLowerCase();
-      const tile = /wood|oak|timber/.test(name)
-        ? 0
-        : name.includes("foliage")
-          ? 2
-          : name.includes("metal") || name.includes("rail")
-            ? 3
-            : 1;
+      const tile = sceneryTile(name);
       const uv = new Float32Array(p.count * 2);
       for (let i = 0; i < p.count; i++) {
         const n = [
@@ -71,12 +66,12 @@ export function batchColoredMeshes(
           mins = [b.min.x, b.min.y, b.min.z],
           sizes = [size.x, size.y, size.z];
         uv[i * 2] =
-          ((tile % 2) +
+          ((tile % 4) +
             ((coords[a] - mins[a]) / Math.max(0.001, sizes[a])) * 0.96 +
             0.02) /
-          2;
+          4;
         uv[i * 2 + 1] =
-          (Math.floor(tile / 2) +
+          (Math.floor(tile / 4) +
             ((coords[c] - mins[c]) / Math.max(0.001, sizes[c])) * 0.96 +
             0.02) /
           2;
@@ -123,6 +118,8 @@ export function batchColoredMeshes(
   if (atlas) {
     material.map = atlas;
     material.roughnessMap = atlas;
+    material.bumpMap = atlas;
+    material.bumpScale = .0016;
   }
   const merged = new THREE.Mesh(geometry, material);
   merged.userData.generatedGeometry = true;
@@ -133,44 +130,13 @@ export function batchColoredMeshes(
 }
 
 export function sceneryTexture() {
-  const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = 512;
-  const context = canvas.getContext("2d");
-  let seed = 937;
-  for (let tile = 0; tile < 4; tile++) {
-    const x = (tile % 2) * 256,
-      y = Math.floor(tile / 2) * 256;
-    context.fillStyle = "#fafaf7";
-    context.fillRect(x, y, 256, 256);
-    for (let i = 0; i < 1500; i++) {
-      seed = (seed * 1664525 + 1013904223) >>> 0;
-      const px = x + ((seed >>> 16) % 256);
-      seed = (seed * 1664525 + 1013904223) >>> 0;
-      const py = y + ((seed >>> 16) % 256);
-      context.fillStyle =
-        tile === 2 ? "rgba(35,48,28,.055)" : "rgba(40,42,37,.04)";
-      context.fillRect(px, py, tile === 0 ? 12 : 2, tile === 0 ? 1 : 2);
-    }
-    if (tile === 0) {
-      context.strokeStyle = "rgba(61,51,29,.08)";
-      for (let row = 24; row < 256; row += 37) {
-        context.beginPath();
-        context.moveTo(x, y + row);
-        context.bezierCurveTo(
-          x + 70,
-          y + row + 5,
-          x + 130,
-          y + row - 4,
-          x + 256,
-          y + row + 2,
-        );
-        context.stroke();
-      }
-    }
-  }
-  const texture = new THREE.CanvasTexture(canvas);
+  const texture = new THREE.DataTexture(sceneryAtlasData(),1024,512);
   texture.colorSpace = THREE.SRGBColorSpace;
+  texture.generateMipmaps = true;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = THREE.LinearFilter;
   texture.anisotropy = 4;
+  texture.needsUpdate = true;
   return texture;
 }
 

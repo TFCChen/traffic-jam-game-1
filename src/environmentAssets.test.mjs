@@ -75,3 +75,8 @@ for(const length of [2,3]){
   tyre.geometry.dispose();tyre.material.dispose();
 }
 console.log('Square street courtyard, authored detail materials, unchanged puzzle surface and continuous exit support passed.');
+
+const {sceneryTile,sceneryAtlasData}=await import('./sceneryAtlas.js');
+for(const [name,tile]of [['Oiled oak',0],['Limestone paver 0',1],['Graphite powdercoat',3],['Cafe brick 0',4],['Linen canvas',5],['Mulched earth',6]])assert.equal(sceneryTile(name),tile,'Authored material families must not share the same generic tile');
+const atlas=sceneryAtlasData();assert.equal(atlas.length,1024*512*4);assert.deepEqual(atlas,sceneryAtlasData(),'Scenery detail must remain stable across reloads');
+assert(atlas.every((v,i)=>i%4!==3||v===255),'Scenery surfaces must remain opaque');

@@ -16,7 +16,8 @@ async function escape(touch=false,id='target',delta=4){const moves=await c.evalu
 const errors=[];await c.send('Runtime.enable');c.onEvent('Runtime.exceptionThrown',e=>errors.push(e.exceptionDetails.text));
 const theme=process.env.VERIFY_THEME??'day';
 const cars=[{id:'target',color:'#e53935',row:2,col:0,len:2,dir:'H'}];
-const fixture=(pitch=65,yaw=0)=>`localStorage.setItem('traffic-jam-tutorial-v1',JSON.stringify({schema:1,data:true}));localStorage.setItem('traffic-jam-custom-levels-v2',JSON.stringify([{id:'custom-exit',title:'出庫演出',cars:${JSON.stringify(cars)}}]));localStorage.setItem('traffic-jam-session-v1',JSON.stringify({schema:1,data:{levelId:'custom-exit',cars:${JSON.stringify(cars)},history:[],moves:0}}));localStorage.setItem('traffic-jam-scene',JSON.stringify({pitch:${pitch},yaw:${yaw},zoom:1,quality:'high',theme:${JSON.stringify(theme)},motion:1.2}))`;
+const unlockProgress=Object.fromEntries(Array.from({length:20},(_,i)=>[i+1,{completed:true,stars:3,bestMoves:10}]));
+const fixture=(pitch=65,yaw=0)=>`localStorage.setItem('traffic-jam-progress-v2',JSON.stringify(${JSON.stringify(unlockProgress)}));localStorage.setItem('traffic-jam-tutorial-v1',JSON.stringify({schema:1,data:true}));localStorage.setItem('traffic-jam-custom-levels-v2',JSON.stringify([{id:'custom-exit',title:'出庫演出',cars:${JSON.stringify(cars)}}]));localStorage.setItem('traffic-jam-session-v1',JSON.stringify({schema:1,data:{levelId:'custom-exit',cars:${JSON.stringify(cars)},history:[],moves:0}}));localStorage.setItem('traffic-jam-scene',JSON.stringify({pitch:${pitch},yaw:${yaw},zoom:1,quality:'high',theme:${JSON.stringify(theme)},motion:1.2}))`;
 try{
  await c.send('Emulation.setFocusEmulationEnabled',{enabled:true});await c.send('Page.bringToFront');const results=[];
  for(const [name,width,height,pitch,yaw,touch] of [['desktop',1440,1000,65,0,false],['mobile',390,844,65,0,true],['low-angle',1440,1000,30,55,false]]){

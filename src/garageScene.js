@@ -544,14 +544,15 @@ export function createGarageScene(canvas, getProps, callbacks) {
       dirty = true;
       return;
     }
-    const angle = THREE.MathUtils.degToRad(settings.light);
-    sun.position.set(
-      aim.x + Math.sin(angle) * 8,
-      10,
-      aim.z + Math.cos(angle) * 8,
-    );
     const theme =
       SCENE_THEMES.find((t) => t.id === settings.theme) ?? SCENE_THEMES[0];
+    const angle = THREE.MathUtils.degToRad(settings.light);
+    const radius = theme.sunRadius ?? 8;
+    sun.position.set(
+      aim.x + Math.sin(angle) * radius,
+      theme.sunHeight ?? 10,
+      aim.z + Math.cos(angle) * radius,
+    );
     sun.intensity = settings.intensity * theme.key;
     sun.color.set(theme.sun);
     sun.castShadow = settings.shadows && quality.decor;
@@ -1871,6 +1872,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
           far: camera.far,
           position: camera.position.toArray(),
         },
+        lighting: { sunPosition: sun.position.toArray(), sunColor: sun.color.getHexString(), sunIntensity: sun.intensity, skyColor: ambient.color.getHexString(), ambientIntensity: ambient.intensity },
         transmissionResolutionScale: renderer.transmissionResolutionScale,
         vehicleLighting: vehicleLights.snapshot(),
         exhaustSmoke: exhaustSmoke.snapshot(),
