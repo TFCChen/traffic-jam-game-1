@@ -25,7 +25,7 @@ export function createCourtyardAtmosphere(scene, garage) {
   garage.traverse(mesh => {
     if (!mesh.isMesh) return;
     const material = mesh.material;
-    if (material.name === 'Courtyard foliage detail') {
+    if (['Courtyard foliage detail', 'Courtyard bark'].includes(material.name)) {
       const original = mesh.geometry, geometry = original.clone();
       mesh.geometry = geometry; geometries.push(geometry); changed.push([mesh, original]);
       const positions = geometry.attributes.position, profile = new Float32Array(positions.count * 4);

@@ -1378,6 +1378,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
             "Architectural glazing",
             "Courtyard paving",
             "Courtyard foliage detail",
+            "Courtyard bark",
             "Courtyard fence",
           ].includes(mesh.material.name) && !mesh.material.name.startsWith('Streetlamp glow'),
         {

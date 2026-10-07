@@ -30,6 +30,7 @@ mark = mat('Parking markings', 'cbd0c7', .89)
 soil = mat('Mulched earth', '4e5141', .98)
 leaves = [mat('Courtyard foliage '+str(i), c, .95) for i,c in enumerate(['4c6952','5b795b','6d8864','7c926b'])]
 leaf_detail = mat('Courtyard foliage detail', 'ffffff', .95)
+bark = mat('Courtyard bark', '66523e', .94)
 leaf_colour=leaf_detail.node_tree.nodes.new('ShaderNodeVertexColor');leaf_colour.layer_name='Col'
 leaf_detail.node_tree.links.new(leaf_colour.outputs['Color'],leaf_detail.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
 stone_dark = mat('Rain drain and rubber', '2b3537', .86)
@@ -120,16 +121,11 @@ sys.path.insert(0, os.path.join(ROOT, 'scripts'))
 from courtyard_foliage import foliage
 
 def shrub(x,y,z,scale=.18):
-    return foliage(x,y,z,scale,leaf_detail,leaves,objects)
+    return foliage(x,y,z,scale,leaf_detail,leaves,objects,bark=bark)
 
 def tree(x,y):
     planter(x,y,.48,.53)
-    cylinder('Tree trunk',(x,y,.55),.031,.78,timber)
-    for i in range(5):
-        a=i*math.tau/5
-        strut('Fine tree branch',(x,y,.63),(x+math.cos(a)*.18,y+math.sin(a)*.18,.95),.012,timber)
-
-    foliage(x,y,1.12,.25,leaf_detail,leaves,objects,canopy=True)
+    foliage(x,y,1.12,.25,leaf_detail,leaves,objects,canopy=True,bark=bark)
 
 for x,y in [(-.68,-5.6),(5.66,.73),(6.0,-7.25),(-1.5,-6.95)]:tree(x,y)
 for x,y,w,l in [(-.6,-2.9,.54,1.15),(2.1,.65,1.8,.42),(3.9,-6.65,1.65,.4)]:

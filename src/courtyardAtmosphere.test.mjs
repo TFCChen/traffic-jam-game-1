@@ -20,8 +20,13 @@ const scene = new THREE.Scene(), garage = new THREE.Group(); scene.add(garage);
 const original = new THREE.BoxGeometry(.1, .1, .1);
 const foliageMaterial = new THREE.MeshStandardMaterial(); foliageMaterial.name = 'Courtyard foliage detail';
 const foliage = new THREE.Mesh(original, foliageMaterial); foliage.position.set(-.7, 1.3, 5.6); garage.add(foliage);
+const barkMaterial = new THREE.MeshStandardMaterial(); barkMaterial.name = 'Courtyard bark';
+const bark = new THREE.Mesh(original, barkMaterial); bark.position.copy(foliage.position); garage.add(bark);
 const atmosphere = createCourtyardAtmosphere(scene, garage);
 assert.notEqual(foliage.geometry, original); assert(!original.getAttribute('windProfile'));
+assert.notEqual(bark.geometry, original);
+assert.deepEqual(bark.geometry.getAttribute('windProfile').array, foliage.geometry.getAttribute('windProfile').array,
+  'Branches and leaves at shared attachment points must receive identical wind displacement');
 atmosphere.setTheme({ theme: 'neon' }, { decor: true });
 assert(atmosphere.snapshot().cafeLight > 0);
 for (let i = 0; i < 1000; i++) {
@@ -37,6 +42,6 @@ atmosphere.setTheme({ theme: 'day' }, { decor: true }); assert.equal(atmosphere.
 atmosphere.update(.1, {}, { decor: true }, false, false);
 assert.equal(atmosphere.pause(), true); assert.equal(atmosphere.pause(), false);
 assert.deepEqual(atmosphere.snapshot().wind, [0, 0, 0, 0]);
-atmosphere.dispose(); assert.equal(foliage.geometry, original); assert.equal(scene.children.length, 1);
-original.dispose(); foliageMaterial.dispose();
+atmosphere.dispose(); assert.equal(foliage.geometry, original); assert.equal(bark.geometry, original); assert.equal(scene.children.length, 1);
+original.dispose(); foliageMaterial.dispose(); barkMaterial.dispose();
 console.log('Courtyard atmosphere: bounded wind, sparse sidewalk leaves, static reduced motion and resource cleanup passed');

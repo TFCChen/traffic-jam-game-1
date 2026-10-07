@@ -3,7 +3,7 @@ import { mkdirSync, writeFileSync, readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { connect } from './cdp-test.mjs';
 const c = await connect(process.argv[2]);
-const dir = new URL('../docs/foliage-2026-10-07/', import.meta.url); mkdirSync(dir, { recursive: true });
+const dir = new URL(process.env.VERIFY_FOLIAGE_OUTPUT_DIR ?? '../docs/foliage-2026-10-07/', import.meta.url); mkdirSync(dir, { recursive: true });
 const saved = await c.evaluate(`Object.fromEntries(Object.keys(localStorage).filter(k=>k.startsWith('traffic-jam-')).map(k=>[k,localStorage.getItem(k)]))`);
 await c.send('Runtime.enable'); await c.send('Network.enable'); await c.send('Network.setBypassServiceWorker',{bypass:true}); await c.send('Network.setCacheDisabled',{cacheDisabled:true});
 await c.send('Emulation.setFocusEmulationEnabled',{enabled:true}); await c.send('Page.bringToFront');
@@ -24,8 +24,8 @@ try{
   await c.send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
   await c.send('Fetch.enable',{patterns:[{urlPattern:'*garage.glb*'}]});await load(close);await shot('before-close');await c.send('Fetch.disable');assert(!interceptionError);
   const reports=[];
-  for(const[name,pitch,yaw,theme]of [['after-close',45,-30,'day'],['after-overhead',90,0,'day'],['after-side',30,-60,'day'],['after-sunset',45,-30,'sunset'],['after-night',45,-30,'neon']]){
-    await load({...close,pitch,yaw,theme});await shot(name);const s=await snap();assert.equal(s.cars.length,8);assert(s.atmosphere.enabled);reports.push({name,settings:s.settings,atmosphere:s.atmosphere,performance:s.performance});
+  for(const[name,pitch,yaw,theme,focusZ=close.focusZ,focusX=close.focusX]of [['after-close',45,-30,'day'],['after-overhead',90,0,'day'],['after-side',30,-60,'day'],['after-sunset',45,-30,'sunset'],['after-night',45,-30,'neon'],['after-shrub',45,-30,'day',-.1,-3.6]]){
+    await load({...close,pitch,yaw,theme,focusZ,focusX});await shot(name);const s=await snap();assert.equal(s.cars.length,8);assert(s.atmosphere.enabled);reports.push({name,settings:s.settings,atmosphere:s.atmosphere,performance:s.performance});
   }
   await c.send('Emulation.setDeviceMetricsOverride',{width:393,height:844,deviceScaleFactor:3,mobile:true});await load({pitch:65,yaw:25,zoom:.85,quality:'high',theme:'day'});await shot('mobile');
   const performance=await c.evaluate(readFileSync(new URL('./check-scene-performance.js',import.meta.url),'utf8'));assert.deepEqual(errors,[]);

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { connect } from './cdp-test.mjs';
 const c = await connect(process.argv[2]);
-const dir = new URL('../docs/atmosphere-2026-10-07/', import.meta.url); mkdirSync(dir, { recursive: true });
+const dir = new URL(process.env.VERIFY_ATMOSPHERE_OUTPUT_DIR ?? '../docs/atmosphere-2026-10-07/', import.meta.url); mkdirSync(dir, { recursive: true });
 const snap = () => c.evaluate(`document.querySelector('.garage-canvas').garageInspection.snapshot()`);
 const saved = await c.evaluate(`Object.fromEntries(Object.keys(localStorage).filter(k=>k.startsWith('traffic-jam-')).map(k=>[k,localStorage.getItem(k)]))`);
 let current = { pitch: 65, yaw: 25, zoom: .85, quality: 'high', theme: 'day' };

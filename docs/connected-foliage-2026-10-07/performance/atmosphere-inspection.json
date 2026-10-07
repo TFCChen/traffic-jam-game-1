@@ -1,0 +1,182 @@
+{
+  "animatedWithoutShadowRefresh": true,
+  "reducedMotion": true,
+  "saver": true,
+  "profiles": [
+    {
+      "name": "desktop-day",
+      "atmosphere": {
+        "enabled": true,
+        "activeLeaves": 2,
+        "leafCapacity": 8,
+        "wind": [
+          -0.015113590253696204,
+          -0.010789896380157982,
+          -0.0024216866884121603,
+          0.0008211319784338564
+        ],
+        "cafeGlow": 0.018,
+        "cafeLight": 0,
+        "animatedShadowUpdates": 0
+      },
+      "performance": {
+        "frames": 182,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 146,
+            "median": 1.800000011920929,
+            "p95": 3
+          },
+          "gpuMs": {
+            "samples": 144,
+            "median": 15.214114,
+            "p95": 43.474583
+          },
+          "drawCalls": {
+            "samples": 146,
+            "median": 98,
+            "p95": 98
+          },
+          "triangles": {
+            "samples": 146,
+            "median": 401422,
+            "p95": 401422
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "desktop-night",
+      "atmosphere": {
+        "enabled": true,
+        "activeLeaves": 2,
+        "leafCapacity": 8,
+        "wind": [
+          -0.015186955316534754,
+          -0.010775961200322667,
+          -0.0024695277226728474,
+          0.0008534975385967202
+        ],
+        "cafeGlow": 0.8,
+        "cafeLight": 0.4,
+        "animatedShadowUpdates": 0
+      },
+      "performance": {
+        "frames": 156,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 124,
+            "median": 2.099999964237213,
+            "p95": 3.399999976158142
+          },
+          "gpuMs": {
+            "samples": 122,
+            "median": 25.510781,
+            "p95": 51.157812
+          },
+          "drawCalls": {
+            "samples": 124,
+            "median": 99,
+            "p95": 99
+          },
+          "triangles": {
+            "samples": 124,
+            "median": 401430,
+            "p95": 401430
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "mobile-day",
+      "atmosphere": {
+        "enabled": true,
+        "activeLeaves": 2,
+        "leafCapacity": 8,
+        "wind": [
+          -0.015145099547064913,
+          -0.010784066795383655,
+          -0.002442290104047993,
+          0.0008349497866046523
+        ],
+        "cafeGlow": 0.018,
+        "cafeLight": 0,
+        "animatedShadowUpdates": 0
+      },
+      "performance": {
+        "frames": 183,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 393,
+          "height": 844
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 2,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 149,
+            "median": 1.399999976158142,
+            "p95": 3
+          },
+          "gpuMs": {
+            "samples": 148,
+            "median": 14.645885,
+            "p95": 44.678384
+          },
+          "drawCalls": {
+            "samples": 149,
+            "median": 98,
+            "p95": 98
+          },
+          "triangles": {
+            "samples": 149,
+            "median": 401422,
+            "p95": 401422
+          },
+          "gpuTimer": true
+        }
+      }
+    }
+  ],
+  "errors": []
+}
