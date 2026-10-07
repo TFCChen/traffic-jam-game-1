@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {Box3,Raycaster,Vector3,Mesh} from 'three';
+import {Box3,Raycaster,Vector3,Mesh,DirectionalLight} from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {exitPose,EXIT_COMPLETE_MS} from './exitChoreography.js';
-import {vegetationShadowProxy} from './environmentShadows.js';
+import {vegetationShadowProxy,configureCourtyardSunShadow} from './environmentShadows.js';
 import {createWheelShadowGeometry} from './garageMaterials.js';
 const bytes=fs.readFileSync(new URL('../public/models/garage.glb',import.meta.url));
 const {scene}=await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),'');
@@ -11,6 +11,29 @@ scene.updateMatrixWorld(true);
 const bounds=new Box3().setFromObject(scene),size=bounds.getSize(new Vector3());
 assert(Math.abs(size.x-size.z)<.1,'Courtyard must have a square footprint');
 assert(size.x>12&&size.x<12.6,'Scene is a complete expanded block');
+const sun=new DirectionalLight();configureCourtyardSunShadow(sun.shadow);
+sun.target.position.set(3,.15,3);sun.target.updateMatrixWorld(true);
+for(let angle=-180;angle<=180;angle+=15){
+  const radians=angle*Math.PI/180;
+  sun.position.set(3+Math.sin(radians)*8,10,3+Math.cos(radians)*8);sun.updateMatrixWorld(true);sun.shadow.updateMatrices(sun);
+  for(const x of [bounds.min.x,bounds.max.x])for(const y of [bounds.min.y,bounds.max.y])for(const z of [bounds.min.z,bounds.max.z]){
+    const point=new Vector3(x,y,z).applyMatrix4(sun.shadow.camera.matrixWorldInverse);
+    assert(-point.z>sun.shadow.camera.near&&-point.z<sun.shadow.camera.far,'Sun depth range covers courtyard at every lighting angle');
+  }
+}
+assert(sun.shadow.bias>=0&&sun.shadow.bias*(sun.shadow.camera.far-sun.shadow.camera.near)<.005,'Depth bias avoids acne without detaching small fence shadows');
+let cornerTriangles=0;
+scene.traverse(o=>{
+  if(!o.isMesh||!['Honed warm limestone','Graphite powdercoat','Satin brass accents'].includes(o.material.name))return;
+  const seen=new Set(),position=o.geometry.attributes.position,index=o.geometry.index;
+  for(let i=0;i<index.count;i+=3){
+    const points=[0,1,2].map(j=>new Vector3().fromBufferAttribute(position,index.getX(i+j)).applyMatrix4(o.matrixWorld));
+    if(!points.every(p=>p.y>-.05&&p.y<.4&&Math.min(Math.abs(p.x),Math.abs(p.x-6))<.05&&Math.min(Math.abs(p.z),Math.abs(p.z-6))<.05))continue;
+    const key=points.map(p=>p.toArray().map(n=>n.toFixed(5)).join(',')).sort().join('|');
+    assert(!seen.has(key),'Fence corners must not contain duplicate coplanar faces');seen.add(key);cornerTriangles++;
+  }
+});
+assert(cornerTriangles>0,'Corner geometry regression check examines the authored fence');
 const materials=new Set();scene.traverse(o=>{if(o.isMesh)materials.add(o.material.name);});
 for(const name of ['Graphite powdercoat','Satin brass accents','Architectural glazing','Oiled oak','Cafe brick 0','Courtyard foliage detail'])assert(materials.has(name),`Detail material exported: ${name}`);
 const asphalt=[];scene.traverse(o=>{if(o.isMesh&&['Asphalt blue slate','Street asphalt'].includes(o.material.name))asphalt.push(o);});

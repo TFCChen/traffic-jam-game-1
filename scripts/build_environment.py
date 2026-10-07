@@ -59,10 +59,14 @@ paving(6.16,6.45,-1.95,.16)
 paving(6.16,6.45,-9.6,-3.05)
 
 # Low, finely proportioned metal fence with separate footings and brass caps.
+fence_posts = set()
 def fence(a,b):
     length=math.dist(a,b);count=max(1,math.ceil(length/.8))
     for i in range(count+1):
         x=a[0]+(b[0]-a[0])*i/count;y=a[1]+(b[1]-a[1])*i/count
+        key=(round(x,6),round(y,6))
+        if key in fence_posts:continue
+        fence_posts.add(key)
         cube('Fence shoe',(x,y,.065),(.085,.085,.06),concrete,.012)
         cube('Slim fence post',(x,y,.195),(.032,.032,.29),iron,.006)
         cube('Satin post cap',(x,y,.345),(.038,.038,.018),brass,.006)

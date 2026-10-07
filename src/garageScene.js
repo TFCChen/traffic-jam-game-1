@@ -3,7 +3,7 @@ import { cullUnlitPixels } from './localLightCulling.js';
 cullUnlitPixels();
 import { createHintGuide } from './hintGuide.js';
 import { exitPose, exitSceneFade, EXIT_COMPLETE_MS } from './exitChoreography.js';
-import { vegetationShadowProxy } from './environmentShadows.js';
+import { vegetationShadowProxy, configureCourtyardSunShadow } from './environmentShadows.js';
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { legalMovesForCar } from "./gameEngine.js";
@@ -239,12 +239,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
   sun.shadow.autoUpdate = false;
   sun.shadow.needsUpdate = true;
   sun.shadow.mapSize.set(1024, 1024);
-  sun.shadow.camera.left = -8;
-  sun.shadow.camera.right = 8;
-  sun.shadow.camera.top = 8;
-  sun.shadow.camera.bottom = -8;
-  sun.shadow.normalBias = 0.025;
-  sun.shadow.bias = -0.0002;
+    configureCourtyardSunShadow(sun.shadow);
   sun.target.position.copy(aim);
   scene.add(sun, sun.target);
   const floorMaterial = new THREE.MeshStandardMaterial({
