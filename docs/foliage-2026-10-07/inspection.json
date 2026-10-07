@@ -1,0 +1,377 @@
+{
+  "reports": [
+    {
+      "name": "after-close",
+      "settings": {
+        "pitch": 45,
+        "yaw": -30,
+        "zoom": 4,
+        "panX": 0,
+        "panY": 0,
+        "focusX": -3.68,
+        "focusZ": 2.6,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "day",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "atmosphere": {
+        "enabled": true,
+        "activeLeaves": 3,
+        "leafCapacity": 8,
+        "wind": [
+          0.008808648909959053,
+          0.007486128625618267,
+          0.002962422116585497,
+          0.0017992587605749435
+        ],
+        "cafeGlow": 0.018,
+        "cafeLight": 0,
+        "animatedShadowUpdates": 0
+      },
+      "performance": {
+        "frames": 31,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "drawCalls": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "triangles": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "after-overhead",
+      "settings": {
+        "pitch": 90,
+        "yaw": 0,
+        "zoom": 4,
+        "panX": 0,
+        "panY": 0,
+        "focusX": -3.68,
+        "focusZ": 2.6,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "day",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "atmosphere": {
+        "enabled": true,
+        "activeLeaves": 3,
+        "leafCapacity": 8,
+        "wind": [
+          0.008392307042079343,
+          0.007560803055230093,
+          0.0029922092903760795,
+          0.0017476752404152701
+        ],
+        "cafeGlow": 0.018,
+        "cafeLight": 0,
+        "animatedShadowUpdates": 0
+      },
+      "performance": {
+        "frames": 32,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "drawCalls": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "triangles": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "after-side",
+      "settings": {
+        "pitch": 30,
+        "yaw": -60,
+        "zoom": 4,
+        "panX": 0,
+        "panY": 0,
+        "focusX": -3.68,
+        "focusZ": 2.6,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "day",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "atmosphere": {
+        "enabled": true,
+        "activeLeaves": 3,
+        "leafCapacity": 8,
+        "wind": [
+          0.010123819076322623,
+          0.007190854698796742,
+          0.0027108159726234003,
+          0.0019286279904688283
+        ],
+        "cafeGlow": 0.018,
+        "cafeLight": 0,
+        "animatedShadowUpdates": 0
+      },
+      "performance": {
+        "frames": 36,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "drawCalls": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "triangles": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "after-sunset",
+      "settings": {
+        "pitch": 45,
+        "yaw": -30,
+        "zoom": 4,
+        "panX": 0,
+        "panY": 0,
+        "focusX": -3.68,
+        "focusZ": 2.6,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "sunset",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "atmosphere": {
+        "enabled": true,
+        "activeLeaves": 3,
+        "leafCapacity": 8,
+        "wind": [
+          0.009978352101934854,
+          0.007228422551588818,
+          0.0027511068892452453,
+          0.0019170778893615739
+        ],
+        "cafeGlow": 0.23,
+        "cafeLight": 0.15,
+        "animatedShadowUpdates": 0
+      },
+      "performance": {
+        "frames": 35,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "drawCalls": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "triangles": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "after-night",
+      "settings": {
+        "pitch": 45,
+        "yaw": -30,
+        "zoom": 4,
+        "panX": 0,
+        "panY": 0,
+        "focusX": -3.68,
+        "focusZ": 2.6,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "neon",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "atmosphere": {
+        "enabled": true,
+        "activeLeaves": 3,
+        "leafCapacity": 8,
+        "wind": [
+          0.009841604175727612,
+          0.007262543710544546,
+          0.002786045454409429,
+          0.001905552038152265
+        ],
+        "cafeGlow": 0.8,
+        "cafeLight": 0.4,
+        "animatedShadowUpdates": 0
+      },
+      "performance": {
+        "frames": 32,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "drawCalls": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "triangles": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuTimer": true
+        }
+      }
+    }
+  ],
+  "performance": {
+    "idleFPS": 30,
+    "idleShadowUpdates": 0,
+    "offscreenFrames": 0,
+    "pixelRatio": 2,
+    "shadowSize": 2048
+  },
+  "errors": []
+}

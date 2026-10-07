@@ -115,32 +115,12 @@ def planter(x,y,w,l):
     cube('Planter stone rim',(x,y,.16),(w+.02,l+.02,.07),concrete,.025)
     cube('Recessed planting soil',(x,y,.201),(w-.075,l-.075,.015),soil,.008)
 
+import sys
+sys.path.insert(0, os.path.join(ROOT, 'scripts'))
+from courtyard_foliage import foliage
+
 def shrub(x,y,z,scale=.18):
-    # Individually folded almond leaves, with small gaps for branch silhouettes.
-    # Build each cluster directly as one mesh, avoiding hundreds of draw calls.
-    vertices=[];faces=[];colours=[]
-    for i in range(110):
-        a=i*2.39996;h=1-2*(i+.5)/110;r=math.sqrt(1-h*h)
-        normal=Vector((r*math.cos(a),r*math.sin(a),h))
-        centre=Vector((x,y,z))+Vector((normal.x*scale,normal.y*scale,normal.z*scale*.8))*rng.uniform(.66,1.02)
-        tangent=normal.cross(Vector((0,0,1)))
-        if tangent.length<.05:tangent=Vector((1,0,0))
-        tangent.normalize();bitangent=normal.cross(tangent).normalized()
-        length=scale*rng.uniform(.28,.38);width=length*.46
-        base=len(vertices)
-        points=[centre-tangent*length,centre+bitangent*width,centre+tangent*length,centre-bitangent*width,centre+normal*width*.35,centre-normal*.004]
-        vertices.extend(tuple(p) for p in points)
-        shade=rng.randrange(len(leaves))
-        for j in range(4):
-            faces.append((base+j,base+(j+1)%4,base+4));colours.append(shade)
-            # Double-sided folded leaves do not need a closed hidden underside.
-    mesh=bpy.data.meshes.new('Folded fine foliage');mesh.from_pydata(vertices,[],faces);mesh.update()
-    obj=bpy.data.objects.new('Individual courtyard leaves',mesh);bpy.context.collection.objects.link(obj)
-    # Preserve the authored palette without multiplying material batches.
-    layer=mesh.color_attributes.new(name='Col',type='FLOAT_COLOR',domain='CORNER')
-    for p in mesh.polygons:
-        for loop in p.loop_indices:layer.data[loop].color=leaves[colours[p.index]].diffuse_color
-    obj.data.materials.append(leaf_detail);objects.append(obj)
+    return foliage(x,y,z,scale,leaf_detail,leaves,objects)
 
 def tree(x,y):
     planter(x,y,.48,.53)
@@ -148,8 +128,8 @@ def tree(x,y):
     for i in range(5):
         a=i*math.tau/5
         strut('Fine tree branch',(x,y,.63),(x+math.cos(a)*.18,y+math.sin(a)*.18,.95),.012,timber)
-        shrub(x+math.cos(a)*.14,y+math.sin(a)*.14,1.08+i*.013,.25)
-    shrub(x,y,1.26,.23)
+
+    foliage(x,y,1.12,.25,leaf_detail,leaves,objects,canopy=True)
 
 for x,y in [(-.68,-5.6),(5.66,.73),(6.0,-7.25),(-1.5,-6.95)]:tree(x,y)
 for x,y,w,l in [(-.6,-2.9,.54,1.15),(2.1,.65,1.8,.42),(3.9,-6.65,1.65,.4)]:
