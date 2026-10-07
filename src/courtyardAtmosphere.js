@@ -101,8 +101,8 @@ export function createCourtyardAtmosphere(scene, garage) {
 
   return {
     setTheme(settings, quality) {
-      cafeGlow.value = settings.theme === 'neon' ? .8 : settings.theme === 'sunset' ? .23 : .018;
-      cafeLight.intensity = quality.decor ? (settings.theme === 'neon' ? .4 : settings.theme === 'sunset' ? .15 : 0) : 0;
+      cafeGlow.value = settings.theme === 'neon' ? .8 : settings.theme === 'sunset' ? .23 : settings.theme === 'rain' ? .12 : .018;
+      cafeLight.intensity = quality.decor ? (settings.theme === 'neon' ? .4 : settings.theme === 'sunset' ? .15 : settings.theme === 'rain' ? .08 : 0) : 0;
       cafeLight.visible = cafeLight.intensity > 0;
     },
     update(dt, settings, quality, reduced, editor) {

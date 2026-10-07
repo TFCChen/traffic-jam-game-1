@@ -371,6 +371,7 @@ button.selected, .tabs button.active { color: #246656; border-color: #9abfae; ba
 .scene-themes small { display:block; font-size:8px; margin-top:3px; color:#7b8a7b; }
 .theme-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; background:#eac775; }
 .theme-dot.sunset { background:#dd937f; }.theme-dot.neon { background:#8787d6; }
+.theme-dot.rain { background:#82adbf; }
 .theme-neon .scene-tag { color:#b9cedd; }.theme-sunset .scene-tag { color:#846650; }
 .game-sheet { width:min(600px,calc(100% - 28px)); max-height:85dvh; border:1px solid #dae2d5; overflow:auto; animation:panel-in 180ms ease-out; }
 .game-sheet .side-panel { padding:0; border:0; box-shadow:none; background:transparent; }

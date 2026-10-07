@@ -12,7 +12,6 @@ import { legalMovesForCar } from "./gameEngine.js";
 import { vehicleModel } from "./vehicleModels.js";
 import { placementBetween, drawingCells } from './editorPlacement.js';
 import {
-  asphaltTexture,
   sceneryTexture,
   detailTexture,
   prepareWheels,
@@ -34,6 +33,7 @@ import {
 import { createRenderProfiler } from "./renderProfiler.js";
 import { cacheLocalTransforms } from "./sceneTransforms.js";
 import { createCourtyardAtmosphere } from './courtyardAtmosphere.js';
+import { createGroundSurface } from './groundSurface.js';
 import { configureVehiclePaint, vehicleTrimSurface } from './vehicleFinish.js';
 import { VEHICLE_GROUND_HEIGHT, CONTACT_PLANE_OFFSET } from './contactShadow.js';
 import {
@@ -132,7 +132,6 @@ export function createGarageScene(canvas, getProps, callbacks) {
   scene.environment = environment.texture;
   room.dispose();
   pmrem.dispose();
-  const roadTexture = asphaltTexture();
   const sceneryAtlas = sceneryTexture();
   const glowTexture = detailTexture("glow"),
     skidTexture = detailTexture("skid");
@@ -181,6 +180,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
   const sceneryLamps = [];
   let vegetationShadows;
   let atmosphere;
+  let groundSurface;
   const stats = { frames: 0, shadowUpdates: 0, renderedSceneKey: null };
   const inputSamples = [];
   let pendingInputAt = null,
@@ -570,6 +570,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
             : 0.1;
     });
     atmosphere?.setTheme(settings, quality);
+    groundSurface?.setTheme(settings, quality);
     lightPools.visible = settings.theme !== "day";
     glowMaterial.color.set("#ffd199");
     glowMaterial.opacity = settings.theme === "neon" ? 0.28 : 0.15;
@@ -1367,6 +1368,10 @@ export function createGarageScene(canvas, getProps, callbacks) {
         name:'Courtyard paving',roughness:.86,metalness:0,atlas:sceneryAtlas,
       });
       ownedGeometries.add(pavingBatch.geometry);
+      const stoneBatch=batchColoredMeshes(garage,mesh=>['Honed warm limestone','Basalt foundation'].includes(mesh.material.name),{
+        name:'Courtyard stone',roughness:.84,metalness:0,
+      });
+      ownedGeometries.add(stoneBatch.geometry);
       const streetBatch = batchColoredMeshes(
         garage,
         (mesh) =>
@@ -1377,6 +1382,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
             "Streetlamp glow",
             "Architectural glazing",
             "Courtyard paving",
+            "Courtyard stone",
+            "Parking markings",
             "Courtyard foliage detail",
             "Courtyard bark",
             "Courtyard fence",
@@ -1394,19 +1401,10 @@ export function createGarageScene(canvas, getProps, callbacks) {
         if (o.isMesh) {
           if (!o.userData.generatedGeometry) o.material = o.material.clone();
           ownedMaterials.add(o.material);
-          if (
-            o.material.name === "Asphalt blue slate" ||
-            o.material.name === "Street asphalt"
-          ) {
-            o.material.map = roadTexture;
-            o.material.bumpMap = roadTexture;
-            o.material.bumpScale = 0.003;
-            o.material.roughnessMap = roadTexture;
-          }
           if (o.material.name.startsWith('Streetlamp glow'))
             sceneryLamps.push(o.material);
           o.receiveShadow = true;
-          o.castShadow = !['Courtyard paving','Asphalt blue slate','Street asphalt','Courtyard foliage detail'].includes(o.material.name);
+          o.castShadow = !['Courtyard paving','Parking markings','Asphalt blue slate','Street asphalt','Courtyard foliage detail'].includes(o.material.name);
           if(o.material.name==='Courtyard foliage detail') {
             vegetationShadows=vegetationShadowProxy(o);
             ownedGeometries.add(vegetationShadows.geometry);ownedMaterials.add(vegetationShadows.material);
@@ -1418,6 +1416,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
       cacheLocalTransforms(garage);
       atmosphere = createCourtyardAtmosphere(scene, garage);
       atmosphere.setTheme(settings, quality);
+      groundSurface = createGroundSurface(renderer, garage);
+      groundSurface.setTheme(settings, quality);
       updateCamera();
       sync();
       await renderer.compileAsync(scene, camera);
@@ -1835,6 +1835,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
         ready,
         hintGuide: hintGuide.snapshot(),
         atmosphere: atmosphere?.snapshot(),
+        groundSurface: groundSurface?.snapshot(),
         settings: { ...settings },
         fenceShadows: (()=>{
           const fence=scene.getObjectByName('Courtyard fence');
@@ -1935,7 +1936,6 @@ export function createGarageScene(canvas, getProps, callbacks) {
       contactGeometry.dispose();
       contactTextures.forEach(texture => texture.dispose());
       hintGuide.dispose();
-      roadTexture.dispose();
       glowTexture.dispose();
       skidTexture.dispose();
       vehicleLights.dispose();
@@ -1943,6 +1943,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       environment.dispose();
 
       atmosphere?.dispose();
+      groundSurface?.dispose();
       celebration.dispose();
       placementCells.dispose(); placementGhost.dispose();
       lightPools.dispose();
