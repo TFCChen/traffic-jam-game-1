@@ -25,20 +25,20 @@ try{
   await c.send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
   const settings={pitch:45,yaw:70,zoom:3.5,focusX:-3.327,focusZ:-1.87,theme:'rain',quality:'high'};
   await load(settings);let s=await snap();
-  assert.equal(s.atmosphere.rainMotion.sources.length,7);assert.equal(s.atmosphere.dripCapacity,35);
-  assert(s.groundSurface.drainage&&s.atmosphere.residualDrips);
+  assert.equal(s.atmosphere.rainMotion.sources.length,7);assert.equal(s.atmosphere.dripCapacity,7);
+  assert(!s.groundSurface.drainage&&s.atmosphere.residualDrips);
   const leaf=s.atmosphere.rainMotion.sources.find(p=>p.kind==='leaf');
   for(const [name,index,camera]of [['canopy',0,settings],['leaf',3,{...settings,pitch:50,yaw:-35,focusX:leaf.x-3,focusZ:leaf.z-3}]]){
     if(name==='leaf')await load(camera);
     s=await snap();const source=s.atmosphere.rainMotion.sources[index],flight=Math.sqrt(2*(source.y-source.floor)/6.2),offset=index*1.37+Math.sin(index*3)*.22;
-    for(const [stage,lo,hi]of [['bead',.2,.5],['fall',.6+flight*.3,.6+flight*.7],['impact',.6+flight+.03,.6+flight+.18]]){
+    for(const [stage,lo,hi]of [['bead',.2,.5],['fall',.6+flight*.3,.6+flight*.7],['landed',.6+flight+.03,.6+flight+.18]]){
       await c.until(`(()=>{const t=(${expression}).atmosphere.rainMotion.time;const phase=(t+${offset})%10.9;return phase>${lo}&&phase<${hi}})()`,30000);
-      const frame=await snap();assert(frame.atmosphere.rainMotion.active>0);await shot(name+'-'+stage);
+      const frame=await snap();if(stage!=='landed')assert(frame.atmosphere.rainMotion.active>0);await shot(name+'-'+stage);
       reports.push({name,stage,time:frame.atmosphere.rainMotion.time,source,active:frame.atmosphere.rainMotion.active});
     }
   }
   await load({...settings,pitch:65,yaw:25,zoom:.85,focusX:0,focusZ:0});await shot('normal-view');
-  s=await snap();const before=s.groundSurface.flowTime;await c.sleep(500);assert((await snap()).groundSurface.flowTime>before);
+  s=await snap();const before=s.groundSurface.flowTime;await c.sleep(500);assert.equal((await snap()).groundSurface.flowTime,before);assert.equal(before,0);
   const enabledCalls=(await snap()).calls;
   await c.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
   await c.sleep(500);s=await snap();assert(!s.atmosphere.residualDrips&&!s.groundSurface.drainage);const frozen=s.groundSurface.flowTime;
@@ -50,7 +50,7 @@ try{
   await c.until(`(${expression}).sceneKey.includes('editor')`);await c.sleep(400);s=await snap();
   assert(!s.atmosphere.residualDrips&&!s.groundSurface.drainage);
   assert.deepEqual(errors,[]);writeFileSync(new URL('inspection.json',dir),JSON.stringify({reports,enabledCalls,reducedFreeze:true,saverDisabled:true,dryDisabled:true,editorDisabled:true,errors},null,2));
-  console.log('Real canopy/leaf bead, fall, impact views; flowing gutter; dry/saver/reduced/editor disable passed');
+  console.log('Real canopy/leaf bead, fall, quiet landing views; static wet ground; dry/saver/reduced/editor disable passed');
 }finally{
   await c.send('Emulation.setEmulatedMedia',{features:[]});await c.send('Emulation.clearDeviceMetricsOverride');
   await c.evaluate(`for(const k of Object.keys(localStorage))if(k.startsWith('traffic-jam-'))localStorage.removeItem(k);for(const[k,v]of Object.entries(${JSON.stringify(saved)}))localStorage.setItem(k,v);location.reload()`);c.close();

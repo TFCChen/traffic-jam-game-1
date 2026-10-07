@@ -18,8 +18,8 @@ for(let t=0;t<90;t+=.02){
     const source=sources[i],p=dripPose(t,i,source);
     assert(p.x<-.25||p.x>6.25||p.z<-.25||p.z>6.25,'Water effects must stay outside the puzzle');
     assert(p.y>=source.floor&&p.y<=source.y+.003,'Drops must stop at the receiving surface');
-    assert(p.impactAlpha===0||p.dropAlpha===0,'A landed drop must not remain airborne');
-    if(p.dropAlpha>0||p.impactAlpha>0)active++;
+    if(p.y===source.floor)assert.equal(p.dropAlpha,0,'Landed drops must disappear');
+    if(p.dropAlpha>0)active++;
   }
   maxActive=Math.max(maxActive,active);
 }
@@ -35,12 +35,10 @@ motion.update(20,false);assert.equal(motion.snapshot().time,clock,'Disabled effe
 assert.equal(motion.snapshot().visible,false);assert.equal(motion.snapshot().active,0);
 for(let i=0;i<11;i++)motion.update(.1,true);
 const particleMesh=waterScene.children[0],matrix=new THREE.Matrix4(),position=new THREE.Vector3();
-for(let j=0;j<3;j++){
-  const index=2+j;assert(particleMesh.geometry.attributes.waterFade.getX(index)>0,'A landing drop must emit its small splash fragments');
-  particleMesh.getMatrixAt(index,matrix);position.setFromMatrixPosition(matrix);
-  assert(position.y>=sources[0].floor&&position.y<sources[0].floor+.08,'Splash particles must rise only a few centimetres above the receiving surface');
-  assert(Math.hypot(position.x-sources[0].x,position.z-sources[0].z)<.065,'Small splashes must stay beside the impact');
-}
+assert.equal(particleMesh.count,sources.length,'Only one drop per source, no impact discs or splash fragments');
+assert.equal(particleMesh.geometry.attributes.waterFade.getX(0),0,'A landed drop must disappear on solid ground');
+particleMesh.getMatrixAt(0,matrix);position.setFromMatrixPosition(matrix);
+assert(Math.abs(position.y-sources[0].floor)<1e-6,'The drop must stop at the receiving surface');
 motion.pause();motion.dispose();assert.equal(waterScene.children.length,0);
 
 for (let t = 0; t < 80; t += .05) {
