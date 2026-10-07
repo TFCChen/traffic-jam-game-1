@@ -41,9 +41,9 @@ export function rainFilmMap(size=512) {
 const functions = `
 vec2 rainFilm(vec3 p,vec3 n) {
   vec3 weight=pow(abs(n),vec3(8.));weight/=max(.001,weight.x+weight.y+weight.z);
-  vec2 sideX=texture2D(rainSurfaceMap,p.zy*1.5).rg;
-  vec2 top=texture2D(rainSurfaceMap,p.zx*1.5).rg;
-  vec2 sideZ=texture2D(rainSurfaceMap,p.xy*1.5).rg;
+  vec2 sideX=texture2D(rainSurfaceMap,p.zy*.95).rg;
+  vec2 top=texture2D(rainSurfaceMap,p.zx*.95).rg;
+  vec2 sideZ=texture2D(rainSurfaceMap,p.xy*.95).rg;
   return vec2(dot(weight,vec3(sideX.r+sideX.g*.65,top.r+top.g*.22,sideZ.r+sideZ.g*.65)),dot(weight,vec3(sideX.g,top.g*.45,sideZ.g)));
 }
 vec3 rainPerturb(vec3 n,vec3 position,float height) {
@@ -82,17 +82,18 @@ export function createRainSurfaces() {
         vec2 rainFilmDetail=vec2(0.);
         ${beads?'if(rainWet*rainSurfaceDetail>.01)rainFilmDetail=rainFilm(rainLocal,normalize(rainLocalNormal));':''}
         float beadHeight=rainFilmDetail.x;
-        ${kind==='paint'||kind==='trim'?'diffuseColor.rgb*=mix(1.,.96,rainFilmDetail.y*rainWet);':''}`);
+        ${kind==='paint'||kind==='trim'?'diffuseColor.rgb*=mix(1.,.84,clamp(beadHeight*.8+rainFilmDetail.y*.7,0.,1.)*rainWet);':''}`);
       if (kind!=='glass')shader.fragmentShader=shader.fragmentShader.replace('#include <roughnessmap_fragment>',`#include <roughnessmap_fragment>
-        roughnessFactor=mix(roughnessFactor,${kind==='bark'?'.44':kind==='leaf'?'.24':'.14'},rainWet*.85);`);
+        roughnessFactor=mix(roughnessFactor,${kind==='bark'?'.44':kind==='leaf'?'.24':'.18'},rainWet*.85);
+        ${beads?'roughnessFactor=mix(roughnessFactor,.045,smoothstep(.03,.3,beadHeight)*rainWet);':''}`);
       if(beads)shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
-        if(rainWet*rainSurfaceDetail>.01)normal=rainPerturb(normal,-vViewPosition,beadHeight*rainWet*${kind==='glass'?'.00025':'.00030'});
+        if(rainWet*rainSurfaceDetail>.01)normal=rainPerturb(normal,-vViewPosition,beadHeight*rainWet*${kind==='glass'?'.00065':'.0010'});
       `);
       // Glass retains its .003 roughness and existing Beer-Lambert tint.
       // The car's lacquer uses a distinct beaded top optical layer.
       if(kind==='paint')shader.fragmentShader=shader.fragmentShader.replace('#include <clearcoat_normal_fragment_maps>',`#include <clearcoat_normal_fragment_maps>
         #ifdef USE_CLEARCOAT
-        if(rainWet*rainSurfaceDetail>.01)clearcoatNormal=rainPerturb(clearcoatNormal,-vViewPosition,beadHeight*rainWet*.00035);
+        if(rainWet*rainSurfaceDetail>.01)clearcoatNormal=rainPerturb(clearcoatNormal,-vViewPosition,beadHeight*rainWet*.0012);
         #endif`);
     };
     material.onBeforeCompile=wrapper;

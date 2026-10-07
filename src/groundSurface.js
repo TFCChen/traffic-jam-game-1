@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 export const GROUND_BOUNDS = { x: -2.2, z: -2.15, size: 12.4 };
-export const PUDDLES = [[8.9,5.4,1.05,.72],[7.5,.9,.62,1.4],[5.6,5.83,.52,.26],[.45,5.4,.38,.5],[4.5,.25,.9,.3],[-.9,2.9,.36,.85],[2.8,7.2,.7,.38]];
+export const PUDDLES = [[9.77,5.4,.24,1.04],[6.79,.9,.23,.92],[5.6,5.83,.52,.26],[.45,5.4,.38,.5],[4.5,.25,.9,.3],[-.9,2.9,.36,.85],[2.8,7.2,.7,.38]];
 const clamp = x => Math.max(0, Math.min(1, x));
 const smooth = (a,b,x) => { const t=clamp((x-a)/(b-a));return t*t*(3-2*t); };
 function hash(x,z) { let n=Math.imul(x,374761393)^Math.imul(z,668265263)^731; n=Math.imul(n^(n>>>13),1274126177);return ((n^(n>>>16))>>>0)/4294967295; }
@@ -21,7 +21,7 @@ export function groundSample(x,z) {
   let puddle=0;
   for(const[cx,cz,rx,rz]of PUDDLES) {
     const distance=Math.hypot((x-cx)/rx,(z-cz)/rz)+.22*(noise(x*9,z*9)-.5);
-    puddle=Math.max(puddle,1-smooth(.65,1.04,distance));
+    puddle=Math.max(puddle,1-smooth(.40,.82,distance));
   }
   return { grime:clamp(.06+.14*broad+.16*edge*(.5+variation)+.17*drain+.08*tyre),
     dampness:clamp(.16+.58*broad+.13*variation+puddle*.35),puddle };
@@ -57,44 +57,44 @@ export function createGroundSurface(renderer,garage) {
   // A small sky-only environment is convolved once. Wet surfaces reflect
   // overcast sky and receive local-light highlights with material-specific
   // roughness. No second scene render or planar mirror is needed.
-  const skyBytes=new Uint8Array(256*128*4);
+  const skyBytes=new Float32Array(256*128*4);
   for(let y=0;y<128;y++)for(let x=0;x<256;x++) {
     const horizon=Math.exp(-(((y/128-.5)/.17)**2));
     const cloud=smooth(.35,.68,noise(x/34,y/16))*.32;
-    const c=new THREE.Color(.18+.28*horizon+cloud,.28+.27*horizon+cloud,.40+.23*horizon+cloud);
-    skyBytes.set([Math.round(c.r*255),Math.round(c.g*255),Math.round(c.b*255),255],(y*256+x)*4);
+    // Equirectangular +Y maps to v=1 in Three.js. Bright cloud openings
+    // belong above the horizon, so upward road normals see the wet sky.
+    const opening=Math.exp(-(((x/256-.28)/.105)**2+((y/128-.75)/.13)**2));
+    const overcast=smooth(.44,.57,y/128)*(.7+4.5*smooth(.34,.66,noise(x/17,y/10)));
+    const c=new THREE.Color(.18+.28*horizon+cloud+opening*2.8+overcast,.28+.27*horizon+cloud+opening*2.8+overcast,.40+.23*horizon+cloud+opening*2.5+overcast);
+    skyBytes.set([c.r,c.g,c.b,1],(y*256+x)*4);
   }
-  const sky=texture(skyBytes,256,128);sky.mapping=THREE.EquirectangularReflectionMapping;
+  const sky=new THREE.DataTexture(skyBytes,256,128,THREE.RGBAFormat,THREE.FloatType);
+  sky.minFilter=sky.magFilter=THREE.LinearFilter;sky.wrapS=THREE.RepeatWrapping;
+  sky.needsUpdate=true;textures.push(sky);sky.mapping=THREE.EquirectangularReflectionMapping;
   const pmrem=new THREE.PMREMGenerator(renderer),reflection=pmrem.fromEquirectangular(sky);pmrem.dispose();
-  const weather={value:0},ripples={value:0},clock={value:0},items=[];
+  const weather={value:0},items=[];
   const kinds={'Asphalt blue slate':0,'Street asphalt':0,'Courtyard paving':1,'Courtyard stone':2,'Parking markings':3};
   garage.traverse(mesh=>{
     if(!mesh.isMesh||!(mesh.material.name in kinds))return;
     const original=mesh.material,kind=kinds[original.name],material=new THREE.MeshStandardMaterial();
     material.copy(original);
-    material.map=null;material.bumpMap=grain;material.bumpScale=kind===0?.003:.0006;material.roughnessMap=null;material.roughness=kind===0?.91:.84;
+    material.map=null;material.bumpMap=grain;material.bumpScale=kind===0?.005:.0006;material.roughnessMap=null;material.roughness=kind===0?.91:.84;
     material.metalness=0;material.envMap=reflection.texture;material.envMapIntensity=1.1;
     const before=original.onBeforeCompile;
     material.onBeforeCompile=(shader,gl)=>{
       before.call(material,shader,gl);
       shader.uniforms.groundMacro={value:macro};shader.uniforms.groundGrain={value:grain};shader.uniforms.groundWeather=weather;
-      shader.uniforms.groundRipple=ripples;shader.uniforms.groundClock=clock;
       shader.vertexShader='varying vec3 groundWorld; varying float groundFacing;\n'+shader.vertexShader;
       shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
         groundWorld=(modelMatrix*vec4(transformed,1.)).xyz;
         groundFacing=abs(normalize(mat3(modelMatrix)*normal).y);`);
-      shader.fragmentShader=`varying vec3 groundWorld; varying float groundFacing; uniform sampler2D groundMacro; uniform sampler2D groundGrain; uniform float groundWeather;uniform float groundRipple;uniform float groundClock;
-        float residualRipple(vec2 p){
-          float h=0.;
-          ${PUDDLES.map(([x,z],i)=>`{
-            float age=mod(groundClock+${(i*.71).toFixed(2)},4.7);
-            float d=length(p-vec2(${x.toFixed(2)},${z.toFixed(2)}));
-            float waveWidth=max(.045,fwidth(d)*1.8);
-            h+=exp(-pow((d-age*.16)/waveWidth,2.))*(1.-smoothstep(1.2,3.4,age));
-          }`).join('\n')}
-          return h;
-        }\n`+shader.fragmentShader;
+      shader.fragmentShader=`varying vec3 groundWorld; varying float groundFacing; uniform sampler2D groundMacro; uniform sampler2D groundGrain; uniform float groundWeather;\n`+shader.fragmentShader;
       shader.fragmentShader=shader.fragmentShader.replace('#include <bumpmap_pars_fragment>',THREE.ShaderChunk.bumpmap_pars_fragment.replaceAll('vBumpMapUv','(groundWorld.xz*1.3)'));
+      // The reflection sky is an optical reference, not extra ambient light.
+      // Keep its diffuse contribution low so dark wet asphalt stays asphalt.
+      shader.fragmentShader=shader.fragmentShader.replace('#include <envmap_physical_pars_fragment>',THREE.ShaderChunk.envmap_physical_pars_fragment.replace(
+        'return PI * envMapColor.rgb * envMapIntensity;',
+        'return PI * envMapColor.rgb * envMapIntensity * mix(1.,.08,groundWeather);'));
       shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
         vec4 groundField=texture2D(groundMacro,(groundWorld.xz-vec2(-2.2,-2.15))/12.4);
         vec4 aggregate=texture2D(groundGrain,groundWorld.xz*1.3);
@@ -103,20 +103,15 @@ export function createGroundSurface(renderer,garage) {
         float pool=groundWeather*groundField.b*facing;
         float pigment=${kind===0?'(.84+.25*aggregate.r-groundField.r*.18)':kind===3?'(1.-groundField.r*.07)':'(.93+.10*aggregate.r-groundField.r*.07)'};
         ${kind===0?'pigment*=mix(1.,.82,aggregate.b*smoothstep(.5,.72,groundField.g));':''}
-        diffuseColor.rgb*=pigment*mix(1.,${kind===0?'.70':kind===3?'.94':'.83'},wet);
-        diffuseColor.rgb*=mix(vec3(1.),vec3(.97,.99,1.),pool*.35);`);
+        diffuseColor.rgb*=pigment*mix(1.,${kind===0?'.58':kind===3?'.88':'.72'},wet);
+        diffuseColor.rgb*=mix(vec3(1.),vec3(.88,.94,.97),pool*.45);`);
       shader.fragmentShader=shader.fragmentShader.replace('#include <roughnessmap_fragment>',`#include <roughnessmap_fragment>
         roughnessFactor=clamp(roughness+(.5-aggregate.g)*.09,.72,.98);
-        roughnessFactor=mix(roughnessFactor,${kind===0?'.60':kind===1?'.42':kind===2?'.52':'.58'},wet);
-        roughnessFactor=mix(roughnessFactor,${kind===0?'.48':kind===1?'.36':kind===2?'.46':'.52'},pool*.4);`);
+        roughnessFactor=mix(roughnessFactor,${kind===0?'.36':kind===1?'.25':kind===2?'.44':'.29'},wet);
+        roughnessFactor=mix(roughnessFactor,.105,pool);`);
       shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
-        normal=normalize(mix(normal,nonPerturbedNormal,max(wet*.12,pool*.35)));
-        if(pool*groundRipple>.01){
-          float waterHeight=residualRipple(groundWorld.xz)*pool*groundRipple*.00012;
-          vec3 px=dFdx(-vViewPosition),py=dFdy(-vViewPosition);
-          vec3 r1=cross(py,normal),r2=cross(normal,px);float det=dot(px,r1);
-          normal=normalize(abs(det)*normal-sign(det)*(dFdx(waterHeight)*r1+dFdy(waterHeight)*r2));
-        }`);
+        normal=normalize(mix(normal,nonPerturbedNormal,max(wet*.08,pool*.94)));
+        `);
     };
     material.customProgramCacheKey=()=>`courtyard-ground-v1-${kind}`;
     mesh.material=material;items.push({mesh,original,material});
@@ -124,12 +119,14 @@ export function createGroundSurface(renderer,garage) {
   return {
     setTheme(settings,quality) {
       weather.value=settings.theme==='rain'?1:0;
-      for(const {material}of items) {
-        material.envMapIntensity=weather.value?1.15:1.1;
+      for(const {material,original}of items) {
+        const next=weather.value?reflection.texture:original.envMap;
+        if(material.envMap!==next){material.envMap=next;material.needsUpdate=true;}
+        material.envMapIntensity=weather.value?.32:1.1;
       }
     },
     snapshot(){return {wet:weather.value>0,materials:items.length,reflectionPassesPerFrame:0,reflectionCaptures:0,macroSize:384};},
-    update(dt,settings,quality,reduced,editor){ripples.value=settings.theme==='rain'&&quality.decor&&!reduced&&!editor?1:0;if(ripples.value)clock.value+=Math.min(dt,.1);},
+    update(){},
     dispose(){for(const{mesh,original,material}of items){mesh.material=original;material.dispose();}textures.forEach(t=>t.dispose());reflection.dispose();},
   };
 }
