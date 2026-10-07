@@ -700,14 +700,24 @@ export function createGarageScene(canvas, getProps, callbacks) {
   }
   function orbitAtScreenCenter(dx, dy) {
     const pivot = screenCenterPoint();
-    applyCamera(rotateView(settings, dx, dy), false);
-    const moved = screenCenterPoint();
-    if (pivot && moved)
-      applyCamera({
-        ...settings,
-        focusX: settings.focusX + pivot.x - moved.x,
-        focusZ: settings.focusZ + pivot.z - moved.z,
-      }, false);
+    const rotated = rotateView(settings, dx, dy);
+    if (!pivot) { applyCamera(rotated, false); return; }
+    // Rebase the camera around the actual screen pivot each time. Accumulating
+    // focus corrections eventually hits stored focus limits in off-center views.
+    // Any bounded focus remainder is represented by the camera-plane offset.
+    applyCamera({
+      ...rotated,
+      focusX: pivot.x - aim.x,
+      focusZ: pivot.z - aim.z,
+      panX: 0,
+      panY: 0,
+    }, false);
+    const projectedPivot = pivot.clone().applyMatrix4(camera.matrixWorldInverse);
+    applyCamera({
+      ...settings,
+      panX: projectedPivot.x - (camera.left + camera.right) / 2,
+      panY: projectedPivot.y - (camera.top + camera.bottom) / 2,
+    }, false);
   }
   function flushCamera() {
     if (!cameraPending || !cameraGesture) return;
