@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 export function configureCourtyardSunShadow(shadow) {
-  // A 500-unit depth range amplified negative bias into self-shadowing on
+  // A 500-unit depth range made small normalized offsets large relative to
   // thin rails. Fixed courtyard bounds keep precision stable during orbit.
   Object.assign(shadow.camera, {left:-8,right:8,top:8,bottom:-8,near:1,far:32});
   shadow.camera.updateProjectionMatrix();

@@ -1361,6 +1361,14 @@ export function createGarageScene(canvas, getProps, callbacks) {
       if (!alive) return;
       library = models;
       const garage = library.garage.clone(true);
+      // Keep the subpixel-width fence out of both shadow passes. It still uses
+      // the same PBR lighting, but cannot cast/receive unstable fine shadows.
+      const fenceBatch=batchColoredMeshes(garage,mesh=>mesh.material.name.startsWith('Fence '),{
+        name:'Courtyard fence',roughness:.55,metalness:.2,atlas:sceneryAtlas,
+        surface:material=>[material.roughness??.8,material.metalness??0],
+      });
+      fenceBatch.name='Courtyard fence';
+      ownedGeometries.add(fenceBatch.geometry);
       const pavingMaterial = material=>material.name.startsWith('Limestone paver')||material.name==='Recessed mortar';
       // Thin paving joints need to receive shadows, but must not generate tiny
       // self-shadow fragments across the otherwise flat walking surface.
@@ -1379,6 +1387,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
             "Architectural glazing",
             "Courtyard paving",
             "Courtyard foliage detail",
+            "Courtyard fence",
           ].includes(mesh.material.name) && !mesh.material.name.startsWith('Streetlamp glow'),
         {
           roughness: 0.85,
@@ -1404,8 +1413,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
           }
           if (o.material.name.startsWith('Streetlamp glow'))
             sceneryLamps.push(o.material);
-          o.receiveShadow = true;
-          o.castShadow = !['Courtyard paving','Asphalt blue slate','Street asphalt','Courtyard foliage detail'].includes(o.material.name);
+          o.receiveShadow = o.material.name !== 'Courtyard fence';
+          o.castShadow = !['Courtyard fence','Courtyard paving','Asphalt blue slate','Street asphalt','Courtyard foliage detail'].includes(o.material.name);
           if(o.material.name==='Courtyard foliage detail') {
             vegetationShadows=vegetationShadowProxy(o);
             ownedGeometries.add(vegetationShadows.geometry);ownedMaterials.add(vegetationShadows.material);
@@ -1849,6 +1858,10 @@ export function createGarageScene(canvas, getProps, callbacks) {
         ready,
         hintGuide: hintGuide.snapshot(),
         settings: { ...settings },
+        fenceShadows: (()=>{
+          const fence=scene.getObjectByName('Courtyard fence');
+          return fence?{visible:fence.visible,cast:fence.castShadow,receive:fence.receiveShadow,triangles:fence.geometry.index.count/3}:null;
+        })(),
         cameraFrustum: {
           width: camera.right - camera.left,
           height: camera.top - camera.bottom,

@@ -31,7 +31,7 @@ stabilizeShadowFilter();assert.equal(ShaderChunk.shadowmap_pars_fragment,stableP
 assert.throws(()=>stableShadowSource('changed upstream shader'),'Three upgrades must explicitly review the filter patch');
 let cornerTriangles=0;
 scene.traverse(o=>{
-  if(!o.isMesh||!['Honed warm limestone','Graphite powdercoat','Satin brass accents'].includes(o.material.name))return;
+  if(!o.isMesh||!o.material.name.startsWith('Fence '))return;
   const seen=new Set(),position=o.geometry.attributes.position,index=o.geometry.index;
   for(let i=0;i<index.count;i+=3){
     const points=[0,1,2].map(j=>new Vector3().fromBufferAttribute(position,index.getX(i+j)).applyMatrix4(o.matrixWorld));
@@ -42,7 +42,7 @@ scene.traverse(o=>{
 });
 assert(cornerTriangles>0,'Corner geometry regression check examines the authored fence');
 const materials=new Set();scene.traverse(o=>{if(o.isMesh)materials.add(o.material.name);});
-for(const name of ['Graphite powdercoat','Satin brass accents','Architectural glazing','Oiled oak','Cafe brick 0','Courtyard foliage detail'])assert(materials.has(name),`Detail material exported: ${name}`);
+for(const name of ['Graphite powdercoat','Satin brass accents','Architectural glazing','Oiled oak','Cafe brick 0','Courtyard foliage detail','Fence graphite powdercoat','Fence limestone footings','Fence brass caps'])assert(materials.has(name),`Detail material exported: ${name}`);
 const asphalt=[];scene.traverse(o=>{if(o.isMesh&&['Asphalt blue slate','Street asphalt'].includes(o.material.name))asphalt.push(o);});
 const ground=(x,z)=>new Raycaster(new Vector3(x,2,z),new Vector3(0,-1,0)).intersectObjects(asphalt)[0];
 for(let row=0;row<6;row++)for(let col=0;col<6;col++)assert(Math.abs(ground(col+.5,row+.5)?.point.y-.0355)<.003,'Puzzle surface maintains original vehicle datum');

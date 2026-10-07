@@ -50,7 +50,12 @@ try{
     assert.equal(before.settings.theme,settings.theme,'Requested theme must be unlocked in the fixture');
     assert.equal(after.performance.shadowUpdates,before.performance.shadowUpdates,'Camera movement must not rebuild fixed world shadows');
     assert(after.settings.shadows);assert.equal(after.cars.length,8);
-    reports.push({name,before:before.settings,after:after.settings,shadowUpdatesDuringMovement:after.performance.shadowUpdates-before.performance.shadowUpdates});
+    if(process.env.VERIFY_FENCE_ISOLATION==='1'){
+      assert(after.fenceShadows?.visible&&after.fenceShadows.triangles>0,'Fence remains present in the camera pass');
+      assert.equal(after.fenceShadows.cast,false,'Fence cannot enter any shadow caster pass');
+      assert.equal(after.fenceShadows.receive,false,'Fence cannot self-shadow');
+    }
+    reports.push({name,before:before.settings,after:after.settings,fenceShadows:after.fenceShadows,shadowUpdatesDuringMovement:after.performance.shadowUpdates-before.performance.shadowUpdates});
   }
   assert.deepEqual(errors,[]);writeFileSync(new URL('inspection.json',dir),JSON.stringify({reports,errors},null,2));console.log(JSON.stringify({reports,errors}));
 }finally{

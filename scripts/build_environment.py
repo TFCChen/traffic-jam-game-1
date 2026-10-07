@@ -16,6 +16,9 @@ edge = mat('Basalt foundation', '414a4c', .75)
 joint = mat('Recessed mortar', '858a84', .95)
 iron = mat('Graphite powdercoat', '344247', .38, .38)
 brass = mat('Satin brass accents', 'b19a70', .34, .68)
+fence_iron = mat('Fence graphite powdercoat', '344247', .38, .38)
+fence_stone = mat('Fence limestone footings', 'c7c4b9', .82)
+fence_brass = mat('Fence brass caps', 'b19a70', .34, .68)
 paver = [mat('Limestone paver '+str(i), c, .87) for i,c in enumerate(['c0bfb4','b8b9b0','ccc9be','bfc1b7'])]
 brick = [mat('Cafe brick '+str(i), c, .92) for i,c in enumerate(['967e69','a18a74','ad9880','9b8876'])]
 timber = mat('Oiled oak', '80634c', .54)
@@ -67,12 +70,12 @@ def fence(a,b):
         key=(round(x,6),round(y,6))
         if key in fence_posts:continue
         fence_posts.add(key)
-        cube('Fence shoe',(x,y,.065),(.085,.085,.06),concrete,.012)
-        cube('Slim fence post',(x,y,.195),(.032,.032,.29),iron,.006)
-        cube('Satin post cap',(x,y,.345),(.038,.038,.018),brass,.006)
+        cube('Fence shoe',(x,y,.065),(.085,.085,.06),fence_stone,.012)
+        cube('Slim fence post',(x,y,.195),(.032,.032,.29),fence_iron,.006)
+        cube('Satin post cap',(x,y,.345),(.038,.038,.018),fence_brass,.006)
     for h in (.15,.30):
         size=(length,.022,.022) if a[1]==b[1] else (.022,length,.022)
-        cube('Architectural railing',((a[0]+b[0])/2,(a[1]+b[1])/2,h),size,iron,.005)
+        cube('Architectural railing',((a[0]+b[0])/2,(a[1]+b[1])/2,h),size,fence_iron,.005)
 
 for a,b in [((0,0),(6,0)),((0,-6),(6,-6)),((0,0),(0,-6)),((6,0),(6,-1.94)),((6,-3.06),(6,-6))]:fence(a,b)
 
