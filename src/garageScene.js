@@ -33,6 +33,7 @@ import {
 } from "./vehicleDynamics.js";
 import { createRenderProfiler } from "./renderProfiler.js";
 import { cacheLocalTransforms } from "./sceneTransforms.js";
+import { createCourtyardAtmosphere } from './courtyardAtmosphere.js';
 import { configureVehiclePaint, vehicleTrimSurface } from './vehicleFinish.js';
 import { VEHICLE_GROUND_HEIGHT, CONTACT_PLANE_OFFSET } from './contactShadow.js';
 import {
@@ -179,6 +180,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     lastHover = 0;
   const sceneryLamps = [];
   let vegetationShadows;
+  let atmosphere;
   const stats = { frames: 0, shadowUpdates: 0, renderedSceneKey: null };
   const inputSamples = [];
   let pendingInputAt = null,
@@ -374,17 +376,6 @@ export function createGarageScene(canvas, getProps, callbacks) {
     instancePose.updateMatrix();
     skidMarks.setMatrixAt(i, instancePose.matrix);
   }
-  const leafGeometry = new THREE.PlaneGeometry(0.07, 0.13);
-  ownedGeometries.add(leafGeometry);
-  const leafMaterial = new THREE.MeshBasicMaterial({
-    color: "#b28e58",
-    side: THREE.DoubleSide,
-  });
-  ownedMaterials.add(leafMaterial);
-  const leaves = new THREE.InstancedMesh(leafGeometry, leafMaterial, 4);
-  leaves.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-  leaves.frustumCulled = false;
-  scene.add(leaves);
   const confettiGeometry = new THREE.PlaneGeometry(0.055, 0.12);
   ownedGeometries.add(confettiGeometry);
   const confettiMaterial = new THREE.MeshBasicMaterial({
@@ -578,7 +569,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
             ? 0.6
             : 0.1;
     });
-    leafMaterial.color.set(settings.theme === "sunset" ? "#c28551" : "#87935e");
+    atmosphere?.setTheme(settings, quality);
     lightPools.visible = settings.theme !== "day";
     glowMaterial.color.set("#ffd199");
     glowMaterial.opacity = settings.theme === "neon" ? 0.28 : 0.15;
@@ -1424,6 +1415,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
       });
       scene.add(garage);
       cacheLocalTransforms(garage);
+      atmosphere = createCourtyardAtmosphere(scene, garage);
+      atmosphere.setTheme(settings, quality);
       updateCamera();
       sync();
       await renderer.compileAsync(scene, camera);
@@ -1454,6 +1447,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
       now < settlingUntil ||
       (escapeStart != null && now - escapeStart < EXIT_COMPLETE_MS + 700);
     // Cap high-refresh displays too; retain ambient life without rendering at 120/144 Hz.
+    // Reset ambient poses before reduced motion suppresses static frames.
+    if ((reduced.matches || !quality.decor) && atmosphere?.pause()) dirty = true;
     const budget = 1000 / (active ? quality.activeFPS : quality.idleFPS);
     if (
       !dirty &&
@@ -1705,26 +1700,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     // Headlight refreshes must not force an unchanged sun map to render again.
     if (renderer.shadowMap.needsUpdate) sun.shadow.needsUpdate = true;
     if (vehicleLights.update(props.editor?null:litCar,settings,quality,now,shadowChanged||renderer.shadowMap.needsUpdate)) renderer.shadowMap.needsUpdate=true;
-    leaves.visible =
-      quality.decor &&
-      !reduced.matches &&
-      settings.theme !== "neon" &&
-      !props.editor;
-    if (leaves.visible) {
-      for (let i = 0; i < 4; i++) {
-        const t = (now * 0.00007 + i * 0.25) % 1;
-        instancePose.position.set(
-          i % 2 ? 6.85 + Math.sin(t * 6) * 0.13 : -0.7 + Math.sin(t * 7) * 0.13,
-          0.13 + Math.sin(t * Math.PI) * 0.17,
-          0.2 + t * 5.7,
-        );
-        instancePose.rotation.set(-1.2, t * 7 + i, t * 5);
-        instancePose.scale.set(1, 1, 1);
-        instancePose.updateMatrix();
-        leaves.setMatrixAt(i, instancePose.matrix);
-      }
-      leaves.instanceMatrix.needsUpdate = true;
-    }
+    atmosphere?.update(dt, settings, quality, reduced.matches, props.editor);
     celebration.visible =
       quality.decor &&
       props.won &&
@@ -1857,6 +1833,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
         memory: { ...renderer.info.memory },
         ready,
         hintGuide: hintGuide.snapshot(),
+        atmosphere: atmosphere?.snapshot(),
         settings: { ...settings },
         fenceShadows: (()=>{
           const fence=scene.getObjectByName('Courtyard fence');
@@ -1964,7 +1941,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       exhaustSmoke.dispose();
       environment.dispose();
 
-      leaves.dispose();
+      atmosphere?.dispose();
       celebration.dispose();
       placementCells.dispose(); placementGhost.dispose();
       lightPools.dispose();
