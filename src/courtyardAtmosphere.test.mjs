@@ -23,6 +23,9 @@ const foliage = new THREE.Mesh(original, foliageMaterial); foliage.position.set(
 const barkMaterial = new THREE.MeshStandardMaterial(); barkMaterial.name = 'Courtyard bark';
 const bark = new THREE.Mesh(original, barkMaterial); bark.position.copy(foliage.position); garage.add(bark);
 const atmosphere = createCourtyardAtmosphere(scene, garage);
+assert.equal(atmosphere.snapshot().residualDrips,false,'Runoff must start hidden until a wet frame is rendered');
+atmosphere.update(.1,{theme:'rain'},{decor:true},false,false);
+assert.equal(atmosphere.snapshot().residualDrips,true);
 assert.notEqual(foliage.geometry, original); assert(!original.getAttribute('windProfile'));
 assert.notEqual(bark.geometry, original);
 assert.deepEqual(bark.geometry.getAttribute('windProfile').array, foliage.geometry.getAttribute('windProfile').array,
@@ -37,6 +40,7 @@ for (let i = 0; i < 1000; i++) {
 for (const [quality, reduced, editor] of [[{ decor: true }, true, false], [{ decor: false }, false, false], [{ decor: true }, false, true]]) {
   atmosphere.update(.1, {}, quality, reduced, editor);
   assert.deepEqual(atmosphere.snapshot().wind, [0, 0, 0, 0]); assert.equal(atmosphere.snapshot().activeLeaves, 0);
+  assert.equal(atmosphere.snapshot().residualDrips,false);
 }
 atmosphere.setTheme({ theme: 'day' }, { decor: true }); assert.equal(atmosphere.snapshot().cafeLight, 0);
 atmosphere.update(.1, {}, { decor: true }, false, false);

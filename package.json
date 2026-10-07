@@ -4,7 +4,7 @@
     "dev": "vite --host 0.0.0.0",
     "build": "node scripts/precompute-levels.mjs && vite build && node scripts/build-offline.mjs",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "node src/gameEngine.test.mjs && node src/modelAssets.test.mjs && node src/sceneThemes.test.mjs && node src/gameFeel.test.mjs && node src/vehicleDynamics.test.mjs && node src/vehicleEffects.test.mjs && node src/storage.test.mjs && node src/cameraControls.test.mjs && node src/sceneTransforms.test.mjs && node src/contactShadow.test.mjs && node src/editorPlacement.test.mjs && node src/exitChoreography.test.mjs && node src/environmentAssets.test.mjs && node src/courtyardAtmosphere.test.mjs && node src/groundSurface.test.mjs"
+    "test": "node src/gameEngine.test.mjs && node src/modelAssets.test.mjs && node src/sceneThemes.test.mjs && node src/gameFeel.test.mjs && node src/vehicleDynamics.test.mjs && node src/vehicleEffects.test.mjs && node src/storage.test.mjs && node src/cameraControls.test.mjs && node src/sceneTransforms.test.mjs && node src/contactShadow.test.mjs && node src/editorPlacement.test.mjs && node src/exitChoreography.test.mjs && node src/environmentAssets.test.mjs && node src/courtyardAtmosphere.test.mjs && node src/groundSurface.test.mjs && node src/rainSurfaces.test.mjs"
   },
   "dependencies": {
     "react": "19.2.6",

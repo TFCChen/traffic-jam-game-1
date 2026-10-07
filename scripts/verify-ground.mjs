@@ -18,12 +18,15 @@ try{
   for(const[name,width,height,pitch,yaw,zoom,theme,focusX=0,focusZ=0,quality='high']of[
     ['dry',1440,1000,55,25,.85,'day'],['rain',1440,1000,55,25,.85,'rain'],
     ['road-dry',1440,1000,35,-55,2.5,'day',5,2.4],['road-wet',1440,1000,35,-55,2.5,'rain',5,2.4],
+    ['car-dry',1440,1000,40,25,3.5,'day',0,-.5],['car-wet',1440,1000,40,25,3.5,'rain',0,-.5],
     ['rain-glint',1440,1000,55,140,.85,'rain'],['rain-cafe',1440,1000,35,70,2,'rain',-3.7,-1.9],['sunset',1440,1000,55,25,.85,'sunset'],
     ['night',1440,1000,55,25,.85,'neon'],['rain-overhead',1440,1000,90,0,1,'rain'],
     ['mobile-rain',393,844,70,0,1,'rain'],['rain-saver',393,844,70,0,1,'rain',0,0,'saver']]){
     await c.send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:width<500?3:1,mobile:width<500});
     await load({pitch,yaw,zoom,theme,focusX,focusZ,quality});await shot(name);
-    const s=await snap();assert.equal(s.groundSurface.wet,theme==='rain');assert.equal(s.groundSurface.reflectionPassesPerFrame,0);assert.equal(s.cars.length,8);reports.push({name,settings:s.settings,ground:s.groundSurface,performance:s.performance});
+    const s=await snap();assert.equal(s.groundSurface.wet,theme==='rain');assert.equal(s.rainSurfaces.wet,theme==='rain');assert(s.groundSurface.reflectionPassesPerFrame<=1);assert.equal(s.cars.length,8);
+    for(const kind of ['paint','glass','leaf','bark','metal','scenery'])assert(s.rainSurfaces.kinds.includes(kind));
+    reports.push({name,settings:s.settings,ground:s.groundSurface,rainSurfaces:s.rainSurfaces,performance:s.performance});
   }
   await c.send('Emulation.clearDeviceMetricsOverride');await load({pitch:65,yaw:0,zoom:1,quality:'high',theme:'day'},false);
   await c.click('車庫設定');const rainPoint=await c.evaluate(`(()=>{const b=[...document.querySelectorAll('.scene-themes button')].find(b=>b.textContent.includes('雨後街景'));if(!b||b.disabled)throw Error('Rain theme must be available from the start');const r=b.getBoundingClientRect();return{x:r.x+r.width/2,y:r.y+r.height/2}})()`);

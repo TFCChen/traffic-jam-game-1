@@ -34,6 +34,7 @@ import { createRenderProfiler } from "./renderProfiler.js";
 import { cacheLocalTransforms } from "./sceneTransforms.js";
 import { createCourtyardAtmosphere } from './courtyardAtmosphere.js';
 import { createGroundSurface } from './groundSurface.js';
+import { createRainSurfaces } from './rainSurfaces.js';
 import { configureVehiclePaint, vehicleTrimSurface } from './vehicleFinish.js';
 import { VEHICLE_GROUND_HEIGHT, CONTACT_PLANE_OFFSET } from './contactShadow.js';
 import {
@@ -181,6 +182,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
   let vegetationShadows;
   let atmosphere;
   let groundSurface;
+  const rainSurfaces=createRainSurfaces();
   const stats = { frames: 0, shadowUpdates: 0, renderedSceneKey: null };
   const inputSamples = [];
   let pendingInputAt = null,
@@ -571,6 +573,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     });
     atmosphere?.setTheme(settings, quality);
     groundSurface?.setTheme(settings, quality);
+    rainSurfaces.setTheme(settings,quality);
     lightPools.visible = settings.theme !== "day";
     glowMaterial.color.set("#ffd199");
     glowMaterial.opacity = settings.theme === "neon" ? 0.28 : 0.15;
@@ -1153,6 +1156,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
         scene.remove(item.group);
         item.group.traverse((o) => {
           if (o.isMesh) {
+            rainSurfaces.detach(o.material);
             o.material.dispose();
             o.customDepthMaterial?.dispose();
             if (o.userData.generatedGeometry) o.geometry.dispose();
@@ -1260,6 +1264,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
             object.castShadow = !["Automotive glass", "Lamp crystal", "Batched cabin", "Headlamp", "Tail lamp"].includes(material.name);
             object.receiveShadow = material.name !== "Automotive glass";
             object.userData.carId = car.id;
+            rainSurfaces.attach(material,car.len);
           }
         });
         const lightAnchors=collectLampAnchors(group,car.len);
@@ -1416,6 +1421,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       cacheLocalTransforms(garage);
       atmosphere = createCourtyardAtmosphere(scene, garage);
       atmosphere.setTheme(settings, quality);
+      garage.traverse(mesh=>{if(mesh.isMesh)rainSurfaces.attach(mesh.material);});
       groundSurface = createGroundSurface(renderer, garage);
       groundSurface.setTheme(settings, quality);
       updateCamera();
@@ -1702,6 +1708,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     if (renderer.shadowMap.needsUpdate) sun.shadow.needsUpdate = true;
     if (vehicleLights.update(props.editor?null:litCar,settings,quality,now,shadowChanged||renderer.shadowMap.needsUpdate)) renderer.shadowMap.needsUpdate=true;
     atmosphere?.update(dt, settings, quality, reduced.matches, props.editor);
+    groundSurface?.update(dt,settings,quality,reduced.matches,props.editor);
     celebration.visible =
       quality.decor &&
       props.won &&
@@ -1749,8 +1756,10 @@ export function createGarageScene(canvas, getProps, callbacks) {
     // Camera and vehicle motion must not change the optical clarity of windows.
     renderer.transmissionResolutionScale = 1;
     profiler.begin();
+    const reflected=groundSurface?.capture(scene,camera,settings,quality,
+      sceneKey+[...groups.values()].map(item=>item.group.position.toArray().map(x=>Math.round(x*100)/100).join(',')+item.group.rotation.y.toFixed(3)).join(';'),now);
     renderer.render(scene, camera);
-    profiler.end(renderer.info.render);
+    profiler.end({...renderer.info.render,calls:renderer.info.render.calls+(reflected?.calls??0),triangles:renderer.info.render.triangles+(reflected?.triangles??0)});
     stats.frames++;
     stats.renderedSceneKey = sceneKey;
     if (pendingInputAt !== null) {
@@ -1798,8 +1807,10 @@ export function createGarageScene(canvas, getProps, callbacks) {
           configureVehiclePaint(paint, item.model, settings.quality, item.car.color);
         }
       for (const item of groups.values())
-        for (const glass of item.windows)
+        for (const glass of item.windows) {
           configureVehicleGlass(glass, settings.quality);
+          rainSurfaces.attach(glass);
+        }
       renderer.setPixelRatio(Math.min(devicePixelRatio, quality.pixelRatio));
       renderer.shadowMap.enabled = settings.shadows && quality.decor;
       if (sun.shadow.mapSize.x !== quality.shadow) {
@@ -1836,6 +1847,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
         hintGuide: hintGuide.snapshot(),
         atmosphere: atmosphere?.snapshot(),
         groundSurface: groundSurface?.snapshot(),
+        rainSurfaces: rainSurfaces.snapshot(),
         settings: { ...settings },
         fenceShadows: (()=>{
           const fence=scene.getObjectByName('Courtyard fence');
@@ -1944,6 +1956,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
 
       atmosphere?.dispose();
       groundSurface?.dispose();
+      rainSurfaces.dispose();
       celebration.dispose();
       placementCells.dispose(); placementGhost.dispose();
       lightPools.dispose();

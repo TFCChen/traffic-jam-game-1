@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Reflector } from 'three/addons/objects/Reflector.js';
 
 export const GROUND_BOUNDS = { x: -2.2, z: -2.15, size: 12.4 };
 export const PUDDLES = [[8.9,5.4,1.05,.72],[7.5,.9,.62,1.4],[5.6,5.83,.52,.26],[.45,5.4,.38,.5],[4.5,.25,.9,.3],[-.9,2.9,.36,.85],[2.8,7.2,.7,.38]];
@@ -55,8 +56,8 @@ export function createGroundSurface(renderer,garage) {
   }
   const macro=texture(maps.macro,384,384),grain=texture(maps.grain,256,256,true);
   // A small sky-only environment is convolved once. Wet surfaces reflect
-  // overcast sky and receive real local-light specular highlights, without
-  // an extra scene render or a screen-space reflection pass each frame.
+  // overcast sky and receive real local-light specular highlights. A separate
+  // cached planar capture below supplies nearby object silhouettes in puddles.
   const skyBytes=new Uint8Array(256*128*4);
   for(let y=0;y<128;y++)for(let x=0;x<256;x++) {
     const horizon=Math.exp(-(((y/128-.5)/.17)**2));
@@ -66,7 +67,13 @@ export function createGroundSurface(renderer,garage) {
   }
   const sky=texture(skyBytes,256,128);sky.mapping=THREE.EquirectangularReflectionMapping;
   const pmrem=new THREE.PMREMGenerator(renderer),reflection=pmrem.fromEquirectangular(sky);pmrem.dispose();
-  const weather={value:0},items=[];
+  const weather={value:0},ripples={value:0},clock={value:0},items=[];
+  // One cached planar capture shared by all puddles. No visible overlay mesh.
+  const mirrorGeometry=new THREE.PlaneGeometry(1,1);
+  const mirror=new Reflector(mirrorGeometry,{textureWidth:512,textureHeight:512,multisample:0,clipBias:.002});
+  mirror.rotation.x=-Math.PI/2;mirror.position.y=.036;mirror.updateMatrixWorld(true);
+  const mirrorMatrix={value:new THREE.Matrix4()},mirrorEnabled={value:0};
+  let reflectionKey='',lastCapture=-Infinity,reflectionCaptures=0,reflectionPasses=0;
   const kinds={'Asphalt blue slate':0,'Street asphalt':0,'Courtyard paving':1,'Courtyard stone':2,'Parking markings':3};
   garage.traverse(mesh=>{
     if(!mesh.isMesh||!(mesh.material.name in kinds))return;
@@ -79,11 +86,23 @@ export function createGroundSurface(renderer,garage) {
     material.onBeforeCompile=(shader,gl)=>{
       before.call(material,shader,gl);
       shader.uniforms.groundMacro={value:macro};shader.uniforms.groundGrain={value:grain};shader.uniforms.groundWeather=weather;
+      shader.uniforms.groundRipple=ripples;shader.uniforms.groundClock=clock;
+      shader.uniforms.groundMirror={value:mirror.getRenderTarget().texture};shader.uniforms.groundMirrorMatrix=mirrorMatrix;shader.uniforms.groundMirrorEnabled=mirrorEnabled;
       shader.vertexShader='varying vec3 groundWorld; varying float groundFacing;\n'+shader.vertexShader;
       shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
         groundWorld=(modelMatrix*vec4(transformed,1.)).xyz;
         groundFacing=abs(normalize(mat3(modelMatrix)*normal).y);`);
-      shader.fragmentShader='varying vec3 groundWorld; varying float groundFacing; uniform sampler2D groundMacro; uniform sampler2D groundGrain; uniform float groundWeather;\n'+shader.fragmentShader;
+      shader.fragmentShader=`varying vec3 groundWorld; varying float groundFacing; uniform sampler2D groundMacro; uniform sampler2D groundGrain; uniform float groundWeather;uniform float groundRipple;uniform float groundClock;uniform sampler2D groundMirror;uniform mat4 groundMirrorMatrix;uniform float groundMirrorEnabled;
+        float residualRipple(vec2 p){
+          float h=0.;
+          ${PUDDLES.map(([x,z],i)=>`{
+            float age=mod(groundClock+${(i*.71).toFixed(2)},4.7);
+            float d=length(p-vec2(${x.toFixed(2)},${z.toFixed(2)}));
+            float waveWidth=max(.045,fwidth(d)*1.8);
+            h+=exp(-pow((d-age*.16)/waveWidth,2.))*(1.-smoothstep(1.2,3.4,age));
+          }`).join('\n')}
+          return h;
+        }\n`+shader.fragmentShader;
       shader.fragmentShader=shader.fragmentShader.replace('#include <bumpmap_pars_fragment>',THREE.ShaderChunk.bumpmap_pars_fragment.replaceAll('vBumpMapUv','(groundWorld.xz*1.3)'));
       shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
         vec4 groundField=texture2D(groundMacro,(groundWorld.xz-vec2(-2.2,-2.15))/12.4);
@@ -99,12 +118,31 @@ export function createGroundSurface(renderer,garage) {
         roughnessFactor=clamp(roughness+(.5-aggregate.g)*.09,.72,.98);
         roughnessFactor=mix(roughnessFactor,${kind===0?'.23':'.32'},wet);`);
       shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_maps>','#include <normal_fragment_maps>\nnormal=normalize(mix(normal,nonPerturbedNormal,max(wet*.55,pool*.98)));');
+      shader.fragmentShader=shader.fragmentShader.replace('#include <clearcoat_normal_fragment_maps>',`#include <clearcoat_normal_fragment_maps>
+        #ifdef USE_CLEARCOAT
+        if(pool*groundRipple>.01){
+          float waterHeight=residualRipple(groundWorld.xz)*pool*groundRipple*.00012;
+          vec3 px=dFdx(-vViewPosition),py=dFdy(-vViewPosition);
+          vec3 r1=cross(py,clearcoatNormal),r2=cross(clearcoatNormal,px);float det=dot(px,r1);
+          clearcoatNormal=normalize(abs(det)*clearcoatNormal-sign(det)*(dFdx(waterHeight)*r1+dFdy(waterHeight)*r2));
+        }
+        #endif`);
       shader.fragmentShader=shader.fragmentShader.replace('#include <lights_physical_fragment>',`#include <lights_physical_fragment>
         #ifdef USE_CLEARCOAT
           material.clearcoat*=max(wet*.65,pool);
           material.clearcoatRoughness=.13+geometryRoughness;
           material.clearcoatF0=vec3(.0204);
         #endif`);
+      shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>',`
+        if(groundMirrorEnabled*pool>.001){
+          vec4 reflectedPoint=groundMirrorMatrix*vec4(groundWorld.x,.036,groundWorld.z,1.);
+          vec2 mirrorUV=reflectedPoint.xy/reflectedPoint.w;
+          float inCapture=step(0.,mirrorUV.x)*step(mirrorUV.x,1.)*step(0.,mirrorUV.y)*step(mirrorUV.y,1.);
+          vec3 reflectedColour=texture2D(groundMirror,mirrorUV).rgb;
+          float waterView=abs(dot(geometryNormal,geometryViewDir));
+          outgoingLight=mix(outgoingLight,reflectedColour,pool*inCapture*(.28+.55*pow(1.-waterView,3.)));
+        }
+        #include <opaque_fragment>`);
     };
     material.customProgramCacheKey=()=>`courtyard-ground-v1-${kind}`;
     mesh.material=material;items.push({mesh,original,material});
@@ -119,7 +157,23 @@ export function createGroundSurface(renderer,garage) {
         material.envMapIntensity=weather.value?2.2:1.1;
       }
     },
-    snapshot(){return {wet:weather.value>0,materials:items.length,reflectionPassesPerFrame:0,macroSize:384};},
-    dispose(){for(const{mesh,original,material}of items){mesh.material=original;material.dispose();}textures.forEach(t=>t.dispose());reflection.dispose();},
+    snapshot(){return {wet:weather.value>0,materials:items.length,reflectionPassesPerFrame:reflectionPasses,reflectionCaptures,reflectionSize:512,macroSize:384};},
+    update(dt,settings,quality,reduced,editor){ripples.value=settings.theme==='rain'&&quality.decor&&!reduced&&!editor?1:0;if(ripples.value)clock.value+=Math.min(dt,.1);},
+    capture(scene,camera,settings,quality,key,now){
+      reflectionPasses=0;mirrorEnabled.value=weather.value&&quality.decor?1:0;
+      if(!mirrorEnabled.value)return {calls:0,triangles:0};
+      const viewKey=camera.matrixWorld.elements.join(',')+camera.projectionMatrix.elements.join(',')+key;
+      if(viewKey===reflectionKey&&now-lastCapture<650)return {calls:0,triangles:0};
+      if(now-lastCapture<32)return {calls:0,triangles:0};
+      const hidden=items.map(({mesh})=>[mesh,mesh.visible]);hidden.forEach(([mesh])=>mesh.visible=false);
+      const shadowUpdate=renderer.shadowMap.needsUpdate;renderer.shadowMap.needsUpdate=false;
+      try{
+        mirror.onBeforeRender(renderer,scene,camera);
+        mirrorMatrix.value.copy(mirror.material.uniforms.textureMatrix.value).multiply(new THREE.Matrix4().copy(mirror.matrixWorld).invert());
+        reflectionKey=viewKey;lastCapture=now;reflectionCaptures++;reflectionPasses=1;
+        return {calls:renderer.info.render.calls,triangles:renderer.info.render.triangles};
+      }finally{hidden.forEach(([mesh,visible])=>mesh.visible=visible);renderer.shadowMap.needsUpdate=shadowUpdate;}
+    },
+    dispose(){for(const{mesh,original,material}of items){mesh.material=original;material.dispose();}textures.forEach(t=>t.dispose());reflection.dispose();mirror.dispose();mirrorGeometry.dispose();},
   };
 }
