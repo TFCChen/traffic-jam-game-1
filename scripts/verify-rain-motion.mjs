@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {connect} from './cdp-test.mjs';
-const c=await connect(process.argv[2]),dir=new URL('../docs/rain-motion-2026-10-08/',import.meta.url);
+const c=await connect(process.argv[2]),dir=new URL(process.env.VERIFY_OUTPUT_DIR??'../docs/rain-motion-2026-10-08/',import.meta.url);
 mkdirSync(dir,{recursive:true});
 const saved=await c.evaluate(`Object.fromEntries(Object.keys(localStorage).filter(k=>k.startsWith('traffic-jam-')).map(k=>[k,localStorage.getItem(k)]))`);
 const errors=[];await c.send('Runtime.enable');await c.send('Network.enable');
@@ -25,14 +25,14 @@ try{
   await c.send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
   const settings={pitch:45,yaw:70,zoom:3.5,focusX:-3.327,focusZ:-1.87,theme:'rain',quality:'high'};
   await load(settings);let s=await snap();
-  assert.equal(s.atmosphere.rainMotion.sources.length,7);assert.equal(s.atmosphere.dripCapacity,14);
+  assert.equal(s.atmosphere.rainMotion.sources.length,7);assert.equal(s.atmosphere.dripCapacity,35);
   assert(s.groundSurface.drainage&&s.atmosphere.residualDrips);
   const leaf=s.atmosphere.rainMotion.sources.find(p=>p.kind==='leaf');
   for(const [name,index,camera]of [['canopy',0,settings],['leaf',3,{...settings,pitch:50,yaw:-35,focusX:leaf.x-3,focusZ:leaf.z-3}]]){
     if(name==='leaf')await load(camera);
-    s=await snap();const source=s.atmosphere.rainMotion.sources[index],flight=Math.sqrt(2*(source.y-source.floor)/6.2),offset=index*2.47+Math.sin(index*3)*.4;
-    for(const [stage,lo,hi]of [['bead',.06,.24],['fall',.32+flight*.3,.32+flight*.7],['impact',.32+flight+.03,.32+flight+.18]]){
-      await c.until(`(()=>{const t=(${expression}).atmosphere.rainMotion.time;const phase=(t+${offset})%19.3;return phase>${lo}&&phase<${hi}})()`,30000);
+    s=await snap();const source=s.atmosphere.rainMotion.sources[index],flight=Math.sqrt(2*(source.y-source.floor)/6.2),offset=index*1.37+Math.sin(index*3)*.22;
+    for(const [stage,lo,hi]of [['bead',.2,.5],['fall',.6+flight*.3,.6+flight*.7],['impact',.6+flight+.03,.6+flight+.18]]){
+      await c.until(`(()=>{const t=(${expression}).atmosphere.rainMotion.time;const phase=(t+${offset})%10.9;return phase>${lo}&&phase<${hi}})()`,30000);
       const frame=await snap();assert(frame.atmosphere.rainMotion.active>0);await shot(name+'-'+stage);
       reports.push({name,stage,time:frame.atmosphere.rainMotion.time,source,active:frame.atmosphere.rainMotion.active});
     }

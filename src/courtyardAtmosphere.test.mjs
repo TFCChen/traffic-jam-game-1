@@ -33,6 +33,14 @@ const waterScene=new THREE.Scene(),motion=createRainMotion(waterScene,asset.scen
 motion.update(.1,true);const clock=motion.snapshot().time;
 motion.update(20,false);assert.equal(motion.snapshot().time,clock,'Disabled effects must not simulate or accumulate time');
 assert.equal(motion.snapshot().visible,false);assert.equal(motion.snapshot().active,0);
+for(let i=0;i<11;i++)motion.update(.1,true);
+const particleMesh=waterScene.children[0],matrix=new THREE.Matrix4(),position=new THREE.Vector3();
+for(let j=0;j<3;j++){
+  const index=2+j;assert(particleMesh.geometry.attributes.waterFade.getX(index)>0,'A landing drop must emit its small splash fragments');
+  particleMesh.getMatrixAt(index,matrix);position.setFromMatrixPosition(matrix);
+  assert(position.y>=sources[0].floor&&position.y<sources[0].floor+.08,'Splash particles must rise only a few centimetres above the receiving surface');
+  assert(Math.hypot(position.x-sources[0].x,position.z-sources[0].z)<.065,'Small splashes must stay beside the impact');
+}
 motion.pause();motion.dispose();assert.equal(waterScene.children.length,0);
 
 for (let t = 0; t < 80; t += .05) {

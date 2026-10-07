@@ -102,6 +102,8 @@ export function createGroundSurface(renderer,garage) {
         float facing=smoothstep(.5,.95,groundFacing);
         float wet=groundWeather*(.55+.45*groundField.g)*facing;
         float pool=groundWeather*groundField.b*facing;
+        ${kind===0?`float curbDistance=min(abs(groundWorld.x-6.79),abs(groundWorld.x-9.77));
+        float gutter=(1.-smoothstep(.018,.085,curbDistance))*smoothstep(-1.7,-1.4,groundWorld.z)*(1.-smoothstep(9.6,9.85,groundWorld.z))*wet*groundDrainage;`:''}
         float pigment=${kind===0?'(.84+.25*aggregate.r-groundField.r*.18)':kind===3?'(1.-groundField.r*.07)':'(.93+.10*aggregate.r-groundField.r*.07)'};
         ${kind===0?'pigment*=mix(1.,.82,aggregate.b*smoothstep(.5,.72,groundField.g));':''}
         diffuseColor.rgb*=pigment*mix(1.,${kind===0?'.58':kind===3?'.88':'.72'},wet);
@@ -110,14 +112,14 @@ export function createGroundSurface(renderer,garage) {
         roughnessFactor=clamp(roughness+(.5-aggregate.g)*.09,.72,.98);
         roughnessFactor=mix(roughnessFactor,${kind===0?'.36':kind===1?'.25':kind===2?'.44':'.29'},wet);
         roughnessFactor=mix(roughnessFactor,.105,pool);`);
+      if(kind===0)shader.fragmentShader=shader.fragmentShader.replace('#include <metalnessmap_fragment>',`roughnessFactor=mix(roughnessFactor,.14,gutter*.8);\n#include <metalnessmap_fragment>`);
       shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
         normal=normalize(mix(normal,nonPerturbedNormal,max(wet*.08,pool*.94)));
         ${kind===0?`
-        float curbDistance=min(abs(groundWorld.x-6.79),abs(groundWorld.x-9.77));
-        float gutter=(1.-smoothstep(.018,.075,curbDistance))*smoothstep(-1.7,-1.4,groundWorld.z)*(1.-smoothstep(9.6,9.85,groundWorld.z))*wet*groundDrainage;
         if(groundDrainage>.001){
           float flow=texture2D(groundGrain,vec2(groundWorld.x*1.3,groundWorld.z*.7+groundFlowTime*.035)).r;
-          float filmHeight=flow*gutter*.00005;
+          float waves=sin(groundWorld.z*24.+groundFlowTime*1.8)+.35*sin(groundWorld.z*41.+groundFlowTime*2.8+groundWorld.x*13.);
+          float filmHeight=(flow*.00008+waves*.0003)*gutter;
           vec3 px=dFdx(-vViewPosition),py=dFdy(-vViewPosition);
           vec3 r1=cross(py,normal),r2=cross(normal,px);float det=dot(px,r1);
           normal=normalize(abs(det)*normal-sign(det)*(dFdx(filmHeight)*r1+dFdy(filmHeight)*r2));

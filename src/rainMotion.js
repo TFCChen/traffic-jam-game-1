@@ -9,7 +9,7 @@ export function courtyardWind(time) {
 // Short isolated releases, not continuous rain. One model unit is roughly
 // 1.5 metres; acceleration is scaled to this small courtyard's proportions.
 export function dripPose(time,index,source,windTime=time) {
-  const phase=(time+index*2.47+Math.sin(index*3)*.4)%19.3,hang=.32;
+  const phase=(time+index*1.37+Math.sin(index*3)*.22)%10.9,hang=.6;
   const flight=Math.sqrt(2*Math.max(0,source.y-source.floor)/6.2);
   const age=phase-hang,impact=age-flight;
   const profile=source.wind??[0,0,0,0];
@@ -18,11 +18,12 @@ export function dripPose(time,index,source,windTime=time) {
   const dz=wind[1]*profile[0]+wind[2]*profile[3];
   const dy=wind[3]*profile[2];
   return {x:source.x+dx,z:source.z+dz,y:Math.max(source.floor,source.y+dy-3.1*Math.max(0,age)**2),
-    radius:phase<hang?.0015+.0025*phase/hang:.004,
-    stretch:phase<hang?.005:.006+Math.min(flight,Math.max(0,age))*.012,
-    dropAlpha:age<flight?.62:0,
-    impactAlpha:impact>=0&&impact<.24?.28*(1-impact/.24):0,
-    impactRadius:.005+.035*Math.max(0,Math.min(.24,impact))/.24,
+    radius:phase<hang?.002+.003*phase/hang:.005,
+    stretch:phase<hang?.007:.009+Math.min(flight,Math.max(0,age))*.024,
+    dropAlpha:age<flight?.9:0,
+    impactAlpha:impact>=0&&impact<.38?.42*(1-impact/.38):0,
+    impactRadius:.006+.039*Math.max(0,Math.min(.38,impact))/.38,
+    impactAge:impact,
     floor:source.floor};
 }
 
@@ -55,11 +56,11 @@ export function rainDripSources(garage,anchors) {
 }
 
 export function createRainMotion(scene,garage,anchors) {
-  const sources=rainDripSources(garage,anchors),capacity=sources.length*2;
+  const sources=rainDripSources(garage,anchors),capacity=sources.length*5;
   const geometry=new THREE.SphereGeometry(1,6,4);
   const fades=new THREE.InstancedBufferAttribute(new Float32Array(capacity),1);
   geometry.setAttribute('waterFade',fades);fades.setUsage(THREE.DynamicDrawUsage);
-  const material=new THREE.MeshStandardMaterial({color:'#b9d4dd',roughness:.06,metalness:0,
+  const material=new THREE.MeshStandardMaterial({color:'#e1f1f6',roughness:.035,metalness:0,
     transparent:true,opacity:1,depthWrite:false});
   material.onBeforeCompile=shader=>{
     shader.vertexShader='attribute float waterFade;varying float dropFade;\n'+shader.vertexShader;
@@ -79,10 +80,17 @@ export function createRainMotion(scene,garage,anchors) {
       sources.forEach((source,i)=>{
         const p=dripPose(time,i,source,windTime??time);
         pose.position.set(p.x,p.y,p.z);pose.scale.set(p.radius,p.stretch,p.radius);
-        pose.updateMatrix();mesh.setMatrixAt(i*2,pose.matrix);fades.array[i*2]=p.dropAlpha;
+        pose.updateMatrix();mesh.setMatrixAt(i*5,pose.matrix);fades.array[i*5]=p.dropAlpha;
         pose.position.set(p.x,p.floor+.0012,p.z);pose.scale.set(p.impactRadius,.0008,p.impactRadius);
-        pose.updateMatrix();mesh.setMatrixAt(i*2+1,pose.matrix);fades.array[i*2+1]=p.impactAlpha;
+        pose.updateMatrix();mesh.setMatrixAt(i*5+1,pose.matrix);fades.array[i*5+1]=p.impactAlpha;
         if(p.dropAlpha>0)active++;if(p.impactAlpha>0)active++;
+        for(let j=0;j<3;j++){
+          const t=p.impactAge,visible=t>=0&&t<.26,age=Math.max(0,Math.min(.26,t)),angle=i*1.7+j*Math.PI*2/3;
+          pose.position.set(p.x+Math.cos(angle)*age*(.17+j*.025),
+            p.floor+.001+Math.max(0,(.65+j*.1)*age-3.1*age*age),p.z+Math.sin(angle)*age*(.17+j*.025));
+          pose.scale.set(.0024,.0036,.0024);pose.updateMatrix();mesh.setMatrixAt(i*5+2+j,pose.matrix);
+          fades.array[i*5+2+j]=visible?.85*(1-age/.26):0;if(visible)active++;
+        }
       });
       mesh.instanceMatrix.needsUpdate=true;fades.needsUpdate=true;
     },
