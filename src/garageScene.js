@@ -434,7 +434,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     p.velocity.copy(direction).multiplyScalar(1.5);
     p.velocity.y = 0.2;
   }
-  function updateCamera(viewOnly = false) {
+  function updateCamera(viewOnly = false, constrainPan = false) {
     cameraFollow = 0;
     cameraFollowZ = 0;
     viewAim.set(
@@ -519,19 +519,22 @@ export function createGarageScene(canvas, getProps, callbacks) {
       visibleHeight = halfHeight / settings.zoom;
     const limitX = Math.max(1.5, halfWidth - visibleWidth + 2),
       limitY = Math.max(1.5, halfHeight - visibleHeight + 2);
-    // Orbit shifts focus to preserve the screen center. Bound the actual view
-    // relative to the lot in the CURRENT camera basis, not the old pan origin.
+    // Bound deliberate pan/zoom input in the current camera basis. Rotation
+    // must not clamp the intermediate pose before preserving its screen pivot;
+    // doing so feeds the clamp back into focus and causes jumps at corners.
     const lotCenter = aim.clone().applyMatrix4(camera.matrixWorldInverse);
-    settings.panX = clamp(
-      settings.panX,
-      lotCenter.x - centerX - limitX,
-      lotCenter.x - centerX + limitX,
-    );
-    settings.panY = clamp(
-      settings.panY,
-      lotCenter.y - centerY - limitY,
-      lotCenter.y - centerY + limitY,
-    );
+    if (constrainPan) {
+      settings.panX = clamp(
+        settings.panX,
+        lotCenter.x - centerX - limitX,
+        lotCenter.x - centerX + limitX,
+      );
+      settings.panY = clamp(
+        settings.panY,
+        lotCenter.y - centerY - limitY,
+        lotCenter.y - centerY + limitY,
+      );
+    }
     camera.left = centerX + settings.panX - visibleWidth;
     camera.right = centerX + settings.panX + visibleWidth;
     camera.top = centerY + settings.panY + visibleHeight;
@@ -671,9 +674,9 @@ export function createGarageScene(canvas, getProps, callbacks) {
   }
   let wheelTimer;
   const publishCamera = () => callbacks.cameraChange?.(normalizeView(settings));
-  function applyCamera(view) {
+  function applyCamera(view, constrainPan = true) {
     Object.assign(settings, normalizeView(view));
-    updateCamera(true);
+    updateCamera(true, constrainPan);
   }
   function zoomAt(zoom, x, y) {
     const r = canvas.getBoundingClientRect();
@@ -697,14 +700,14 @@ export function createGarageScene(canvas, getProps, callbacks) {
   }
   function orbitAtScreenCenter(dx, dy) {
     const pivot = screenCenterPoint();
-    applyCamera(rotateView(settings, dx, dy));
+    applyCamera(rotateView(settings, dx, dy), false);
     const moved = screenCenterPoint();
     if (pivot && moved)
       applyCamera({
         ...settings,
         focusX: settings.focusX + pivot.x - moved.x,
         focusZ: settings.focusZ + pivot.z - moved.z,
-      });
+      }, false);
   }
   function flushCamera() {
     if (!cameraPending || !cameraGesture) return;
