@@ -1,11 +1,21 @@
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import {createRainSurfaces,rainSurfaceKind} from './rainSurfaces.js';
+import {createRainSurfaces,rainSurfaceKind,rainFilmMap} from './rainSurfaces.js';
+
+const film=rainFilmMap();assert.equal(film.length,512*512*4);assert.deepEqual(film,rainFilmMap());
+const count=channel=>film.filter((value,i)=>i%4===channel&&value>32).length;
+assert(count(0)>1000&&count(0)<512*512*.04,'Fine beads must stay small and sparsely cover the surface');
+assert(count(1)>1000&&count(1)<512*512*.08,'Thin runoff trails must leave clear spaces');
+let along=0,across=0;
+for(let y=1;y<511;y++)for(let x=1;x<511;x++){
+  const i=(y*512+x)*4+1;if(film[i]>64){along+=film[i+512*4]>64?1:0;across+=film[i+4]>64?1:0;}
+}
+assert(along>across*1.3,'Runoff trails must follow gravity instead of forming round blotches');
 
 assert.equal(rainSurfaceKind('Batched cabin'),null,'Cabin upholstery must remain dry');
 assert.equal(rainSurfaceKind('Rolling wheels'),null,'Wetness must not interfere with steering shaders');
 const system=createRainSurfaces();
-for(const name of ['Paint red','Automotive glass','Courtyard foliage detail','Courtyard bark','Courtyard fence','Batched scenery']){
+for(const name of ['Paint red','Batched trim','Automotive glass','Courtyard foliage detail','Courtyard bark','Courtyard fence','Batched scenery']){
   const material=new THREE.MeshPhysicalMaterial();material.name=name;
   material.onBeforeCompile=s=>{s.fragmentShader+='\n// preserved optical/finish logic';};
   system.attach(material);const first=material.onBeforeCompile;system.attach(material);

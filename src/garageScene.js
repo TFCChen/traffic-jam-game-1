@@ -1756,10 +1756,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
     // Camera and vehicle motion must not change the optical clarity of windows.
     renderer.transmissionResolutionScale = 1;
     profiler.begin();
-    const reflected=groundSurface?.capture(scene,camera,settings,quality,
-      sceneKey+[...groups.values()].map(item=>item.group.position.toArray().map(x=>Math.round(x*100)/100).join(',')+item.group.rotation.y.toFixed(3)).join(';'),now);
     renderer.render(scene, camera);
-    profiler.end({...renderer.info.render,calls:renderer.info.render.calls+(reflected?.calls??0),triangles:renderer.info.render.triangles+(reflected?.triangles??0)});
+    profiler.end(renderer.info.render);
     stats.frames++;
     stats.renderedSceneKey = sceneKey;
     if (pendingInputAt !== null) {

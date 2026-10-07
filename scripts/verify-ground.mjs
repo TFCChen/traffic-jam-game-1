@@ -24,7 +24,7 @@ try{
     ['mobile-rain',393,844,70,0,1,'rain'],['rain-saver',393,844,70,0,1,'rain',0,0,'saver']]){
     await c.send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:width<500?3:1,mobile:width<500});
     await load({pitch,yaw,zoom,theme,focusX,focusZ,quality});await shot(name);
-    const s=await snap();assert.equal(s.groundSurface.wet,theme==='rain');assert.equal(s.rainSurfaces.wet,theme==='rain');assert(s.groundSurface.reflectionPassesPerFrame<=1);assert.equal(s.cars.length,8);
+    const s=await snap();assert.equal(s.groundSurface.wet,theme==='rain');assert.equal(s.rainSurfaces.wet,theme==='rain');assert.equal(s.groundSurface.reflectionPassesPerFrame,0);assert.equal(s.cars.length,8);
     for(const kind of ['paint','glass','leaf','bark','metal','scenery'])assert(s.rainSurfaces.kinds.includes(kind));
     reports.push({name,settings:s.settings,ground:s.groundSurface,rainSurfaces:s.rainSurfaces,performance:s.performance});
   }
@@ -39,6 +39,20 @@ try{
   for(const[name,width,height,dpr,theme]of [['dry',1440,1000,1,'day'],['wet',1440,1000,1,'rain'],['mobile-wet',393,844,3,'rain']]){
     await c.send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:dpr,mobile:width<500});await load({pitch:65,yaw:25,zoom:.85,quality:'high',theme});
     await c.evaluate(`document.querySelector('.garage-canvas').garageInspection.measure(true)`);await c.sleep(5000);const s=await snap();profiles.push({name,ground:s.groundSurface,performance:s.performance});await c.evaluate(`document.querySelector('.garage-canvas').garageInspection.measure(false)`);
+  }
+  for(const theme of ['day','rain']){
+    await c.send('Emulation.clearDeviceMetricsOverride');
+    await c.send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
+    await load({pitch:65,yaw:25,zoom:.85,quality:'high',theme});
+    await c.evaluate(`document.querySelector('.garage-canvas').garageInspection.measure(true)`);
+    await c.send('Input.dispatchMouseEvent',{type:'mousePressed',x:1260,y:420,button:'right',buttons:2,clickCount:1});
+    for(let i=0;i<180;i++){
+      await c.send('Input.dispatchMouseEvent',{type:'mouseMoved',x:1260+Math.sin(i*.055)*110,y:420+Math.sin(i*.03)*45,button:'right',buttons:2});await c.sleep(25);
+    }
+    await c.send('Input.dispatchMouseEvent',{type:'mouseReleased',x:1260,y:420,button:'right',buttons:0});
+    const s=await snap();assert(Math.abs(s.settings.yaw-25)>5,'Orbit benchmark must actually rotate the camera');
+    profiles.push({name:theme==='rain'?'wet-orbit':'dry-orbit',ground:s.groundSurface,performance:s.performance});
+    await c.evaluate(`document.querySelector('.garage-canvas').garageInspection.measure(false)`);
   }
   assert.deepEqual(errors,[]);writeFileSync(new URL('inspection.json',dir),JSON.stringify({reports,idle,profiles,rainSelectableWithoutProgress:true,errors},null,2));console.log(JSON.stringify({views:reports.length,rainSelection:true,idle,errors}));
 }finally{

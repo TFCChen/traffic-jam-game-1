@@ -9,26 +9,42 @@ export function rainSurfaceKind(name) {
   return ({'Courtyard foliage detail':'leaf','Courtyard bark':'bark',
     'Courtyard fence':'metal','Batched scenery':'scenery'})[name] ?? null;
 }
+// R: tiny spherical beads. G: narrow gravity-aligned drainage trails.
+// Bake once, then let hardware mipmaps filter subpixel water detail.
+export function rainFilmMap(size=512) {
+  const bytes=new Uint8Array(size*size*4);let seed=92171;
+  const random=()=>{seed^=seed<<13;seed^=seed>>>17;seed^=seed<<5;return(seed>>>0)/4294967296;};
+  const put=(x,y,channel,height)=>{
+    const pixel=(((y%size+size)%size)*size+((x%size+size)%size))*4;
+    bytes[pixel+channel]=Math.max(bytes[pixel+channel],Math.round(Math.max(0,Math.min(1,height))*255));
+    bytes[pixel+3]=255;
+  };
+  for(let i=0;i<2200;i++){
+    const x=random()*size,y=random()*size,r=.65+random()**2*1.65;
+    for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++){
+      const px=Math.round(x)+dx,py=Math.round(y)+dy,cap=Math.max(0,1-((px-x)**2+(py-y)**2)/(r*r));
+      put(px,py,0,cap*cap);
+    }
+  }
+  for(let i=0;i<32;i++){
+    const x=random()*size,y=random()*size,length=30+random()*130,width=.7+random()*.8,phase=random()*6.28;
+    for(let t=0;t<length;t++){
+      const centre=x+Math.sin(t*.035+phase)*1.4,fade=Math.sin(Math.PI*t/length)**.6;
+      for(let dx=-3;dx<=3;dx++){
+        const px=Math.round(centre)+dx;
+        put(px,Math.round(y-t),1,Math.exp(-(((px-centre)/width)**2))*fade);
+      }
+    }
+  }
+  return bytes;
+}
 const functions = `
-vec2 rainHash(vec2 p) {
-  vec3 q=fract(vec3(p.xyx)*vec3(.1031,.1030,.0973));
-  q+=dot(q,q.yzx+33.33);return fract((q.xx+q.yz)*q.zy);
-}
-float rainBead(vec2 uv) {
-  vec2 cell=floor(uv),random=rainHash(cell);
-  vec2 p=fract(uv)-(.22+.56*random);
-  float radius=.10+.19*random.x*random.x;
-  float r=length(p)/radius;
-  float aa=max(fwidth(r),.025);
-  // Smooth spherical caps, with screen-footprint fading to prevent sparkle.
-  float cap=max(0.,1.-r*r);
-  return cap*cap*(1.-smoothstep(1.-aa,1.+aa,r))*
-    (1.-smoothstep(.35,1.1,length(fwidth(uv))))*step(.48,random.y);
-}
-float rainHeight(vec3 p,vec3 n) {
+vec2 rainFilm(vec3 p,vec3 n) {
   vec3 weight=pow(abs(n),vec3(8.));weight/=max(.001,weight.x+weight.y+weight.z);
-  vec3 warped=p+sin(p.zxy*31.)*.005;
-  return dot(weight,vec3(rainBead(warped.zy*27.),rainBead(warped.xz*27.),rainBead(warped.xy*27.)));
+  vec2 sideX=texture2D(rainSurfaceMap,p.zy*1.5).rg;
+  vec2 top=texture2D(rainSurfaceMap,p.zx*1.5).rg;
+  vec2 sideZ=texture2D(rainSurfaceMap,p.xy*1.5).rg;
+  return vec2(dot(weight,vec3(sideX.r+sideX.g*.65,top.r+top.g*.22,sideZ.r+sideZ.g*.65)),dot(weight,vec3(sideX.g,top.g*.45,sideZ.g)));
 }
 vec3 rainPerturb(vec3 n,vec3 position,float height) {
   vec3 px=dFdx(position),py=dFdy(position),r1=cross(py,n),r2=cross(n,px);
@@ -40,36 +56,43 @@ vec3 rainPerturb(vec3 n,vec3 position,float height) {
 
 export function createRainSurfaces() {
   const wet={value:0},detail={value:1},tracked=new Map();
+  const film=new THREE.DataTexture(rainFilmMap(),512,512);
+  film.wrapS=film.wrapT=THREE.RepeatWrapping;film.generateMipmaps=true;
+  film.minFilter=THREE.LinearMipmapLinearFilter;film.magFilter=THREE.LinearFilter;film.needsUpdate=true;
   function attach(material,length=2) {
     const kind=rainSurfaceKind(material.name);
     if (!kind) return;
+    const beads=['paint','glass','trim'].includes(kind);
     const entry=tracked.get(material);
     if (entry?.wrapper===material.onBeforeCompile) return;
     const before=material.onBeforeCompile,key=material.customProgramCacheKey();
     const wrapper=(shader,renderer)=>{
       before.call(material,shader,renderer);
       shader.uniforms.rainSurfaceWet=wet;shader.uniforms.rainSurfaceDetail=detail;
+      shader.uniforms.rainSurfaceMap={value:film};
       shader.vertexShader='varying vec3 rainLocal;varying vec3 rainLocalNormal;\n'+shader.vertexShader;
       shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',
         '#include <begin_vertex>\nrainLocal=transformed;rainLocalNormal=normal;');
-      shader.fragmentShader='varying vec3 rainLocal;varying vec3 rainLocalNormal;uniform float rainSurfaceWet;uniform float rainSurfaceDetail;\n'+functions+shader.fragmentShader;
+      shader.fragmentShader='varying vec3 rainLocal;varying vec3 rainLocalNormal;uniform float rainSurfaceWet;uniform float rainSurfaceDetail;uniform sampler2D rainSurfaceMap;\n'+functions+shader.fragmentShader;
       shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
         float rainExposure=${kind==='scenery'?'smoothstep(.1,.25,rainLocal.y)':kind==='trim'?`max(smoothstep(.80,.9,rainLocal.y),max(smoothstep(.40,.46,abs(rainLocal.z)),smoothstep(${(length/2-.16).toFixed(2)},${(length/2-.08).toFixed(2)},abs(rainLocal.x))))`:'1.'};
         ${kind==='scenery'||kind==='glass'?'rainExposure*=1.-(1.-smoothstep(.84,.91,rainLocal.y))*step(rainLocal.x,-.42)*step(.45,rainLocal.z)*step(rainLocal.z,1.7);':''}
         float rainWet=rainSurfaceWet*rainExposure;
         diffuseColor.rgb*=mix(1.,${{paint:'.95',trim:'.92',glass:'1.',leaf:'.68',bark:'.60',metal:'.88',scenery:'.73'}[kind]},rainWet);
-        float beadHeight=0.;
-        if(rainWet*rainSurfaceDetail>.01)beadHeight=rainHeight(rainLocal,normalize(rainLocalNormal));`);
+        vec2 rainFilmDetail=vec2(0.);
+        ${beads?'if(rainWet*rainSurfaceDetail>.01)rainFilmDetail=rainFilm(rainLocal,normalize(rainLocalNormal));':''}
+        float beadHeight=rainFilmDetail.x;
+        ${kind==='paint'||kind==='trim'?'diffuseColor.rgb*=mix(1.,.96,rainFilmDetail.y*rainWet);':''}`);
       if (kind!=='glass')shader.fragmentShader=shader.fragmentShader.replace('#include <roughnessmap_fragment>',`#include <roughnessmap_fragment>
         roughnessFactor=mix(roughnessFactor,${kind==='bark'?'.44':kind==='leaf'?'.24':'.14'},rainWet*.85);`);
-      shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
-        if(rainWet*rainSurfaceDetail>.01)normal=rainPerturb(normal,-vViewPosition,beadHeight*rainWet*${kind==='glass'?'.001':'.0012'});
+      if(beads)shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
+        if(rainWet*rainSurfaceDetail>.01)normal=rainPerturb(normal,-vViewPosition,beadHeight*rainWet*${kind==='glass'?'.00025':'.00030'});
       `);
       // Glass retains its .003 roughness and existing Beer-Lambert tint.
       // The car's lacquer uses a distinct beaded top optical layer.
       if(kind==='paint')shader.fragmentShader=shader.fragmentShader.replace('#include <clearcoat_normal_fragment_maps>',`#include <clearcoat_normal_fragment_maps>
         #ifdef USE_CLEARCOAT
-        if(rainWet*rainSurfaceDetail>.01)clearcoatNormal=rainPerturb(clearcoatNormal,-vViewPosition,beadHeight*rainWet*.0014);
+        if(rainWet*rainSurfaceDetail>.01)clearcoatNormal=rainPerturb(clearcoatNormal,-vViewPosition,beadHeight*rainWet*.00035);
         #endif`);
     };
     material.onBeforeCompile=wrapper;
@@ -82,6 +105,6 @@ export function createRainSurfaces() {
     detach(material){tracked.delete(material);},
     setTheme(settings,quality){wet.value=settings.theme==='rain'?1:0;detail.value=quality.decor?1:0;},
     snapshot(){return {wet:wet.value>0,detail:detail.value>0,materials:tracked.size,kinds:[...new Set([...tracked.values()].map(e=>e.kind))]};},
-    dispose(){for(const[m,e]of tracked){m.onBeforeCompile=e.before;m.customProgramCacheKey=()=>e.key;}tracked.clear();},
+    dispose(){for(const[m,e]of tracked){m.onBeforeCompile=e.before;m.customProgramCacheKey=()=>e.key;}tracked.clear();film.dispose();},
   };
 }
