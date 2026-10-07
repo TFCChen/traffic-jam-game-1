@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 export const GROUND_BOUNDS = { x: -2.2, z: -2.15, size: 12.4 };
-export const PUDDLES = [[8.9,5.4,.8,.48],[7.5,.9,.34,1.05],[5.6,5.83,.36,.18],[.45,5.4,.28,.38],[4.5,.25,.65,.22],[-.9,2.9,.22,.6],[2.8,7.2,.5,.25]];
+export const PUDDLES = [[8.9,5.4,1.05,.72],[7.5,.9,.62,1.4],[5.6,5.83,.52,.26],[.45,5.4,.38,.5],[4.5,.25,.9,.3],[-.9,2.9,.36,.85],[2.8,7.2,.7,.38]];
 const clamp = x => Math.max(0, Math.min(1, x));
 const smooth = (a,b,x) => { const t=clamp((x-a)/(b-a));return t*t*(3-2*t); };
 function hash(x,z) { let n=Math.imul(x,374761393)^Math.imul(z,668265263)^731; n=Math.imul(n^(n>>>13),1274126177);return ((n^(n>>>16))>>>0)/4294967295; }
@@ -59,8 +59,9 @@ export function createGroundSurface(renderer,garage) {
   // an extra scene render or a screen-space reflection pass each frame.
   const skyBytes=new Uint8Array(256*128*4);
   for(let y=0;y<128;y++)for(let x=0;x<256;x++) {
-    const horizon=Math.exp(-(((y/128-.5)/.17)**2)),cloud=noise(x/25,y/12)*.045;
-    const c=new THREE.Color(.33+.34*horizon+cloud,.44+.32*horizon+cloud,.53+.28*horizon+cloud);
+    const horizon=Math.exp(-(((y/128-.5)/.17)**2));
+    const cloud=smooth(.35,.68,noise(x/34,y/16))*.32;
+    const c=new THREE.Color(.18+.28*horizon+cloud,.28+.27*horizon+cloud,.40+.23*horizon+cloud);
     skyBytes.set([Math.round(c.r*255),Math.round(c.g*255),Math.round(c.b*255),255],(y*256+x)*4);
   }
   const sky=texture(skyBytes,256,128);sky.mapping=THREE.EquirectangularReflectionMapping;
@@ -88,19 +89,19 @@ export function createGroundSurface(renderer,garage) {
         vec4 groundField=texture2D(groundMacro,(groundWorld.xz-vec2(-2.2,-2.15))/12.4);
         vec4 aggregate=texture2D(groundGrain,groundWorld.xz*1.3);
         float facing=smoothstep(.5,.95,groundFacing);
-        float wet=groundWeather*groundField.g*facing;
+        float wet=groundWeather*(.55+.45*groundField.g)*facing;
         float pool=groundWeather*groundField.b*facing;
         float pigment=${kind===0?'(.84+.25*aggregate.r-groundField.r*.18)':kind===3?'(1.-groundField.r*.07)':'(.93+.10*aggregate.r-groundField.r*.07)'};
         ${kind===0?'pigment*=mix(1.,.82,aggregate.b*smoothstep(.5,.72,groundField.g));':''}
-        diffuseColor.rgb*=pigment*mix(1.,${kind===0?'.76':'.90'},wet);
-        diffuseColor.rgb*=mix(1.,.92,pool);`);
+        diffuseColor.rgb*=pigment*mix(1.,${kind===0?'.46':kind===3?'.88':'.72'},wet);
+        diffuseColor.rgb*=mix(vec3(1.),vec3(.68,.78,.84),pool);`);
       shader.fragmentShader=shader.fragmentShader.replace('#include <roughnessmap_fragment>',`#include <roughnessmap_fragment>
         roughnessFactor=clamp(roughness+(.5-aggregate.g)*.09,.72,.98);
-        roughnessFactor=mix(roughnessFactor,.36,wet);`);
-      shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_maps>','#include <normal_fragment_maps>\nnormal=normalize(mix(normal,nonPerturbedNormal,pool*.94));');
+        roughnessFactor=mix(roughnessFactor,${kind===0?'.23':'.32'},wet);`);
+      shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_maps>','#include <normal_fragment_maps>\nnormal=normalize(mix(normal,nonPerturbedNormal,max(wet*.55,pool*.98)));');
       shader.fragmentShader=shader.fragmentShader.replace('#include <lights_physical_fragment>',`#include <lights_physical_fragment>
         #ifdef USE_CLEARCOAT
-          material.clearcoat*=max(wet*.42,pool);
+          material.clearcoat*=max(wet*.65,pool);
           material.clearcoatRoughness=.13+geometryRoughness;
           material.clearcoatF0=vec3(.0204);
         #endif`);
@@ -112,9 +113,10 @@ export function createGroundSurface(renderer,garage) {
     setTheme(settings,quality) {
       weather.value=settings.theme==='rain'?1:0;
       for(const {material}of items) {
-        const coat=weather.value && quality.decor ? .8 : 0;
+        const coat=weather.value && quality.decor ? 1 : 0;
         if((material.clearcoat>0)!==(coat>0))material.needsUpdate=true;
         material.clearcoat=coat;
+        material.envMapIntensity=weather.value?2.2:1.1;
       }
     },
     snapshot(){return {wet:weather.value>0,materials:items.length,reflectionPassesPerFrame:0,macroSize:384};},

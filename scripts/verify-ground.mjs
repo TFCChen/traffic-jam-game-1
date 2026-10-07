@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdirSync,writeFileSync,readFileSync } from 'node:fs';
 import { connect } from './cdp-test.mjs';
-const c=await connect(process.argv[2]),dir=new URL('../docs/ground-2026-10-07/',import.meta.url);mkdirSync(dir,{recursive:true});
+const c=await connect(process.argv[2]),dir=new URL(process.env.VERIFY_OUTPUT_DIR??'../docs/ground-2026-10-07/',import.meta.url);mkdirSync(dir,{recursive:true});
 const saved=await c.evaluate(`Object.fromEntries(Object.keys(localStorage).filter(k=>k.startsWith('traffic-jam-')).map(k=>[k,localStorage.getItem(k)]))`);
 await c.send('Runtime.enable');await c.send('Network.enable');await c.send('Network.setBypassServiceWorker',{bypass:true});await c.send('Network.setCacheDisabled',{cacheDisabled:true});
 await c.send('Emulation.setFocusEmulationEnabled',{enabled:true});await c.send('Page.bringToFront');
