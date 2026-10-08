@@ -6,13 +6,17 @@ const clamp = v => Math.max(0, Math.min(1, v));
 const smooth = v => { v=clamp(v); return v*v*(3-2*v); };
 const smoother = v => {v=clamp(v);return v*v*v*(v*(v*6-15)+10);};
 const WHEELBASE=1.33, HALF_TRACK=.405, REAR_OFFSET=.67;
-const TURN_REAR_X=6.385, RADIUS=2.4, RAMP=.8;
-const TURN_LENGTH=Math.PI/2*RADIUS+RAMP, STEPS=480, ds=TURN_LENGTH/STEPS;
+const TURN_REAR_X=6.385, RADIUS=2.4, ENTRY_RAMP=.8, RETURN_RAMP=1.8;
+// Independent entry/exit transitions: unwind over a longer distance, without
+// adding a steering-only lag that would make the tyres slide across the path.
+// Each symmetric ramp has half its length under its curvature envelope, so this
+// length retains a 90-degree integrated heading with asymmetric transitions.
+const TURN_LENGTH=Math.PI/2*RADIUS+(ENTRY_RAMP+RETURN_RAMP)/2, STEPS=720, ds=TURN_LENGTH/STEPS;
 // The rear axle follows the path; both front wheels share a turning centre.
 const curve=[{x:0,z:0,heading:0,curvature:0}];
 for(let i=1;i<=STEPS;i++){
   const s=(i-.5)*ds, p=curve[i-1];
-  const curvature=smoother(s/RAMP)*smoother((TURN_LENGTH-s)/RAMP)/RADIUS;
+  const curvature=smooth(s/ENTRY_RAMP)*smoother((TURN_LENGTH-s)/RETURN_RAMP)/RADIUS;
   const heading=p.heading+curvature*ds;
   curve.push({x:p.x+Math.cos((p.heading+heading)/2)*ds,z:p.z+Math.sin((p.heading+heading)/2)*ds,heading,curvature});
 }
@@ -21,7 +25,7 @@ for(let i=1;i<=TICKS;i++){
   const t=(i-.5)*5.5/TICKS;
   // Gently leave the bay, settle into the turn, then accelerate away. Fifth
   // order easing avoids abrupt acceleration at either end of each transition.
-  const speed=smoother(t/.95)*(2.45-.85*smoother((t-.95)/.7)+.95*smoother((t-3.9)/.9));
+  const speed=smoother(t/.95)*(2.45-.85*smoother((t-.65)/.7)+.95*smoother((t-4.6)/.9));
   timeline.push(timeline[i-1]+speed*5.5/TICKS);
 }
 function sample(values,t){const f=clamp(t)*(values.length-1),i=Math.min(values.length-2,Math.floor(f));return [i,f-i];}

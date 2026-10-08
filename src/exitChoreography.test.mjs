@@ -34,4 +34,19 @@ assert.equal(exitSceneFade(5400),1);assert.equal(exitSceneFade(6300),0);assert.e
 const turning=exitPose(3000);
 assert(Math.abs(turning.steeringPair[1])>Math.abs(turning.steeringPair[0]),'Inside wheel steers more sharply');
 assert.equal(exitPose(0,5,2.5,true).follow,0);assert.equal(exitPose(120,5,2.5,true).complete,true);
+// Verify the rendered wheel heading against the derivative of its own world
+// trajectory, rather than only checking that its angle changes continuously.
+const wheelPoint=(p,x,z)=>[p.x+x*Math.cos(p.yaw)+z*Math.sin(p.yaw),p.z-x*Math.sin(p.yaw)+z*Math.cos(p.yaw)];
+let maxReturnRate=0;
+for(let age=1200;age<4900;age+=2){
+ const p=exitPose(age),before=exitPose(age-1),after=exitPose(age+1);
+ for(const [x,z,index]of [[.66,-.405,0],[.66,.405,1],[-.67,-.43,-1],[-.67,.43,-1]]){
+  const a=wheelPoint(before,x,z),b=wheelPoint(after,x,z),dx=b[0]-a[0],dz=b[1]-a[1];
+  const heading=-p.yaw-(index<0?0:p.steeringPair[index]);
+  const error=Math.atan2(dz*Math.cos(heading)-dx*Math.sin(heading),dx*Math.cos(heading)+dz*Math.sin(heading));
+  assert(Math.abs(error)<.012,'Each wheel must point along its actual travel direction, without visual steering lag');
+ }
+ for(let i=0;i<2;i++)maxReturnRate=Math.max(maxReturnRate,(after.steeringPair[i]-before.steeringPair[i])/.002);
+}
+assert(maxReturnRate<1.2,'Unwinding must stay below 69 degrees per second through the whole visible turn');
 console.log('Smooth steering, continuous heading, fence/street clearance and camera restoration passed.');
