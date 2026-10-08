@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {exitPose,exitSceneFade,EXIT_COMPLETE_MS} from './exitChoreography.js';
+import {exitPose,exitSceneFade,EXIT_COMPLETE_MS,EXIT_TIME_SCALE} from './exitChoreography.js';
 let prior=exitPose(0),turned=false,maxSteering=0;
 for(let age=16;age<=EXIT_COMPLETE_MS;age+=16){
   const p=exitPose(age);
@@ -17,12 +17,12 @@ for(let age=16;age<=EXIT_COMPLETE_MS;age+=16){
   }
   maxSteering=Math.max(maxSteering,Math.abs(p.steering));prior=p;
 }
-assert(turned&&maxSteering>.4&&maxSteering<.6);
+assert(turned&&maxSteering>.6&&maxSteering<.7,'Later, deeper turn must remain within the authored wheel steering range');
 const end=exitPose(EXIT_COMPLETE_MS);
 assert.equal(end.visible,false,'Departing car is removed behind the cinematic cut');
 assert.equal(end.follow,0);assert.equal(end.complete,true);assert.equal(Math.abs(end.steering),0);
-assert.equal(exitPose(5250).follow,1,'Camera must not move back while the departing car is still visible');
-assert(exitPose(5470).follow<1&&exitSceneFade(5470)===1,'Camera restoration belongs behind the opaque cut');
+assert.equal(exitPose(5250*EXIT_TIME_SCALE).follow,1,'Camera must not move back while the departing car is still visible');
+assert(exitPose(5470*EXIT_TIME_SCALE).follow<1&&exitSceneFade(5470*EXIT_TIME_SCALE)===1,'Camera restoration belongs behind the opaque cut');
 for(let age=300;age<5300;age+=17){
  const a=exitPose(age),b=exitPose(age+1);
  assert(Number.isFinite(a.speed)&&a.speed>=0);
@@ -30,7 +30,7 @@ for(let age=300;age<5300;age+=17){
  assert(Math.abs(a.bank)<=.016,'Cornering load must remain subtle');
 }
 assert(exitPose(5350).z>exitPose(5200).z,'Car keeps moving as the shot fades');
-assert.equal(exitSceneFade(5400),1);assert.equal(exitSceneFade(6300),0);assert.equal(exitSceneFade(5400,true),0);
+assert.equal(exitSceneFade(5400*EXIT_TIME_SCALE),1);assert.equal(exitSceneFade(6300*EXIT_TIME_SCALE),0);assert.equal(exitSceneFade(5400,true),0);
 const turning=exitPose(3000);
 assert(Math.abs(turning.steeringPair[1])>Math.abs(turning.steeringPair[0]),'Inside wheel steers more sharply');
 assert.equal(exitPose(0,5,2.5,true).follow,0);assert.equal(exitPose(120,5,2.5,true).complete,true);
@@ -38,7 +38,7 @@ assert.equal(exitPose(0,5,2.5,true).follow,0);assert.equal(exitPose(120,5,2.5,tr
 // trajectory, rather than only checking that its angle changes continuously.
 const wheelPoint=(p,x,z)=>[p.x+x*Math.cos(p.yaw)+z*Math.sin(p.yaw),p.z-x*Math.sin(p.yaw)+z*Math.cos(p.yaw)];
 let maxReturnRate=0;
-for(let age=1200;age<4900;age+=2){
+for(let age=1200;age<5400*EXIT_TIME_SCALE;age+=2){
  const p=exitPose(age),before=exitPose(age-1),after=exitPose(age+1);
  for(const [x,z,index]of [[.66,-.405,0],[.66,.405,1],[-.67,-.43,-1],[-.67,.43,-1]]){
   const a=wheelPoint(before,x,z),b=wheelPoint(after,x,z),dx=b[0]-a[0],dz=b[1]-a[1];
@@ -49,4 +49,15 @@ for(let age=1200;age<4900;age+=2){
  for(let i=0;i<2;i++)maxReturnRate=Math.max(maxReturnRate,(after.steeringPair[i]-before.steeringPair[i])/.002);
 }
 assert(maxReturnRate<1.2,'Unwinding must stay below 69 degrees per second through the whole visible turn');
+const fractions=[.6,.3,.1,.02],crossings=[];
+let returning=false,lastAngle=exitPose(0).steering;
+for(let age=2;age<EXIT_COMPLETE_MS;age+=2){
+ const angle=exitPose(age).steering;
+ if(angle-lastAngle>1e-6)returning=true;
+ if(returning&&crossings.length<fractions.length&&-angle<maxSteering*fractions[crossings.length])crossings.push(age);
+ lastAngle=angle;
+}
+assert.equal(crossings.length,4,'The long unwind must actually reach near-straight steering before the cut');
+const rates=fractions.slice(1).map((f,i)=>(fractions[i]-f)*maxSteering/((crossings[i+1]-crossings[i])/1000));
+assert(rates[0]>rates[1]&&rates[1]>rates[2],'Average return rate must progressively fall through the last 60%, 30%, 10% and 2% of steering');
 console.log('Smooth steering, continuous heading, fence/street clearance and camera restoration passed.');
