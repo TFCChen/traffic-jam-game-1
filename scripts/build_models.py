@@ -768,15 +768,47 @@ def passenger_car(kind,paint):
             for x in (-.5,.02):cube('Roof rail foot',(x,side*.245,.816),(.064,.045,.025),rubber,.006)
         else:
             strut('Hatch lamp signature',(-.865,side*.365,.398),(-.893,side*.315,.324),.025,redlamp)
-        cube('Inset lamp housing',(.897,side*.25,.378 if suv else .321),(.035,.17,.073),rubber,.018)
         height=.378 if suv else .321
+        if kind in ('compact','jeep'):
+            # A true opening and sealed optical assembly instead of bulbs on
+            # an intact bumper. Keep the authored lens locations for lighting.
+            cutter=cube('Passenger lamp pocket cutter',(.912,side*.25,height),(.16,.167,.075),rubber,.010)
+            objects.remove(cutter);bpy.context.view_layer.objects.active=body
+            mod=body.modifiers.new('Recessed passenger headlamp','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter
+            bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
+            housing=cube('Inset lamp perimeter',(.882,side*.25,height),(.066,.185,.091),rubber,.012)
+            cutter=cube('Lamp perimeter opening',(.891,side*.25,height),(.11,.156,.065),rubber,.008)
+            objects.remove(cutter);bpy.context.view_layer.objects.active=housing
+            mod=housing.modifiers.new('Hollow lamp bezel','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter
+            bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
+            cube('Inset reflector backing',(.835,side*.25,height),(.009,.158,.069),panel_glass,.004)
+        else:
+            cube('Inset lamp housing',(.897,side*.25,height),(.035,.17,.073),rubber,.018)
+        lamp_x=-.032 if kind in ('compact','jeep') else 0
         for offset in (-.038,.038):
-            cylinder('Projector satin barrel',(.923,side*.25+offset,height),.026,.017,chrome,'X')
-            cylinder('Clear projector optic',(.934,side*.25+offset,height),.019,.008,lamp,'X')
-        cube('Separate daylight blade',(.938,side*.25,height+.036),(.012,.133,.010),lamp,.003)
-    cube('Front grille',(.94,0,.325 if suv else .272),(.024,.25,.11 if suv else .065),rubber,.015)
+            cylinder('Projector satin barrel',(.923+lamp_x,side*.25+offset,height),.026,.017,chrome,'X')
+            cylinder('Clear projector optic',(.934+lamp_x,side*.25+offset,height),.019,.008,lamp,'X')
+        cube('Separate daylight blade',(.938+lamp_x,side*.25,height+.036),(.012,.133,.010),lamp,.003)
+        if kind in ('compact','jeep'):
+            cube('Sealed passenger headlamp cover',(.919,side*.25,height),(.006,.177,.086),lamp_crystal,.003)
+    grille_z=.325 if suv else .272;grille_h=.11 if suv else .065
+    if kind in ('compact','jeep'):
+        cutter=cube('Passenger intake pocket cutter',(.924,0,grille_z),(.17,.247,grille_h),rubber,.009)
+        objects.remove(cutter);bpy.context.view_layer.objects.active=body
+        mod=body.modifiers.new('Functional recessed intake','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter
+        bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
+        frame=cube('Intake perimeter frame',(.918,0,grille_z),(.037,.273,grille_h+.025),rubber,.012)
+        cutter=cube('Intake frame opening',(.918,0,grille_z),(.10,.243,grille_h-.005),rubber,.009)
+        objects.remove(cutter);bpy.context.view_layer.objects.active=frame
+        mod=frame.modifiers.new('Open intake surround','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter
+        bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
+        cube('Recessed radiator shadow',(.847,0,grille_z),(.009,.243,grille_h),rubber,.003)
+        if not suv:
+            for offset in (-.018,0,.018):cube('Inset horizontal intake slat',(.917,0,grille_z+offset),(.031,.231,.006),bed,.002)
+    else:
+        cube('Front grille',(.94,0,grille_z),(.024,.25,grille_h),rubber,.015)
     if suv:
-        for y in (-.08,-.04,0,.04,.08):cube('Grille satin bar',(.955,y,.326),(.014,.013,.078),chrome,.004)
+        for y in (-.08,-.04,0,.04,.08):cube('Grille satin bar',(.930,y,.326),(.014,.013,.078),chrome,.004)
         cube('Front skid plate',(.923,0,.169),(.055,.42,.053),chrome,.01)
         cylinder('Rear mounted spare tyre',(-.978,0,.46),.165,.075,rubber,'X')
         cylinder('Spare wheel cover',(-1.021,0,.46),.119,.020,paint,'X')

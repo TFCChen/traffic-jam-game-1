@@ -93,6 +93,18 @@ for(const [name,length]of Object.entries(lengths)){
       assert.ok(heights[1]>=Math.max(heights[0],heights[2])-.006,`${name}: bonnet centre must not sink between raised fenders`);
     }
   }
+  if(['compact','jeep'].includes(name)){
+    const h=name==='jeep'?.378:.321;
+    for(const z of [-.25,.25]){
+      const hits=new Raycaster(new Vector3(2,h,z),new Vector3(-1,0,0)).intersectObject(asset.scene,true);
+      assert.equal(hits[0]?.object.material.name,'Lamp crystal','Passenger headlights must be enclosed by a transparent cover');
+      const backing=hits.find(hit=>hit.object.material.name==='Smoked panel glass');
+      assert(backing&&hits[0].point.x-backing.point.x>.06,'Passenger headlights need depth between the cover and reflector backing');
+    }
+    const grille=new Raycaster(new Vector3(2,name==='jeep'?.325:.281,.02),new Vector3(-1,0,0)).intersectObject(asset.scene,true)[0];
+    assert.equal(grille?.object.material.name,'Tyre rubber','Intake gaps must expose the dark radiator instead of intact coachwork');
+    assert(grille.point.x<.90,'Radiator must be recessed behind the grille surround');
+  }
   if(name==='compact'||name==='jeep'){
     asset.scene.updateMatrixWorld(true);
     for(const x of [.45,.65,.85]){

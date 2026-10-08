@@ -42,7 +42,7 @@ npm run preview
 
 `scripts/build_models.py` 可用 Blender 4.5 重新產生全部素材：
 
-目前主角跑車的新版可編輯來源是 `art/racer.blend`。打磨單一車型時，使用單車模式，只更新對應 GLB 與該車型的 .blend，保留其他車型和已翻新的街景：
+目前主角跑車、小轎車與越野車的新版可編輯來源分別是 `art/racer.blend`、`art/compact.blend`、`art/jeep.blend`。打磨單一車型時，使用單車模式（`--vehicle racer`、`--vehicle compact` 或 `--vehicle jeep`），只更新對應 GLB 與該車型的 .blend，保留其他車型和已翻新的街景：
 
 ```powershell
 & 'C:/Program Files/Blender Foundation/Blender 4.5/blender.exe' --background --python-exit-code 1 --python scripts/build_models.py -- --vehicle racer

@@ -21,6 +21,14 @@ assert(turned&&maxSteering>.4&&maxSteering<.6);
 const end=exitPose(EXIT_COMPLETE_MS);
 assert.equal(end.visible,false,'Departing car is removed behind the cinematic cut');
 assert.equal(end.follow,0);assert.equal(end.complete,true);assert.equal(Math.abs(end.steering),0);
+assert.equal(exitPose(5250).follow,1,'Camera must not move back while the departing car is still visible');
+assert(exitPose(5470).follow<1&&exitSceneFade(5470)===1,'Camera restoration belongs behind the opaque cut');
+for(let age=300;age<5300;age+=17){
+ const a=exitPose(age),b=exitPose(age+1);
+ assert(Number.isFinite(a.speed)&&a.speed>=0);
+ assert(Math.abs(a.speed-b.speed)<.02,'Speed must vary continuously instead of jumping at animation phases');
+ assert(Math.abs(a.bank)<=.016,'Cornering load must remain subtle');
+}
 assert(exitPose(5350).z>exitPose(5200).z,'Car keeps moving as the shot fades');
 assert.equal(exitSceneFade(5400),1);assert.equal(exitSceneFade(6300),0);assert.equal(exitSceneFade(5400,true),0);
 const turning=exitPose(3000);

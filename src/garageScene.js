@@ -22,7 +22,7 @@ import {
 import { SCENE_THEMES } from "./sceneThemes.js";
 import { QUALITY } from "./gamePreferences.js";
 import { configureVehicleGlass, prepareVehicleGlass, VEHICLE_MIRROR } from "./vehicleGlass.js";
-import { createVehicleLights, createExhaustSmoke, collectLampAnchors, vehicleLampState } from './vehicleEffects.js';
+import { createVehicleLights, createExhaustSmoke, collectLampAnchors, vehicleLampState, movingShadowRefreshDue } from './vehicleEffects.js';
 import { quadDistance, snapDragDelta } from "./pointerHelpers.js";
 import {
   stepSuspension,
@@ -378,26 +378,6 @@ export function createGarageScene(canvas, getProps, callbacks) {
     instancePose.updateMatrix();
     skidMarks.setMatrixAt(i, instancePose.matrix);
   }
-  const confettiGeometry = new THREE.PlaneGeometry(0.055, 0.12);
-  ownedGeometries.add(confettiGeometry);
-  const confettiMaterial = new THREE.MeshBasicMaterial({
-    side: THREE.DoubleSide,
-  });
-  ownedMaterials.add(confettiMaterial);
-  const celebration = new THREE.InstancedMesh(
-    confettiGeometry,
-    confettiMaterial,
-    24,
-  );
-  celebration.visible = false;
-  celebration.frustumCulled = false;
-  celebration.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-  scene.add(celebration);
-  for (let i = 0; i < 24; i++)
-    celebration.setColorAt(
-      i,
-      accentColour.set(["#ffc857", "#72d2bd", "#ee7f75", "#8a9df1"][i % 4]),
-    );
   // A bounded particle pool: never allocate meshes in the animation loop.
   const vehicleLights = createVehicleLights(scene);
   const exhaustSmoke = createExhaustSmoke(scene);
@@ -1517,7 +1497,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       group.position.y = height;
       const travelled = exiting ? exit.distance-(item.exitDistance??0) :
           (car.dir === "H" ? group.position.x : group.position.z) - oldAxis,
-        velocity = travelled / Math.max(0.008, dt);
+        velocity = exiting ? exit.speed : travelled / Math.max(0.008, dt);
       item.wheelAngle.value -= travelled / 0.19;
       item.wheelSteering.value=exit?.steeringPair??[0,0];
       if(exiting)item.exitDistance=exit.distance;
@@ -1720,32 +1700,10 @@ export function createGarageScene(canvas, getProps, callbacks) {
     const litCar=lightOwner?.group.visible?lightOwner:null;
     // Headlight refreshes must not force an unchanged sun map to render again.
     if (renderer.shadowMap.needsUpdate) sun.shadow.needsUpdate = true;
-    if (vehicleLights.update(props.editor?null:litCar,settings,quality,now,shadowChanged||renderer.shadowMap.needsUpdate)) renderer.shadowMap.needsUpdate=true;
+    const synchronousExitShadows = props.won && groups.get('target')?.group.visible && !reduced.matches;
+    if (vehicleLights.update(props.editor?null:litCar,settings,quality,now,shadowChanged||renderer.shadowMap.needsUpdate,synchronousExitShadows)) renderer.shadowMap.needsUpdate=true;
     atmosphere?.update(dt, settings, quality, reduced.matches, props.editor);
     groundSurface?.update(dt,settings,quality,reduced.matches,props.editor);
-    celebration.visible =
-      quality.decor &&
-      props.won &&
-      props.perfect &&
-      !reduced.matches &&
-      victoryAge > 800 &&
-      victoryAge < 1850;
-    if (celebration.visible) {
-      const t = (victoryAge - 800) / 1050;
-      for (let i = 0; i < 24; i++) {
-        const angle = i * 2.4;
-        instancePose.position.set(
-          6.8 + Math.cos(angle) * t * 0.9,
-          0.25 + Math.sin(t * Math.PI) * (0.7 + (i % 3) * 0.2),
-          2.5 + Math.sin(angle) * t * 0.8,
-        );
-        instancePose.rotation.set(t * 8 + i, t * 5 + i, t * 9);
-        instancePose.scale.set(1, 1, 1);
-        instancePose.updateMatrix();
-        celebration.setMatrixAt(i, instancePose.matrix);
-      }
-      celebration.instanceMatrix.needsUpdate = true;
-    }
     exhaustSmoke.update(dt,now,camera,!reduced.matches&&quality.decor&&!props.editor,settings.theme);
     particles.forEach((p) => {
       if (reduced.matches || !quality.decor) {
@@ -1759,7 +1717,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       p.mesh.position.addScaledVector(p.velocity, dt);
       p.mesh.material.opacity = Math.max(0, p.life / p.duration) * 0.38;
     });
-    if (shadowChanged && now - lastShadow >= 1000 / 30 - 0.5) {
+    if (movingShadowRefreshDue(shadowChanged,now,lastShadow,synchronousExitShadows,30)) {
       sun.shadow.needsUpdate = true;
       renderer.shadowMap.needsUpdate = true;
     }
@@ -1926,7 +1884,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
           scale: marker.scale.toArray(),
           opacity: ringMaterial.opacity,
         },
-        celebration: celebration.visible,
+        celebration: false,
         editorPlacement: { legalStarts: availablePlacements.length, preview: previewPlacement },
         cameraFollow,
         exit:{age:escapeStart==null?null:performance.now()-escapeStart,fade:exitFadeMaterial.opacity,complete:groups.get('target')?.exitReported??false,visible:groups.get('target')?.group.visible??false,yaw:groups.get('target')?.group.rotation.y??0},
@@ -1970,7 +1928,6 @@ export function createGarageScene(canvas, getProps, callbacks) {
       atmosphere?.dispose();
       groundSurface?.dispose();
       rainSurfaces.dispose();
-      celebration.dispose();
       placementCells.dispose(); placementGhost.dispose();
       lightPools.dispose();
       vegetationShadows?.dispose();

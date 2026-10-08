@@ -93,6 +93,11 @@ function beamMaterial() {
         beamColor=vec4(tint,power*edge*fade*lit);}`
   });
 }
+// A moving receiver must never sample its own depth at an older pose.
+// Idle/drag shadow caching remains bounded; cinematic motion opts into sync.
+export function movingShadowRefreshDue(changed,now,last,continuous=false,hz=20) {
+  return changed && (continuous || now-last>=1000/hz-.5);
+}
 export function createVehicleLights(scene) {
   const headGeometry = new THREE.CylinderGeometry(.006, 1, 1, 12, 1, true);
   const heads = [-1, 1].map(side => {
@@ -144,7 +149,7 @@ export function createVehicleLights(scene) {
     out.addScaledVector(forward, kind === 'head' ? .012 : -.012);
   }
   return {
-    update(item, settings, quality, now, castersChanged = false) {
+    update(item, settings, quality, now, castersChanged = false, continuous = false) {
       owner = item?.car.id ?? null;
       const state = vehicleLampState(item, settings.theme, now);
       if (item) {
@@ -204,7 +209,7 @@ export function createVehicleLights(scene) {
         old.position.copy(light.position);
         old.target.copy(light.target.position);
       }
-      if (heads[0].light.intensity > 0 && settings.shadows && pendingShadow && now - lastShadow >= 1000 / 20) {
+      if (heads[0].light.intensity > 0 && settings.shadows && movingShadowRefreshDue(pendingShadow,now,lastShadow,continuous)) {
         for (const {
           light
         } of heads) light.shadow.needsUpdate = true;

@@ -1,0 +1,4931 @@
+{
+  "theme": "sunset",
+  "samples": [
+    {
+      "exit": {
+        "age": 3.599999964237213,
+        "fade": 0,
+        "complete": false,
+        "visible": true,
+        "yaw": 0
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          5,
+          0.038,
+          2.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -21.05263157894737,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -0.00025471939127930804,
+        "compression": -0.003356545288875995,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              5.823151038131971,
+              0.38805102624312426,
+              2.197478199546987
+            ],
+            [
+              5.841374617337134,
+              0.38592505496764773,
+              2.804060852011809
+            ]
+          ],
+          "tail": [
+            [
+              4.041524523925923,
+              0.3211523090548438,
+              2.2504117751822754
+            ],
+            [
+              4.041524523925923,
+              0.3211523090548438,
+              2.770411756108789
+            ]
+          ],
+          "reverse": [
+            [
+              4.035513061748086,
+              0.2761538388310193,
+              2.2754117751822753
+            ],
+            [
+              4.035513061748086,
+              0.2761538388310193,
+              2.7454117561087887
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 17,
+      "frames": 45
+    },
+    {
+      "exit": {
+        "age": 462.80000001192093,
+        "fade": 0,
+        "complete": false,
+        "visible": true,
+        "yaw": 0
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          5.025130103348246,
+          0.038,
+          2.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -21.184895280780246,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -0.0016106250118822808,
+        "compression": -0.0006486874138530441,
+        "wheelTilt": 0,
+        "velocity": 0.3368231934587334,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              5.84850194998375,
+              0.38964261913017423,
+              2.197478199546987
+            ],
+            [
+              5.866722629821554,
+              0.3874919403630747,
+              2.804060852011809
+            ]
+          ],
+          "tail": [
+            [
+              4.0667863652010015,
+              0.3251596801020822,
+              2.2504117751822754
+            ],
+            [
+              4.0667863652010015,
+              0.3251596801020822,
+              2.770411756108789
+            ]
+          ],
+          "reverse": [
+            [
+              4.06071389488914,
+              0.28016940221550357,
+              2.2754117751822753
+            ],
+            [
+              4.06071389488914,
+              0.28016940221550357,
+              2.7454117561087887
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 44,
+      "frames": 72
+    },
+    {
+      "exit": {
+        "age": 581.5,
+        "fade": 0,
+        "complete": false,
+        "visible": true,
+        "yaw": 0
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          5.087740330408861,
+          0.038,
+          2.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -21.51442279162559,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": 0.002539901464256565,
+        "compression": -0.0009700193686078273,
+        "wheelTilt": 0,
+        "velocity": 0.798929347935802,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              5.91043149256398,
+              0.3927373061290529,
+              2.197478199546987
+            ],
+            [
+              5.928660941882903,
+              0.3906622710836073,
+              2.804060852011809
+            ]
+          ],
+          "tail": [
+            [
+              4.128998891827872,
+              0.320859886044443,
+              2.2504117751822754
+            ],
+            [
+              4.128998891827872,
+              0.320859886044443,
+              2.770411756108789
+            ]
+          ],
+          "reverse": [
+            [
+              4.123113206624163,
+              0.2758447918017022,
+              2.2754117751822753
+            ],
+            [
+              4.123113206624163,
+              0.2758447918017022,
+              2.7454117561087887
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 51,
+      "frames": 79
+    },
+    {
+      "exit": {
+        "age": 705.8000000119209,
+        "fade": 0,
+        "complete": false,
+        "visible": true,
+        "yaw": 0
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          5.246669260307978,
+          0.038,
+          2.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -22.350890843726205,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": 0.005552200423353789,
+        "compression": -0.0016791087054539855,
+        "wheelTilt": 0,
+        "velocity": 1.4849475741610316,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              6.068857530689512,
+              0.39450565296678564,
+              2.197478199546987
+            ],
+            [
+              6.087093147918441,
+              0.39248553980387263,
+              2.804060852011809
+            ]
+          ],
+          "tail": [
+            [
+              4.2876495282082905,
+              0.3172623595343506,
+              2.2504117751822754
+            ],
+            [
+              4.2876495282082905,
+              0.3172623595343506,
+              2.770411756108789
+            ]
+          ],
+          "reverse": [
+            [
+              4.281899468424215,
+              0.2722297401071004,
+              2.2754117751822753
+            ],
+            [
+              4.281899468424215,
+              0.2722297401071004,
+              2.7454117561087887
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 59,
+      "frames": 87
+    },
+    {
+      "exit": {
+        "age": 830.5999999642372,
+        "fade": 0,
+        "complete": false,
+        "visible": true,
+        "yaw": 0
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          5.478127414694382,
+          0.038,
+          2.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -23.569091656286222,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": 0.006466150894627453,
+        "compression": -0.0018983540359012174,
+        "wheelTilt": 0,
+        "velocity": 2.0471880400827756,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              6.300161629165971,
+              0.3950377766460954,
+              2.197478199546987
+            ],
+            [
+              6.318399085061866,
+              0.3930343307755282,
+              2.804060852011809
+            ]
+          ],
+          "tail": [
+            [
+              4.519024967145694,
+              0.3161665798078639,
+              2.2504117751822754
+            ],
+            [
+              4.519024967145694,
+              0.3161665798078639,
+              2.770411756108789
+            ]
+          ],
+          "reverse": [
+            [
+              4.513316067341164,
+              0.27112872391949094,
+              2.2754117751822753
+            ],
+            [
+              4.513316067341164,
+              0.27112872391949094,
+              2.7454117561087887
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 66,
+      "frames": 94
+    },
+    {
+      "exit": {
+        "age": 1356.0999999642372,
+        "fade": 0,
+        "complete": false,
+        "visible": true,
+        "yaw": 0
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          6.733380520817109,
+          0.038,
+          2.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -30.175686951669,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -0.00023601184097838535,
+        "compression": -0.0001952463768829793,
+        "wheelTilt": 0,
+        "velocity": 2.3816019252931864,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              7.556528501849676,
+              0.39122772426597346,
+              2.197478199546987
+            ],
+            [
+              7.574752120823365,
+              0.38910209390939354,
+              2.804060852011809
+            ]
+          ],
+          "tail": [
+            [
+              5.7749032394665045,
+              0.3242956772217694,
+              2.2504117751822754
+            ],
+            [
+              5.7749032394665045,
+              0.3242956772217694,
+              2.770411756108789
+            ]
+          ],
+          "reverse": [
+            [
+              5.768892619100864,
+              0.27929709454608787,
+              2.2754117751822753
+            ],
+            [
+              5.768892619100864,
+              0.27929709454608787,
+              2.7454117561087887
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 95,
+      "frames": 123
+    },
+    {
+      "exit": {
+        "age": 1481.800000011921,
+        "fade": 0,
+        "complete": false,
+        "visible": true,
+        "yaw": 0
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          7.010516959472545,
+          0.038,
+          2.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -31.63429978669761,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -0.0017390641984099502,
+        "compression": -0.0005498657740443391,
+        "wheelTilt": 0,
+        "velocity": 2.1195269729678,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              7.833909643879957,
+              0.38963568622145267,
+              2.197478199546987
+            ],
+            [
+              7.852130047336041,
+              0.3874826672228027,
+              2.804060852011809
+            ]
+          ],
+          "tail": [
+            [
+              6.052185791657144,
+              0.32538158982494,
+              2.2504117751822754
+            ],
+            [
+              6.052185791657144,
+              0.32538158982494,
+              2.770411756108789
+            ]
+          ],
+          "reverse": [
+            [
+              6.0461075428806925,
+              0.2803920922526002,
+              2.2754117751822753
+            ],
+            [
+              6.0461075428806925,
+              0.2803920922526002,
+              2.7454117561087887
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 102,
+      "frames": 130
+    },
+    {
+      "exit": {
+        "age": 1608.199999988079,
+        "fade": 0,
+        "complete": false,
+        "visible": true,
+        "yaw": -0.0033618984001986003
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          7.275418295586496,
+          0.038,
+          2.5024109845226588
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -33.02853806568127,
+        "wheelSteering": -0.07090139534658399,
+        "wheelSteeringPair": [
+          -0.06779809991858075,
+          -0.07090139534658399
+        ],
+        "tilt": -0.0027933944580319663,
+        "compression": -0.0008321022592683303,
+        "wheelTilt": 0,
+        "velocity": 1.8279668688627737,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              8.0999948176895,
+              0.3879784388956461,
+              2.2023899272432788
+            ],
+            [
+              8.116173563295167,
+              0.3868219246861418,
+              2.8090331861110256
+            ]
+          ],
+          "tail": [
+            [
+              6.318035972087993,
+              0.32569162692654785,
+              2.2494373878574008
+            ],
+            [
+              6.316287790727973,
+              0.32656235679155754,
+              2.769433701166456
+            ]
+          ],
+          "reverse": [
+            [
+              6.311826027114741,
+              0.28075048791806234,
+              2.2744919404985704
+            ],
+            [
+              6.310245940122427,
+              0.2815374937545193,
+              2.7444886064631637
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 110,
+      "frames": 138
+    },
+    {
+      "exit": {
+        "age": 1733.3999999761581,
+        "fade": 0,
+        "complete": false,
+        "visible": true,
+        "yaw": -0.02916346728973901
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          7.469151463946165,
+          0.038,
+          2.5223197197229075
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -34.04978802975035,
+        "wheelSteering": -0.30934453101578696,
+        "wheelSteeringPair": [
+          -0.2589214767602162,
+          -0.30934453101578696
+        ],
+        "tilt": -0.0026676114342010795,
+        "compression": -0.000772878462391241,
+        "wheelTilt": 0,
+        "velocity": 1.6838325631218787,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              8.30119328292972,
+              0.3868517997879808,
+              2.2429893072772513
+            ],
+            [
+              8.301716322297809,
+              0.38827784206810767,
+              2.849847466732494
+            ]
+          ],
+          "tail": [
+            [
+              6.518613890455573,
+              0.3245670462068533,
+              2.244314792396374
+            ],
+            [
+              6.5034513040288555,
+              0.3276497079019164,
+              2.7640845234632194
+            ]
+          ],
+          "reverse": [
+            [
+              6.5117597252759944,
+              0.279732207316147,
+              2.269391826537904
+            ],
+            [
+              6.498055079905323,
+              0.28251845922196644,
+              2.739183697015145
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 117,
+      "frames": 145
+    },
+    {
+      "exit": {
+        "age": 2278.800000011921,
+        "fade": 0,
+        "complete": false,
+        "visible": true,
+        "yaw": -0.394743137036027
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          8.326335336210835,
+          0.038,
+          2.9469992814906862
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -38.959913310022976,
+        "wheelSteering": -0.5938368430683221,
+        "wheelSteeringPair": [
+          -0.43933194456224706,
+          -0.5938368430683221
+        ],
+        "tilt": -0.000017586638442781234,
+        "compression": -0.000004086703388583857,
+        "wheelTilt": 0,
+        "velocity": 1.6514971820582591,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.203167074393244,
+              0.38828856181793425,
+              2.982657036707389
+            ],
+            [
+              8.986720468652239,
+              0.39278458529345306,
+              3.5495871783476747
+            ]
+          ],
+          "tail": [
+            [
+              7.537932608284681,
+              0.3215488526377781,
+              2.347038895040834
+            ],
+            [
+              7.337967548351474,
+              0.3272218212124718,
+              2.8270199075788653
+            ]
+          ],
+          "reverse": [
+            [
+              7.522590803290446,
+              0.27682437503571444,
+              2.3682603493439998
+            ],
+            [
+              7.341853153671459,
+              0.2819518658428335,
+              2.802089339752836
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 150,
+      "frames": 178
+    },
+    {
+      "exit": {
+        "age": 2401.599999964237,
+        "fade": 0,
+        "complete": false,
+        "visible": true,
+        "yaw": -0.47855661902548596
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          8.484819532494729,
+          0.038,
+          3.0829137645662565
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -40.018609924626666,
+        "wheelSteering": -0.5938368430683221,
+        "wheelSteeringPair": [
+          -0.43933194456224706,
+          -0.5938368430683221
+        ],
+        "tilt": -0.000004182504167285697,
+        "compression": -9.57895656406027e-7,
+        "wheelTilt": 0,
+        "velocity": 1.6514971820583702,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.35558633917213,
+              0.38830272306171154,
+              3.191849543910876
+            ],
+            [
+              9.092438773821874,
+              0.39279899080093794,
+              3.738669692854584
+            ]
+          ],
+          "tail": [
+            [
+              7.749409037234361,
+              0.32153913436106984,
+              2.4190575046941865
+            ],
+            [
+              7.509964116314562,
+              0.32721210293576436,
+              2.8806134898539892
+            ]
+          ],
+          "reverse": [
+            [
+              7.732345059207098,
+              0.2768145763324217,
+              2.4389203988193424
+            ],
+            [
+              7.51592368922024,
+              0.2819420671395414,
+              2.85609599916284
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 157,
+      "frames": 185
+    },
+    {
+      "exit": {
+        "age": 2548.300000011921,
+        "fade": 0,
+        "complete": false,
+        "visible": true,
+        "yaw": -0.5797108214265569
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          8.66010455835643,
+          0.038,
+          3.2638866870278607
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -41.296347218113866,
+        "wheelSteering": -0.5938368430683221,
+        "wheelSteeringPair": [
+          -0.43933194456224706,
+          -0.5938368430683221
+        ],
+        "tilt": -7.257099394958752e-7,
+        "compression": -1.6482127027095395e-7,
+        "wheelTilt": 0,
+        "velocity": 1.6514971820583702,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.515419258461865,
+              0.3883063612879404,
+              3.460196868198908
+            ],
+            [
+              9.198397962414152,
+              0.39280269202043305,
+              3.9776487149695448
+            ]
+          ],
+          "tail": [
+            [
+              7.995490372247223,
+              0.3215366142960895,
+              2.5291606607128982
+            ],
+            [
+              7.710660680256536,
+              0.32720958287078405,
+              2.964177722621527
+            ]
+          ],
+          "reverse": [
+            [
+              7.976507960081908,
+              0.2768120355275286,
+              2.547198955597973
+            ],
+            [
+              7.7190657394795075,
+              0.2819395263346483,
+              2.9403874523272786
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 166,
+      "frames": 194
+    },
+    {
+      "exit": {
+        "age": 2666.399999976158,
+        "fade": 0,
+        "complete": false,
+        "visible": true,
+        "yaw": -0.6593955604608701
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          8.784768054632213,
+          0.038,
+          3.4183619683863986
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -42.30289129012623,
+        "wheelSteering": -0.5938368430683221,
+        "wheelSteeringPair": [
+          -0.43933194456224706,
+          -0.5938368430683221
+        ],
+        "tilt": -1.8154498511970463e-7,
+        "compression": -4.111059265232697e-8,
+        "wheelTilt": 0,
+        "velocity": 1.6514971820582591,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.621742269888102,
+              0.3883069328792862,
+              3.6821325938321734
+            ],
+            [
+              9.264537537404328,
+              0.39280327352811484,
+              4.172707455475261
+            ]
+          ],
+          "tail": [
+            [
+              8.18074725665641,
+              0.3215362164557074,
+              2.6330637299425614
+            ],
+            [
+              7.862193823413341,
+              0.3272091850304011,
+              3.0440278497391433
+            ]
+          ],
+          "reverse": [
+            [
+              8.160389241688522,
+              0.2768116344223398,
+              2.649533793345835
+            ],
+            [
+              7.872465947380793,
+              0.28193912522945885,
+              3.020982130943315
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 173,
+      "frames": 201
+    },
+    {
+      "exit": {
+        "age": 3324.099999964237,
+        "fade": 0,
+        "complete": false,
+        "visible": true,
+        "yaw": -1.1072265463290243
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.231186797933878,
+          0.038,
+          4.430906871162839
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -47.959703743197664,
+        "wheelSteering": -0.5938368430683221,
+        "wheelSteeringPair": [
+          -0.43933194456224706,
+          -0.5938368430683221
+        ],
+        "tilt": -7.387713609091738e-11,
+        "compression": -1.6687151660477184e-11,
+        "wheelTilt": 0,
+        "velocity": 1.6514971820584812,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.871409964137424,
+              0.38830712333487694,
+              5.031086035596353
+            ],
+            [
+              9.33700522903359,
+              0.39280346729066185,
+              5.318610808187866
+            ]
+          ],
+          "tail": [
+            [
+              9.026772542916,
+              0.32153608361990305,
+              3.461500200784899
+            ],
+            [
+              8.561680002711494,
+              0.3272090521945983,
+              3.6940012258089734
+            ]
+          ],
+          "reverse": [
+            [
+              9.001290341703527,
+              0.276811500497773,
+              3.4675308795127657
+            ],
+            [
+              8.580918239697484,
+              0.28193899130489336,
+              3.6776760359260554
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 212,
+      "frames": 240
+    },
+    {
+      "exit": {
+        "age": 3463,
+        "fade": 0,
+        "complete": false,
+        "visible": true,
+        "yaw": -1.2010178237934197
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.264812157022858,
+          0.038,
+          4.662094870140606
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -49.14443566906374,
+        "wheelSteering": -0.5938368430683221,
+        "wheelSteeringPair": [
+          -0.43933194456224706,
+          -0.5938368430683221
+        ],
+        "tilt": -1.4395845988510461e-11,
+        "compression": -3.2518432391270835e-12,
+        "wheelTilt": 0,
+        "velocity": 1.6514971820582591,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.846012352287184,
+              0.3883071233972699,
+              5.319595489891507
+            ],
+            [
+              9.287028625964744,
+              0.39280346735413685,
+              5.555807490987709
+            ]
+          ],
+          "tail": [
+            [
+              9.15208498408542,
+              0.3215360835763297,
+              3.6778047377507934
+            ],
+            [
+              8.667261997749653,
+              0.32720905215102336,
+              3.865726182805887
+            ]
+          ],
+          "reverse": [
+            [
+              9.126149985552034,
+              0.2768115004538426,
+              3.681422404898703
+            ],
+            [
+              8.687944595766169,
+              0.28193899126096167,
+              3.8512744795741805
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 220,
+      "frames": 248
+    },
+    {
+      "exit": {
+        "age": 3598.699999988079,
+        "fade": 0,
+        "complete": false,
+        "visible": true,
+        "yaw": -1.296254161292115
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.27665021321913,
+          0.038,
+          4.899016162577629
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -50.34742098483676,
+        "wheelSteering": -0.5938368430683221,
+        "wheelSteeringPair": [
+          -0.43933194456224706,
+          -0.5938368430683221
+        ],
+        "tilt": -2.734701285527526e-12,
+        "compression": -6.176448241745902e-13,
+        "wheelTilt": 0,
+        "velocity": 1.651497182058037,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.792693331995617,
+              0.3883071234095028,
+              5.608805026612892
+            ],
+            [
+              9.213780695227676,
+              0.3928034673665805,
+              5.790791495191137
+            ]
+          ],
+          "tail": [
+            [
+              9.258032417681743,
+              0.32153608356778807,
+              3.9084668917536876
+            ],
+            [
+              8.75753652424776,
+              0.3272090521424803,
+              4.049433761077099
+            ]
+          ],
+          "reverse": [
+            [
+              9.231870932189763,
+              0.276811500445231,
+              3.909601943015253
+            ],
+            [
+              8.779499645658863,
+              0.28193899125234867,
+              4.0370143051757745
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 228,
+      "frames": 256
+    },
+    {
+      "exit": {
+        "age": 3722.399999976158,
+        "fade": 0,
+        "complete": false,
+        "visible": true,
+        "yaw": -1.3787602080124444
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.268646270299035,
+          0.038,
+          5.104387919730531
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -51.38960262761989,
+        "wheelSteering": -0.5938368430683221,
+        "wheelSteeringPair": [
+          -0.43933194456224706,
+          -0.5938368430683221
+        ],
+        "tilt": -6.472033753627085e-13,
+        "compression": -1.4604983888943934e-13,
+        "wheelTilt": 0,
+        "velocity": 1.6514971820582591,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.724438513609853,
+              0.3883071234116916,
+              5.854290688682729
+            ],
+            [
+              9.132497205458913,
+              0.3928034673688091,
+              5.987948473565406
+            ]
+          ],
+          "tail": [
+            [
+              9.331725420900696,
+              0.3215360835662582,
+              4.115673855402395
+            ],
+            [
+              8.821314632932332,
+              0.32720905214095186,
+              4.214914094804753
+            ]
+          ],
+          "reverse": [
+            [
+              9.305559386384415,
+              0.27681150044368863,
+              4.114649012875396
+            ],
+            [
+              8.844226560597793,
+              0.2819389912508077,
+              4.204346921215977
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 235,
+      "frames": 263
+    },
+    {
+      "exit": {
+        "age": 4485.899999976158,
+        "fade": 0,
+        "complete": false,
+        "visible": true,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          6.4334457789509285
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -58.335275198643096,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": 0.0016629822012965115,
+        "compression": -0.0005057463037671239,
+        "wheelTilt": 0,
+        "velocity": 2.032194291826661,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.492176476033617,
+              0.39248008184537686,
+              7.256281936709105
+            ],
+            [
+              8.885593823569067,
+              0.390389061844557,
+              7.274509559390003
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371744,
+              0.32216486176021564,
+              5.474786990237185
+            ],
+            [
+              8.91924291944523,
+              0.32216486176021564,
+              5.474786990244945
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371654,
+              0.277154946095563,
+              5.468861832698651
+            ],
+            [
+              8.944242919445141,
+              0.277154946095563,
+              5.468861832705665
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 281,
+      "frames": 309
+    },
+    {
+      "exit": {
+        "age": 4633.099999964237,
+        "fade": 0,
+        "complete": false,
+        "visible": true,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          6.76092020337599
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -60.05882480088027,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": 0.002544680320027091,
+        "compression": -0.0007549585939944647,
+        "wheelTilt": 0,
+        "velocity": 2.3317214129470187,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.492176476033613,
+              0.39295629842418167,
+              7.5836105736257915
+            ],
+            [
+              8.885593823569064,
+              0.3908813504946689,
+              7.601840032869852
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371742,
+              0.3210703651309288,
+              5.80217831640264
+            ],
+            [
+              8.919242919445228,
+              0.3210703651309288,
+              5.8021783164104
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371654,
+              0.2760552427618613,
+              5.796292846320013
+            ],
+            [
+              8.94424291944514,
+              0.2760552427618613,
+              5.796292846327027
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 290,
+      "frames": 318
+    },
+    {
+      "exit": {
+        "age": 4766.099999964237,
+        "fade": 0,
+        "complete": false,
+        "visible": true,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          7.052886524695877
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -61.595489649932304,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": 0.0025845615151879344,
+        "compression": -0.0007525054382676311,
+        "wheelTilt": 0,
+        "velocity": 2.523042920016705,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.492176476033613,
+              0.39299156132333013,
+              7.87557028552845
+            ],
+            [
+              8.885593823569064,
+              0.3909173404080887,
+              7.893799827509416
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371742,
+              0.3210345824397476,
+              6.094140896618925
+            ],
+            [
+              8.919242919445228,
+              0.3210345824397476,
+              6.094140896626685
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371654,
+              0.2760192253868976,
+              6.088257221797859
+            ],
+            [
+              8.94424291944514,
+              0.2760192253868976,
+              6.088257221804873
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 297,
+      "frames": 325
+    },
+    {
+      "exit": {
+        "age": 4903.5,
+        "fade": 0.024846832,
+        "complete": false,
+        "visible": true,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          7.439228442062178
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -63.628868162386524,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": 0.001770421533275448,
+        "compression": -0.0004991910043872227,
+        "wheelTilt": 0,
+        "velocity": 2.6254477443914404,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.492176476033615,
+              0.39257504115947184,
+              8.262046869104141
+            ],
+            [
+              8.885593823569065,
+              0.3904859795343202,
+              8.280274716337628
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371744,
+              0.32206841885353754,
+              6.480559487534564
+            ],
+            [
+              8.91924291944523,
+              0.32206841885353754,
+              6.480559487542324
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371654,
+              0.2770578668536978,
+              6.474639165865491
+            ],
+            [
+              8.944242919445141,
+              0.2770578668536978,
+              6.474639165872505
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 306,
+      "frames": 334
+    },
+    {
+      "exit": {
+        "age": 5631.300000011921,
+        "fade": 1,
+        "complete": false,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.364974622580654
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -73.76437437564165,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": 0.0000010293776961035951,
+        "compression": -2.3436774232443724e-7,
+        "wheelTilt": 0,
+        "velocity": 2.6320736339058293,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.49217647603362,
+              0.3916178516826113,
+              10.188083842503207
+            ],
+            [
+              8.88559382356907,
+              0.3894965411345591,
+              10.206307964835975
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371745,
+              0.3242634878993525,
+              8.406474495828137
+            ],
+            [
+              8.919242919445232,
+              0.3242634878993525,
+              8.406474495835898
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371656,
+              0.27926348172311016,
+              8.40047454215051
+            ],
+            [
+              8.944242919445141,
+              0.27926348172311016,
+              8.400474542157523
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 341,
+      "frames": 378
+    },
+    {
+      "exit": {
+        "age": 5755.899999976158,
+        "fade": 1,
+        "complete": true,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -74.47503425679612,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -0.005494873384771434,
+        "compression": -0.0017712778027031972,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 1.3,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 1,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.492176476033633,
+              0.38532063175356535,
+              10.323996013532849
+            ],
+            [
+              8.885593823569083,
+              0.383099195742457,
+              10.342208202179172
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371752,
+              0.32775878762313726,
+              8.54204340232768
+            ],
+            [
+              8.919242919445239,
+              0.32775878762313726,
+              8.54204340233544
+            ]
+          ],
+          "reverse": [
+            [
+              9.41424290037166,
+              0.28279243605258064,
+              8.535796224850737
+            ],
+            [
+              8.944242919445147,
+              0.28279243605258064,
+              8.53579622485775
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 344,
+      "frames": 385
+    },
+    {
+      "exit": {
+        "age": 5879.399999976158,
+        "fade": 0.9385683421454053,
+        "complete": true,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -74.47503425679612,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -0.008623715035414637,
+        "compression": -0.0025261412901799174,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 1.3,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 1,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.49217647603364,
+              0.38198684069907596,
+              10.32448975280055
+            ],
+            [
+              8.88559382356909,
+              0.37970843260011566,
+              10.342694901791294
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371758,
+              0.33000071677604526,
+              8.542365762332976
+            ],
+            [
+              8.919242919445244,
+              0.33000071677604526,
+              8.542365762340735
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371663,
+              0.2850541317049305,
+              8.53597792307073
+            ],
+            [
+              8.944242919445148,
+              0.2850541317049305,
+              8.535977923077745
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 347,
+      "frames": 392
+    },
+    {
+      "exit": {
+        "age": 5996.5,
+        "fade": 0.6257861434074086,
+        "complete": true,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -74.47503425679612,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -0.003926541297418623,
+        "compression": -0.001049340732552112,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.49217647603363,
+              0.38733467202542377,
+              10.323745491311449
+            ],
+            [
+              8.88559382356908,
+              0.3851418014944213,
+              10.341961141507777
+            ]
+          ],
+          "tail": [
+            [
+              9.43924290037175,
+              0.32697820637379527,
+              8.541885347659692
+            ],
+            [
+              8.919242919445237,
+              0.32697820637379527,
+              8.541885347667451
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371658,
+              0.2820021124594434,
+              8.535708700008838
+            ],
+            [
+              8.944242919445145,
+              0.2820021124594434,
+              8.535708700015851
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 350,
+      "frames": 399
+    },
+    {
+      "exit": {
+        "age": 6399.5,
+        "fade": 0,
+        "complete": true,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -74.47503425679612,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -0.000045697433168181886,
+        "compression": -0.00001053337818171518,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.49217647603362,
+              0.39156909122472433,
+              10.323116864375326
+            ],
+            [
+              8.88559382356907,
+              0.38944692912387124,
+              10.34134088756612
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371745,
+              0.32429797643794195,
+              8.541504372390618
+            ],
+            [
+              8.919242919445232,
+              0.32429797643794195,
+              8.541504372398379
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371656,
+              0.2792982506695266,
+              8.535502316012764
+            ],
+            [
+              8.944242919445141,
+              0.2792982506695266,
+              8.535502316019777
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 360,
+      "frames": 422
+    },
+    {
+      "exit": {
+        "age": 6511.199999988079,
+        "fade": 0,
+        "complete": true,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -74.47503425679612,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -0.000013867488078244487,
+        "compression": -0.000003170189742024432,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.49217647603362,
+              0.39160265409489037,
+              10.323111657227889
+            ],
+            [
+              8.88559382356907,
+              0.38948107206476945,
+              10.341335747957755
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371745,
+              0.3242748307144039,
+              8.541501307381587
+            ],
+            [
+              8.919242919445232,
+              0.3242748307144039,
+              8.541501307389346
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371656,
+              0.2792749139236593,
+              8.535500683345573
+            ],
+            [
+              8.944242919445141,
+              0.2792749139236593,
+              8.535500683352588
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 360,
+      "frames": 425
+    },
+    {
+      "exit": {
+        "age": 6635.599999964237,
+        "fade": 0,
+        "complete": true,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -74.47503425679612,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -0.000002899433061776184,
+        "compression": -6.588441840704728e-7,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.12,
+        "headLight": 1.2,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 1,
+          "park": 0.12,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 1
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.49217647603362,
+              0.39161419336454867,
+              10.323109862740699
+            ],
+            [
+              8.88559382356907,
+              0.389492811217385,
+              10.341333976739097
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371745,
+              0.3242668291877772,
+              8.54150025145683
+            ],
+            [
+              8.919242919445232,
+              0.3242668291877772,
+              8.541500251464589
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371656,
+              0.27926684658456474,
+              8.53550012098274
+            ],
+            [
+              8.944242919445141,
+              0.27926684658456474,
+              8.535500120989752
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 360,
+      "frames": 429
+    },
+    {
+      "exit": {
+        "age": 6747.5,
+        "fade": 0,
+        "complete": true,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -74.47503425679612,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -8.853136940688002e-7,
+        "compression": -2.0068038059095628e-7,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.1108,
+        "headLight": 1.1079999999999999,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 0.9233333333333333,
+          "park": 0.1108,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 0.9233333333333333
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.49217647603362,
+              0.39161630936953656,
+              10.323109533199185
+            ],
+            [
+              8.88559382356907,
+              0.3894949639279181,
+              10.341333651470263
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371745,
+              0.32426535681847796,
+              8.54150005756456
+            ],
+            [
+              8.919242919445232,
+              0.32426535681847796,
+              8.54150005757232
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371656,
+              0.2792653621303778,
+              8.53550001772582
+            ],
+            [
+              8.944242919445141,
+              0.2792653621303778,
+              8.535500017732835
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 360,
+      "frames": 432
+    },
+    {
+      "exit": {
+        "age": 7072.899999976158,
+        "fade": 0,
+        "complete": true,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -74.47503425679612,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -1.6399050898568056e-8,
+        "compression": -3.7054664336899634e-9,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.04424000000000014,
+        "headLight": 0.4424000000000014,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 0.36866666666666786,
+          "park": 0.04424000000000014,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 0.36866666666666786
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.49217647603362,
+              0.3916172215563153,
+              10.323109391030092
+            ],
+            [
+              8.88559382356907,
+              0.38949589194990086,
+              10.341333511144432
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371745,
+              0.3242647209387203,
+              8.54149997391837
+            ],
+            [
+              8.919242919445232,
+              0.3242647209387203,
+              8.541499973926129
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371656,
+              0.27926472103711464,
+              8.535499973180785
+            ],
+            [
+              8.944242919445141,
+              0.27926472103711464,
+              8.5354999731878
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 360,
+      "frames": 442
+    },
+    {
+      "exit": {
+        "age": 7200.800000011921,
+        "fade": 0,
+        "complete": true,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -74.47503425679612,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -3.3264139143044694e-9,
+        "compression": -7.51531087361812e-10,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0.017640000000000145,
+        "headLight": 0.17640000000000144,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 0.1470000000000012,
+          "park": 0.017640000000000145,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 0.1470000000000012
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.49217647603362,
+              0.3916172352704609,
+              10.323109388891185
+            ],
+            [
+              8.88559382356907,
+              0.3894959059022838,
+              10.341333509033255
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371745,
+              0.32426471136253276,
+              8.541499972659937
+            ],
+            [
+              8.919242919445232,
+              0.32426471136253276,
+              8.541499972667696
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371656,
+              0.27926471138249126,
+              8.535499972510621
+            ],
+            [
+              8.944242919445141,
+              0.27926471138249126,
+              8.535499972517634
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 360,
+      "frames": 446
+    },
+    {
+      "exit": {
+        "age": 7315.5,
+        "fade": 0,
+        "complete": true,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -74.47503425679612,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -9.708652653331566e-10,
+        "compression": -2.1928614479804764e-10,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0,
+        "headLight": 0,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 0,
+          "park": 0,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 0
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.49217647603362,
+              0.3916172377415801,
+              10.323109388505777
+            ],
+            [
+              8.88559382356907,
+              0.38949590841633075,
+              10.341333508652845
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371745,
+              0.3242647096369843,
+              8.541499972433181
+            ],
+            [
+              8.919242919445232,
+              0.3242647096369843,
+              8.54149997244094
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371656,
+              0.27926470964280947,
+              8.535499972389864
+            ],
+            [
+              8.944242919445141,
+              0.27926470964280947,
+              8.535499972396877
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 360,
+      "frames": 449
+    },
+    {
+      "exit": {
+        "age": 7431.800000011921,
+        "fade": 0,
+        "complete": true,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -74.47503425679612,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -1.9876162814488022e-10,
+        "compression": -4.489406069119184e-11,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0,
+        "headLight": 0,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 0,
+          "park": 0,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 0
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.49217647603362,
+              0.3916172385514979,
+              10.323109388379446
+            ],
+            [
+              8.88559382356907,
+              0.38949590924031946,
+              10.341333508528152
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371745,
+              0.324264709071315,
+              8.541499972358853
+            ],
+            [
+              8.919242919445232,
+              0.324264709071315,
+              8.541499972366614
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371656,
+              0.27926470907250756,
+              8.535499972350284
+            ],
+            [
+              8.944242919445141,
+              0.27926470907250756,
+              8.535499972357297
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 360,
+      "frames": 453
+    },
+    {
+      "exit": {
+        "age": 7766.899999976158,
+        "fade": 0,
+        "complete": true,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -74.47503425679612,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -3.611716203405368e-12,
+        "compression": -8.157641229189494e-13,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0,
+        "headLight": 0,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 0,
+          "park": 0,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 0
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.49217647603362,
+              0.3916172387562059,
+              10.323109388347518
+            ],
+            [
+              8.88559382356907,
+              0.3894959094485839,
+              10.341333508496637
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371745,
+              0.3242647089283421,
+              8.541499972340068
+            ],
+            [
+              8.919242919445232,
+              0.3242647089283421,
+              8.541499972347829
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371656,
+              0.27926470892836375,
+              8.53549997234028
+            ],
+            [
+              8.944242919445141,
+              0.27926470892836375,
+              8.535499972347292
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 360,
+      "frames": 463
+    },
+    {
+      "exit": {
+        "age": 7880.199999988079,
+        "fade": 0,
+        "complete": true,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -74.47503425679612,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -1.1472131215388329e-12,
+        "compression": -2.5915380952312717e-13,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0,
+        "headLight": 0,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 0,
+          "park": 0,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 0
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.49217647603362,
+              0.39161723875879106,
+              10.323109388347113
+            ],
+            [
+              8.88559382356907,
+              0.38949590945121404,
+              10.341333508496238
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371745,
+              0.32426470892653647,
+              8.54149997233983
+            ],
+            [
+              8.919242919445232,
+              0.32426470892653647,
+              8.54149997234759
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371656,
+              0.27926470892654337,
+              8.535499972340151
+            ],
+            [
+              8.944242919445141,
+              0.27926470892654337,
+              8.535499972347166
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 360,
+      "frames": 466
+    },
+    {
+      "exit": {
+        "age": 7997.300000011921,
+        "fade": 0,
+        "complete": true,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -74.47503425679612,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -2.2807022139166276e-13,
+        "compression": -5.1514348342607263e-14,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0,
+        "headLight": 0,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 0,
+          "park": 0,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 0
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.49217647603362,
+              0.3916172387597553,
+              10.323109388346964
+            ],
+            [
+              8.88559382356907,
+              0.3894959094521949,
+              10.341333508496092
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371745,
+              0.3242647089258631,
+              8.541499972339743
+            ],
+            [
+              8.919242919445232,
+              0.3242647089258631,
+              8.541499972347502
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371656,
+              0.27926470892586447,
+              8.535499972340105
+            ],
+            [
+              8.944242919445141,
+              0.27926470892586447,
+              8.535499972347118
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 360,
+      "frames": 470
+    },
+    {
+      "exit": {
+        "age": 8120.800000011921,
+        "fade": 0,
+        "complete": true,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -74.47503425679612,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -6.578039631716004e-14,
+        "compression": -1.484923295436147e-14,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0,
+        "headLight": 0,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 0,
+          "park": 0,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 0
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.49217647603362,
+              0.39161723875992555,
+              10.323109388346937
+            ],
+            [
+              8.88559382356907,
+              0.38949590945236817,
+              10.341333508496064
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371745,
+              0.3242647089257442,
+              8.541499972339727
+            ],
+            [
+              8.919242919445232,
+              0.3242647089257442,
+              8.541499972347486
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371656,
+              0.2792647089257446,
+              8.535499972340096
+            ],
+            [
+              8.944242919445141,
+              0.2792647089257446,
+              8.535499972347111
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 360,
+      "frames": 473
+    },
+    {
+      "exit": {
+        "age": 8435.699999988079,
+        "fade": 0,
+        "complete": true,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -74.47503425679612,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -1.228487203130801e-15,
+        "compression": -2.7755575615628914e-16,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0,
+        "headLight": 0,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 0,
+          "park": 0,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 0
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.49217647603362,
+              0.3916172387599932,
+              10.323109388346927
+            ],
+            [
+              8.88559382356907,
+              0.38949590945243706,
+              10.341333508496055
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371745,
+              0.3242647089256969,
+              8.54149997233972
+            ],
+            [
+              8.919242919445232,
+              0.3242647089256969,
+              8.54149997234748
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371656,
+              0.27926470892569694,
+              8.535499972340093
+            ],
+            [
+              8.944242919445141,
+              0.27926470892569694,
+              8.535499972347107
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 360,
+      "frames": 483
+    },
+    {
+      "exit": {
+        "age": 8559.300000011921,
+        "fade": 0,
+        "complete": true,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -74.47503425679612,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -2.5421113749154443e-16,
+        "compression": -5.551115123125783e-17,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0,
+        "headLight": 0,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 0,
+          "park": 0,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 0
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.49217647603362,
+              0.3916172387599942,
+              10.323109388346927
+            ],
+            [
+              8.88559382356907,
+              0.38949590945243806,
+              10.341333508496053
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371745,
+              0.32426470892569614,
+              8.54149997233972
+            ],
+            [
+              8.919242919445232,
+              0.32426470892569614,
+              8.54149997234748
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371656,
+              0.2792647089256962,
+              8.535499972340093
+            ],
+            [
+              8.944242919445141,
+              0.2792647089256962,
+              8.535499972347107
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 360,
+      "frames": 487
+    },
+    {
+      "exit": {
+        "age": 8670.399999976158,
+        "fade": 0,
+        "complete": true,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -74.47503425679612,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -7.438275071739987e-17,
+        "compression": -2.7755575615628914e-17,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0,
+        "headLight": 0,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 0,
+          "park": 0,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 0
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.49217647603362,
+              0.39161723875999443,
+              10.323109388346927
+            ],
+            [
+              8.88559382356907,
+              0.3894959094524383,
+              10.341333508496053
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371745,
+              0.32426470892569603,
+              8.54149997233972
+            ],
+            [
+              8.919242919445232,
+              0.32426470892569603,
+              8.54149997234748
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371656,
+              0.27926470892569605,
+              8.535499972340093
+            ],
+            [
+              8.944242919445141,
+              0.27926470892569605,
+              8.535499972347107
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 360,
+      "frames": 490
+    },
+    {
+      "exit": {
+        "age": 8787.199999988079,
+        "fade": 0,
+        "complete": true,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -74.47503425679612,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -2.3004945179124052e-17,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0,
+        "headLight": 0,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 0,
+          "park": 0,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 0
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.49217647603362,
+              0.39161723875999455,
+              10.323109388346927
+            ],
+            [
+              8.88559382356907,
+              0.3894959094524384,
+              10.341333508496053
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371745,
+              0.32426470892569603,
+              8.54149997233972
+            ],
+            [
+              8.919242919445232,
+              0.32426470892569603,
+              8.54149997234748
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371656,
+              0.27926470892569605,
+              8.535499972340093
+            ],
+            [
+              8.944242919445141,
+              0.27926470892569605,
+              8.535499972347107
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 360,
+      "frames": 493
+    },
+    {
+      "exit": {
+        "age": 9086.699999988079,
+        "fade": 0,
+        "complete": true,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -74.47503425679612,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -6.270799261046443e-19,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0,
+        "headLight": 0,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 0,
+          "park": 0,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 0
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.49217647603362,
+              0.39161723875999455,
+              10.323109388346927
+            ],
+            [
+              8.88559382356907,
+              0.3894959094524384,
+              10.341333508496053
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371745,
+              0.32426470892569603,
+              8.54149997233972
+            ],
+            [
+              8.919242919445232,
+              0.32426470892569603,
+              8.54149997234748
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371656,
+              0.279264708925696,
+              8.535499972340093
+            ],
+            [
+              8.944242919445141,
+              0.279264708925696,
+              8.535499972347107
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 360,
+      "frames": 502
+    },
+    {
+      "exit": {
+        "age": 9211.800000011921,
+        "fade": 0,
+        "complete": true,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -74.47503425679612,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -1.254531535415201e-19,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0,
+        "headLight": 0,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 0,
+          "park": 0,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 0
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.49217647603362,
+              0.39161723875999455,
+              10.323109388346927
+            ],
+            [
+              8.88559382356907,
+              0.3894959094524384,
+              10.341333508496053
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371745,
+              0.32426470892569603,
+              8.54149997233972
+            ],
+            [
+              8.919242919445232,
+              0.32426470892569603,
+              8.54149997234748
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371656,
+              0.279264708925696,
+              8.535499972340093
+            ],
+            [
+              8.944242919445141,
+              0.279264708925696,
+              8.535499972347107
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 360,
+      "frames": 506
+    },
+    {
+      "exit": {
+        "age": 9323.300000011921,
+        "fade": 0,
+        "complete": true,
+        "visible": false,
+        "yaw": -1.5707963267799736
+      },
+      "car": {
+        "id": "target",
+        "model": "racer",
+        "dir": "H",
+        "len": 2,
+        "position": [
+          9.189654675568324,
+          0.038,
+          9.5
+        ],
+        "finish": [
+          {
+            "physical": true,
+            "roughness": 0.27,
+            "metalness": 0.16,
+            "clearcoat": 0.92,
+            "clearcoatRoughness": 0.11
+          }
+        ],
+        "glazing": [
+          {
+            "physical": true,
+            "transmission": 0,
+            "opacity": 0.34,
+            "roughness": 0.003,
+            "ior": 1.48,
+            "optics": "thin-sheet"
+          }
+        ],
+        "wheelAngle": -74.47503425679612,
+        "wheelSteering": 0,
+        "wheelSteeringPair": [
+          0,
+          0
+        ],
+        "tilt": -3.760556839740585e-20,
+        "compression": 0,
+        "wheelTilt": 0,
+        "velocity": 0,
+        "tailLight": 0,
+        "headLight": 0,
+        "headColor": "ffd994",
+        "reverseLight": 0,
+        "tailColor": "ef3426",
+        "lampState": {
+          "head": 0,
+          "park": 0,
+          "brake": 0,
+          "reverse": 0,
+          "activity": 0
+        },
+        "lampAnchors": {
+          "head": [
+            "Headlamp",
+            "Headlamp"
+          ],
+          "tail": [
+            "Tail_lamp",
+            "Tail_lamp"
+          ]
+        },
+        "lampOrigins": {
+          "head": [
+            [
+              9.49217647603362,
+              0.39161723875999455,
+              10.323109388346927
+            ],
+            [
+              8.88559382356907,
+              0.3894959094524384,
+              10.341333508496053
+            ]
+          ],
+          "tail": [
+            [
+              9.439242900371745,
+              0.32426470892569603,
+              8.54149997233972
+            ],
+            [
+              8.919242919445232,
+              0.32426470892569603,
+              8.54149997234748
+            ]
+          ],
+          "reverse": [
+            [
+              9.414242900371656,
+              0.279264708925696,
+              8.535499972340093
+            ],
+            [
+              8.944242919445141,
+              0.279264708925696,
+              8.535499972347107
+            ]
+          ]
+        }
+      },
+      "shadowUpdates": 360,
+      "frames": 509
+    }
+  ],
+  "performance": {
+    "frames": 513,
+    "shadowUpdates": 360,
+    "renderedSceneKey": "custom-exit-play",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "inputToSubmission": {
+      "count": 12,
+      "median": 7.100000023841858,
+      "p95": 13.699999988079071
+    },
+    "pixelRatio": 1,
+    "shadowSize": 2048,
+    "shadows": true,
+    "inView": true,
+    "profile": {
+      "cpuMs": {
+        "samples": 300,
+        "median": 1.199999988079071,
+        "p95": 2.099999964237213
+      },
+      "gpuMs": {
+        "samples": 300,
+        "median": 13.937968,
+        "p95": 14.692082
+      },
+      "drawCalls": {
+        "samples": 300,
+        "median": 53,
+        "p95": 55
+      },
+      "triangles": {
+        "samples": 300,
+        "median": 325720,
+        "p95": 370350
+      },
+      "gpuTimer": true
+    }
+  },
+  "errors": []
+}

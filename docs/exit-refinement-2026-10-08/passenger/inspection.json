@@ -1,0 +1,25 @@
+{
+  "results": [
+    {
+      "kind": "compact",
+      "theme": "day",
+      "drag": true
+    },
+    {
+      "kind": "compact",
+      "theme": "sunset",
+      "drag": true
+    },
+    {
+      "kind": "jeep",
+      "theme": "day",
+      "drag": true
+    },
+    {
+      "kind": "jeep",
+      "theme": "sunset",
+      "drag": true
+    }
+  ],
+  "errors": []
+}

@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { createVehicleLights, createExhaustSmoke, collectLampAnchors, vehicleLampState, vehicleLightPower } from './vehicleEffects.js';
+import { createVehicleLights, createExhaustSmoke, collectLampAnchors, vehicleLampState, vehicleLightPower, movingShadowRefreshDue } from './vehicleEffects.js';
+assert.equal(movingShadowRefreshDue(true,116,100),false,'Normal updates retain their shadow budget');
+assert.equal(movingShadowRefreshDue(true,116,100,true),true,'Cinematic motion cannot reuse depth from the preceding pose');
+assert.equal(movingShadowRefreshDue(false,116,100,true),false,'Unchanged shadows remain cached even in cinematic mode');
 const scene = new THREE.Scene(),
   lighting = createVehicleLights(scene),
   group = new THREE.Group();
@@ -68,6 +71,8 @@ assert.equal(lighting.update(car, settings, {
 assert(lighting.update(car, settings, {
   decor: true
 }, 400, true), 'Obstacle movement invalidates shadows');
+group.position.x+=.1;
+assert(lighting.update(car,settings,{decor:true},416,true,true),'Moving lens depth must refresh on the immediately following frame during exit');
 group.rotation.y = -Math.PI / 2;
 assert(lighting.update(car, settings, {
   decor: true
