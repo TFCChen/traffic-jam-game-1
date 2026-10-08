@@ -226,7 +226,7 @@ export function prepareWheels(root, length, frontHalfTrack = .43) {
   root.updateMatrixWorld(true);
   const wheels = [];
   root.traverse((mesh) => {
-    if (mesh.isMesh && ["Rolling wheels", "Wheel brake calipers"].includes(mesh.material.name))
+    if (mesh.isMesh && ["Rolling wheels", "Wheel brake calipers", "Wheel suspension links"].includes(mesh.material.name))
       wheels.push(mesh);
   });
   const prepared = [];
@@ -251,8 +251,15 @@ export function prepareWheels(root, length, frontHalfTrack = .43) {
       );
     }
     geometry.setAttribute("wheelPivot", new THREE.BufferAttribute(pivots, 3));
-    const fixed = mesh.material.name === 'Wheel brake calipers';
+    const linkage = mesh.material.name === 'Wheel suspension links';
+    const fixed = mesh.material.name !== 'Rolling wheels';
     geometry.setAttribute('wheelSpin', new THREE.BufferAttribute(new Float32Array(position.count).fill(fixed ? 0 : 1), 1));
+    // Body attachments stay pinned while hub attachments follow the knuckle.
+    // A separate weight avoids swinging the whole arm or letting a static link
+    // cut across the rotating rim when the front wheel reaches full lock.
+    const steerWeights=new Float32Array(position.count);
+    for(let i=0;i<position.count;i++)steerWeights[i]=linkage?THREE.MathUtils.clamp((Math.abs(position.getZ(i))-.23)/.115,0,1):1;
+    geometry.setAttribute('wheelSteerWeight',new THREE.BufferAttribute(steerWeights,1));
     const colors = geometry.getAttribute('color');
     const surfaces = new Float32Array(position.count * 2);
     for (let i = 0; i < position.count; i++) {
@@ -265,7 +272,7 @@ export function prepareWheels(root, length, frontHalfTrack = .43) {
     geometry.computeBoundingBox();
     geometry.computeBoundingSphere();
     for (const name of Object.keys(geometry.attributes))
-      if (!['position', 'normal', 'color', 'wheelPivot', 'wheelSpin', 'wheelSurface'].includes(name)) geometry.deleteAttribute(name);
+      if (!['position', 'normal', 'color', 'wheelPivot', 'wheelSpin', 'wheelSteerWeight', 'wheelSurface'].includes(name)) geometry.deleteAttribute(name);
     prepared.push(geometry);
   }
   if (!prepared.length) return;
@@ -299,7 +306,7 @@ export function rollingMaterial(
     shader.uniforms.tyreCompression = compression;
     shader.uniforms.wheelSteering = steering;
     shader.vertexShader =
-      "uniform float wheelAngle;\nuniform vec2 wheelSteering;\nuniform vec2 tyreCompression;\nattribute vec3 wheelPivot;\nattribute float wheelSpin;\n" +
+      "uniform float wheelAngle;\nuniform vec2 wheelSteering;\nuniform vec2 tyreCompression;\nattribute vec3 wheelPivot;\nattribute float wheelSpin;\nattribute float wheelSteerWeight;\n" +
       shader.vertexShader;
     shader.vertexShader = shader.vertexShader.replace(
       "#include <begin_vertex>",
@@ -310,7 +317,8 @@ export function rollingMaterial(
       float steer=wheelPivot.x>0.0?(wheelPivot.z<0.0?wheelSteering.x:wheelSteering.y):0.0;
       float sc=cos(steer),ss=sin(steer);
       vec2 axleOffset=transformed.xz-wheelPivot.xz;
-      transformed.xz=vec2(sc*axleOffset.x+ss*axleOffset.y,-ss*axleOffset.x+sc*axleOffset.y)+wheelPivot.xz;
+      vec2 steeredOffset=vec2(sc*axleOffset.x+ss*axleOffset.y,-ss*axleOffset.x+sc*axleOffset.y);
+      transformed.xz=mix(axleOffset,steeredOffset,wheelSteerWeight)+wheelPivot.xz;
       float load=wheelPivot.x>0.0?tyreCompression.x:tyreCompression.y;
       transformed.y-=load*smoothstep(0.0,0.38,transformed.y);
       transformed.x+=(transformed.x-wheelPivot.x)*load*2.0*(1.0-smoothstep(0.0,0.15,transformed.y));`,
@@ -322,10 +330,10 @@ export function rollingMaterial(
       objectNormal.xy=vec2(nc*objectNormal.x-ns*objectNormal.y,ns*objectNormal.x+nc*objectNormal.y);
       float normalSteer=wheelPivot.x>0.0?(wheelPivot.z<0.0?wheelSteering.x:wheelSteering.y):0.0;
       float normalSC=cos(normalSteer),normalSS=sin(normalSteer);
-      objectNormal.xz=vec2(normalSC*objectNormal.x+normalSS*objectNormal.z,-normalSS*objectNormal.x+normalSC*objectNormal.z);`,
+      objectNormal.xz=mix(objectNormal.xz,vec2(normalSC*objectNormal.x+normalSS*objectNormal.z,-normalSS*objectNormal.x+normalSC*objectNormal.z),wheelSteerWeight);`,
     );
   };
-  material.customProgramCacheKey = () => "rolling-wheels-ackermann-v6";
+  material.customProgramCacheKey = () => "rolling-wheels-ackermann-linkage-v7";
   return material;
 }
 
@@ -341,6 +349,7 @@ export function createWheelShadowGeometry(length, frontHalfTrack = .43) {
     for(let i=0;i<count;i++)pivots.set([x,.19,z],i*3);
     geometry.setAttribute('wheelPivot',new THREE.BufferAttribute(pivots,3));
     geometry.setAttribute('wheelSpin',new THREE.BufferAttribute(new Float32Array(count),1));
+    geometry.setAttribute('wheelSteerWeight',new THREE.BufferAttribute(new Float32Array(count).fill(1),1));
     geometry.setAttribute('wheelSurface',new THREE.BufferAttribute(new Float32Array(count*2),2));
     pieces.push(geometry);
   }

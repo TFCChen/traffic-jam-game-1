@@ -184,7 +184,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
   let atmosphere;
   let groundSurface;
   const rainSurfaces=createRainSurfaces();
-  const stats = { frames: 0, shadowUpdates: 0, renderedSceneKey: null };
+  const stats = { frames: 0, shadowUpdates: 0, movingFrames: 0, movingShadowFrames: 0, renderedSceneKey: null };
   const inputSamples = [];
   let pendingInputAt = null,
     measuring = false;
@@ -1701,8 +1701,10 @@ export function createGarageScene(canvas, getProps, callbacks) {
     const litCar=lightOwner?.group.visible?lightOwner:null;
     // Headlight refreshes must not force an unchanged sun map to render again.
     if (renderer.shadowMap.needsUpdate) sun.shadow.needsUpdate = true;
-    const synchronousExitShadows = props.won && groups.get('target')?.group.visible && !reduced.matches;
-    if (vehicleLights.update(props.editor?null:litCar,settings,quality,now,shadowChanged||renderer.shadowMap.needsUpdate,synchronousExitShadows)) renderer.shadowMap.needsUpdate=true;
+    // Every rendered moving pose needs matching depth, including native drag
+    // and settling after release. Only unchanged poses may reuse cached maps.
+    const synchronousMovingShadows = shadowChanged;
+    if (vehicleLights.update(props.editor?null:litCar,settings,quality,now,shadowChanged||renderer.shadowMap.needsUpdate,synchronousMovingShadows)) renderer.shadowMap.needsUpdate=true;
     atmosphere?.update(dt, settings, quality, reduced.matches, props.editor);
     groundSurface?.update(dt,settings,quality,reduced.matches,props.editor);
     exhaustSmoke.update(dt,now,camera,!reduced.matches&&quality.decor&&!props.editor,settings.theme);
@@ -1718,13 +1720,17 @@ export function createGarageScene(canvas, getProps, callbacks) {
       p.mesh.position.addScaledVector(p.velocity, dt);
       p.mesh.material.opacity = Math.max(0, p.life / p.duration) * 0.38;
     });
-    if (movingShadowRefreshDue(shadowChanged,now,lastShadow,synchronousExitShadows,30)) {
+    if (movingShadowRefreshDue(shadowChanged,now,lastShadow,synchronousMovingShadows,30)) {
       sun.shadow.needsUpdate = true;
       renderer.shadowMap.needsUpdate = true;
     }
     if (renderer.shadowMap.needsUpdate) {
       lastShadow = now;
       stats.shadowUpdates++;
+    }
+    if(shadowChanged&&renderer.shadowMap.enabled){
+      stats.movingFrames++;
+      if(sun.shadow.needsUpdate&&renderer.shadowMap.needsUpdate)stats.movingShadowFrames++;
     }
     // Camera and vehicle motion must not change the optical clarity of windows.
     renderer.transmissionResolutionScale = 1;

@@ -62,6 +62,8 @@ caliper_material = mat('Wheel brake calipers', 'ffffff', .32, .35)
 caliper_colour=caliper_material.node_tree.nodes.new('ShaderNodeVertexColor')
 caliper_colour.layer_name='Col'
 caliper_material.node_tree.links.new(caliper_colour.outputs['Color'],caliper_material.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
+suspension_material = caliper_material.copy()
+suspension_material.name = 'Wheel suspension links'
 foliage=mat('Garden foliage','688a68',.95)
 leaf_light=mat('Sunlit foliage','7b966d',.95)
 leaf_dark=mat('Shaded foliage','526e58',.95)
@@ -172,9 +174,12 @@ def detailed_wheel(kind,x,y):
     if sport:
         # Visible load path into the chassis, rather than a wheel in an empty
         # opening. Arms stay on the body; the upright turns but does not spin.
-        strut('Lower wishbone leading arm',(x-.12,side*.22,.13),(x,side*.345,.17),.013,rubber)
-        strut('Lower wishbone trailing arm',(x+.12,side*.22,.13),(x,side*.345,.17),.013,rubber)
-        strut('Upper suspension link',(x-.04,side*.23,.30),(x,side*.345,.24),.010,bed)
+        for name,a,b,width,material in [
+            ('Lower wishbone leading arm',(x-.12,side*.22,.13),(x,side*.345,.17),.013,rubber),
+            ('Lower wishbone trailing arm',(x+.12,side*.22,.13),(x,side*.345,.17),.013,rubber),
+            ('Upper suspension link',(x-.04,side*.23,.30),(x,side*.345,.24),.010,bed)]:
+            arm=strut(name,a,b,width,material);wheel_colourize(arm,material)
+            arm.data.materials.clear();arm.data.materials.append(suspension_material)
         cylinder('Steering upright',(x,side*.352,.19),.031,.050,bed,'Y')
         upright=objects[-1];wheel_colourize(upright,bed)
         upright.data.materials.clear();upright.data.materials.append(caliper_material)

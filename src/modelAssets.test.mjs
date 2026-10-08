@@ -172,6 +172,26 @@ for(const [name,length]of Object.entries(lengths)){
   assert.equal(rollingBatches.length,1,`${name}: brakes must share the wheel draw call`);
   const spin=rollingBatches[0].geometry.getAttribute('wheelSpin');
   const wheelGeometry=rollingBatches[0].geometry;
+  const steerWeights=wheelGeometry.getAttribute('wheelSteerWeight');
+  assert.equal(steerWeights.count,spin.count,'Visible and shadow wheel geometry require the same steering layout');
+  if(name==='racer'){
+    const positions=wheelGeometry.getAttribute('position'),pivots=wheelGeometry.getAttribute('wheelPivot');
+    let checked=0;
+    for(let i=0;i<positions.count;i++){
+      const w=steerWeights.getX(i);
+      if(pivots.getX(i)<=0||w>=1)continue;
+      assert.equal(spin.getX(i),0,'Suspension links must not roll with the tyre');
+      const dx=positions.getX(i)-pivots.getX(i),dz=positions.getZ(i)-pivots.getZ(i),side=Math.sign(pivots.getZ(i));
+      for(const angle of[-.70,0,.70]){
+        const c=Math.cos(angle),s=Math.sin(angle);
+        const tx=dx+(c*dx+s*dz-dx)*w,tz=dz+(-s*dx+c*dz-dz)*w;
+        const axleDepth=side*(s*tx+c*tz);
+        assert(axleDepth<-.027,'Pinned and articulated link vertices must stay behind the alloy barrel across both full-lock directions');
+      }
+      checked++;
+    }
+    assert(checked>50,'Authored suspension attachments must survive batching');
+  }
   const visibleVertices=Array.from(wheelGeometry.index.array.slice(0,wheelGeometry.drawRange.count)).reduce((max,v)=>Math.max(max,v),0)+1;
   const visibleSpin=Array.from(spin.array.slice(0,visibleVertices));
   assert.ok(spin&&visibleSpin.some(v=>v===1));
