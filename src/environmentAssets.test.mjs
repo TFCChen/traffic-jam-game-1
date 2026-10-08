@@ -80,3 +80,12 @@ const {sceneryTile,sceneryAtlasData}=await import('./sceneryAtlas.js');
 for(const [name,tile]of [['Oiled oak',0],['Limestone paver 0',1],['Graphite powdercoat',3],['Cafe brick 0',4],['Linen canvas',5],['Mulched earth',6]])assert.equal(sceneryTile(name),tile,'Authored material families must not share the same generic tile');
 const atlas=sceneryAtlasData();assert.equal(atlas.length,1024*512*4);assert.deepEqual(atlas,sceneryAtlasData(),'Scenery detail must remain stable across reloads');
 assert(atlas.every((v,i)=>i%4!==3||v===255),'Scenery surfaces must remain opaque');
+
+// Incremental facade detail must face the back observer, not remain a plain box.
+const backFace=new Raycaster(new Vector3(-2.12,.58,1.14),new Vector3(1,0,0)).intersectObject(scene,true)[0];
+assert(backFace?.object.material.name.startsWith('Cafe brick'),'The cafe back must have authored masonry');
+const soilHit=new Raycaster(new Vector3(-.68,2,5.6),new Vector3(0,-1,0)).intersectObject(scene,true).find(h=>h.object.material.name==='Mulched earth');
+const lipHit=new Raycaster(new Vector3(-.46,2,5.6),new Vector3(0,-1,0)).intersectObject(scene,true).find(h=>h.object.material.name==='Honed warm limestone');
+assert(soilHit&&lipHit&&soilHit.point.y<lipHit.point.y-.01,'Soil must sit inside the planter instead of above its lip');
+
+assert(!new Raycaster(new Vector3(-.68,2,5.6),new Vector3(0,-1,0)).intersectObject(scene,true).some(h=>h.object.material.name==='Honed warm limestone'&&h.point.y>soilHit.point.y),'The planting cavity must be genuinely open');

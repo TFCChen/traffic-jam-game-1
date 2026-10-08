@@ -1,0 +1,637 @@
+{
+  "reports": [
+    {
+      "name": "day-normal",
+      "settings": {
+        "pitch": 55,
+        "yaw": 25,
+        "zoom": 0.85,
+        "panX": 0,
+        "panY": 0,
+        "focusX": 0,
+        "focusZ": 0,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "day",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "lighting": {
+        "sunPosition": [
+          -2.142300877492314,
+          9,
+          9.128355544951823
+        ],
+        "sunColor": "fff0d6",
+        "sunIntensity": 3.06,
+        "skyColor": "e3edf6",
+        "ambientIntensity": 0.88
+      },
+      "calls": 100
+    },
+    {
+      "name": "day-cafe",
+      "settings": {
+        "pitch": 35,
+        "yaw": 70,
+        "zoom": 2.8,
+        "panX": 0,
+        "panY": 0,
+        "focusX": -3.3,
+        "focusZ": -1.9,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "day",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "lighting": {
+        "sunPosition": [
+          -2.142300877492314,
+          9,
+          9.128355544951823
+        ],
+        "sunColor": "fff0d6",
+        "sunIntensity": 3.06,
+        "skyColor": "e3edf6",
+        "ambientIntensity": 0.88
+      },
+      "calls": 79
+    },
+    {
+      "name": "day-bench",
+      "settings": {
+        "pitch": 40,
+        "yaw": 20,
+        "zoom": 3,
+        "panX": 0,
+        "panY": 0,
+        "focusX": -3.3,
+        "focusZ": 1.1,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "day",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "lighting": {
+        "sunPosition": [
+          -2.142300877492314,
+          9,
+          9.128355544951823
+        ],
+        "sunColor": "fff0d6",
+        "sunIntensity": 3.06,
+        "skyColor": "e3edf6",
+        "ambientIntensity": 0.88
+      },
+      "calls": 63
+    },
+    {
+      "name": "day-overhead",
+      "settings": {
+        "pitch": 90,
+        "yaw": 0,
+        "zoom": 0.85,
+        "panX": 0,
+        "panY": 0,
+        "focusX": 0,
+        "focusZ": 0,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "day",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "lighting": {
+        "sunPosition": [
+          -2.142300877492314,
+          9,
+          9.128355544951823
+        ],
+        "sunColor": "fff0d6",
+        "sunIntensity": 3.06,
+        "skyColor": "e3edf6",
+        "ambientIntensity": 0.88
+      },
+      "calls": 100
+    },
+    {
+      "name": "day-cafe-back",
+      "settings": {
+        "pitch": 40,
+        "yaw": -70,
+        "zoom": 3,
+        "panX": 0,
+        "panY": 0,
+        "focusX": -4.32,
+        "focusZ": -1.95,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "day",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "lighting": {
+        "sunPosition": [
+          -2.142300877492314,
+          9,
+          9.128355544951823
+        ],
+        "sunColor": "fff0d6",
+        "sunIntensity": 3.06,
+        "skyColor": "e3edf6",
+        "ambientIntensity": 0.88
+      },
+      "calls": 51
+    },
+    {
+      "name": "day-cafe-side",
+      "settings": {
+        "pitch": 40,
+        "yaw": 175,
+        "zoom": 3,
+        "panX": 0,
+        "panY": 0,
+        "focusX": -4.32,
+        "focusZ": -1.95,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "day",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "lighting": {
+        "sunPosition": [
+          -2.142300877492314,
+          9,
+          9.128355544951823
+        ],
+        "sunColor": "fff0d6",
+        "sunIntensity": 3.06,
+        "skyColor": "e3edf6",
+        "ambientIntensity": 0.88
+      },
+      "calls": 48
+    },
+    {
+      "name": "sunset-normal",
+      "settings": {
+        "pitch": 55,
+        "yaw": 25,
+        "zoom": 0.85,
+        "panX": 0,
+        "panY": 0,
+        "focusX": 0,
+        "focusZ": 0,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "sunset",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "lighting": {
+        "sunPosition": [
+          -3.1064822920221227,
+          4.6,
+          10.277422209630291
+        ],
+        "sunColor": "ffd09b",
+        "sunIntensity": 3.3600000000000003,
+        "skyColor": "bdcce9",
+        "ambientIntensity": 0.68
+      },
+      "calls": 101
+    },
+    {
+      "name": "sunset-cafe",
+      "settings": {
+        "pitch": 35,
+        "yaw": 70,
+        "zoom": 2.8,
+        "panX": 0,
+        "panY": 0,
+        "focusX": -3.3,
+        "focusZ": -1.9,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "sunset",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "lighting": {
+        "sunPosition": [
+          -3.1064822920221227,
+          4.6,
+          10.277422209630291
+        ],
+        "sunColor": "ffd09b",
+        "sunIntensity": 3.3600000000000003,
+        "skyColor": "bdcce9",
+        "ambientIntensity": 0.68
+      },
+      "calls": 80
+    },
+    {
+      "name": "sunset-bench",
+      "settings": {
+        "pitch": 40,
+        "yaw": 20,
+        "zoom": 3,
+        "panX": 0,
+        "panY": 0,
+        "focusX": -3.3,
+        "focusZ": 1.1,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "sunset",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "lighting": {
+        "sunPosition": [
+          -3.1064822920221227,
+          4.6,
+          10.277422209630291
+        ],
+        "sunColor": "ffd09b",
+        "sunIntensity": 3.3600000000000003,
+        "skyColor": "bdcce9",
+        "ambientIntensity": 0.68
+      },
+      "calls": 64
+    },
+    {
+      "name": "sunset-overhead",
+      "settings": {
+        "pitch": 90,
+        "yaw": 0,
+        "zoom": 0.85,
+        "panX": 0,
+        "panY": 0,
+        "focusX": 0,
+        "focusZ": 0,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "sunset",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "lighting": {
+        "sunPosition": [
+          -3.1064822920221227,
+          4.6,
+          10.277422209630291
+        ],
+        "sunColor": "ffd09b",
+        "sunIntensity": 3.3600000000000003,
+        "skyColor": "bdcce9",
+        "ambientIntensity": 0.68
+      },
+      "calls": 101
+    },
+    {
+      "name": "sunset-cafe-back",
+      "settings": {
+        "pitch": 40,
+        "yaw": -70,
+        "zoom": 3,
+        "panX": 0,
+        "panY": 0,
+        "focusX": -4.32,
+        "focusZ": -1.95,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "sunset",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "lighting": {
+        "sunPosition": [
+          -3.1064822920221227,
+          4.6,
+          10.277422209630291
+        ],
+        "sunColor": "ffd09b",
+        "sunIntensity": 3.3600000000000003,
+        "skyColor": "bdcce9",
+        "ambientIntensity": 0.68
+      },
+      "calls": 52
+    },
+    {
+      "name": "sunset-cafe-side",
+      "settings": {
+        "pitch": 40,
+        "yaw": 175,
+        "zoom": 3,
+        "panX": 0,
+        "panY": 0,
+        "focusX": -4.32,
+        "focusZ": -1.95,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "sunset",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "lighting": {
+        "sunPosition": [
+          -3.1064822920221227,
+          4.6,
+          10.277422209630291
+        ],
+        "sunColor": "ffd09b",
+        "sunIntensity": 3.3600000000000003,
+        "skyColor": "bdcce9",
+        "ambientIntensity": 0.68
+      },
+      "calls": 49
+    }
+  ],
+  "profiles": [
+    {
+      "name": "day",
+      "calls": 100,
+      "performance": {
+        "frames": 153,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 121,
+            "median": 1.199999988079071,
+            "p95": 3.300000011920929
+          },
+          "gpuMs": {
+            "samples": 120,
+            "median": 16.768645,
+            "p95": 20.171562
+          },
+          "drawCalls": {
+            "samples": 121,
+            "median": 100,
+            "p95": 100
+          },
+          "triangles": {
+            "samples": 121,
+            "median": 406238,
+            "p95": 406238
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "sunset",
+      "calls": 101,
+      "performance": {
+        "frames": 160,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 120,
+            "median": 1.199999988079071,
+            "p95": 3.5
+          },
+          "gpuMs": {
+            "samples": 119,
+            "median": 16.96276,
+            "p95": 20.659427
+          },
+          "drawCalls": {
+            "samples": 120,
+            "median": 101,
+            "p95": 101
+          },
+          "triangles": {
+            "samples": 120,
+            "median": 406246,
+            "p95": 406246
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "mobile-sunset",
+      "calls": 101,
+      "performance": {
+        "frames": 147,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 393,
+          "height": 844
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 2,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 109,
+            "median": 1.2000000476837158,
+            "p95": 3.600000023841858
+          },
+          "gpuMs": {
+            "samples": 108,
+            "median": 14.39052,
+            "p95": 17.711406
+          },
+          "drawCalls": {
+            "samples": 109,
+            "median": 101,
+            "p95": 101
+          },
+          "triangles": {
+            "samples": 109,
+            "median": 406246,
+            "p95": 406246
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "saver-sunset",
+      "calls": 98,
+      "performance": {
+        "frames": 3,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 393,
+          "height": 844
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 512,
+        "shadows": false,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuMs": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "drawCalls": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "triangles": {
+            "samples": 0,
+            "median": null,
+            "p95": null
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "day-orbit",
+      "calls": 100,
+      "performance": {
+        "frames": 337,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 300,
+            "median": 1.300000011920929,
+            "p95": 2
+          },
+          "gpuMs": {
+            "samples": 300,
+            "median": 13.264114,
+            "p95": 13.742395
+          },
+          "drawCalls": {
+            "samples": 300,
+            "median": 100,
+            "p95": 100
+          },
+          "triangles": {
+            "samples": 300,
+            "median": 406238,
+            "p95": 406238
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "sunset-orbit",
+      "calls": 101,
+      "performance": {
+        "frames": 371,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 300,
+            "median": 2,
+            "p95": 3.100000023841858
+          },
+          "gpuMs": {
+            "samples": 300,
+            "median": 14.461875,
+            "p95": 15.105156
+          },
+          "drawCalls": {
+            "samples": 300,
+            "median": 101,
+            "p95": 101
+          },
+          "triangles": {
+            "samples": 300,
+            "median": 406246,
+            "p95": 406246
+          },
+          "gpuTimer": true
+        }
+      }
+    }
+  ],
+  "errors": []
+}
