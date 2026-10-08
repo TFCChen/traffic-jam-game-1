@@ -222,7 +222,7 @@ export function asphaltTexture() {
 }
 
 // Keep all four wheels in one material batch. Vertex rotation avoids four extra draw calls per car.
-export function prepareWheels(root, length) {
+export function prepareWheels(root, length, frontHalfTrack = .43) {
   root.updateMatrixWorld(true);
   const wheels = [];
   root.traverse((mesh) => {
@@ -245,7 +245,7 @@ export function prepareWheels(root, length) {
         [
           x < 0 ? -length / 2 + 0.33 : length / 2 - 0.34,
           0.19,
-          z < 0 ? -0.43 : 0.43,
+          (z < 0 ? -1 : 1) * (x > 0 ? frontHalfTrack : .43),
         ],
         i * 3,
       );
@@ -272,7 +272,7 @@ export function prepareWheels(root, length) {
   let geometry = mergeGeometries(prepared);
   if (!geometry) throw Error('Wheel and stationary brake geometry could not be batched');
   prepared.forEach(g => g.dispose());
-  const visibleCount=geometry.index.count,shadow=createWheelShadowGeometry(length);
+  const visibleCount=geometry.index.count,shadow=createWheelShadowGeometry(length,frontHalfTrack);
   shadow.deleteAttribute('uv');
   const colorSize=geometry.attributes.color.itemSize;
   shadow.setAttribute('color',new THREE.BufferAttribute(new Float32Array(shadow.attributes.position.count*colorSize).fill(1),colorSize));
@@ -331,9 +331,10 @@ export function rollingMaterial(
 
 // Shadow maps cannot resolve tread grooves, spokes or brake drillings. Retain
 // the tyre silhouette and exactly the same hubs/steering in a tiny depth mesh.
-export function createWheelShadowGeometry(length) {
+export function createWheelShadowGeometry(length, frontHalfTrack = .43) {
   const pieces=[];
-  for(const x of [-length/2+.33,length/2-.34])for(const z of [-.43,.43]){
+  for(const x of [-length/2+.33,length/2-.34])for(const side of [-1,1]){
+    const z=side*(x>0?frontHalfTrack:.43);
     const geometry=new THREE.CylinderGeometry(.19,.19,.134,24,1);
     geometry.rotateX(Math.PI/2);geometry.translate(x,.19,z);
     const count=geometry.attributes.position.count,pivots=new Float32Array(count*3);

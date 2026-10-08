@@ -81,6 +81,7 @@ function assets() {
               ["schoolbus", "coach", "camper", "delivery"].includes(name)
                 ? 3
                 : 2,
+              name === 'racer' ? .405 : .43,
             );
           root.traverse((o) => {
             if (o.isMesh && o.material.name === 'Automotive glass') {

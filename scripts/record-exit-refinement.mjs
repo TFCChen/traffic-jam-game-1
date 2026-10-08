@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {connect} from './cdp-test.mjs';
 const c=await connect(process.argv[2]),out=process.argv[3],theme=process.argv[4]??'day';mkdirSync(out,{recursive:true});
+const zoom=Number(process.argv[5]??1.5),pitch=Number(process.argv[6]??35);
 const saved=await c.evaluate(`Object.fromEntries(Object.keys(localStorage).filter(k=>k.startsWith('traffic-jam-')).map(k=>[k,localStorage.getItem(k)]))`),samples=[],errors=[];
 const frames=[],frameDir='.browser-checks/exit-recording-'+Date.now();mkdirSync(frameDir,{recursive:true});
 await c.send('Page.enable');
@@ -11,13 +12,13 @@ c.onEvent('Runtime.exceptionThrown',e=>errors.push(e.exceptionDetails.exception?
 const snap=()=>c.evaluate(`document.querySelector('.garage-canvas').garageInspection.snapshot()`);
 try{
  await c.send('Emulation.setDeviceMetricsOverride',{width:1280,height:900,deviceScaleFactor:1,mobile:false});
- const time=await c.evaluate('performance.timeOrigin'),cars=[{id:'target',color:'#e53935',row:2,col:0,len:2,dir:'H'}];
- await c.evaluate(`localStorage.setItem('traffic-jam-progress-v2',JSON.stringify(Object.fromEntries(Array.from({length:40},(_,i)=>[i+1,{completed:true,stars:3,bestMoves:10}]))));localStorage.setItem('traffic-jam-tutorial-v1',JSON.stringify({schema:1,data:true}));localStorage.setItem('traffic-jam-custom-levels-v2',JSON.stringify([{id:'custom-exit',title:'出庫演出',cars:${JSON.stringify(cars)}}]));localStorage.setItem('traffic-jam-session-v1',JSON.stringify({schema:1,data:{levelId:'custom-exit',cars:${JSON.stringify(cars)},history:[],moves:0}}));localStorage.setItem('traffic-jam-scene',JSON.stringify({pitch:35,yaw:45,zoom:1.5,quality:'high',theme:'${theme}',motion:1.2}));location.reload()`);
+ const time=await c.evaluate('performance.timeOrigin'),cars=[{id:'target',color:'#e53935',row:2,col:zoom>1.5?4:0,len:2,dir:'H'}];
+ await c.evaluate(`localStorage.setItem('traffic-jam-progress-v2',JSON.stringify(Object.fromEntries(Array.from({length:40},(_,i)=>[i+1,{completed:true,stars:3,bestMoves:10}]))));localStorage.setItem('traffic-jam-tutorial-v1',JSON.stringify({schema:1,data:true}));localStorage.setItem('traffic-jam-custom-levels-v2',JSON.stringify([{id:'custom-exit',title:'出庫演出',cars:${JSON.stringify(cars)}}]));localStorage.setItem('traffic-jam-session-v1',JSON.stringify({schema:1,data:{levelId:'custom-exit',cars:${JSON.stringify(cars)},history:[],moves:0}}));localStorage.setItem('traffic-jam-scene',JSON.stringify({pitch:${pitch},yaw:45,zoom:${zoom},focusX:${zoom>1.5?2:0},focusZ:${zoom>1.5?-.5:0},quality:'high',theme:'${theme}',motion:1.2}));location.reload()`);
  await c.until(`performance.timeOrigin!==${time}&&document.querySelector('.garage-canvas')?.garageInspection?.snapshot().ready&&document.querySelector('.game-column').getAttribute('aria-busy')==='false'`);await c.sleep(500);
  assert.equal((await snap()).settings.theme,theme);
  await c.send('Page.startScreencast',{format:'jpeg',quality:90,maxWidth:1280,maxHeight:900,everyNthFrame:2});
  await c.evaluate(`document.querySelector('.garage-canvas').garageInspection.measure(true)`);
- const p=await c.evaluate(`(()=>{const a=document.querySelector('.garage-canvas').garageInspection;for(const h of [.45,.6,.8]){const from=a.project(1,h,2.5);if(a.pick(from.x,from.y)==='target')return{from,to:a.project(5,h,2.5)};}throw Error('Unpickable target')})()`);
+ const p=await c.evaluate(`(()=>{const a=document.querySelector('.garage-canvas').garageInspection,x=a.snapshot().cars[0].position[0];for(const h of [.45,.6,.8]){const from=a.project(x,h,2.5);if(a.pick(from.x,from.y)==='target')return{from,to:a.project(Math.max(5,x+1),h,2.5)};}throw Error('Unpickable target')})()`);
  await c.send('Input.dispatchMouseEvent',{type:'mousePressed',...p.from,button:'left',buttons:1,clickCount:1});
  for(let i=1;i<=12;i++){await c.send('Input.dispatchMouseEvent',{type:'mouseMoved',x:p.from.x+(p.to.x-p.from.x)*i/12,y:p.from.y+(p.to.y-p.from.y)*i/12,button:'left',buttons:1});await c.sleep(25);}
  await c.send('Input.dispatchMouseEvent',{type:'mouseReleased',...p.to,button:'left',buttons:0});

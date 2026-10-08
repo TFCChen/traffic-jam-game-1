@@ -169,6 +169,15 @@ def wheel_profile(name,x,y,profile,material,segments=48):
 def detailed_wheel(kind,x,y):
     side=1 if y>0 else -1
     sport=kind=='racer';utility=kind in ('jeep','pickup')
+    if sport:
+        # Visible load path into the chassis, rather than a wheel in an empty
+        # opening. Arms stay on the body; the upright turns but does not spin.
+        strut('Lower wishbone leading arm',(x-.12,side*.22,.13),(x,side*.345,.17),.013,rubber)
+        strut('Lower wishbone trailing arm',(x+.12,side*.22,.13),(x,side*.345,.17),.013,rubber)
+        strut('Upper suspension link',(x-.04,side*.23,.30),(x,side*.345,.24),.010,bed)
+        cylinder('Steering upright',(x,side*.352,.19),.031,.050,bed,'Y')
+        upright=objects[-1];wheel_colourize(upright,bed)
+        upright.data.materials.clear();upright.data.materials.append(caliper_material)
     commercial=kind in ('coach','schoolbus','delivery','camper')
     rim=.121 if sport else .094 if utility else .105 if commercial else .112
     tyre=[(-.055,rim),(-.066,.144),(-.061,.169),(-.045,.184),(-.034,.19),
@@ -602,12 +611,16 @@ def midengine_coupe(paint):
             vertices=[]
             for i in range(25):
                 angle=math.pi*i/24
-                for y,r in ((side*.31,.197),(side*.35,.197),(side*.35,.207),(side*.31,.207)):
+                for y,r in ((side*.22,.197),(side*.35,.197),(side*.35,.207),(side*.22,.207)):
                     vertices.append((x+math.cos(angle)*r,y,.19+math.sin(angle)*r))
             faces=[]
             for i in range(24):
                 for j in range(4):faces.append((i*4+j,i*4+(j+1)%4,(i+1)*4+(j+1)%4,(i+1)*4+j))
             surface('Recessed coupe wheel liner',vertices,faces,rubber)
+            # A dark inner wheel-house wall hides daylight through the body;
+            # keep it deep enough for the swept tyre during steering.
+            vertices=[(x,side*.235,.19)]+[(x+math.cos(i*math.pi/32)*.207,side*.235,.19+math.sin(i*math.pi/32)*.207)for i in range(33)]
+            surface('Coupe inner wheel house',vertices,[(0,i+2,i+1)if side>0 else(0,i+1,i+2)for i in range(32)],rubber)
     panel_seam(body,'Bonnet shut line',[(.33,-.275,0),(.66,-.255,0),(.87,-.20,0),(.89,0,0),(.87,.20,0),(.66,.255,0),(.33,.275,0),(.33,-.275,0)])
     for side in (-1,1):
         panel_seam(body,'Coupe door shut line',[(.23,0,.32),(.24,0,.19),(-.32,0,.18),(-.38,0,.31)],side)
@@ -1111,7 +1124,8 @@ def car(kind, length, colour):
         cube('Exhaust outlet',(-length/2+.043,.23,.15),(.06,.085,.045),rubber,.008)
     for y in (-.075,-.025,.025,.075): cube('Plate marks', (-.996 if kind=='racer' else -length/2+.035,y,.24), (.006 if kind=='racer' else .012,.025,.047), rubber, .002)
     for x in (-length/2+.33, length/2-.34):
-        for y in (-.43,.43):
+        half_track=.405 if kind=='racer' and x>0 else .43
+        for y in (-half_track,half_track):
             detailed_wheel(kind,x,y)
     for y in (-.26,.26):
         if not refined:cube('Headlight', (length/2-.065,y,.3), (.022,.15,.09), lamp, .02)

@@ -119,6 +119,10 @@ for(const [name,length]of Object.entries(lengths)){
   }
   if(name==='racer'){
     asset.scene.updateMatrixWorld(true);
+    for(const side of [-1,1]){
+      const wall=new Raycaster(new Vector3(.66,.30,side*.30),new Vector3(0,0,-side)).intersectObject(asset.scene,true)[0];
+      assert.ok(wall?.object.material.name==='Tyre rubber'&&Math.abs(Math.abs(wall.point.z)-.235)<.001,'A recessed inner wheel-house wall must cover the exposed chassis behind the front arch');
+    }
     const vent=new Raycaster(new Vector3(-.79,2,0),new Vector3(0,-1,0)).intersectObject(asset.scene,true)[0];
     const ventLip=new Raycaster(new Vector3(-.79,2,.20),new Vector3(0,-1,0)).intersectObject(asset.scene,true)[0];
     assert.equal(vent?.object.material.name,'Tyre rubber','Rear ventilation must expose a shadow floor instead of being hidden inside the body');
@@ -162,7 +166,7 @@ for(const [name,length]of Object.entries(lengths)){
   }
   const stationaryBrakes=[];
   asset.scene.traverse(o=>{if(o.isMesh&&o.material.name==='Wheel brake calipers')stationaryBrakes.push(o);});
-  prepareWheels(asset.scene,length);
+  prepareWheels(asset.scene,length,name==='racer'?.405:.43);
   const rollingBatches=[];
   asset.scene.traverse(o=>{if(o.isMesh&&o.material.name==='Rolling wheels')rollingBatches.push(o);});
   assert.equal(rollingBatches.length,1,`${name}: brakes must share the wheel draw call`);
@@ -212,6 +216,10 @@ for(const [name,length]of Object.entries(lengths)){
       const pivots=object.geometry.getAttribute('wheelPivot'),centres=new Set();
       for(let i=0;i<pivots.count;i++)centres.add(`${pivots.getX(i).toFixed(2)}:${pivots.getY(i).toFixed(2)}:${pivots.getZ(i).toFixed(2)}`);
       assert.equal(centres.size,4,`${name}: four independent wheel centres required`);
+      if(name==='racer'){
+        const front=new Set();for(let i=0;i<pivots.count;i++)if(pivots.getX(i)>0)front.add(Math.abs(pivots.getZ(i)).toFixed(3));
+        assert.deepEqual([...front],['0.405'],'Visible and shadow front wheels share the inset hub centres');
+      }
     }
     object.geometry.dispose();object.material.dispose();
   }});

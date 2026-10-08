@@ -5,7 +5,7 @@ export function exitSceneFade(age,reduced=false){
 const clamp = v => Math.max(0, Math.min(1, v));
 const smooth = v => { v=clamp(v); return v*v*(3-2*v); };
 const smoother = v => {v=clamp(v);return v*v*v*(v*(v*6-15)+10);};
-const WHEELBASE=1.33, HALF_TRACK=.43, REAR_OFFSET=.67;
+const WHEELBASE=1.33, HALF_TRACK=.405, REAR_OFFSET=.67;
 const TURN_REAR_X=6.385, RADIUS=2.4, RAMP=.8;
 const TURN_LENGTH=Math.PI/2*RADIUS+RAMP, STEPS=480, ds=TURN_LENGTH/STEPS;
 // The rear axle follows the path; both front wheels share a turning centre.
