@@ -107,6 +107,22 @@ for(const [name,length]of Object.entries(lengths)){
   }
   if(name==='racer'){
     asset.scene.updateMatrixWorld(true);
+    const vent=new Raycaster(new Vector3(-.79,2,0),new Vector3(0,-1,0)).intersectObject(asset.scene,true)[0];
+    const ventLip=new Raycaster(new Vector3(-.79,2,.20),new Vector3(0,-1,0)).intersectObject(asset.scene,true)[0];
+    assert.equal(vent?.object.material.name,'Tyre rubber','Rear ventilation must expose a shadow floor instead of being hidden inside the body');
+    assert.ok(ventLip?.object.material.name.startsWith('Paint')&&ventLip.point.y>vent.point.y+.015,'Vent floor must sit below the adjacent rear deck');
+    const blade=new Raycaster(new Vector3(-.82,2,0),new Vector3(0,-1,0)).intersectObject(asset.scene,true)[0];
+    assert.equal(blade?.object.material.name,'Pickup bed','Cooling blades must be visible within the vent');
+    assert.ok(blade.point.y>vent.point.y,'Blades need actual depth above the vent floor');
+    for(const z of [-.23,.23]){
+      const bore=new Raycaster(new Vector3(-1.1,.15,z),new Vector3(1,0,0)).intersectObject(asset.scene,true)[0];
+      const lip=new Raycaster(new Vector3(-1.1,.15+.023,z),new Vector3(1,0,0)).intersectObject(asset.scene,true)[0];
+      assert.equal(bore?.object.material.name,'Tyre rubber','Exhaust aperture must reveal a dark bore');
+      assert.equal(lip?.object.material.name,'Wheel hubs','Exhaust lip must expose metal around its opening');
+      assert.ok(bore.point.x-lip.point.x>.03,'Exhaust centre must sit behind the rolled metal lip');
+    }
+    const plate=new Raycaster(new Vector3(-1.1,.24,0),new Vector3(1,0,0)).intersectObject(asset.scene,true)[0];
+    assert.equal(plate?.object.material.name,'Warm white trim','Rear plate must remain visible in front of its mounting frame and coachwork');
     for(const side of [-1,1]) {
       const outerFender=new Raycaster(new Vector3(.82,2,side*.37),new Vector3(0,-1,0)).intersectObject(asset.scene,true)[0];
       assert.ok(outerFender?.object.material.name.startsWith('Paint'),'Recessed wheel liners must not protrude through the front fender');

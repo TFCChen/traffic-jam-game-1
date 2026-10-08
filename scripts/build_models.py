@@ -2,7 +2,7 @@
 Run: blender --background --python scripts/build_models.py
 All outputs are inside this repository; no external add-ons or textures required.
 """
-import bpy, bmesh, math, os
+import bpy, bmesh, math, os, argparse
 from mathutils import Vector
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -242,7 +242,7 @@ def panel_seam(body,name,points,side=None):
             hit,point,normal,index=body.ray_cast(origin,direction)
             if hit:projected.append(point+normal*.0015)
     for a,b in zip(projected,projected[1:]):
-        if (b-a).length<.15:strut(name,a,b,.0028,rubber)
+        if (b-a).length<.15:strut(name,a,b,.0016 if name.startswith(('Bonnet','Coupe door')) else .0028,rubber)
 
 def shaped_cabin(name,position,size,material,taper=.68):
     obj=cube(name,position,size,material,0)
@@ -665,8 +665,37 @@ def midengine_coupe(paint):
             for i in range(32):faces.append((r*32+i,r*32+(i+1)%32,(r+1)*32+(i+1)%32,(r+1)*32+i))
         surface('Domed clear headlamp cover',vertices,faces,lamp_crystal)
         strut('Lower side blade',(-.42,side*.378,.13),(.40,side*.389,.13),.025,rubber)
-    ribbon('Engine cover',[(-.61,.235,.36),(-.74,.244,.355),(-.85,.237,.343)],panel_glass)
-    for x in (-.66,-.715,-.77,-.825):cube('Engine cooling louvre',(x,0,.366),(.012,.38,.012),rubber,.002)
+    # Project a recessed vent onto the actual deck instead of hiding a flat
+    # panel inside the sculpted shell. Store heights before the pocket cut.
+    def deck_point(x,y,lift=0):
+        hit,p,n,index=body.ray_cast(Vector((x,y,2)),Vector((0,0,-1)))
+        if not hit:raise RuntimeError('Engine vent must attach to the rear deck')
+        return (x,y,p.z+lift)
+    outline=[]
+    for cx,cy,start in [(-.665,.158,0),(-.855,.158,90),(-.855,-.158,180),(-.665,-.158,270)]:
+        for i in range(5):
+            a=math.radians(start+i*22.5);outline.append((cx+.018*math.cos(a),cy+.018*math.sin(a)))
+    border=[deck_point(x,y,.003)for x,y in outline]
+    floor=[]
+    for scale in (1,.66,.33):
+        floor.extend(deck_point(-.76+(x+.76)*scale,y*scale,-.025)for x,y in outline)
+    floor.append(deck_point(-.76,0,-.025))
+    blades=[]
+    for i in range(6):
+        x=-.845+i*.033
+        blades.append([deck_point(x+dx,y,lift)for y in (-.151,-.075,0,.075,.151)for dx,lift in [(-.010,-.014),(.010,-.007)]])
+    bottom=min(p[2]for p in floor)-.01;top=max(p[2]for p in border)+.10
+    cutter=cube('Engine vent pocket cutter',(-.76,0,(bottom+top)/2),(.222,.350,top-bottom),rubber,.017)
+    objects.remove(cutter);bpy.context.view_layer.objects.active=body
+    mod=body.modifiers.new('Recessed rear deck ventilation','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cutter
+    bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
+    vertices=border+floor[:len(outline)];n=len(outline)
+    surface('Engine vent recessed reveal',vertices,[(i,(i+1)%n,(i+1)%n+n,i+n)for i in range(n)],rubber)
+    faces=[(r*n+i,r*n+(i+1)%n,(r+1)*n+(i+1)%n,(r+1)*n+i)for r in range(2)for i in range(n)]
+    faces.extend((2*n+i,2*n+(i+1)%n,3*n)for i in range(n))
+    surface('Engine vent shadow floor',floor,faces,rubber)
+    for points in blades:
+        surface('Inset sculpted cooling blade',points,[(i*2,i*2+1,i*2+3,i*2+2)for i in range(4)],bed)
     cube('Integrated rear lip',(-.918,0,.323),(.047,.64,.022),paint,.009)
     cube('Front air intake',(.951,0,.164),(.024,.42,.046),rubber,.01)
     cube('Rear diffuser',(-.955,0,.147),(.022,.51,.051),rubber,.008)
@@ -1021,7 +1050,11 @@ def car(kind, length, colour):
             cube('Front splitter', (.90,0,.115), (.13,.71,.025), rubber, .008)
         elif not refined:
             for y in (-.342,.342): cube('Window pillar', (-.15,y,.51), (.055,.035,.29), paint, .01)
-    cube('Rear plate', (-length/2+.055,0,.24), (.026,.24,.09), white, .007)
+    if kind=='racer':
+        cube('Recessed rear plate mounting frame',(-.973,0,.24),(.030,.274,.112),rubber,.008)
+        cube('Rear plate',(-.986,0,.24),(.014,.24,.09),white,.004)
+    else:
+        cube('Rear plate', (-length/2+.055,0,.24), (.026,.24,.09), white, .007)
     # Body details remain in existing paint/trim batches.
     for x in (-length/2+.33,length/2-.34):
         if not refined:
@@ -1033,8 +1066,18 @@ def car(kind, length, colour):
             pillar.rotation_euler.y=-.1 if kind=='racer' else .05
     if kind=='taxi':
         cube('Taxi sign face',(-.19,-.123,.79),(.24,.012,.048),rubber,.004)
-    cube('Exhaust outlet',(-length/2+.043,.23,.15),(.06,.085,.045),rubber,.008)
-    for y in (-.075,-.025,.025,.075): cube('Plate marks', (-length/2+.035,y,.24), (.012,.025,.047), rubber, .002)
+    if kind=='racer':
+        # A rolled metal lip with a deep inner bore; keep the existing right
+        # outlet centre so the smoke emitter remains aligned with the pipe.
+        for y in (-.23,.23):
+            rings=[(-.973,.026),(-1.008,.026),(-1.013,.024),(-1.008,.020),(-.973,.020)]
+            vertices=[(x,y+math.cos(i*math.tau/32)*r,.15+math.sin(i*math.tau/32)*r)for x,r in rings for i in range(32)]
+            faces=[(j*32+i,j*32+(i+1)%32,(j+1)*32+(i+1)%32,(j+1)*32+i)for j in range(len(rings)-1)for i in range(32)]
+            surface('Rolled stainless exhaust tip',vertices,faces,chrome)
+            surface('Deep exhaust bore',[(-.971,y,.15)]+[(-.971,y+math.cos(i*math.tau/32)*.020,.15+math.sin(i*math.tau/32)*.020)for i in range(32)],[(0,i+1,(i+1)%32+1)for i in range(32)],rubber)
+    else:
+        cube('Exhaust outlet',(-length/2+.043,.23,.15),(.06,.085,.045),rubber,.008)
+    for y in (-.075,-.025,.025,.075): cube('Plate marks', (-.996 if kind=='racer' else -length/2+.035,y,.24), (.006 if kind=='racer' else .012,.025,.047), rubber, .002)
     for x in (-length/2+.33, length/2-.34):
         for y in (-.43,.43):
             detailed_wheel(kind,x,y)
@@ -1051,19 +1094,25 @@ def car(kind, length, colour):
     exported = export(kind)
     return exported
 
+parser=argparse.ArgumentParser(description='Build all assets, or one vehicle without touching the courtyard')
+parser.add_argument('--vehicle',choices=['racer','jeep','pickup','compact','taxi','schoolbus','coach','camper','delivery'])
+import sys
+args=parser.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
 assets = []
 for index,(kind,length,colour) in enumerate([
     ('racer',2,'e53935'),('jeep',2,'43a047'),('pickup',2,'fb8c00'),('compact',2,'38bdf8'),('taxi',2,'ec4899'),
     ('schoolbus',3,'fdd835'),('coach',3,'2563eb'),('camper',3,'059669'),('delivery',3,'9333ea')]):
+    if args.vehicle and kind!=args.vehicle:continue
     group=car(kind,length,colour)
     assets.append((group,(index%3)*4,(index//3)*4))
 
 # Rebuild the coherent courtyard from the shared environment source.
-environment_source=os.path.join(ROOT,'scripts','build_environment.py')
-exec(compile(open(environment_source,encoding='utf8').read(),environment_source,'exec'),globals())
-for group,x,y in assets:
-    for obj in group: obj.location.x += x+10; obj.location.y += y
+if not args.vehicle:
+    environment_source=os.path.join(ROOT,'scripts','build_environment.py')
+    exec(compile(open(environment_source,encoding='utf8').read(),environment_source,'exec'),globals())
+    for group,x,y in assets:
+        for obj in group: obj.location.x += x+10; obj.location.y += y
 # Save the editable source with all original asset meshes and materials.
 bpy.context.preferences.filepaths.save_version=0
-bpy.ops.wm.save_as_mainfile(filepath=os.path.join(ROOT,'art','toy-garage.blend'))
+bpy.ops.wm.save_as_mainfile(filepath=os.path.join(ROOT,'art',args.vehicle+'.blend' if args.vehicle else 'toy-garage.blend'))
 print('MODEL_BUILD_COMPLETE', OUT)
