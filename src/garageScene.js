@@ -7,7 +7,7 @@ import { createHintGuide } from './hintGuide.js';
 import { exitPose, exitSceneFade, EXIT_COMPLETE_MS } from './exitChoreography.js';
 import { vegetationShadowProxy, configureCourtyardSunShadow } from './environmentShadows.js';
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { createCourtyardReflections } from './courtyardReflections.js';
 import { legalMovesForCar } from "./gameEngine.js";
 import { vehicleModel } from "./vehicleModels.js";
 import { placementBetween, drawingCells } from './editorPlacement.js';
@@ -128,17 +128,24 @@ export function createGarageScene(canvas, getProps, callbacks) {
   const exitFade=new THREE.Mesh(exitFadeGeometry,exitFadeMaterial);
   exitFade.frustumCulled=false;exitFade.renderOrder=1000000;exitFade.visible=false;exitFade.raycast=()=>{};
   scene.add(exitFade);
-  const room = new RoomEnvironment(),
-    pmrem = new THREE.PMREMGenerator(renderer);
-  const environment = pmrem.fromScene(room, 0.04);
-  scene.environment = environment.texture;
-  room.dispose();
-  pmrem.dispose();
+  let reflections, reflectionTimer, reflectionTheme, reflectionPending;
+  function refreshReflections(theme) {
+    if(!reflections) return;
+    const position=sun.position.clone(), intensity=sun.intensity;
+    const key=JSON.stringify([theme.id,...position.toArray(),intensity]);
+    if(key===reflections.snapshot().key) {clearTimeout(reflectionTimer);reflectionPending=null;return;}
+    if(key===reflectionPending) return;
+    clearTimeout(reflectionTimer);
+    const capture=()=>{if(!alive)return;scene.environment=reflections.update(theme,position,intensity);reflectionPending=null;dirty=true;};
+    if(reflectionTheme!==theme.id) {reflectionTheme=theme.id;capture();}
+    else {reflectionPending=key;reflectionTimer=setTimeout(capture,180);}
+  }
   const sceneryAtlas = sceneryTexture();
   const glowTexture = detailTexture("glow"),
     skidTexture = detailTexture("skid");
   const contactGeometry = new THREE.PlaneGeometry(1, 1);
   const contactTextures = new Map([2, 3].map(length => [length, vehicleContactTexture(length)]));
+  contactTextures.set('racer',vehicleContactTexture(2,.405));
   const camera = new THREE.OrthographicCamera(-5, 5, 4, -4, 0.1, ORTHOGRAPHIC_FAR);
   const aim = new THREE.Vector3(3, 0.15, 3);
   const viewAim = aim.clone();
@@ -541,6 +548,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     ambient.groundColor.set(theme.ground);
     ambient.intensity = theme.ambient;
     scene.environmentIntensity = theme.environment;
+    refreshReflections(theme);
     floorMaterial.color.set(theme.floor);
     garageFill.visible = settings.theme === "neon";
     streetLights.forEach((light) => {
@@ -1287,7 +1295,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
         const contact = new THREE.Mesh(
           contactGeometry,
           new THREE.MeshBasicMaterial({
-            map: contactTextures.get(car.len),
+            map: contactTextures.get(vehicleModel(car).kind === 'racer' ? 'racer' : car.len),
             color: "#17232a",
             transparent: true,
             opacity: 0.52,
@@ -1414,6 +1422,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
       });
       scene.add(garage);
       cacheLocalTransforms(garage);
+      // Capture the already batched courtyard, not thousands of source pieces.
+      reflections = createCourtyardReflections(renderer,garage);
       atmosphere = createCourtyardAtmosphere(scene, garage);
       atmosphere.setTheme(settings, quality);
       garage.traverse(mesh=>{if(mesh.isMesh)rainSurfaces.attach(mesh.material);});
@@ -1837,7 +1847,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
           far: camera.far,
           position: camera.position.toArray(),
         },
-        lighting: { sunPosition: sun.position.toArray(), sunColor: sun.color.getHexString(), sunIntensity: sun.intensity, skyColor: ambient.color.getHexString(), ambientIntensity: ambient.intensity },
+        lighting: { sunPosition: sun.position.toArray(), sunColor: sun.color.getHexString(), sunIntensity: sun.intensity, skyColor: ambient.color.getHexString(), ambientIntensity: ambient.intensity, reflections:reflections?.snapshot() },
         transmissionResolutionScale: renderer.transmissionResolutionScale,
         vehicleLighting: vehicleLights.snapshot(),
         exhaustSmoke: exhaustSmoke.snapshot(),
@@ -1903,6 +1913,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       window.removeEventListener("blur", cancelInput);
       document.removeEventListener("visibilitychange", pauseInput);
       clearTimeout(wheelTimer);
+      clearTimeout(reflectionTimer);
       cancelCamera(false);
       if (!alive) return;
       alive = false;
@@ -1930,7 +1941,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       skidTexture.dispose();
       vehicleLights.dispose();
       exhaustSmoke.dispose();
-      environment.dispose();
+      reflections?.dispose();
 
       atmosphere?.dispose();
       groundSurface?.dispose();

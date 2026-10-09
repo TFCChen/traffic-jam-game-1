@@ -9,6 +9,18 @@ export function configureVehiclePaint(material, kind, quality, color) {
   material.envMapIntensity = commercial ? 1 : 1.12;
   material.clearcoat = coat;
   material.clearcoatRoughness = commercial ? .17 : .11;
+  if(!material.userData.courtyardOcclusion) {
+    material.userData.courtyardOcclusion=true;
+    material.onBeforeCompile=shader=>{
+      // Diffuse skylight is occluded below the chassis. Direct lamp/sun light
+      // remains intact, so a nearby headlamp can still illuminate these faces.
+      shader.fragmentShader=shader.fragmentShader.replace('#include <aomap_fragment>',
+        `#include <aomap_fragment>
+        float underbodyVisibility=mix(.62,1.,smoothstep(-.65,.18,inverseTransformDirection(geometryNormal,viewMatrix).y));
+        reflectedLight.indirectDiffuse*=underbodyVisibility;`);
+    };
+    material.customProgramCacheKey=()=> 'courtyard-paint-occlusion-v1';
+  }
   if (changed) material.needsUpdate = true;
 }
 

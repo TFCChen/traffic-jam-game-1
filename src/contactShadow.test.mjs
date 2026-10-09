@@ -13,3 +13,7 @@ for (const length of [2, 3]) {
   assert(contactOpacity(length / 2 + .06, 0, length) < .02, 'No rectangular shadow edge');
 }
 console.log('Four tyre contact patches and soft underbody shadow passed.');
+assert(contactOpacity(.66,.405,2,.405)>contactOpacity(.66,.43,2,.405),
+  'Racer front contact must follow its narrower front axle');
+assert.equal(contactOpacity(-.67,.43,2,.405),contactOpacity(-.67,.43,2),
+  'Racer rear contact remains at the rear axle track');

@@ -4,14 +4,14 @@ import { surfaceShader } from './vehicleFinish.js';
 import { contactOpacity } from './contactShadow.js';
 import { sceneryAtlasData, sceneryTile } from './sceneryAtlas.js';
 
-export function vehicleContactTexture(length) {
+export function vehicleContactTexture(length, frontHalfTrack=.43) {
   const width = 128, height = 64;
   const pixels = new Uint8Array(width * height * 4);
   for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
     const index = (y * width + x) * 4;
     pixels.set([255, 255, 255, Math.round(255 * contactOpacity(
       ((x + .5) / width - .5) * (length + .12),
-      ((y + .5) / height - .5) * 1.08, length))], index);
+      ((y + .5) / height - .5) * 1.08, length, frontHalfTrack))], index);
   }
   const texture = new THREE.DataTexture(pixels, width, height);
   texture.minFilter = texture.magFilter = THREE.LinearFilter;

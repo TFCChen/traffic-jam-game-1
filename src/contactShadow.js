@@ -2,10 +2,11 @@
 export const VEHICLE_GROUND_HEIGHT = .038;
 export const CONTACT_PLANE_OFFSET = -.001;
 // A soft chassis footprint plus four concentrated tyre contacts, in road units.
-export function contactOpacity(x, z, length) {
+export function contactOpacity(x, z, length, frontHalfTrack=.43) {
   let opacity = .16 * Math.exp(-Math.pow(x / (length * .43), 4) - Math.pow(z / .34, 4));
   for (const axle of [-length / 2 + .33, length / 2 - .34]) {
-    for (const side of [-.43, .43]) {
+    for (const sign of [-1, 1]) {
+      const side=sign*(axle>0?frontHalfTrack:.43);
       opacity += .62 * Math.exp(-Math.pow((x - axle) / .11, 2) - Math.pow((z - side) / .085, 2));
     }
   }
