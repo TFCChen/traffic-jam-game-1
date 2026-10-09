@@ -2,20 +2,45 @@
 .exit-skip-surface:hover,.exit-skip-surface:active{background:transparent;box-shadow:none;transform:none}
 .exit-skip-surface:focus-visible{outline:2px solid #efcc8460;outline-offset:-5px}
 .cheering-corners{position:absolute;inset:0;overflow:hidden;pointer-events:none;user-select:none}
-.cheering-corner{position:absolute;width:clamp(125px,23vw,232px);height:auto;aspect-ratio:232/128;overflow:visible;opacity:.97}
-.cheering-corner.top-left{top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left))}
-.cheering-corner.top-right{top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right))}
-.cheering-corner.bottom-left{bottom:max(12px,env(safe-area-inset-bottom));left:max(12px,env(safe-area-inset-left))}
-.cheering-corner.bottom-right{bottom:max(12px,env(safe-area-inset-bottom));right:max(12px,env(safe-area-inset-right))}
-.cheering-animal{animation:cheering-bob 1.1s ease-in-out var(--clap-delay) infinite;transform-origin:38px 105px}
-.cheering-paw{animation-duration:.66s;animation-delay:var(--clap-delay);animation-timing-function:cubic-bezier(.45,0,.45,1);animation-iteration-count:infinite}
+.cheering-guest{position:absolute;width:148px;aspect-ratio:112/128;transform:rotate(var(--angle));animation:guest-arrive .6s cubic-bezier(.2,.8,.3,1) var(--arrival) both;filter:drop-shadow(0 4px 5px #10152135)}
+.cheering-guest svg{display:block;width:100%;height:auto;overflow:visible}
+.cheering-guest.top-left.lead{left:-12px;top:-12px}.cheering-guest.top-right.lead{right:-12px;top:-12px}
+.cheering-guest.bottom-left.lead{left:-12px;bottom:-12px}.cheering-guest.bottom-right.lead{right:-12px;bottom:-12px}
+.cheering-guest.friend{width:120px}
+.cheering-guest.top-left.friend{left:130px;top:-15px}.cheering-guest.top-right.friend{right:130px;top:-15px}
+.cheering-guest.bottom-left.friend{left:130px;bottom:-15px}.cheering-guest.bottom-right.friend{right:130px;bottom:-15px}
+.cheering-animal{animation:cheering-bob calc(var(--tempo)*2) ease-in-out var(--clap-delay) infinite;transform-origin:56px 120px}
+.cheering-paw{animation-duration:var(--tempo);animation-delay:var(--clap-delay);animation-timing-function:cubic-bezier(.45,0,.45,1);animation-iteration-count:infinite}
 .cheering-paw-left{animation-name:cheering-left}.cheering-paw-right{animation-name:cheering-right}
-.cheering-clap{animation:cheering-spark .66s ease-out var(--clap-delay) infinite;transform-origin:38px 69px}
+.cheering-clap{animation:cheering-spark var(--tempo) ease-out var(--clap-delay) infinite;transform-origin:55px 90px}
 .win-overlay.has-cheering .win-card{z-index:1;max-height:calc(100dvh - 32px);overflow:auto;scrollbar-width:thin;scrollbar-color:#767b87 #252932}
-@keyframes cheering-bob{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-3px) rotate(1deg)}}
-@keyframes cheering-left{0%,100%{transform:translate(0,0)}42%,55%{transform:translate(8px,-3px)}}
-@keyframes cheering-right{0%,100%{transform:translate(0,0)}42%,55%{transform:translate(-8px,-3px)}}
-@keyframes cheering-spark{0%,30%,100%{opacity:0;transform:translateY(2px)}44%{opacity:.9;transform:translateY(0)}75%{opacity:0;transform:translateY(-3px)}}
-@media(max-width:600px) and (min-height:501px){.cheering-corner{width:40vw;max-width:200px}.win-overlay.has-cheering .win-card{max-height:calc(100dvh - 220px)}}
-@media(max-height:500px){.cheering-corner{width:clamp(88px,18vw,150px)}.cheering-corner.top-left,.cheering-corner.top-right{top:5px}.cheering-corner.bottom-left,.cheering-corner.bottom-right{bottom:5px}}
-@media(prefers-reduced-motion:reduce){.cheering-corners *{animation:none!important}.cheering-clap{opacity:0}.cheering-paw-left{transform:translate(8px,-3px)}.cheering-paw-right{transform:translate(-8px,-3px)}}
+@keyframes guest-arrive{from{opacity:0;transform:rotate(var(--angle)) translateY(72px)}to{opacity:1;transform:rotate(var(--angle)) translateY(0)}}
+@keyframes cheering-bob{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-2px) rotate(1.5deg)}}
+@keyframes cheering-left{0%,100%{transform:translate(0,0)}42%,55%{transform:translate(14px,-3px)}}
+@keyframes cheering-right{0%,100%{transform:translate(0,0)}42%,55%{transform:translate(-14px,-3px)}}
+@keyframes cheering-spark{0%,30%,100%{opacity:0;transform:translateY(2px)}44%{opacity:.85;transform:translateY(0)}75%{opacity:0;transform:translateY(-3px)}}
+@media(max-width:600px) and (min-height:501px){
+  .cheering-guest.lead{width:126px}
+  .cheering-guest.friend{width:108px}
+  .cheering-guest.friend .cheering-hands{transform:translateY(-30px)}
+  .cheering-guest.top-left.friend{left:-40px;top:27%;--angle:90deg!important}
+  .cheering-guest.top-right.friend{right:-40px;top:27%;--angle:-90deg!important}
+  .cheering-guest.bottom-left.friend{left:-40px;bottom:20%;--angle:90deg!important}
+  .cheering-guest.bottom-right.friend{right:-40px;bottom:20%;--angle:-90deg!important}
+  .win-overlay.has-cheering .win-card{width:calc(100% - 96px);max-height:calc(100dvh - 176px);padding:24px 16px}
+  .win-overlay.has-cheering .win-card h2{font-size:30px}
+  .win-overlay.has-cheering .win-score{gap:16px;padding:12px 8px}
+  .win-overlay.has-cheering .win-score>span{white-space:nowrap;font-size:10px}
+  .win-overlay.has-cheering .win-actions{gap:6px}
+  .win-overlay.has-cheering .win-actions button{min-width:0;font-size:12px;padding:12px 4px;gap:4px;white-space:nowrap}
+  .win-overlay.has-cheering .win-actions svg{width:18px;height:18px}
+}
+@media(max-width:360px) and (min-height:501px){.cheering-guest.friend{width:96px}.win-overlay.has-cheering .win-card{width:calc(100% - 72px)}}
+@media(max-height:500px){
+  .cheering-guest.lead{width:116px}.cheering-guest.friend{width:94px}
+  .cheering-guest.top-left.friend,.cheering-guest.bottom-left.friend{left:82px}
+  .cheering-guest.top-right.friend,.cheering-guest.bottom-right.friend{right:82px}
+  .cheering-guest.top-left.friend,.cheering-guest.top-right.friend{top:-35px}
+  .cheering-guest.bottom-left.friend,.cheering-guest.bottom-right.friend{bottom:-35px}
+}
+@media(prefers-reduced-motion:reduce){.cheering-corners *{animation:none!important}.cheering-clap{opacity:0}.cheering-paw-left{transform:translate(14px,-3px)}.cheering-paw-right{transform:translate(-14px,-3px)}}
