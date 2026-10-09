@@ -1759,6 +1759,12 @@ export function createGarageScene(canvas, getProps, callbacks) {
   frame = requestAnimationFrame(animate);
   return {
     sync,
+    finishExit() {
+      if (!getProps().won || escapeStart == null) return;
+      escapeStart = performance.now() - EXIT_COMPLETE_MS - 800;
+      dirty = true;
+      settlingUntil = performance.now() + 100;
+    },
     measure(value) {
       measuring = Boolean(value);
       pendingInputAt = null;

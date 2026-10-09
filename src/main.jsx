@@ -940,6 +940,7 @@ function App() {
             hint={hint}
             won={mode === "play" && won}
             onExitComplete={() => setExitFinished(true)}
+            exitFinished={exitFinished}
             disabled={loading || levelTransition || tutorial}
             goalIntro={tutorial && initialized && !loading}
             onIntroComplete={() => { setTutorial(false); saveTutorial(true); }}
@@ -1321,7 +1322,15 @@ function App() {
         )}
       </main>
       <OfflineStatus />
-      {rewardNotice && (
+      {mode === 'play' && won && !exitFinished && (
+        <button className="exit-skip-surface" aria-label="直接查看通關結果" onClick={() => {
+          setExitFinished(true);
+          winPresented.current = true;
+          setWinReady(true);
+          setWinOpen(true);
+        }} />
+      )}
+      {rewardNotice && !winOpen && (
         <div className="reward-notice" role="status">
           <b>✦ 新收藏</b>
           <span>{rewards.map((r) => r.name).join(" · ")}</span>

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import CheeringAnimals from './CheeringAnimals.jsx';
 
 const paths = {
   undo: "M9 5 4 10l5 5 M4 10h10a6 6 0 0 1 0 12",
@@ -118,7 +119,8 @@ export function WinDialog({
   }
 
   return (
-    <div className="win-overlay">
+    <div className="win-overlay has-cheering">
+      <CheeringAnimals />
       <div className="confetti" aria-hidden="true">
         {Array.from({ length: 22 }, (_, i) => (
           <i

@@ -151,6 +151,9 @@ export default function Board(props) {
     if (open || props.disabled) engine.current?.cancelInput();
   }, [open, props.disabled]);
   useEffect(() => {
+    if (props.won && props.exitFinished) engine.current?.finishExit();
+  }, [props.won, props.exitFinished]);
+  useEffect(() => {
     engine.current?.settings({ ...settings, theme });
     try {
       if (!props.editor) localStorage.setItem("traffic-jam-scene", JSON.stringify(settings));
