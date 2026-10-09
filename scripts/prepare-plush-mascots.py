@@ -12,6 +12,9 @@ from PIL import Image
 
 root = Path(__file__).resolve().parents[1]
 inputs = json.loads(Path(sys.argv[1]).read_text(encoding='utf-8-sig'))
+asset_folder = sys.argv[2] if len(sys.argv) > 2 else 'mascots'
+metadata_name = sys.argv[3] if len(sys.argv) > 3 else 'plushMascots.json'
+(root/'public'/asset_folder).mkdir(parents=True, exist_ok=True)
 result = {}
 for kind, source in inputs.items():
     with Image.open(source).convert('RGBA') as original:
@@ -58,9 +61,9 @@ for kind, source in inputs.items():
         # Format compression only: same resolution and generated alpha.
         digest = hashlib.sha256(Path(source).read_bytes()).hexdigest()[:12]
         name = f'{kind}-{digest}.webp'
-        destination = root/'public'/'mascots'/name
+        destination = root/'public'/asset_folder/name
         original.save(destination, 'WEBP', quality=89, method=6, exact=True)
-        result[kind] = {'src':f'/mascots/{name}', 'width':width, 'height':height,
+        result[kind] = {'src':f'/{asset_folder}/{name}', 'width':width, 'height':height,
                         'body':describe(body), 'left':describe(paws[0]), 'right':describe(paws[1])}
         print(f'{kind}: {width}x{height}, {destination.stat().st_size//1024} KiB, {len(islands)} alpha islands')
-(root/'src'/'plushMascots.json').write_text(json.dumps(result,separators=(',',':')),encoding='utf-8')
+(root/'src'/metadata_name).write_text(json.dumps(result,separators=(',',':')),encoding='utf-8')

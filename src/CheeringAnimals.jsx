@@ -1,15 +1,15 @@
 import React, { useId } from 'react';
-import sprites from './plushMascots.json';
+import sprites from './referenceMascots.json';
 import './cheeringAnimals.css';
 
 const CAST = [
   { kind: 'rabbit', corner: 'top-left', slot: 'lead', angle: 135, tempo: .72 },
-  { kind: 'owl', corner: 'top-left', slot: 'friend', angle: 174, tempo: .83 },
-  { kind: 'fox', corner: 'top-right', slot: 'lead', angle: -135, tempo: .61 },
-  { kind: 'panda', corner: 'top-right', slot: 'friend', angle: -174, tempo: .76 },
-  { kind: 'otter', corner: 'bottom-left', slot: 'lead', angle: 45, tempo: .68 },
-  { kind: 'hedgehog', corner: 'bottom-left', slot: 'friend', angle: 8, tempo: .91 },
-  { kind: 'cat', corner: 'bottom-right', slot: 'lead', angle: -45, tempo: .65 },
+  { kind: 'sheep', corner: 'top-left', slot: 'friend', angle: 174, tempo: .83 },
+  { kind: 'goat', corner: 'top-right', slot: 'lead', angle: -135, tempo: .61 },
+  { kind: 'mouse', corner: 'top-right', slot: 'friend', angle: -174, tempo: .76 },
+  { kind: 'cow', corner: 'bottom-left', slot: 'lead', angle: 45, tempo: .68 },
+  { kind: 'pig', corner: 'bottom-left', slot: 'friend', angle: 8, tempo: .91 },
+  { kind: 'chick', corner: 'bottom-right', slot: 'lead', angle: -45, tempo: .65 },
   { kind: 'dog', corner: 'bottom-right', slot: 'friend', angle: -8, tempo: .8 },
 ];
 
@@ -31,9 +31,9 @@ function Animal({ character, id, index }) {
       <g className="cheering-animal">
         <PlushPart sprite={sprite} part="body" id={`${id}-${kind}-body`} x={3} y={0} width={106} height={128}/>
         <g className="cheering-hands">
-          <g className="cheering-paw cheering-paw-left"><PlushPart sprite={sprite} part="left" id={`${id}-${kind}-left`} x={24} y={82} width={24} height={26}/></g>
-          <g className="cheering-paw cheering-paw-right"><PlushPart sprite={sprite} part="right" id={`${id}-${kind}-right`} x={64} y={82} width={24} height={26}/></g>
-          <g className="cheering-clap" fill="none" stroke="#f9dca0" strokeWidth="1.6" strokeLinecap="round"><path d="M56 85v-4m-7 6-3-3m17 3 3-3"/></g>
+          <g className="cheering-paw cheering-paw-left"><PlushPart sprite={sprite} part="left" id={`${id}-${kind}-left`} x={24} y={96} width={24} height={26}/></g>
+          <g className="cheering-paw cheering-paw-right"><PlushPart sprite={sprite} part="right" id={`${id}-${kind}-right`} x={64} y={96} width={24} height={26}/></g>
+          <g className="cheering-clap" fill="none" stroke="#f9dca0" strokeWidth="1.6" strokeLinecap="round"><path d="M56 99v-4m-7 6-3-3m17 3 3-3"/></g>
         </g>
       </g>
     </svg>
