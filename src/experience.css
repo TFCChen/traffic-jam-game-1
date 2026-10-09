@@ -484,27 +484,6 @@ button.selected,
 .storage-alert button {
   margin-left: 12px;
 }
-.tutorial-card p {
-  line-height: 1.8;
-  font-size: 16px;
-}
-.tutorial-card button {
-  margin: 4px;
-}
-.tutorial-illustration {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 32px;
-  min-height: 140px;
-  border-radius: 12px;
-  background: #16281f;
-  color: var(--gold);
-  font-size: 28px;
-}
-.tutorial-illustration .mini-car {
-  scale: 1.8;
-}
 .win-card {
   background: var(--surface);
   border: 1px solid var(--line);

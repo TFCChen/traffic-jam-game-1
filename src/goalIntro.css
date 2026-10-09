@@ -1,0 +1,16 @@
+.goal-intro{color:#f4f2ec;background:linear-gradient(145deg,#303841f5,#1d242cfb);border:1px solid #ffffff26;border-radius:24px;box-shadow:0 24px 90px #0b10195c,inset 0 1px #ffffff0d;padding:28px 24px 23px;width:min(480px,calc(100vw - 32px));max-width:none;overflow:hidden}
+.goal-intro::backdrop{background:radial-gradient(ellipse at center,#11192318,#11192360)}
+.goal-intro-heading{text-align:center}.goal-intro-heading>span{font-size:11px;letter-spacing:4px;color:#e5c88c}.goal-intro h2{margin:8px 0 0;font-size:26px;letter-spacing:3px;font-weight:700}
+.goal-intro-close{position:absolute;right:10px;top:8px;width:44px;height:44px;border:0;background:transparent;color:#bfc6cb;font-size:25px;padding:0;border-radius:50%}.goal-intro-close:hover{background:#ffffff0e;color:white}.goal-intro-close:focus-visible{outline:2px solid #edcc86;outline-offset:-5px}
+.goal-demo{display:block;width:100%;margin:10px 0 0}.goal-intro p{display:flex;align-items:center;justify-content:center;gap:10px;white-space:nowrap;margin:5px 0 9px;font-size:12px;color:#c2cbd1}.goal-intro p i{font-style:normal;color:#76838f}.goal-intro p strong{font-weight:500;color:#efd69e}
+.goal-intro-progress{position:absolute;left:0;right:0;bottom:0;height:3px;background:#ffffff08}.goal-intro-progress span{display:block;height:100%;background:linear-gradient(90deg,#a78b56,#f4d79a);transform-origin:left;animation:goal-progress 4.6s linear both}
+.goal-blocker{animation:goal-clear 4.6s cubic-bezier(.4,0,.25,1) both}.goal-hero{animation:goal-escape 4.6s cubic-bezier(.45,0,.3,1) both}.goal-route{animation:goal-route 4.6s ease both}.goal-blocker-arrow{animation:goal-direction 4.6s ease both}.goal-exit-glow{animation:goal-gate 4.6s ease both}
+.goal-intro[data-paused="true"] *{animation-play-state:paused}
+@keyframes goal-progress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes goal-clear{0%,17%{transform:translateY(0)}35%,100%{transform:translateY(-55px)}}
+@keyframes goal-escape{0%,40%{transform:translateX(0);opacity:1}81%{transform:translateX(283px);opacity:1}94%,100%{transform:translateX(322px);opacity:0}}
+@keyframes goal-direction{0%{opacity:0}12%,25%{opacity:1}37%,100%{opacity:0}}
+@keyframes goal-route{0%,28%{opacity:.12}40%,82%{opacity:1}100%{opacity:.25}}
+@keyframes goal-gate{0%,33%{opacity:.3}53%,87%{opacity:1}100%{opacity:.4}}
+@media(max-width:500px){.goal-intro{padding:26px 15px 22px;border-radius:20px}.goal-intro h2{font-size:23px}.goal-intro p{font-size:11px;gap:7px}}
+@media(prefers-reduced-motion:reduce){.goal-intro *{animation:none!important}.goal-blocker{transform:translateY(-55px)}.goal-route,.goal-exit-glow{opacity:1}.goal-blocker-arrow{opacity:0}.goal-intro-progress span{transform:scaleX(1)}}

@@ -1,4 +1,4 @@
-export const EXIT_TIME_SCALE = 1.18;
+export const EXIT_TIME_SCALE = .72;
 export const EXIT_COMPLETE_MS = 5650 * EXIT_TIME_SCALE;
 export function exitSceneFade(age,reduced=false){
   age /= EXIT_TIME_SCALE;

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import Board2D from "./Board2D.jsx";
+import GoalIntro from "./GoalIntro.jsx";
 import { vehicleModel } from "./vehicleModels.js";
 import {
   SCENE_THEMES,
@@ -188,10 +189,12 @@ export default function Board(props) {
           </button>
         </p>
         <Board2D {...props} />
+        {props.goalIntro && <GoalIntro onComplete={props.onIntroComplete} />}
       </div>
     );
   return (
     <div className={`garage-3d theme-${theme}`}>
+      {ready && props.goalIntro && <GoalIntro onComplete={props.onIntroComplete} />}
       <div className="garage-canvas-wrap">
         <canvas
           ref={canvas}

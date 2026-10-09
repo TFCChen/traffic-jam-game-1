@@ -269,8 +269,7 @@ function App() {
   }, [mode, loading, editorHistory, editorFuture, editorCars]);
   const [initialized, setInitialized] = useState(false),
     [storageError, setStorageError] = useState(getStorageIssue);
-  const [tutorial, setTutorial] = useState(false),
-    [tutorialStep, setTutorialStep] = useState(0);
+  const [tutorial, setTutorial] = useState(false);
   const [trial, setTrial] = useState(false);
   const editorReturn = useRef(null);
   const importFile = useRef(null),
@@ -941,7 +940,9 @@ function App() {
             hint={hint}
             won={mode === "play" && won}
             onExitComplete={() => setExitFinished(true)}
-            disabled={loading || levelTransition}
+            disabled={loading || levelTransition || tutorial}
+            goalIntro={tutorial && initialized && !loading}
+            onIntroComplete={() => { setTutorial(false); saveTutorial(true); }}
             editor={mode === "editor"}
             editorStart={editorStart}
             editorConflict={editorConflict}
@@ -1091,11 +1092,11 @@ function App() {
             <InstallApp />
             <button
               onClick={() => {
-                setTutorialStep(0);
+                if (utilityMenu.current) utilityMenu.current.open = false;
                 setTutorial(true);
               }}
             >
-              操作指南
+              通關演示
             </button>
             <button
               onClick={() =>
@@ -1320,62 +1321,6 @@ function App() {
         )}
       </main>
       <OfflineStatus />
-      {tutorial && (
-        <Sheet
-          label="操作指南"
-          onClose={() => {
-            setTutorial(false);
-            saveTutorial(true);
-          }}
-        >
-          <div className="tutorial-card">
-            <small>操作指南 · {tutorialStep + 1} / 4</small>
-            <h2>
-              {
-                [
-                  "讓紅車出庫",
-                  "沿著車身移動",
-                  "先替出口騰出空間",
-                  "近看你的車庫",
-                ][tutorialStep]
-              }
-            </h2>
-            <p>
-              {
-                [
-                  "紅色跑車是主角，出口位於停車場右側的第三列。",
-                  "按住車身前後拖動，放手會停入格位。也可用「選車」後按方向鍵；上下車只能上下移動。",
-                  "移開擋路的車，再將紅車送到出口。復原不扣分；卡住時可用提示找到下一步。",
-                  "電腦：右鍵拖曳旋轉、Shift＋右鍵或中鍵拖曳平移、滾輪縮放。手機：單指拖曳停車場外的街景旋轉，雙指拖曳平移、捏合縮放；單指抓住車子仍是移車。放大到看不到場外時，先縮小或按「重置」。",
-                ][tutorialStep]
-              }
-            </p>
-            <div className="tutorial-illustration" aria-hidden="true">
-              <span className="mini-car" />→<span>出口</span>
-            </div>
-            <button
-              onClick={() => {
-                setTutorial(false);
-                saveTutorial(true);
-              }}
-            >
-              略過／關閉
-            </button>
-            <button
-              className="accent"
-              onClick={() => {
-                if (tutorialStep < 3) setTutorialStep((s) => s + 1);
-                else {
-                  setTutorial(false);
-                  saveTutorial(true);
-                }
-              }}
-            >
-              {tutorialStep < 3 ? "下一步" : "開始移車"}
-            </button>
-          </div>
-        </Sheet>
-      )}
       {rewardNotice && (
         <div className="reward-notice" role="status">
           <b>✦ 新收藏</b>
