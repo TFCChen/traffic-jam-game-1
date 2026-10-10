@@ -16,7 +16,7 @@ assert.equal(rainSurfaceKind('Batched cabin'),null,'Cabin upholstery must remain
 assert.equal(rainSurfaceKind('Rolling wheels'),null,'Wetness must not interfere with steering shaders');
 assert.equal(rainSurfaceKind('Street tunnel'),null,'Sheltered passage interior remains dry');
 const system=createRainSurfaces();
-for(const name of ['Paint red','Batched trim','Automotive glass','Courtyard foliage detail','Courtyard bark','Courtyard fence','Batched scenery','Street masonry','Street roof','Street fittings','Street glazing','Street planting']){
+for(const name of ['Paint red','Batched trim','Automotive glass','Courtyard foliage detail','Courtyard bark','Courtyard fence','Batched scenery','Street masonry','Street roof','Street timber','Street terrace','Street fittings','Street glazing','Street planting']){
   const material=new THREE.MeshPhysicalMaterial();material.name=name;
   material.onBeforeCompile=s=>{s.fragmentShader+='\n// preserved optical/finish logic';};
   system.attach(material);const first=material.onBeforeCompile;system.attach(material);

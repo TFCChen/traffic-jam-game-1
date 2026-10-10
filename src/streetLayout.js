@@ -3,8 +3,8 @@ import * as THREE from 'three';
 // Two low, covered neighbourhood passages enclose a finite stretch of street.
 // The rear wall is real geometry; there is no world-space vehicle clipping.
 export const STREET = Object.freeze({
-  min: -8.9, max: 16.9, north: -2.45, south: 10.45,
-  left: 6.34, right: 10.25, ceiling: 1.62, roof: 1.82,
+  min: -8.7, max: 16.7, north: -2.45, south: 10.45,
+  left: 6.34, right: 10.25, ceiling: 1.48, roof: 1.58,
 });
 export function passageBoxes() {
   return [[STREET.min, STREET.north], [STREET.south, STREET.max]].flatMap(([a,b]) => [

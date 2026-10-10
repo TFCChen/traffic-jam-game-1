@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { STREET } from './streetLayout.js';
 
 // Surface-attached droplets: local coordinates keep them on moving cars.
 // Beads perturb the optical normal, not the pane's overall transparency.
@@ -7,7 +8,7 @@ export function rainSurfaceKind(name) {
   if (name === 'Automotive glass' || name === 'Architectural glazing' || name==='Street glazing') return 'glass';
   if(name==='Batched trim')return 'trim';
   return ({'Courtyard foliage detail':'leaf','Courtyard bark':'bark',
-    'Courtyard fence':'metal','Batched scenery':'scenery','Street masonry':'masonry','Street roof':'roof','Street fittings':'metal','Street planting':'leaf'})[name] ?? null;
+    'Courtyard fence':'metal','Batched scenery':'scenery','Street masonry':'masonry','Street roof':'roof','Street terrace':'roof','Street timber':'masonry','Street fittings':'metal','Street planting':'leaf'})[name] ?? null;
 }
 // R: tiny spherical beads. G: narrow gravity-aligned drainage trails.
 // Bake once, then let hardware mipmaps filter subpixel water detail.
@@ -75,7 +76,7 @@ export function createRainSurfaces() {
         '#include <begin_vertex>\nrainLocal=transformed;rainLocalNormal=normal;');
       shader.fragmentShader='varying vec3 rainLocal;varying vec3 rainLocalNormal;uniform float rainSurfaceWet;uniform float rainSurfaceDetail;uniform sampler2D rainSurfaceMap;\n'+functions+shader.fragmentShader;
       shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
-        float rainExposure=${kind==='masonry'?'max(max(step(rainLocal.z,-8.89),step(16.89,rainLocal.z)),max(step(1.78,rainLocal.y),max(step(rainLocal.x,6.08),step(10.51,rainLocal.x))))':kind==='roof'?'smoothstep(.5,.9,abs(rainLocalNormal.y))':kind==='scenery'?'smoothstep(.1,.25,rainLocal.y)':kind==='trim'?`max(smoothstep(.80,.9,rainLocal.y),max(smoothstep(.40,.46,abs(rainLocal.z)),smoothstep(${(length/2-.16).toFixed(2)},${(length/2-.08).toFixed(2)},abs(rainLocal.x))))`:'1.'};
+        float rainExposure=${kind==='masonry'?`max(max(step(rainLocal.z,${(STREET.min+.01).toFixed(2)}),step(${(STREET.max-.01).toFixed(2)},rainLocal.z)),max(step(${(STREET.roof-.005).toFixed(3)},rainLocal.y),max(step(rainLocal.x,6.08),step(10.51,rainLocal.x))))`:kind==='roof'?'smoothstep(.5,.9,abs(rainLocalNormal.y))':kind==='scenery'?'smoothstep(.1,.25,rainLocal.y)':kind==='trim'?`max(smoothstep(.80,.9,rainLocal.y),max(smoothstep(.40,.46,abs(rainLocal.z)),smoothstep(${(length/2-.16).toFixed(2)},${(length/2-.08).toFixed(2)},abs(rainLocal.x))))`:'1.'};
         ${kind==='scenery'||kind==='glass'?'rainExposure*=1.-(1.-smoothstep(.84,.91,rainLocal.y))*step(rainLocal.x,-.42)*step(.45,rainLocal.z)*step(rainLocal.z,1.7);':''}
         float rainWet=rainSurfaceWet*rainExposure;
         diffuseColor.rgb*=mix(1.,${{paint:'.95',trim:'.92',glass:'1.',leaf:'.68',bark:'.60',metal:'.88',scenery:'.73',masonry:'.84',roof:'.72'}[kind]},rainWet);

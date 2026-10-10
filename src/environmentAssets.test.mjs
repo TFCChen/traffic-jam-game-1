@@ -104,7 +104,7 @@ assert.deepEqual(originalStreet.geometry.attributes.position.array,originalPosit
 const roadMesh=extended.getObjectByName('Continuous neighbourhood street');
 const roadBounds=new Box3().setFromObject(roadMesh);
 assert(Math.abs(roadBounds.max.y-.0355)<.0001,'New and original street keep the same height');
-assert(Math.abs(roadBounds.max.z-roadBounds.min.z-25.8)<.001,'Finite street terminates inside both buildings');
+assert(Math.abs(roadBounds.max.z-roadBounds.min.z-25.4)<.001,'Finite street terminates inside both buildings');
 const curbBounds=new Box3().setFromObject(extended.getObjectByName('Matching continuous stone curbs'));
 assert(curbBounds.min.z<-8&&curbBounds.max.z>16,'Both kerb lines continue into the passages');
 for(const height of [4.6,9,10])for(let angle=-180;angle<=180;angle+=30) {

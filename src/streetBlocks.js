@@ -6,8 +6,9 @@ import { STREET, passageBoxes } from './streetLayout.js';
 export function createStreetBlocks(garage) {
   const pieces = new Map(), geometries=[], materials=[], lights=[];
   const palette = {
-    'Street masonry':['#bebcaf',.87,0], 'Street roof':['#52605d',.94,0],
-    'Street tunnel':['#636c68',.91,0], 'Street fittings':['#37484b',.48,.32],
+    'Street masonry':['#c4c1b2',.87,0], 'Street roof':['#969d89',.94,0],
+    'Street tunnel':['#a5a699',.91,0], 'Street fittings':['#37484b',.48,.32],
+    'Street timber':['#967e60',.83,0], 'Street terrace':['#c8c5b6',.88,0],
     'Street glazing':['#49626a',.13,.28], 'Streetlamp glow passage':['#ffe1ac',.35,0],
     'Street planting':['#697765',.91,0],
   };
@@ -24,45 +25,68 @@ export function createStreetBlocks(garage) {
     const c=bounds.getCenter(new THREE.Vector3()),s=bounds.getSize(new THREE.Vector3());
     box('Street tunnel',c.x,c.y,c.z,s.x,s.y,s.z,0);
   }
+  function shrub(x,y,z,w=.22,d=.22,seed=0) {
+    const foliage=new THREE.IcosahedronGeometry(1,1);
+    const variation=.86+.22*Math.sin(seed*2.37+1);
+    foliage.scale(w*variation,.075+(seed%5)*.015,d*(1.08-.15*Math.sin(seed*1.7)));
+    foliage.rotateY(seed*.73);foliage.translate(x+Math.sin(seed*4.13)*w*.22,y,z+Math.cos(seed*2.19)*d*.27);
+    const tint=new THREE.Color().setRGB(.86+(seed%3)*.055,.90+(seed%4)*.025,.82+(seed%5)*.03);
+    const colors=new Float32Array(foliage.attributes.position.count*3);
+    for(let i=0;i<colors.length;i+=3){colors[i]=tint.r;colors[i+1]=tint.g;colors[i+2]=tint.b;}
+    foliage.setAttribute('color',new THREE.BufferAttribute(colors,3));
+    foliage.deleteAttribute('uv');if(!pieces.has('Street planting'))pieces.set('Street planting',[]);pieces.get('Street planting').push(foliage);
+  }
   for(const [front,back,sign] of [[STREET.north,STREET.min,-1],[STREET.south,STREET.max,1]]) {
     const middle=(front+back)/2,depth=Math.abs(back-front);
-    // Continuous plinth, masonry sides, overhanging coping and recessed roof.
-    box('Street fittings',8.295,-.24,middle,4.75,.48,depth+.12,.025);
+    const garden=sign<0;
+    // Match the courtyard's thin stone edge, not a separate dark podium.
+    box('Street masonry',8.295,-.24,middle,4.5,.48,depth,.025);
     for(const x of [6.12,10.47]) {
-      box('Street masonry',x,.84,middle,.28,1.68,depth,.025);
-      box('Street masonry',x,1.87,middle,.36,.18,depth+.08,.02);
-      // Shallow horizontal masonry courses, never high-contrast brick wallpaper.
-      for(let y=.32;y<1.5;y+=.32) box('Street fittings',x+(x<8?-.147:.147),y,middle,.006,.008,depth-.04,0);
+      box('Street masonry',x,.74,middle,.20,1.48,depth,.018);
+      box('Street masonry',x,1.59,middle,.24,.06,depth,.012);
+      if(garden) {
+        // A low planted edge visually joins the existing courtyard planters.
+        for(let i=0;i<17;i++)shrub(x,1.68,front+sign*(.23+i*.36),.17,.22,i);
+        for(let y=.36;y<1.4;y+=.36)box('Street roof',x+(x<8?-.105:.105),y,middle,.006,.006,depth-.04,0);
+      } else {
+        for(let i=0;i<24;i++)box('Street timber',x+(x<8?-.105:.105),.88,front+sign*(.16+i*.26),.025,1.12,.09,.004);
+      }
     }
-    box('Street roof',8.295,1.825,middle,3.96,.025,depth-.28,.008);
-    for(let z=Math.min(front,back)+.7;z<Math.max(front,back)-.35;z+=.82)box('Street fittings',8.295,1.841,z,3.83,.005,.007,0);
+    // The structural roof stays opaque under both finishes. Different layouts
+    // avoid two cloned buildings without sacrificing any viewing direction.
+    box(garden?'Street roof':'Street terrace',8.295,1.599,middle,4.08,.035,depth-.12,.008);
+    if(garden) {
+      // Two offset planting beds leave a quiet stone maintenance path.
+      for(const [x,z,w,d]of [[7.05,middle+sign*.65,1.35,4.85],[9.27,middle-sign*.85,1.48,3.85]]) {
+        box('Street roof',x,1.635,z,w,.055,d,.015);
+        for(let i=0;i<Math.floor(w/.29);i++)for(let j=0;j<Math.floor(d/.31);j++)shrub(x-w/2+.16+i*.30,1.70,z-d/2+.16+j*.32,.23,.24,i*17+j);
+      }
+      for(let i=0;i<10;i++)box('Street terrace',8.15,1.627,front+sign*(.4+i*.58),.62,.025,.46,.008);
+    } else {
+      // A small timber terrace echoes the cafe and pergola beside the puzzle.
+      for(let i=0;i<16;i++)box('Street timber',8.60,1.63,front+sign*(1.75+i*.25),2.90,.035,.235,.006);
+      for(const [x,z,d]of [[6.78,front+sign*2.6,2.1],[9.75,back-sign*.7,.85]]) {
+        box('Street masonry',x,1.70,z,.48,.16,d,.025);
+        for(let i=0;i<Math.floor(d/.25);i++)shrub(x,1.82,z-d/2+.13+i*.25,.22,.19,i);
+      }
+      box('Street timber',8.25,1.75,back-sign*.6,1.28,.23,.32,.018);
+    }
     for(const z of [front,back]) {
-      box('Street masonry',8.295,1.88,z,4.67,.24,.22,.025);
-      box('Street fittings',8.295,1.725,z-sign*.035,3.91,.025,.05,.006);
+      box('Street masonry',8.295,1.56,z,4.43,.12,.12,.015);
+      box('Street fittings',8.295,1.49,z-sign*.035,3.91,.018,.03,.004);
     }
-    box('Street masonry',8.295,.81,back+sign*.025,4.43,1.62,.08,.018);
-    // A clerestory band and divided frame make this a small building rather
-    // than a freestanding motorway portal. Its lighting follows scene themes.
-    box('Street glazing',8.295,1.895,front-sign*.116,3.45,.10,.018,.004);
-    for(let x=6.72;x<10;x+=.52) box('Street fittings',x,1.895,front-sign*.129,.018,.12,.018,.003);
+    box('Street masonry',8.295,.74,back+sign*.025,4.43,1.48,.08,.018);
+    if(!garden) {
+      box('Street glazing',8.8,1.55,front-sign*.066,2.4,.07,.018,.004);
+      for(let x=7.6;x<10;x+=.48)box('Street fittings',x,1.55,front-sign*.079,.018,.09,.018,.003);
+    }
     // Recessed entry lights, a drain and rainwater downpipes belong to the shell.
     for(const x of [6.45,10.14]) {
-      box('Street fittings',x,1.28,front+sign*.18,.08,.21,.08,.012);
-      box('Streetlamp glow passage',x,1.28,front+sign*.13,.052,.14,.018,.006);
+      box('Street fittings',x,1.2,front+sign*.18,.07,.17,.07,.01);
+      box('Streetlamp glow passage',x,1.2,front+sign*.13,.045,.11,.018,.006);
     }
     for(let x=6.65;x<10.2;x+=.13) box('Street fittings',x,.044,front-sign*.16,.065,.014,.13,.003);
-    for(const x of [6.07,10.52]) box('Street fittings',x,.78,front+sign*.58,.045,1.5,.045,.008);
-    // Restrained rooftop detail; no oversized signs, faux trees, or roof holes.
-    box('Street fittings',6.77,1.92,middle+sign*.7,.56,.17,.78,.025);
-    for(let i=0;i<5;i++) box('Street roof',6.77,2.01,middle+sign*.7+(i-2)*.12,.48,.02,.045,.004);
-    box('Street masonry',10.16,1.95,middle-sign*.7,.34,.23,1.5,.02);
-    box('Street roof',10.16,2.07,middle-sign*.7,.26,.025,1.4,.006);
-    // Low shrubs keep the roof edge soft; reuse the courtyard's muted palette.
-    for(let i=0;i<7;i++) {
-      const foliage=new THREE.IcosahedronGeometry(1,1);
-      foliage.scale(.14,.07+(i%3)*.01,.15);foliage.translate(10.16+Math.sin(i*3.7)*.025,2.12,middle-sign*.7+(i-3)*.18);
-      foliage.deleteAttribute('uv');if(!pieces.has('Street planting'))pieces.set('Street planting',[]);pieces.get('Street planting').push(foliage);
-    }
+    for(const x of [6.07,10.52])box('Street fittings',x,.72,front+sign*.58,.035,1.4,.035,.006);
     const light=new THREE.PointLight('#ffcf8d',0,2.8,2);
     light.name='Passage entry light';
     light.position.set(8.295,1.42,front+sign*.25);garage.add(light);lights.push(light);
@@ -70,7 +94,7 @@ export function createStreetBlocks(garage) {
   for(const [name,list]of pieces) {
     const geometry=mergeGeometries(list);list.forEach(g=>g.dispose());
     const [color,roughness,metalness]=palette[name];
-    const material=new THREE.MeshStandardMaterial({name,color,roughness,metalness});
+    const material=new THREE.MeshStandardMaterial({name,color,roughness,metalness,vertexColors:name==='Street planting'});
     const mesh=new THREE.Mesh(geometry,material);mesh.name=name;mesh.userData.generatedGeometry=true;
     mesh.raycast=()=>{};garage.add(mesh);geometries.push(geometry);materials.push(material);
   }
