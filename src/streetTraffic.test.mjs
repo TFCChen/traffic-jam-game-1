@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import { createTrafficClock, createStreetTraffic, TRAFFIC_FLEET, trafficTravel, installTrafficCoverage } from './streetTraffic.js';
+import { createTrafficClock, createStreetTraffic, TRAFFIC_FLEET, trafficTravel, installTrafficCoverage, trafficRoute } from './streetTraffic.js';
 let seed = 83;
 const random = () => ((seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296);
 const clock = createTrafficClock(random), trips = new Map();
@@ -10,6 +10,7 @@ for (let frame = 0; frame < 4000; frame++) {
   assert.equal(new Set(poses.map(pose => pose.direction)).size, poses.length, 'one car per lane');
   for (const pose of poses) {
     assert.ok(pose.opacity >= 0 && pose.opacity <= 1);
+    assert.equal(pose.opacity, 1, 'normal traffic never fades into view');
     assert.equal(pose.x, pose.direction < 0 ? 9.25 : 7.35);
     assert.ok(pose.duration < 5.3 && pose.duration > 3.2, 'faster than old seven-second route');
     const previous = trips.get(pose.id);
@@ -32,6 +33,15 @@ clock.step(.1, true, true);
 assert.deepEqual(clock.step(.1, true, true), [], 'street clears in 0.18 seconds for exit');
 for (let i = 0; i < 100; i++) assert.deepEqual(clock.step(.1, true, true), []);
 assert.deepEqual(clock.step(.1, false), []);
+const orbitClock = createTrafficClock(() => .4);
+let orbitPose;
+for (let i = 0; i < 31; i++) orbitPose = orbitClock.step(.1, true)[0] ?? orbitPose;
+const extendedRoute = () => ({ min: -40, max: 40 });
+for (let i = 0; i < 70; i++) {
+  const current = orbitClock.step(.1, true, false, extendedRoute).find(pose => pose.id === orbitPose.id);
+  assert.ok(current, 'zooming out extends the exit instead of removing a visible car');
+  orbitPose = current;
+}
 const coverage = { value: .25 }, opaque = new THREE.MeshStandardMaterial();
 installTrafficCoverage(opaque, coverage);
 const shader = { uniforms: {}, vertexShader: '#include <project_vertex>', fragmentShader: 'void main() {\n#include <opaque_fragment>\n}' };
@@ -41,8 +51,23 @@ assert.equal(opaque.depthWrite, true, 'fading shell must still occlude cabin');
 assert.equal(opaque.opacity, 1);
 assert.equal(shader.uniforms.trafficCoverage, coverage);
 assert.match(shader.fragmentShader, /gl_FragCoord/);
-assert.match(shader.fragmentShader, /trafficWorld.z/);
+assert.doesNotMatch(shader.fragmentShader, /trafficWorld|trafficWorld.z/, 'never slice the vehicle at a world-space boundary');
 assert.match(shader.fragmentShader, /discard/);
+for (const pitch of [30, 45, 90]) for (const yaw of [0, 45, 90, 180]) for (const zoom of [.65, 1, 4]) {
+  const camera = new THREE.OrthographicCamera(-12 / zoom, 12 / zoom, 9 / zoom, -9 / zoom, .1, 400);
+  const p = pitch * Math.PI / 180, a = yaw * Math.PI / 180;
+  camera.position.set(3 + 200 * Math.sin(a) * Math.cos(p), 200 * Math.sin(p), 3 + 200 * Math.cos(a) * Math.cos(p));
+  camera.up.set(-Math.sin(a)*Math.sin(p), Math.cos(p), -Math.cos(a)*Math.sin(p));
+  camera.lookAt(3, 0, 3); camera.updateMatrixWorld(true);
+  const frustum = new THREE.Frustum().setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+  for (const x of [7.35, 9.25]) for (const length of [2, 3]) {
+    const route = trafficRoute(camera, x, length);
+    if (!route) continue;
+    for (const z of [route.min, route.max]) {
+      assert.equal(frustum.intersectsSphere(new THREE.Sphere(new THREE.Vector3(x, .8, z), Math.hypot(length / 2 + .25, .8, .6))), false, 'whole vehicle outside camera at both endpoints');
+    }
+  }
+}
 const scene = new THREE.Scene(), source = new THREE.Group();
 const geometry = new THREE.BoxGeometry(), material = new THREE.MeshStandardMaterial({ name: 'Paint body' });
 source.add(new THREE.Mesh(geometry, material));

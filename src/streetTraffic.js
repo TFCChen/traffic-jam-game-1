@@ -16,42 +16,96 @@ export function trafficTravel(progress, bend) {
   // Monotonic, with independently varied entry/exit speed; never stops or reverses.
   return progress + bend * Math.sin(Math.PI * progress) / Math.PI;
 }
+// Bound the complete vehicle, not just its centre, outside the current camera.
+export function trafficRoute(camera, x, length) {
+  const frustum = new THREE.Frustum().setFromProjectionMatrix(
+    new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+  const radius = Math.hypot(length / 2 + .25, .8, .6);
+  let min = -96, max = 96;
+  for (const plane of frustum.planes) {
+    const distance = plane.distanceToPoint(new THREE.Vector3(x, .8, 0)) + radius;
+    if (Math.abs(plane.normal.z) < 1e-6) {
+      if (distance < 0) return null;
+    } else if (plane.normal.z > 0) min = Math.max(min, -distance / plane.normal.z);
+    else max = Math.min(max, -distance / plane.normal.z);
+  }
+  return min <= max ? { min: min - .5, max: max + .5 } : null;
+}
+export function extendStreetRoad(garage) {
+  let asphalt, markings;
+  garage.traverse(mesh => {
+    if (mesh.isMesh && mesh.material.name === 'Street asphalt') asphalt = mesh;
+    if (mesh.isMesh && mesh.material.name === 'Parking markings') markings = mesh.material;
+  });
+  if (!asphalt) return [];
+  garage.updateMatrixWorld(true);
+  const bounds = new THREE.Box3().setFromObject(asphalt), center = bounds.getCenter(new THREE.Vector3());
+  const road = new THREE.Mesh(new THREE.BoxGeometry(bounds.max.x - bounds.min.x, .514, 200), asphalt.material);
+  road.position.set(center.x, bounds.max.y - .001 - .257, center.z);
+  road.name = 'Continuous street approaches';
+  road.raycast = () => {};
+  garage.add(road);
+  const geometries = [road.geometry];
+  if (markings) {
+    const positions = [], normals = [];
+    for (let z = center.z - 99; z < center.z + 99; z += .85) {
+      if (z + .42 > bounds.min.z && z < bounds.max.z) continue;
+      const x = center.x, y = bounds.max.y + .001;
+      for (const point of [[x-.018,z],[x-.018,z+.38],[x+.018,z],[x+.018,z],[x-.018,z+.38],[x+.018,z+.38]]) {
+        positions.push(point[0], y, point[1]); normals.push(0, 1, 0);
+      }
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+    const lines = new THREE.Mesh(geometry, markings);
+    lines.raycast = () => {};
+    garage.add(lines); geometries.push(geometry);
+  }
+  return geometries;
+}
 export function createTrafficClock(random = Math.random) {
   let wait = 3, sequence = 0, active = [], bag = [], lastDirection = 0;
   const pick = count => Math.min(count - 1, Math.floor(random() * count));
   return {
-    step(dt, enabled, blocked = false) {
+    step(dt, enabled, blocked = false, routeFor = (_, length) => ({ min: -2.1 - length / 2, max: 10.2 + length / 2 })) {
       dt = Math.max(0, Math.min(.1, dt));
       if (!enabled) { active = []; wait = 3; return []; }
       for (const item of active) {
         item.age += dt;
+        const progress = Math.min(1, item.age / item.duration);
+        const distance = item.span * trafficTravel(progress, item.bend)
+          + Math.max(0, item.age - item.duration) * item.speed * (1 - item.bend);
+        item.distance = distance;
+        item.z = item.start + item.direction * distance;
+        // Zooming out or orbiting during a trip must not expose its despawn.
+        const route = routeFor(item.direction, TRAFFIC_FLEET[item.model].length);
+        if (route) item.end = item.direction < 0 ? Math.min(item.end, route.min) : Math.max(item.end, route.max);
         if (blocked) item.retiring = Math.max(0, item.retiring - dt / .18);
       }
-      active = active.filter(item => item.age < item.duration && item.retiring > 0);
+      active = active.filter(item => item.z * item.direction < item.end * item.direction && item.retiring > 0);
       if (!blocked) wait -= dt;
       if (!blocked && wait <= 0 && active.length < 2) {
         if (!bag.length) bag = TRAFFIC_FLEET.map((_, index) => index);
         const available = bag.filter(index => !active.some(item => item.model === index));
         if (available.length) {
           const model = available[pick(available.length)], spec = TRAFFIC_FLEET[model];
-          bag.splice(bag.indexOf(model), 1);
           let direction = lastDirection ? -lastDirection : random() < .5 ? -1 : 1;
           if (active.some(item => item.direction === direction)) direction *= -1;
+          const route = routeFor(direction, spec.length);
+          if (!route) { wait = 1; return active.map(item => ({ ...item, x: item.direction < 0 ? 9.25 : 7.35, opacity: item.retiring })); }
+          bag.splice(bag.indexOf(model), 1);
           lastDirection = direction;
-          const span = 12.3 + spec.length;
+          const span = route.max - route.min, speed = 2.9 + random() * 1.5;
+          const start = direction < 0 ? route.max : route.min;
           active.push({ id: ++sequence, model, direction, color: spec.colors[pick(spec.colors.length)],
-            duration: span / (2.9 + random() * 1.5), bend: (random() - .5) * .65,
+            duration: span / speed, span, speed, start, z: start, distance: 0,
+            end: direction < 0 ? route.min : route.max, bend: (random() - .5) * .65,
             age: 0, retiring: 1 });
           wait = 3.8 + random() * 6.2;
         }
       }
-      return active.map(item => {
-        const length = TRAFFIC_FLEET[item.model].length, progress = item.age / item.duration;
-        const distance = (12.3 + length) * trafficTravel(progress, item.bend);
-        const z = item.direction < 0 ? 10.2 + length / 2 - distance : -2.1 - length / 2 + distance;
-        return { ...item, distance, z, x: item.direction < 0 ? 9.25 : 7.35,
-          opacity: Math.min(1, progress / .055, (1 - progress) / .055) * item.retiring };
-      });
+      return active.map(item => ({ ...item, x: item.direction < 0 ? 9.25 : 7.35, opacity: item.retiring }));
     },
   };
 }
@@ -63,12 +117,8 @@ export function installTrafficCoverage(material, coverage) {
   material.onBeforeCompile = (shader, renderer) => {
     before.call(material, shader, renderer);
     shader.uniforms.trafficCoverage = coverage;
-    shader.vertexShader = 'varying vec3 trafficWorld;\n' + shader.vertexShader;
-    shader.vertexShader = shader.vertexShader.replace('#include <project_vertex>',
-      'trafficWorld=(modelMatrix*vec4(transformed,1.)).xyz;\n#include <project_vertex>');
-    shader.fragmentShader = 'uniform float trafficCoverage; varying vec3 trafficWorld;\n' + shader.fragmentShader;
+    shader.fragmentShader = 'uniform float trafficCoverage;\n' + shader.fragmentShader;
     shader.fragmentShader = shader.fragmentShader.replace('void main() {', `void main() {
-      if(trafficWorld.z < -2.1 || trafficWorld.z > 10.2) discard;
       vec2 pixel=mod(floor(gl_FragCoord.xy),4.);
       vec2 low=mod(pixel,2.);
       vec2 high=floor(pixel/2.);
@@ -76,7 +126,7 @@ export function installTrafficCoverage(material, coverage) {
       if(trafficCoverage < threshold) discard;
     `);
   };
-  material.customProgramCacheKey = () => key + '-traffic-coverage-v1';
+  material.customProgramCacheKey = () => key + '-traffic-coverage-v2';
 }
 
 function createTrafficVehicle(scene, source, spec, contactTexture, rainSurfaces) {
@@ -156,7 +206,7 @@ function createTrafficVehicle(scene, source, spec, contactTexture, rainSurfaces)
   };
 }
 
-export function createStreetTraffic(scene, library, contactTextures, rainSurfaces, random = Math.random) {
+export function createStreetTraffic(scene, library, contactTextures, rainSurfaces, random = Math.random, camera) {
   const clock = createTrafficClock(random);
   const fleet = TRAFFIC_FLEET.map(spec => createTrafficVehicle(scene, library[spec.kind], spec, contactTextures.get(spec.length), rainSurfaces));
   return {
@@ -168,7 +218,8 @@ export function createStreetTraffic(scene, library, contactTextures, rainSurface
       return changed;
     },
     update(dt, settings, quality, reduced, props) {
-      const poses = clock.step(dt, quality.decor && !reduced && !props.editor, props.won || props.disabled);
+      const poses = clock.step(dt, quality.decor && !reduced && !props.editor, props.won || props.disabled,
+        camera ? (direction, length) => trafficRoute(camera, direction < 0 ? 9.25 : 7.35, length) : undefined);
       fleet.forEach((vehicle, index) => vehicle.update(poses.find(pose => pose.model === index), settings));
     },
     dispose() { fleet.forEach(vehicle => vehicle.dispose()); },

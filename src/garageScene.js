@@ -34,7 +34,7 @@ import { createRenderProfiler } from "./renderProfiler.js";
 import { cacheLocalTransforms } from "./sceneTransforms.js";
 import { createCourtyardAtmosphere } from './courtyardAtmosphere.js';
 import { createGroundSurface, pavingTone } from './groundSurface.js';
-import { createStreetTraffic } from './streetTraffic.js';
+import { createStreetTraffic, extendStreetRoad } from './streetTraffic.js';
 import { createRainSurfaces } from './rainSurfaces.js';
 import { configureVehiclePaint, vehicleTrimSurface } from './vehicleFinish.js';
 import { VEHICLE_GROUND_HEIGHT, CONTACT_PLANE_OFFSET } from './contactShadow.js';
@@ -1438,6 +1438,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
         },
       );
       ownedGeometries.add(streetBatch.geometry);
+      extendStreetRoad(garage).forEach(geometry => ownedGeometries.add(geometry));
       garage.traverse((o) => {
         if (o.isMesh) {
           if (!o.userData.generatedGeometry) o.material = o.material.clone();
@@ -1462,7 +1463,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       garage.traverse(mesh=>{if(mesh.isMesh)rainSurfaces.attach(mesh.material);});
       groundSurface = createGroundSurface(renderer, garage);
       groundSurface.setTheme(settings, quality);
-      streetTraffic = createStreetTraffic(scene, library, contactTextures, rainSurfaces);
+      streetTraffic = createStreetTraffic(scene, library, contactTextures, rainSurfaces, Math.random, camera);
       updateCamera();
       sync();
       streetTraffic.prepare();
