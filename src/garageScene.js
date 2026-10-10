@@ -5,7 +5,7 @@ import {stabilizeShadowFilter} from './stableShadowFilter.js';
 stabilizeShadowFilter();
 import { createHintGuide } from './hintGuide.js';
 import { exitPose, exitSceneFade, EXIT_COMPLETE_MS } from './exitChoreography.js';
-import { vegetationShadowProxy, configureCourtyardSunShadow } from './environmentShadows.js';
+import { vegetationShadowProxy, configureCourtyardSunShadow, fitCourtyardExitShadow } from './environmentShadows.js';
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { createCourtyardReflections } from './courtyardReflections.js';
 import { legalMovesForCar } from "./gameEngine.js";
@@ -34,7 +34,8 @@ import { createRenderProfiler } from "./renderProfiler.js";
 import { cacheLocalTransforms } from "./sceneTransforms.js";
 import { createCourtyardAtmosphere } from './courtyardAtmosphere.js';
 import { createGroundSurface, pavingTone } from './groundSurface.js';
-import { createStreetTraffic, extendStreetRoad } from './streetTraffic.js';
+import { createStreetTraffic } from './streetTraffic.js';
+import { extendStreetRoad } from './streetApproaches.js';
 import { createRainSurfaces } from './rainSurfaces.js';
 import { configureVehiclePaint, vehicleTrimSurface } from './vehicleFinish.js';
 import { VEHICLE_GROUND_HEIGHT, CONTACT_PLANE_OFFSET } from './contactShadow.js';
@@ -553,6 +554,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     );
     sun.intensity = settings.intensity * theme.key;
     sun.color.set(theme.sun);
+    fitCourtyardExitShadow(sun);
     sun.castShadow = settings.shadows && quality.decor;
     ambient.color.set(theme.sky);
     ambient.groundColor.set(theme.ground);
@@ -1389,6 +1391,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       if (!alive) return;
       library = models;
       const garage = library.garage.clone(true);
+      extendStreetRoad(garage).forEach(geometry => ownedGeometries.add(geometry));
       // Keep the fence independently inspectable after the shadow isolation
       // test. Its normal shadows are restored once the slab overlap is fixed.
       const fenceBatch=batchColoredMeshes(garage,mesh=>mesh.material.name.startsWith('Fence '),{
@@ -1438,7 +1441,6 @@ export function createGarageScene(canvas, getProps, callbacks) {
         },
       );
       ownedGeometries.add(streetBatch.geometry);
-      extendStreetRoad(garage).forEach(geometry => ownedGeometries.add(geometry));
       garage.traverse((o) => {
         if (o.isMesh) {
           if (!o.userData.generatedGeometry) o.material = o.material.clone();

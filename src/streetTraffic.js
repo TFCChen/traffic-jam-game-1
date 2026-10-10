@@ -31,39 +31,6 @@ export function trafficRoute(camera, x, length) {
   }
   return min <= max ? { min: min - .5, max: max + .5 } : null;
 }
-export function extendStreetRoad(garage) {
-  let asphalt, markings;
-  garage.traverse(mesh => {
-    if (mesh.isMesh && mesh.material.name === 'Street asphalt') asphalt = mesh;
-    if (mesh.isMesh && mesh.material.name === 'Parking markings') markings = mesh.material;
-  });
-  if (!asphalt) return [];
-  garage.updateMatrixWorld(true);
-  const bounds = new THREE.Box3().setFromObject(asphalt), center = bounds.getCenter(new THREE.Vector3());
-  const road = new THREE.Mesh(new THREE.BoxGeometry(bounds.max.x - bounds.min.x, .514, 200), asphalt.material);
-  road.position.set(center.x, bounds.max.y - .001 - .257, center.z);
-  road.name = 'Continuous street approaches';
-  road.raycast = () => {};
-  garage.add(road);
-  const geometries = [road.geometry];
-  if (markings) {
-    const positions = [], normals = [];
-    for (let z = center.z - 99; z < center.z + 99; z += .85) {
-      if (z + .42 > bounds.min.z && z < bounds.max.z) continue;
-      const x = center.x, y = bounds.max.y + .001;
-      for (const point of [[x-.018,z],[x-.018,z+.38],[x+.018,z],[x+.018,z],[x-.018,z+.38],[x+.018,z+.38]]) {
-        positions.push(point[0], y, point[1]); normals.push(0, 1, 0);
-      }
-    }
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-    geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
-    const lines = new THREE.Mesh(geometry, markings);
-    lines.raycast = () => {};
-    garage.add(lines); geometries.push(geometry);
-  }
-  return geometries;
-}
 export function createTrafficClock(random = Math.random) {
   let wait = 3, sequence = 0, active = [], bag = [], lastDirection = 0;
   const pick = count => Math.min(count - 1, Math.floor(random() * count));
@@ -96,7 +63,7 @@ export function createTrafficClock(random = Math.random) {
           if (!route) { wait = 1; return active.map(item => ({ ...item, x: item.direction < 0 ? 9.25 : 7.35, opacity: item.retiring })); }
           bag.splice(bag.indexOf(model), 1);
           lastDirection = direction;
-          const span = route.max - route.min, speed = 2.9 + random() * 1.5;
+          const span = route.max - route.min, speed = 5.2 + random() * 2.4;
           const start = direction < 0 ? route.max : route.min;
           active.push({ id: ++sequence, model, direction, color: spec.colors[pick(spec.colors.length)],
             duration: span / speed, span, speed, start, z: start, distance: 0,

@@ -12,7 +12,7 @@ for (let frame = 0; frame < 4000; frame++) {
     assert.ok(pose.opacity >= 0 && pose.opacity <= 1);
     assert.equal(pose.opacity, 1, 'normal traffic never fades into view');
     assert.equal(pose.x, pose.direction < 0 ? 9.25 : 7.35);
-    assert.ok(pose.duration < 5.3 && pose.duration > 3.2, 'faster than old seven-second route');
+    assert.ok(pose.duration < 3 && pose.duration > 1.8, 'brisk traffic with per-trip speed variety');
     const previous = trips.get(pose.id);
     if (previous) assert.ok((pose.z - previous.z) * pose.direction > 0);
     trips.set(pose.id, pose);
@@ -37,7 +37,7 @@ const orbitClock = createTrafficClock(() => .4);
 let orbitPose;
 for (let i = 0; i < 31; i++) orbitPose = orbitClock.step(.1, true)[0] ?? orbitPose;
 const extendedRoute = () => ({ min: -40, max: 40 });
-for (let i = 0; i < 70; i++) {
+for (let i = 0; i < 40; i++) {
   const current = orbitClock.step(.1, true, false, extendedRoute).find(pose => pose.id === orbitPose.id);
   assert.ok(current, 'zooming out extends the exit instead of removing a visible car');
   orbitPose = current;

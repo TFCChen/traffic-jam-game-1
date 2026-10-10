@@ -11,6 +11,21 @@ export function configureCourtyardSunShadow(shadow) {
   shadow.bias = -0.0001;
 }
 
+// Fit once per lighting change to a fixed world region, including the full
+// departing car and its ground projection. Never chase the car each frame.
+export function fitCourtyardExitShadow(light) {
+  light.updateMatrixWorld(true); light.target.updateMatrixWorld(true);
+  light.shadow.updateMatrices(light);
+  const camera=light.shadow.camera, point=new THREE.Vector3();
+  let left=-8,right=8,bottom=-8,top=8;
+  for(const x of [6.4,10.7])for(const y of [-.5,1.8])for(const z of [-2.2,11]) {
+    point.set(x,y,z).applyMatrix4(camera.matrixWorldInverse);
+    left=Math.min(left,point.x-.8);right=Math.max(right,point.x+.8);
+    bottom=Math.min(bottom,point.y-.8);top=Math.max(top,point.y+.8);
+  }
+  Object.assign(camera,{left,right,bottom,top});camera.updateProjectionMatrix();
+}
+
 // Static canopy clusters cast soft silhouettes using ~80 triangles each.
 // The full authored leaves remain in the camera pass and receive lighting.
 export function vegetationShadowProxy(foliage) {

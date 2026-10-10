@@ -4,8 +4,9 @@ import {Box3,Raycaster,Vector3,Mesh,DirectionalLight,ShaderChunk} from 'three';
 import {stableShadowSource,stabilizeShadowFilter} from './stableShadowFilter.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {exitPose,EXIT_COMPLETE_MS} from './exitChoreography.js';
-import {vegetationShadowProxy,configureCourtyardSunShadow} from './environmentShadows.js';
-import {createWheelShadowGeometry} from './garageMaterials.js';
+import {vegetationShadowProxy,configureCourtyardSunShadow,fitCourtyardExitShadow} from './environmentShadows.js';
+import {extendStreetRoad} from './streetApproaches.js';
+import {createWheelShadowGeometry,batchColoredMeshes} from './garageMaterials.js';
 const bytes=fs.readFileSync(new URL('../public/models/garage.glb',import.meta.url));
 const {scene}=await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),'');
 scene.updateMatrixWorld(true);
@@ -89,3 +90,35 @@ const lipHit=new Raycaster(new Vector3(-.46,2,5.6),new Vector3(0,-1,0)).intersec
 assert(soilHit&&lipHit&&soilHit.point.y<lipHit.point.y-.01,'Soil must sit inside the planter instead of above its lip');
 
 assert(!new Raycaster(new Vector3(-.68,2,5.6),new Vector3(0,-1,0)).intersectObject(scene,true).some(h=>h.object.material.name==='Honed warm limestone'&&h.point.y>soilHit.point.y),'The planting cavity must be genuinely open');
+
+const extended=scene.clone(true),originalStreet=asphalt.find(mesh=>mesh.material.name==='Street asphalt');
+const originalPositions=originalStreet.geometry.attributes.position.array.slice();
+const approaches=extendStreetRoad(extended);
+extended.updateMatrixWorld(true);
+let continuousRoads=0;
+extended.traverse(mesh=>{if(mesh.isMesh&&mesh.material.name==='Street asphalt')continuousRoads++;});
+assert.equal(continuousRoads,1,'A single road receiver prevents overlapping seams');
+assert.deepEqual(originalStreet.geometry.attributes.position.array,originalPositions,'Shared source geometry stays untouched');
+const roadMesh=extended.getObjectByName('Continuous neighbourhood street');
+const roadBounds=new Box3().setFromObject(roadMesh);
+assert(Math.abs(roadBounds.max.y-.0355)<.0001,'New and original street keep the same height');
+assert(roadBounds.max.z-roadBounds.min.z>199,'Road approaches extend beyond the view');
+const curbBounds=new Box3().setFromObject(extended.getObjectByName('Matching continuous stone curbs'));
+assert(curbBounds.min.z<-90&&curbBounds.max.z>90,'Both kerb lines continue with the road');
+for(const height of [4.6,9,10])for(let angle=-180;angle<=180;angle+=30) {
+  const a=angle*Math.PI/180;
+  sun.position.set(3+Math.sin(a)*9.5,height,3+Math.cos(a)*9.5);
+  fitCourtyardExitShadow(sun);
+  const c=sun.shadow.camera;
+  for(let age=1800;age<3850;age+=75) {
+    const pose=exitPose(age);
+    for(const dx of [-1.1,1.1])for(const dz of [-1.1,1.1]) {
+      const point=new Vector3(pose.x+dx,.8,pose.z+dz).applyMatrix4(c.matrixWorldInverse);
+      assert(point.x>c.left&&point.x<c.right&&point.y>c.bottom&&point.y<c.top,'Exit silhouette cannot cross the sun map edge');
+    }
+  }
+}
+const stoneBatch=batchColoredMeshes(extended,mesh=>['Honed warm limestone','Basalt foundation'].includes(mesh.material.name));
+assert(stoneBatch?.geometry.index,'New curbs must remain compatible with the existing scenery batching');
+stoneBatch.geometry.dispose();stoneBatch.material.dispose();
+approaches.forEach(geometry=>geometry.dispose());
