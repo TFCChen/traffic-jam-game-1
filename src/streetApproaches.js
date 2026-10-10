@@ -29,12 +29,17 @@ export function extendStreetRoad(garage) {
   garage.updateMatrixWorld(true);
   const inverse = garage.matrixWorld.clone().invert(), stones = [], normalFormats = new Map();
   let asphalt, markings, foundation;
+  const foundationBounds = new THREE.Box3();
   garage.traverse(mesh => {
     if (!mesh.isMesh) return;
     normalFormats.set(mesh.material,mesh.geometry.attributes.normal);
     if (mesh.material.name === 'Street asphalt') asphalt = mesh;
     if (mesh.material.name === 'Parking markings') markings = mesh.material;
-    if (mesh.material.name === 'Basalt foundation') foundation = mesh.material;
+    if (mesh.material.name === 'Basalt foundation') {
+      foundation = mesh.material;
+      mesh.geometry.computeBoundingBox();
+      foundationBounds.union(mesh.geometry.boundingBox.clone().applyMatrix4(new THREE.Matrix4().multiplyMatrices(inverse,mesh.matrixWorld)));
+    }
     if (mesh.material.name === 'Honed warm limestone') stones.push(mesh);
   });
   if (!asphalt) return [];
@@ -62,8 +67,19 @@ export function extendStreetRoad(garage) {
   asphalt.removeFromParent();
   add(surface,asphalt.material,'Continuous neighbourhood street');
   if (foundation) {
-    const base = add(new THREE.BoxGeometry(bounds.max.x-bounds.min.x,.48,roadLength),foundation,'Street foundation');
-    base.position.set(center.x,-.24,roadCenter);
+    // The authored courtyard already has a slab, and each tunnel owns its
+    // full-width stone plinth. Fill only the two small uncovered joins.
+    // A second full-length slab put coplanar dark faces on both tunnel backs.
+    const joins=[];
+    for(const [a,b]of [[STREET.north,Math.min(STREET.south,foundationBounds.min.z)],
+      [Math.max(STREET.north,foundationBounds.max.z),STREET.south]]) {
+      if(b-a<=.0001)continue;
+      joins.push(new THREE.BoxGeometry(bounds.max.x-bounds.min.x,.48,b-a).translate(center.x,-.24,(a+b)/2));
+    }
+    if(joins.length) {
+      const geometry=mergeGeometries(joins);joins.forEach(g=>g.dispose());
+      add(geometry,foundation,'Street foundation');
+    }
   }
   const templates = stones.map(mesh => ({geometry:curbTemplate(mesh,inverse),material:mesh.material})).filter(item=>item.geometry);
   if (!templates.length) throw Error('Authored street curb template missing');

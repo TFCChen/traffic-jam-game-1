@@ -133,6 +133,19 @@ approaches.forEach(geometry=>geometry.dispose());
 const buildings=new Group(),blocks=createStreetBlocks(buildings);
 buildings.traverse(mesh=>{if(mesh.isMesh)mesh.raycast=Mesh.prototype.raycast;});
 buildings.updateMatrixWorld(true);
+// Orbiting exposed coincident dark road and pale plinth faces on each back.
+// The tunnel must be the sole owner of its visible foundation face.
+const foundationScene=scene.clone(true),foundationParts=extendStreetRoad(foundationScene);
+foundationScene.add(buildings);
+foundationScene.traverse(mesh=>{if(mesh.isMesh)mesh.raycast=Mesh.prototype.raycast;});
+foundationScene.updateMatrixWorld(true);
+for(const [z,sign]of [[STREET.min,-1],[STREET.max,1]])for(const x of [7,8.3,9.6]) {
+  const hits=new Raycaster(new Vector3(x,-.24,z+sign),new Vector3(0,0,-sign)).intersectObject(foundationScene,true);
+  assert(hits.length,'Tunnel rear plinth is supported');
+  const coincident=new Set(hits.filter(hit=>Math.abs(hit.distance-hits[0].distance)<.0001).map(hit=>hit.object));
+  assert.equal(coincident.size,1,'No competing road and tunnel faces at the visible rear foundation');
+}
+foundationParts.forEach(g=>g.dispose());
 const shell=buildings.children.filter(mesh=>mesh.name==='Street tunnel');
 for(let pitch=30;pitch<=90;pitch+=15)for(let yaw=-180;yaw<180;yaw+=15) {
   const p=pitch*Math.PI/180,a=yaw*Math.PI/180,camera=new OrthographicCamera(-12,12,9,-9,.1,400);
