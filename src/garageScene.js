@@ -34,6 +34,7 @@ import { createRenderProfiler } from "./renderProfiler.js";
 import { cacheLocalTransforms } from "./sceneTransforms.js";
 import { createCourtyardAtmosphere } from './courtyardAtmosphere.js';
 import { createGroundSurface, pavingTone } from './groundSurface.js';
+import { createStreetTraffic } from './streetTraffic.js';
 import { createRainSurfaces } from './rainSurfaces.js';
 import { configureVehiclePaint, vehicleTrimSurface } from './vehicleFinish.js';
 import { VEHICLE_GROUND_HEIGHT, CONTACT_PLANE_OFFSET } from './contactShadow.js';
@@ -193,6 +194,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
   let vegetationShadows;
   let atmosphere;
   let groundSurface;
+  let streetTraffic;
   const rainSurfaces=createRainSurfaces();
   const stats = { frames: 0, shadowUpdates: 0, movingFrames: 0, movingShadowFrames: 0, renderedSceneKey: null };
   const inputSamples = [];
@@ -234,7 +236,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
   reduced.addEventListener("change", motionChanged);
   const ambient = new THREE.HemisphereLight(0xfff7e7, 0x738a89, 2.0);
   scene.add(ambient);
-  const garageFill = new THREE.SpotLight("#c7e4ec", 20, 9, 0.72, 0.75, 2);
+  const garageFill = new THREE.SpotLight("#c7e4ec", 24, 9, 0.82, 0.9, 2);
   garageFill.position.set(3.2, 5, 3);
   garageFill.target.position.set(3, 0, 3);
   garageFill.visible = false;
@@ -263,7 +265,9 @@ export function createGarageScene(canvas, getProps, callbacks) {
     color: "#edf0e8",
     roughness: 1,
   });
+  const nightBackdrop = { value: 0 };
   floorMaterial.onBeforeCompile = (shader) => {
+    shader.uniforms.nightBackdrop = nightBackdrop;
     // The backdrop is outside the playable block. It needs the sun/sky and
     // courtyard silhouette, but not eight local lamp evaluations per pixel.
     shader.fragmentShader=shader.fragmentShader.replace('#include <lights_fragment_begin>',
@@ -275,13 +279,15 @@ export function createGarageScene(canvas, getProps, callbacks) {
       "garageFloorPosition=(modelMatrix*vec4(transformed,1.)).xyz;\n#include <project_vertex>",
     );
     shader.fragmentShader =
-      "varying vec3 garageFloorPosition;\n" + shader.fragmentShader;
+      "uniform float nightBackdrop; varying vec3 garageFloorPosition;\n" + shader.fragmentShader;
     shader.fragmentShader = shader.fragmentShader.replace(
       "#include <color_fragment>",
       "#include <color_fragment>\nvec2 floorOffset=garageFloorPosition.xz-vec2(3.);\ndiffuseColor.rgb*=mix(.68,1.04,exp(-dot(floorOffset,floorOffset)*.027));",
     );
+    shader.fragmentShader = shader.fragmentShader.replace('#include <emissivemap_fragment>',
+      '#include <emissivemap_fragment>\nvec2 nightOffset=(garageFloorPosition.xz-vec2(3.,2.))/vec2(15.,11.);\ntotalEmissiveRadiance+=nightBackdrop*vec3(.006,.012,.022)*(.35+.65*exp(-dot(nightOffset,nightOffset)));');
   };
-  floorMaterial.customProgramCacheKey = () => "garage-floor-sky-and-sun-v2";
+  floorMaterial.customProgramCacheKey = () => "garage-floor-sky-and-sun-v3";
   ownedMaterials.add(floorMaterial);
   const floorGeometry = new THREE.PlaneGeometry(200, 200);
   ownedGeometries.add(floorGeometry);
@@ -554,6 +560,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     scene.environmentIntensity = theme.environment;
     refreshReflections(theme);
     floorMaterial.color.set(theme.floor);
+    nightBackdrop.value = settings.theme === 'neon' ? 1 : 0;
     garageFill.visible = settings.theme === "neon";
     streetLights.forEach((light) => {
       light.visible = quality.decor && settings.theme !== "day";
@@ -1455,6 +1462,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       garage.traverse(mesh=>{if(mesh.isMesh)rainSurfaces.attach(mesh.material);});
       groundSurface = createGroundSurface(renderer, garage);
       groundSurface.setTheme(settings, quality);
+      streetTraffic = createStreetTraffic(scene, library.compact, contactTextures.get(2), rainSurfaces);
       updateCamera();
       sync();
       await renderer.compileAsync(scene, camera);
@@ -1487,6 +1495,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     // Cap high-refresh displays too; retain ambient life without rendering at 120/144 Hz.
     // Reset ambient poses before reduced motion suppresses static frames.
     if ((reduced.matches || !quality.decor) && atmosphere?.pause()) dirty = true;
+    if ((reduced.matches || !quality.decor) && streetTraffic?.pause()) dirty = true;
     const budget = 1000 / (active ? quality.activeFPS : quality.idleFPS);
     if (
       !dirty &&
@@ -1742,6 +1751,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     const synchronousMovingShadows = shadowChanged;
     if (vehicleLights.update(props.editor?null:litCar,settings,quality,now,shadowChanged||renderer.shadowMap.needsUpdate,synchronousMovingShadows)) renderer.shadowMap.needsUpdate=true;
     atmosphere?.update(dt, settings, quality, reduced.matches, props.editor);
+    streetTraffic?.update(dt, settings, quality, reduced.matches, props);
     groundSurface?.update(dt,settings,quality,reduced.matches,props.editor);
     exhaustSmoke.update(dt,now,camera,!reduced.matches&&quality.decor&&!props.editor,settings.theme);
     particles.forEach((p) => {
@@ -1976,6 +1986,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
       reflections?.dispose();
 
       atmosphere?.dispose();
+      streetTraffic?.dispose();
       groundSurface?.dispose();
       rainSurfaces.dispose();
       placementCells.dispose(); placementGhost.dispose();

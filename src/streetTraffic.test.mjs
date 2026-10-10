@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import * as THREE from 'three';
+import { createTrafficClock, createStreetTraffic } from './streetTraffic.js';
+
+const clock = createTrafficClock();
+for (let i = 0; i < 59; i++) assert.equal(clock.step(.1, true), null);
+let pose;
+for (let i = 0; i < 3 && !pose; i++) pose = clock.step(.1, true);
+assert.ok(pose && pose.z > 9 && pose.opacity < 1);
+const start = pose.z;
+for (let i = 0; i < 20; i++) pose = clock.step(.1, true);
+assert.ok(pose.z < start && pose.opacity === 1);
+assert.ok(clock.step(.1, true, true).opacity < .5);
+assert.equal(clock.step(.1, true, true), null, 'clear street before red-car exit');
+for (let i = 0; i < 400; i++) assert.equal(clock.step(.1, true, true), null);
+assert.equal(clock.step(.1, false), null);
+for (let i = 0; i < 59; i++) assert.equal(clock.step(.1, true), null);
+
+const scene = new THREE.Scene(), source = new THREE.Group();
+const geometry = new THREE.BoxGeometry(), material = new THREE.MeshStandardMaterial({ name: 'Paint body' });
+source.add(new THREE.Mesh(geometry, material));
+const traffic = createStreetTraffic(scene, source, null);
+for (let i = 0; i < 90; i++) traffic.update(.1, {}, { decor: true }, false, {});
+assert.equal(scene.children[0].visible, true);
+assert.equal(scene.children[0].position.x, 9.35);
+assert.equal(material.transparent, false, 'source paint stays untouched');
+traffic.update(.1, {}, { decor: true }, false, { editor: true });
+assert.equal(scene.children[0].visible, false);
+traffic.dispose();
+assert.equal(scene.children.length, 0);
+geometry.dispose(); material.dispose();
+console.log('Street traffic spacing, exit priority, pause and ownership passed');
