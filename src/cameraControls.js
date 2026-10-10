@@ -12,6 +12,13 @@ export const DEFAULT_VIEW = {
   focusX: 0,
   focusZ: 0,
 };
+// Fit in the unobstructed screen area without storing a UI offset as user pan.
+export function safeFrame(extentX, extentY, width, height, top = 0, bottom = 0) {
+  const usable = Math.max(height * .4, height - top - bottom);
+  const halfWidth = Math.max(extentX, extentY * width / usable);
+  const halfHeight = halfWidth * height / width;
+  return { halfWidth, halfHeight, offsetY: halfHeight * (bottom - top) / height };
+}
 const number = (v, fallback) =>
   Number.isFinite(Number(v)) ? Number(v) : fallback;
 export function normalizeView(value = {}) {

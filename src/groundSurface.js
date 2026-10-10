@@ -10,6 +10,21 @@ function noise(x,z) {
   const a=hash(ix,iz)*(1-tx)+hash(ix+1,iz)*tx,b=hash(ix,iz+1)*(1-tx)+hash(ix+1,iz+1)*tx;
   return a*(1-tz)+b*tz;
 }
+// Local contact weathering stays on the sidewalk, away from puzzle cells.
+export function courtyardWear(x,z) {
+  let wear = 0;
+  for (const [cx,cz,rx,rz] of [[-.68,5.6,.42,.46],[5.66,-.73,.42,.46],[6,7.25,.42,.46],[-1.5,6.95,.42,.46],[-.6,2.9,.46,.79],[2.1,-.65,1.1,.36],[3.9,6.65,1.02,.35]]) {
+    const distance = Math.hypot((x-cx)/rx,(z-cz)/rz);
+    wear = Math.max(wear, (1-smooth(.6,1.65,distance)) * (.55+.45*noise(x*5,z*5)));
+  }
+  return x > 0 && x < 6 && z > 0 && z < 6 ? 0 : wear;
+}
+export function pavingTone(name,x,z) {
+  if (name === 'Recessed mortar') return [.83,.84,.82];
+  const shade = .91 + hash(Math.round(x*17),Math.round(z*17)) * .13;
+  const warmth = (noise(x*.7+9,z*.7)-.5)*.045;
+  return [shade+warmth,shade,shade-warmth];
+}
 export function groundSample(x,z) {
   const variation=noise(x*1.7,z*1.7),broad=noise(x*.45+12,z*.45-7);
   const lotEdge=Math.min(Math.abs(x+.09),Math.abs(x-6.09),Math.abs(z+.09),Math.abs(z-6.09));
@@ -30,7 +45,8 @@ export function groundMaps(size=384) {
   const macro=new Uint8Array(size*size*4);
   for(let z=0;z<size;z++)for(let x=0;x<size;x++) {
     const s=groundSample(GROUND_BOUNDS.x+(x+.5)/size*GROUND_BOUNDS.size,GROUND_BOUNDS.z+(z+.5)/size*GROUND_BOUNDS.size);
-    macro.set([Math.round(s.grime*255),Math.round(s.dampness*255),Math.round(s.puddle*255),255],(z*size+x)*4);
+    const wx=GROUND_BOUNDS.x+(x+.5)/size*GROUND_BOUNDS.size,wz=GROUND_BOUNDS.z+(z+.5)/size*GROUND_BOUNDS.size;
+    macro.set([Math.round(s.grime*255),Math.round(s.dampness*255),Math.round(s.puddle*255),Math.round(courtyardWear(wx,wz)*255)],(z*size+x)*4);
   }
   const grain=new Uint8Array(256*256*4);
   for(let z=0;z<256;z++)for(let x=0;x<256;x++) {
@@ -104,7 +120,8 @@ export function createGroundSurface(renderer,garage) {
         float pigment=${kind===0?'(.84+.25*aggregate.r-groundField.r*.18)':kind===3?'(1.-groundField.r*.07)':'(.93+.10*aggregate.r-groundField.r*.07)'};
         ${kind===0?'pigment*=mix(1.,.82,aggregate.b*smoothstep(.5,.72,groundField.g));':''}
         diffuseColor.rgb*=pigment*mix(1.,${kind===0?'.58':kind===3?'.88':'.72'},wet);
-        diffuseColor.rgb*=mix(vec3(1.),vec3(.88,.94,.97),pool*.45);`);
+        diffuseColor.rgb*=mix(vec3(1.),vec3(.88,.94,.97),pool*.45);
+        ${kind===1||kind===2?'diffuseColor.rgb *= mix(vec3(1.),vec3(.82,.80,.74),groundField.a*facing);':''}`);
       shader.fragmentShader=shader.fragmentShader.replace('#include <roughnessmap_fragment>',`#include <roughnessmap_fragment>
         roughnessFactor=clamp(roughness+(.5-aggregate.g)*.09,.72,.98);
         roughnessFactor=mix(roughnessFactor,${kind===0?'.36':kind===1?'.25':kind===2?'.44':'.29'},wet);
@@ -113,7 +130,7 @@ export function createGroundSurface(renderer,garage) {
         normal=normalize(mix(normal,nonPerturbedNormal,max(wet*.08,pool*.94)));
         `);
     };
-    material.customProgramCacheKey=()=>`courtyard-ground-v1-${kind}`;
+    material.customProgramCacheKey=()=>`courtyard-ground-v2-${kind}`;
     mesh.material=material;items.push({mesh,original,material});
   });
   return {

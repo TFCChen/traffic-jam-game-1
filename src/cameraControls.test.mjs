@@ -10,8 +10,17 @@ import {
   touchPair,
   viewUp,
   restoreView,
+  safeFrame,
 } from "./cameraControls.js";
 import { OrthographicCamera, Vector3 } from "three";
+// The default puzzle bounds must fit above actual lower controls on short screens.
+for (const [width,height,top,bottom] of [[320,568,60,220],[844,390,62,118],[1440,900,0,0]]) {
+  const frame = safeFrame(3.8,3.6,width,height,top,bottom);
+  const pixelY = y => height/2 - (y+frame.offsetY)/frame.halfHeight*height/2;
+  assert(pixelY(3.6) >= top-1e-8);
+  assert(pixelY(-3.6) <= height-bottom+1e-8);
+  assert(frame.halfWidth >= 3.8);
+}
 // Regression: panning the orbit target toward the viewer put the lot behind
 // the old 14-unit camera's near plane, slicing it along a horizontal line.
 for (const pitch of [30, 45, 60, 80, 90])

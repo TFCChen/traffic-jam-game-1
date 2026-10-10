@@ -28,6 +28,7 @@ export function batchColoredMeshes(
     name = "Batched trim",
     atlas = null,
     surface = null,
+    colorMultiplier = null,
   } = {},
 ) {
   root.updateMatrixWorld(true);
@@ -86,10 +87,11 @@ export function batchColoredMeshes(
         geometry.deleteAttribute(name);
     const color = mesh.material.color,
       colors = new Float32Array(geometry.getAttribute("position").count * 3);
+    const tint = colorMultiplier?.(mesh, geometry) ?? [1, 1, 1];
     for (let i = 0; i < colors.length; i += 3) {
-      colors[i] = color.r * (sourceColors?.getX(i / 3) ?? 1);
-      colors[i + 1] = color.g * (sourceColors?.getY(i / 3) ?? 1);
-      colors[i + 2] = color.b * (sourceColors?.getZ(i / 3) ?? 1);
+      colors[i] = color.r * tint[0] * (sourceColors?.getX(i / 3) ?? 1);
+      colors[i + 1] = color.g * tint[1] * (sourceColors?.getY(i / 3) ?? 1);
+      colors[i + 2] = color.b * tint[2] * (sourceColors?.getZ(i / 3) ?? 1);
     }
     geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
     if (surface) {

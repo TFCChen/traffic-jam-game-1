@@ -33,7 +33,7 @@ import {
 import { createRenderProfiler } from "./renderProfiler.js";
 import { cacheLocalTransforms } from "./sceneTransforms.js";
 import { createCourtyardAtmosphere } from './courtyardAtmosphere.js';
-import { createGroundSurface } from './groundSurface.js';
+import { createGroundSurface, pavingTone } from './groundSurface.js';
 import { createRainSurfaces } from './rainSurfaces.js';
 import { configureVehiclePaint, vehicleTrimSurface } from './vehicleFinish.js';
 import { VEHICLE_GROUND_HEIGHT, CONTACT_PLANE_OFFSET } from './contactShadow.js';
@@ -47,6 +47,7 @@ import {
   panView,
   zoomView,
   touchPair,
+  safeFrame,
 } from "./cameraControls.js";
 
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
@@ -152,6 +153,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
   // A fixed reference view determines framing. Orbit changes orientation only,
   // so fitting the current angle cannot silently change the player's scale.
   const framingCamera = camera.clone();
+  let frameInsets = { top: 0, bottom: 0 };
+  let framingEditor = false;
   const framingPitch = THREE.MathUtils.degToRad(DEFAULT_VIEW.pitch),
     framingYaw = THREE.MathUtils.degToRad(DEFAULT_VIEW.yaw);
   framingCamera.position.set(
@@ -445,7 +448,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
     // Fit the occupied height ranges, rather than an oversized empty bounding cube.
     // Portrait framing prioritizes the puzzle; peripheral street edges may leave the shot.
     const portrait = rect.width < 560 && aspect < 1.15;
-    const bounds = portrait
+    const compact = !getProps().editor && (frameInsets.top > 0 || frameInsets.bottom > 0);
+    const bounds = portrait || compact
       ? [
           [
             [-0.18, 6.62],
@@ -498,11 +502,11 @@ export function createGarageScene(canvas, getProps, callbacks) {
         .applyMatrix4(framingCamera.matrixWorldInverse),
       centerX = referenceCenter.x,
       centerY = referenceCenter.y;
-    const halfWidth = Math.max(
-        Math.max(maxX - centerX, centerX - minX) + padding,
-        (Math.max(maxY - centerY, centerY - minY) + padding) * aspect,
-      ),
-      halfHeight = halfWidth / aspect;
+    const {halfWidth, halfHeight, offsetY} = safeFrame(
+      Math.max(maxX - centerX, centerX - minX) + padding,
+      Math.max(maxY - centerY, centerY - minY) + padding,
+      rect.width, rect.height, compact ? frameInsets.top : 0, compact ? frameInsets.bottom : 0,
+    );
     const visibleWidth = halfWidth / settings.zoom,
       visibleHeight = halfHeight / settings.zoom;
     const limitX = Math.max(1.5, halfWidth - visibleWidth + 2),
@@ -525,8 +529,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
     }
     camera.left = centerX + settings.panX - visibleWidth;
     camera.right = centerX + settings.panX + visibleWidth;
-    camera.top = centerY + settings.panY + visibleHeight;
-    camera.bottom = centerY + settings.panY - visibleHeight;
+    camera.top = centerY + settings.panY - offsetY + visibleHeight;
+    camera.bottom = centerY + settings.panY - offsetY - visibleHeight;
     camera.updateProjectionMatrix();
     if (viewOnly) {
       dirty = true;
@@ -574,7 +578,23 @@ export function createGarageScene(canvas, getProps, callbacks) {
     dirty = true;
   }
   function resize() {
-    const { width, height } = canvas.getBoundingClientRect();
+    const rect = canvas.getBoundingClientRect();
+    const { width, height } = rect;
+    frameInsets = {top: 0, bottom: 0};
+    framingEditor = !!getProps().editor;
+    // Read layout only on resize, never in the rendering/drag loop.
+    if ((width <= 540 && height <= 700) || (width <= 1000 && height <= 500)) {
+      const shell = canvas.closest('.immersive-play');
+      const hud = shell?.querySelector('.game-hud')?.getBoundingClientRect();
+      frameInsets.top = hud ? Math.max(0, hud.bottom - rect.top + 10) : 0;
+      for (const selector of ['.toolbar', '.camera-navigation', '.scene-options-bar']) {
+        const control = shell?.querySelector(selector);
+        if (!control || !control.getClientRects().length) continue;
+        const box = control.getBoundingClientRect();
+        if (box.top > rect.top + height / 2)
+          frameInsets.bottom = Math.max(frameInsets.bottom, rect.bottom - box.top + 12);
+      }
+    }
     stats.viewport = { width, height };
     renderer.setSize(width, height, false);
     const aspect = width / Math.max(1, height),
@@ -1137,6 +1157,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     if (drag) finish({ pointerId: drag.pointerId }, true);
     const props = getProps(),
       ids = new Set(props.cars.map((c) => c.id));
+    if (framingEditor !== !!props.editor) resize();
     const changed = sceneKey !== props.sceneKey;
     sceneKey = props.sceneKey;
     if (changed) {
@@ -1374,6 +1395,11 @@ export function createGarageScene(canvas, getProps, callbacks) {
       // self-shadow fragments across the otherwise flat walking surface.
       const pavingBatch=batchColoredMeshes(garage,mesh=>pavingMaterial(mesh.material),{
         name:'Courtyard paving',roughness:.86,metalness:0,atlas:sceneryAtlas,
+        colorMultiplier: (mesh, geometry) => {
+          geometry.computeBoundingBox();
+          const center = geometry.boundingBox.getCenter(new THREE.Vector3());
+          return pavingTone(mesh.material.name, center.x, center.z);
+        },
       });
       ownedGeometries.add(pavingBatch.geometry);
       const stoneBatch=batchColoredMeshes(garage,mesh=>['Honed warm limestone','Basalt foundation'].includes(mesh.material.name),{

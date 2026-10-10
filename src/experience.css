@@ -813,6 +813,7 @@ button.selected, .tabs button.active, .quality-options button[aria-pressed="true
   .immersive-play .utility-menu { top: 10px; right: 12px; }
   .immersive-play .camera-navigation { bottom: 30px; right: 12px; }
   .immersive-play .toolbar { bottom: 30px; }
+  .immersive-play .instruction { left: 12px; top: 72px; width: calc(50% - 130px); font-size: 11px; }
 }
 @media (max-width: 540px) {
   .immersive-play .camera-navigation button { min-width: 44px; min-height: 44px; }

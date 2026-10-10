@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import { groundSample, groundMaps, PUDDLES } from './groundSurface.js';
+import { groundSample, groundMaps, PUDDLES, courtyardWear } from './groundSurface.js';
+for(let x=.1;x<6;x+=.2)for(let z=.1;z<6;z+=.2)assert.equal(courtyardWear(x,z),0,'Sidewalk patina must not dirty puzzle cells');
 for(let x=-2.2;x<10.2;x+=.13)for(let z=-2.15;z<10.25;z+=.13){
   const s=groundSample(x,z),next=groundSample(x+.001,z);
   for(const key of ['grime','dampness','puddle']){
