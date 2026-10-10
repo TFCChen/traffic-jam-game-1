@@ -55,6 +55,11 @@ export function createCourtyardReflections(renderer, source) {
       for(const material of materials) if(material.name.startsWith('Streetlamp glow')) {
         material.emissive.set('#ffc882'); material.emissiveIntensity=theme.id==='neon'?2.2:theme.id==='sunset'?.6:.1;
       }
+      const passageWarmth=theme.id==='neon'?1:theme.id==='sunset'?.45:theme.id==='rain'?.16:0;
+      for(const material of materials)if(material.name==='Street glazing') {
+        material.emissive.set('#e3b575');material.emissiveIntensity=passageWarmth*.36;
+      }
+      courtyard.traverse(o=>{if(o.name==='Passage entry light')o.intensity=passageWarmth*.65;});
       const target=generator.fromScene(probe,0,.1,100,{size:128,position:new THREE.Vector3(3,.85,3)});
       cache.set(key,target); builds++;
       if(cache.size>4) { const oldest=cache.keys().next().value; cache.get(oldest).dispose();cache.delete(oldest); }

@@ -36,6 +36,7 @@ import { createCourtyardAtmosphere } from './courtyardAtmosphere.js';
 import { createGroundSurface, pavingTone } from './groundSurface.js';
 import { createStreetTraffic } from './streetTraffic.js';
 import { extendStreetRoad } from './streetApproaches.js';
+import { createStreetBlocks } from './streetBlocks.js';
 import { createRainSurfaces } from './rainSurfaces.js';
 import { configureVehiclePaint, vehicleTrimSurface } from './vehicleFinish.js';
 import { VEHICLE_GROUND_HEIGHT, CONTACT_PLANE_OFFSET } from './contactShadow.js';
@@ -195,6 +196,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
   let vegetationShadows;
   let atmosphere;
   let groundSurface;
+  let streetBlocks;
   let streetTraffic;
   const rainSurfaces=createRainSurfaces();
   const stats = { frames: 0, shadowUpdates: 0, movingFrames: 0, movingShadowFrames: 0, renderedSceneKey: null };
@@ -580,6 +582,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     atmosphere?.setTheme(settings, quality);
     groundSurface?.setTheme(settings, quality);
     rainSurfaces.setTheme(settings,quality);
+    streetBlocks?.setTheme(settings,quality);
     lightPools.visible = settings.theme !== "day";
     glowMaterial.color.set("#ffd199");
     glowMaterial.opacity = settings.theme === "neon" ? 0.28 : 0.15;
@@ -1441,6 +1444,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
         },
       );
       ownedGeometries.add(streetBatch.geometry);
+      streetBlocks=createStreetBlocks(garage);
+      streetBlocks.geometries.forEach(geometry=>ownedGeometries.add(geometry));
       garage.traverse((o) => {
         if (o.isMesh) {
           if (!o.userData.generatedGeometry) o.material = o.material.clone();

@@ -1,11 +1,13 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {Box3,Raycaster,Vector3,Mesh,DirectionalLight,ShaderChunk} from 'three';
+import {Box3,Raycaster,Vector3,Mesh,DirectionalLight,ShaderChunk,Group,OrthographicCamera} from 'three';
 import {stableShadowSource,stabilizeShadowFilter} from './stableShadowFilter.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {exitPose,EXIT_COMPLETE_MS} from './exitChoreography.js';
 import {vegetationShadowProxy,configureCourtyardSunShadow,fitCourtyardExitShadow} from './environmentShadows.js';
 import {extendStreetRoad} from './streetApproaches.js';
+import {createStreetBlocks} from './streetBlocks.js';
+import {passageTrafficRoute,vehicleHiddenInPassage,STREET,streetRainExposure} from './streetLayout.js';
 import {createWheelShadowGeometry,batchColoredMeshes} from './garageMaterials.js';
 const bytes=fs.readFileSync(new URL('../public/models/garage.glb',import.meta.url));
 const {scene}=await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),'');
@@ -102,14 +104,18 @@ assert.deepEqual(originalStreet.geometry.attributes.position.array,originalPosit
 const roadMesh=extended.getObjectByName('Continuous neighbourhood street');
 const roadBounds=new Box3().setFromObject(roadMesh);
 assert(Math.abs(roadBounds.max.y-.0355)<.0001,'New and original street keep the same height');
-assert(roadBounds.max.z-roadBounds.min.z>199,'Road approaches extend beyond the view');
+assert(Math.abs(roadBounds.max.z-roadBounds.min.z-25.8)<.001,'Finite street terminates inside both buildings');
 const curbBounds=new Box3().setFromObject(extended.getObjectByName('Matching continuous stone curbs'));
-assert(curbBounds.min.z<-90&&curbBounds.max.z>90,'Both kerb lines continue with the road');
+assert(curbBounds.min.z<-8&&curbBounds.max.z>16,'Both kerb lines continue into the passages');
 for(const height of [4.6,9,10])for(let angle=-180;angle<=180;angle+=30) {
   const a=angle*Math.PI/180;
   sun.position.set(3+Math.sin(a)*9.5,height,3+Math.cos(a)*9.5);
   fitCourtyardExitShadow(sun);
   const c=sun.shadow.camera;
+  for(const x of [6.08,10.51])for(const y of [0,2.2])for(const z of [STREET.min,STREET.max]) {
+    const point=new Vector3(x,y,z).project(c);
+    assert(Math.abs(point.x)<1&&Math.abs(point.y)<1&&Math.abs(point.z)<1,'All building casters fit the complete sun volume, including low sunset angles');
+  }
   for(let age=1800;age<3850;age+=75) {
     const pose=exitPose(age);
     for(const dx of [-1.1,1.1])for(const dz of [-1.1,1.1]) {
@@ -122,3 +128,29 @@ const stoneBatch=batchColoredMeshes(extended,mesh=>['Honed warm limestone','Basa
 assert(stoneBatch?.geometry.index,'New curbs must remain compatible with the existing scenery batching');
 stoneBatch.geometry.dispose();stoneBatch.material.dispose();
 approaches.forEach(geometry=>geometry.dispose());
+
+// Test the actual renderable shell, not just the visibility helper's boxes.
+const buildings=new Group(),blocks=createStreetBlocks(buildings);
+buildings.traverse(mesh=>{if(mesh.isMesh)mesh.raycast=Mesh.prototype.raycast;});
+buildings.updateMatrixWorld(true);
+const shell=buildings.children.filter(mesh=>mesh.name==='Street tunnel');
+for(let pitch=30;pitch<=90;pitch+=15)for(let yaw=-180;yaw<180;yaw+=15) {
+  const p=pitch*Math.PI/180,a=yaw*Math.PI/180,camera=new OrthographicCamera(-12,12,9,-9,.1,400);
+  camera.position.set(3+200*Math.sin(a)*Math.cos(p),200*Math.sin(p),3+200*Math.cos(a)*Math.cos(p));
+  camera.up.set(-Math.sin(a)*Math.sin(p),Math.cos(p),-Math.cos(a)*Math.sin(p));
+  camera.lookAt(3,0,3);camera.updateMatrixWorld(true);
+  const toEye=camera.getWorldDirection(new Vector3()).negate();
+  for(const x of [7.35,9.25])for(const length of [2,3]) {
+    const route=passageTrafficRoute(camera,x,length);assert(route,'Every supported viewing direction has concealed endpoints');
+    for(const z of [route.min,route.max])for(const dx of [-.64,.64])for(const dz of [-length/2-.2,length/2+.2])for(const y of [.02,1.4]) {
+      const ray=new Raycaster(new Vector3(x+dx,y,z+dz).addScaledVector(toEye,200),toEye.clone().negate(),0,200);
+      assert(ray.intersectObjects(shell).length,'Real opaque shell occludes the whole vehicle, including mirrors and ground shadow');
+    }
+    assert.equal(vehicleHiddenInPassage(camera,x,4,length),false,'Open street remains visible');
+  }
+}
+assert.equal(streetRainExposure(4),1);assert.equal(streetRainExposure(STREET.min+1),0);assert.equal(streetRainExposure(STREET.max-1),0);
+blocks.setTheme({theme:'neon'},{decor:true});assert.equal(buildings.children.filter(o=>o.isPointLight&&o.visible).length,2);
+blocks.setTheme({theme:'day'},{decor:true});assert.equal(buildings.children.filter(o=>o.isPointLight&&o.visible).length,0);
+blocks.setTheme({theme:'neon'},{decor:false});assert.equal(buildings.children.filter(o=>o.isPointLight&&o.visible).length,0);
+blocks.geometries.forEach(g=>g.dispose());buildings.traverse(mesh=>mesh.material?.dispose());

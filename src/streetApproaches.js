@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { STREET } from './streetLayout.js';
 
 // Reuse an authored bevelled curb stone, including its normals, rather than
 // attaching a different box-shaped road kit to the finished courtyard.
@@ -55,20 +56,22 @@ export function extendStreetRoad(garage) {
   surface.computeBoundingBox();
   const bounds = surface.boundingBox.clone(), center = bounds.getCenter(new THREE.Vector3());
   const positions = surface.attributes.position;
-  for (let i = 0; i < positions.count; i++) positions.setZ(i, center.z + (positions.getZ(i)-center.z)*200/(bounds.max.z-bounds.min.z));
+  const roadLength=STREET.max-STREET.min,roadCenter=(STREET.max+STREET.min)/2;
+  for (let i = 0; i < positions.count; i++) positions.setZ(i, roadCenter + (positions.getZ(i)-center.z)*roadLength/(bounds.max.z-bounds.min.z));
   positions.needsUpdate = true; surface.computeBoundingBox(); surface.computeBoundingSphere();
   asphalt.removeFromParent();
   add(surface,asphalt.material,'Continuous neighbourhood street');
   if (foundation) {
-    const base = add(new THREE.BoxGeometry(bounds.max.x-bounds.min.x,.48,200),foundation,'Street foundation');
-    base.position.set(center.x,-.24,center.z);
+    const base = add(new THREE.BoxGeometry(bounds.max.x-bounds.min.x,.48,roadLength),foundation,'Street foundation');
+    base.position.set(center.x,-.24,roadCenter);
   }
   const templates = stones.map(mesh => ({geometry:curbTemplate(mesh,inverse),material:mesh.material})).filter(item=>item.geometry);
   if (!templates.length) throw Error('Authored street curb template missing');
   const pieces = [];
-  for (let i = -230; i <= 245; i++) {
+  for (let i = -16; i <= 44; i++) {
     if (i >= 0 && i <= 28) continue;
     const z = -1.95 + i*.42;
+    if(z-.21<STREET.min||z+.21>STREET.max)continue;
     for (const x of [6.48,10.13]) for (const template of templates) {
       const piece = template.geometry.clone();
       if (x < 8) piece.scale(1,.13/.12,1);
@@ -82,9 +85,10 @@ export function extendStreetRoad(garage) {
   if (markings) {
     const p = [], n = [];
     // Same x and cadence as the authored dashes, continuing the same phase.
-    for (let i = -120; i < 130; i++) {
+    for (let i = -9; i < 24; i++) {
       if (i >= 0 && i < 15) continue;
       const z = -1.75+i*.82, x = 8.05, y = .0405;
+      if(z-.18<STREET.min||z+.18>STREET.max)continue;
       for (const [px,pz] of [[x-.019,z-.18],[x-.019,z+.18],[x+.019,z-.18],[x+.019,z-.18],[x-.019,z+.18],[x+.019,z+.18]]) {
         p.push(px,y,pz); n.push(0,1,0);
       }

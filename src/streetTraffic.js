@@ -3,6 +3,7 @@ import { batchColoredMeshes, rollingMaterial } from './garageMaterials.js';
 import { configureVehiclePaint, vehicleTrimSurface } from './vehicleFinish.js';
 import { configureVehicleGlass, VEHICLE_MIRROR } from './vehicleGlass.js';
 import { VEHICLE_GROUND_HEIGHT } from './contactShadow.js';
+import { passageTrafficRoute } from './streetLayout.js';
 
 export const TRAFFIC_FLEET = [
   { kind: 'compact', length: 2, colors: ['#5c98b6', '#b9c9c1', '#d8bd8e'] },
@@ -186,7 +187,7 @@ export function createStreetTraffic(scene, library, contactTextures, rainSurface
     },
     update(dt, settings, quality, reduced, props) {
       const poses = clock.step(dt, quality.decor && !reduced && !props.editor, props.won || props.disabled,
-        camera ? (direction, length) => trafficRoute(camera, direction < 0 ? 9.25 : 7.35, length) : undefined);
+        camera ? (direction, length) => passageTrafficRoute(camera, direction < 0 ? 9.25 : 7.35, length) : undefined);
       fleet.forEach((vehicle, index) => vehicle.update(poses.find(pose => pose.model === index), settings));
     },
     dispose() { fleet.forEach(vehicle => vehicle.dispose()); },

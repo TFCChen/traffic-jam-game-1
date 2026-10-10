@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { STREET } from './streetLayout.js';
 
 export function configureCourtyardSunShadow(shadow) {
   // A 500-unit depth range made small normalized offsets large relative to
@@ -18,12 +19,16 @@ export function fitCourtyardExitShadow(light) {
   light.shadow.updateMatrices(light);
   const camera=light.shadow.camera, point=new THREE.Vector3();
   let left=-8,right=8,bottom=-8,top=8;
-  for(const x of [6.4,10.7])for(const y of [-.5,1.8])for(const z of [-2.2,11]) {
+  let near=1,far=32;
+  for(const x of [5.95,10.65])for(const y of [-.5,2.3])for(const z of [STREET.min,STREET.max]) {
     point.set(x,y,z).applyMatrix4(camera.matrixWorldInverse);
     left=Math.min(left,point.x-.8);right=Math.max(right,point.x+.8);
     bottom=Math.min(bottom,point.y-.8);top=Math.max(top,point.y+.8);
+    near=Math.min(near,-point.z-.8);far=Math.max(far,-point.z+.8);
   }
-  Object.assign(camera,{left,right,bottom,top});camera.updateProjectionMatrix();
+  // An orthographic directional-light camera can include casters behind the
+  // finite light proxy; sun direction and the visible scene remain unchanged.
+  Object.assign(camera,{left,right,bottom,top,near,far});camera.updateProjectionMatrix();
 }
 
 // Static canopy clusters cast soft silhouettes using ~80 triangles each.

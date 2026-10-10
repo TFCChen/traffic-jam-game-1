@@ -14,8 +14,9 @@ assert(along>across*1.3,'Runoff trails must follow gravity instead of forming ro
 
 assert.equal(rainSurfaceKind('Batched cabin'),null,'Cabin upholstery must remain dry');
 assert.equal(rainSurfaceKind('Rolling wheels'),null,'Wetness must not interfere with steering shaders');
+assert.equal(rainSurfaceKind('Street tunnel'),null,'Sheltered passage interior remains dry');
 const system=createRainSurfaces();
-for(const name of ['Paint red','Batched trim','Automotive glass','Courtyard foliage detail','Courtyard bark','Courtyard fence','Batched scenery']){
+for(const name of ['Paint red','Batched trim','Automotive glass','Courtyard foliage detail','Courtyard bark','Courtyard fence','Batched scenery','Street masonry','Street roof','Street fittings','Street glazing','Street planting']){
   const material=new THREE.MeshPhysicalMaterial();material.name=name;
   material.onBeforeCompile=s=>{s.fragmentShader+='\n// preserved optical/finish logic';};
   system.attach(material);const first=material.onBeforeCompile;system.attach(material);
@@ -25,6 +26,7 @@ for(const name of ['Paint red','Batched trim','Automotive glass','Courtyard foli
   assert(shader.fragmentShader.includes('preserved optical/finish logic'));
   assert(shader.vertexShader.includes('rainLocal=transformed'));
   assert(shader.fragmentShader.includes('rainPerturb'));
+  assert(!shader.fragmentShader.includes('undefined'),'Every building surface has a defined wet response');
   system.setTheme({theme:'rain'},{decor:true});assert.equal(shader.uniforms.rainSurfaceWet.value,1);
   system.setTheme({theme:'day'},{decor:true});assert.equal(shader.uniforms.rainSurfaceWet.value,0);
   system.setTheme({theme:'rain'},{decor:false});assert.equal(shader.uniforms.rainSurfaceDetail.value,0);
