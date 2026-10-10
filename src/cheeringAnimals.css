@@ -1,9 +1,9 @@
 .exit-skip-surface{position:fixed;inset:0;z-index:90;width:100%;height:100%;margin:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;cursor:default;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .exit-skip-surface:hover,.exit-skip-surface:active{background:transparent;box-shadow:none;transform:none}
 .exit-skip-surface:focus-visible{outline:2px solid #efcc8460;outline-offset:-5px}
-.win-overlay.has-cheering{background:radial-gradient(ellipse at center,#bba16b18,transparent 65%),#171b228f}
-.win-celebration{position:relative;display:flex;align-items:center;justify-content:center;width:min(760px,100%);height:min(640px,100%);isolation:isolate}
-.cheering-corners{position:absolute;inset:0;overflow:hidden;pointer-events:none;user-select:none;border-radius:32px;mask-image:linear-gradient(transparent,#000 12px,#000 calc(100% - 12px),transparent)}
+.win-overlay.has-cheering{padding:0;background:radial-gradient(ellipse at center,#dfc89a20,transparent 65%),#171b228f}
+.win-celebration{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%;isolation:isolate}
+.cheering-corners{position:absolute;inset:0;overflow:hidden;pointer-events:none;user-select:none}
 .cheering-guest{position:absolute;width:132px;aspect-ratio:112/128;transform:rotate(var(--angle));animation:guest-arrive .65s cubic-bezier(.2,.8,.3,1) var(--arrival) both;filter:drop-shadow(0 3px 7px #16181d30)}
 .cheering-guest svg{display:block;width:100%;height:auto;overflow:visible}
 .guest-rabbit>svg{transform:scale(.9)}
@@ -17,12 +17,27 @@
 .cheering-paw{animation-duration:var(--tempo);animation-delay:var(--clap-delay);animation-timing-function:cubic-bezier(.45,0,.45,1);animation-iteration-count:infinite}
 .cheering-paw-left{animation-name:cheering-left}.cheering-paw-right{animation-name:cheering-right}
 .cheering-clap{animation:cheering-spark var(--tempo) ease-out var(--clap-delay) infinite;transform-origin:55px 90px}
-.win-overlay.has-cheering .win-card{z-index:1;max-height:calc(100dvh - 32px);overflow:auto;scrollbar-width:thin;scrollbar-color:#767b87 #252932;border-radius:26px;border:1px solid #e5d2ac30;background:linear-gradient(155deg,#383a42f5,#26282ff7 75%);box-shadow:0 20px 65px #0005,0 0 70px #e8c68209;padding:34px 28px 28px}
+.win-overlay.has-cheering .win-card{z-index:1;max-height:calc(100dvh - 32px);overflow:auto;scrollbar-width:thin;scrollbar-color:#b7ac98 #f6f0e5;border-radius:30px;border:1px solid #fff5dfb3;background:linear-gradient(155deg,#fff9ee,#f3ecdf 85%);color:#45433f;box-shadow:0 20px 65px #0004,0 2px 0 #fff8 inset;padding:34px 28px 28px}
+.win-overlay.has-cheering .win-card h2{color:#45433f;letter-spacing:0;font-weight:750}
+.win-overlay.has-cheering .eyebrow{color:#8a7450;letter-spacing:.16em}
+.win-overlay.has-cheering .dialog-close{color:#81786a}
+.win-overlay.has-cheering .win-copy,.win-overlay.has-cheering .win-level,.win-overlay.has-cheering .win-up-next,.win-overlay.has-cheering .journey-summary{color:#71685c}
 .win-overlay.has-cheering .win-stars{margin:22px 0}
-.win-overlay.has-cheering .win-score{background:#171b222e;border-color:#e5d2ac1c;border-radius:18px}
+.win-overlay.has-cheering .win-stars span{color:#ded5c5}
+.win-overlay.has-cheering .win-stars .earned{color:#dfac48;text-shadow:0 2px 0 #bd883b30}
+.win-overlay.has-cheering .win-score{background:transparent;border:0;border-radius:0}
+.win-overlay.has-cheering .win-score span{color:#71685c;font-weight:500}
+.win-overlay.has-cheering .win-score b{color:#45433f;font-weight:750}
+.win-overlay.has-cheering .win-score>i{background:#d9cfbe}
 .win-overlay.has-cheering .win-level{margin:16px 0 8px}
-.win-overlay.has-cheering .win-performance{margin:10px 0 22px;line-height:1.6;color:#dec797}
-.win-overlay.has-cheering .win-actions button{border-radius:12px}
+.win-overlay.has-cheering .win-performance{margin:10px 0 22px;line-height:1.6;color:#8b6a35}
+.win-overlay.has-cheering .win-actions button{border-radius:16px;background:#fffcf5;border:1px solid #d8cdbb;color:#625a4c}
+.win-overlay.has-cheering .win-actions .accent{background:#f0cf88;border-color:#d8b66f;color:#51432a}
+.win-overlay.has-cheering .win-actions button:hover{background:#eee4d2}
+.win-overlay.has-cheering .win-actions .accent:hover{background:#e9c375}
+.win-overlay.has-cheering .win-card button:focus-visible{outline:2px solid #937039;outline-offset:3px}
+.win-overlay.has-cheering .win-rewards span{background:#ebe1ce;color:#74603d;border-radius:14px}
+.win-overlay.has-cheering .win-rewards small{color:#81735b}
 .win-celebration .confetti i{width:5px;height:9px;opacity:.65}
 @keyframes guest-arrive{from{opacity:0;transform:rotate(var(--angle)) translateY(72px)}to{opacity:1;transform:rotate(var(--angle)) translateY(0)}}
 @keyframes cheering-bob{0%,100%{transform:translateY(0) rotate(-.6deg)}50%{transform:translateY(-1px) rotate(.6deg)}}
@@ -30,9 +45,6 @@
 @keyframes cheering-right{0%,100%{transform:translate(0,0)}42%,55%{transform:translate(-14px,-3px)}}
 @keyframes cheering-spark{0%,30%,100%{opacity:0;transform:translateY(2px)}44%{opacity:.85;transform:translateY(0)}75%{opacity:0;transform:translateY(-3px)}}
 @media(max-width:600px) and (min-height:501px){
-  .win-overlay.has-cheering{padding:0}
-  .win-celebration{width:100%;height:100%}
-  .cheering-corners{border-radius:0;mask-image:none}
   .cheering-guest.lead{width:116px}
   .cheering-guest.friend{width:96px}
   .cheering-guest.friend .cheering-hands{transform:translateY(-10px)}
