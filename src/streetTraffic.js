@@ -4,45 +4,95 @@ import { configureVehiclePaint, vehicleTrimSurface } from './vehicleFinish.js';
 import { configureVehicleGlass, VEHICLE_MIRROR } from './vehicleGlass.js';
 import { VEHICLE_GROUND_HEIGHT } from './contactShadow.js';
 
-const DURATION = 7.2;
-export function createTrafficClock() {
-  let wait = 6, age = null, sequence = 0, retiring = 1;
+export const TRAFFIC_FLEET = [
+  { kind: 'compact', length: 2, colors: ['#5c98b6', '#b9c9c1', '#d8bd8e'] },
+  { kind: 'jeep', length: 2, colors: ['#829675', '#c5b398', '#637eaa'] },
+  { kind: 'pickup', length: 2, colors: ['#e0d3bd', '#688eaa', '#b76e52'] },
+  { kind: 'taxi', length: 2, colors: ['#efc847'] },
+  { kind: 'delivery', length: 3, colors: ['#d9d6cc', '#88a6a7', '#b6c0d4'] },
+  { kind: 'coach', length: 3, colors: ['#779f98', '#bca386', '#7a95b9'] },
+];
+export function trafficTravel(progress, bend) {
+  // Monotonic, with independently varied entry/exit speed; never stops or reverses.
+  return progress + bend * Math.sin(Math.PI * progress) / Math.PI;
+}
+export function createTrafficClock(random = Math.random) {
+  let wait = 3, sequence = 0, active = [], bag = [], lastDirection = 0;
+  const pick = count => Math.min(count - 1, Math.floor(random() * count));
   return {
     step(dt, enabled, blocked = false) {
       dt = Math.max(0, Math.min(.1, dt));
-      if (!enabled) { age = null; wait = 6; retiring = 1; return null; }
-      if (age === null) {
-        if (blocked) return null;
-        wait -= dt;
-        if (wait > 0) return null;
-        age = 0; retiring = 1;
+      if (!enabled) { active = []; wait = 3; return []; }
+      for (const item of active) {
+        item.age += dt;
+        if (blocked) item.retiring = Math.max(0, item.retiring - dt / .18);
       }
-      age += dt;
-      if (blocked) retiring = Math.max(0, retiring - dt / .18);
-      if (age >= DURATION || retiring === 0) {
-        age = null; wait = 22 + (++sequence * 7 % 13); return null;
+      active = active.filter(item => item.age < item.duration && item.retiring > 0);
+      if (!blocked) wait -= dt;
+      if (!blocked && wait <= 0 && active.length < 2) {
+        if (!bag.length) bag = TRAFFIC_FLEET.map((_, index) => index);
+        const available = bag.filter(index => !active.some(item => item.model === index));
+        if (available.length) {
+          const model = available[pick(available.length)], spec = TRAFFIC_FLEET[model];
+          bag.splice(bag.indexOf(model), 1);
+          let direction = lastDirection ? -lastDirection : random() < .5 ? -1 : 1;
+          if (active.some(item => item.direction === direction)) direction *= -1;
+          lastDirection = direction;
+          const span = 12.3 + spec.length;
+          active.push({ id: ++sequence, model, direction, color: spec.colors[pick(spec.colors.length)],
+            duration: span / (2.9 + random() * 1.5), bend: (random() - .5) * .65,
+            age: 0, retiring: 1 });
+          wait = 3.8 + random() * 6.2;
+        }
       }
-      const progress = age / DURATION;
-      return { z: 9.2 - 10.3 * progress, distance: 10.3 * progress,
-        opacity: Math.min(1, progress / .085, (1 - progress) / .085) * retiring };
+      return active.map(item => {
+        const length = TRAFFIC_FLEET[item.model].length, progress = item.age / item.duration;
+        const distance = (12.3 + length) * trafficTravel(progress, item.bend);
+        const z = item.direction < 0 ? 10.2 + length / 2 - distance : -2.1 - length / 2 + distance;
+        return { ...item, distance, z, x: item.direction < 0 ? 9.25 : 7.35,
+          opacity: Math.min(1, progress / .055, (1 - progress) / .055) * item.retiring };
+      });
     },
   };
 }
 
-// One recycled detailed car, restricted to the far street lane. Its materials
-// and batches are owned here; the source GLB remains shared with puzzle cars.
-export function createStreetTraffic(scene, source, contactTexture, rainSurfaces) {
-  const car = source.clone(true), clock = createTrafficClock();
+// Shared screen coverage preserves opaque occlusion: seats cannot show through
+// a fading shell. Glass keeps its own optical alpha; no material changes queues.
+export function installTrafficCoverage(material, coverage) {
+  const before = material.onBeforeCompile, key = material.customProgramCacheKey();
+  material.onBeforeCompile = (shader, renderer) => {
+    before.call(material, shader, renderer);
+    shader.uniforms.trafficCoverage = coverage;
+    shader.vertexShader = 'varying vec3 trafficWorld;\n' + shader.vertexShader;
+    shader.vertexShader = shader.vertexShader.replace('#include <project_vertex>',
+      'trafficWorld=(modelMatrix*vec4(transformed,1.)).xyz;\n#include <project_vertex>');
+    shader.fragmentShader = 'uniform float trafficCoverage; varying vec3 trafficWorld;\n' + shader.fragmentShader;
+    shader.fragmentShader = shader.fragmentShader.replace('void main() {', `void main() {
+      if(trafficWorld.z < -2.1 || trafficWorld.z > 10.2) discard;
+      vec2 pixel=mod(floor(gl_FragCoord.xy),4.);
+      vec2 low=mod(pixel,2.);
+      vec2 high=floor(pixel/2.);
+      float threshold=(4.*(2.*low.x+3.*low.y-4.*low.x*low.y)+(2.*high.x+3.*high.y-4.*high.x*high.y)+.5)/16.;
+      if(trafficCoverage < threshold) discard;
+    `);
+  };
+  material.customProgramCacheKey = () => key + '-traffic-coverage-v1';
+}
+
+function createTrafficVehicle(scene, source, spec, contactTexture, rainSurfaces) {
+  const car = source.clone(true);
   batchColoredMeshes(car, mesh => ['Cabin upholstery', 'Tailored cabin leather', 'Seat stitching and console'].includes(mesh.material.name),
     { name: 'Batched cabin', roughness: .7, metalness: .02 });
   batchColoredMeshes(car, mesh => !['Automotive glass', 'Lamp crystal', VEHICLE_MIRROR, 'Batched cabin', 'Headlamp', 'Tail lamp', 'Rolling wheels'].includes(mesh.material.name) && !mesh.material.name.startsWith('Paint'),
     { surface: vehicleTrimSurface });
-  const materials = [], wheelAngle = { value: 0 }, lampLevel = { value: 0 };
+  const materials = [], paints = [], coverage = { value: 0 }, wheelAngle = { value: 0 }, lampLevel = { value: 0 };
   car.traverse(mesh => {
     if (!mesh.isMesh) return;
     if (!mesh.userData.generatedGeometry) mesh.material = mesh.material.clone();
     const material = mesh.material;
-    if (material.name.startsWith('Paint')) configureVehiclePaint(material, 'compact', 'standard', '#b6c8c4');
+    if (material.name.startsWith('Paint')) {
+      configureVehiclePaint(material, spec.kind, 'standard', spec.colors[0]); paints.push(material);
+    }
     if (material.name === 'Automotive glass') configureVehicleGlass(material, 'standard');
     if (material.name === 'Lamp crystal') {
       material.transmission = 0; material.transparent = true; material.opacity = .22; material.depthWrite = false;
@@ -58,48 +108,69 @@ export function createStreetTraffic(scene, source, contactTexture, rainSurfaces)
         shader.uniforms.trafficLampLevel = lampLevel;
         shader.uniforms.trafficLampRoot = { value: lampRoot };
         shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nuniform mat4 trafficLampRoot; varying float trafficLens;')
-          .replace('#include <begin_vertex>', `#include <begin_vertex>\nvec3 lensPoint=(trafficLampRoot*vec4(transformed,1.)).xyz; trafficLens=${front ? 'step(.7,lensPoint.x)*step(.12,abs(lensPoint.z))' : 'step(lensPoint.x,-.82)'};`);
+          .replace('#include <begin_vertex>', `#include <begin_vertex>\nvec3 lensPoint=(trafficLampRoot*vec4(transformed,1.)).xyz; trafficLens=${front ? `step(${spec.length * .35},lensPoint.x)*step(.12,abs(lensPoint.z))` : `step(lensPoint.x,${-spec.length / 2 + .18})`};`);
         shader.fragmentShader = shader.fragmentShader.replace('#include <common>', '#include <common>\nuniform float trafficLampLevel; varying float trafficLens;')
           .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\ntotalEmissiveRadiance*=trafficLens*trafficLampLevel;');
       };
-      material.customProgramCacheKey = () => `traffic-lens-${front}`;
+      material.customProgramCacheKey = () => `traffic-lens-${front}-${spec.length}`;
     }
-    rainSurfaces?.attach(material, 2);
-    materials.push({ material, opacity: material.opacity, transparent: material.transparent, depthWrite: material.depthWrite });
+    rainSurfaces?.attach(material, spec.length);
+    installTrafficCoverage(material, coverage);
+    materials.push(material);
     mesh.castShadow = false; mesh.receiveShadow = true; mesh.raycast = () => {};
   });
-  const footprintGeometry = new THREE.PlaneGeometry(2.12, 1.08);
-  const footprintMaterial = new THREE.MeshBasicMaterial({ map: contactTexture, color: '#17232a', transparent: true, opacity: .5, depthWrite: false });
+  const footprintGeometry = new THREE.PlaneGeometry(spec.length + .12, 1.08);
+  const footprintMaterial = new THREE.MeshBasicMaterial({ map: contactTexture ?? null, color: '#17232a', transparent: true, opacity: .5, depthWrite: false });
   const footprint = new THREE.Mesh(footprintGeometry, footprintMaterial);
   footprint.rotation.x = -Math.PI / 2;
   footprint.position.y = -.001;
   footprint.raycast = () => {};
+  installTrafficCoverage(footprintMaterial, coverage);
   car.add(footprint);
-  car.rotation.y = Math.PI / 2;
-  car.position.set(9.35, VEHICLE_GROUND_HEIGHT, 9.2);
+  car.position.y = VEHICLE_GROUND_HEIGHT;
   car.visible = false;
   scene.add(car);
   return {
-    pause() { const visible = car.visible; car.visible = false; clock.step(0, false); return visible; },
-    update(dt, settings, quality, reduced, props) {
-      const pose = clock.step(dt, quality.decor && !reduced && !props.editor, props.won || props.disabled);
+    prepare() { car.visible = true; coverage.value = 0; },
+    hide() { const visible = car.visible; car.visible = false; return visible; },
+    update(pose, settings) {
       car.visible = !!pose;
       if (!pose) return;
+      if (car.userData.trip !== pose.id) {
+        car.userData.trip = pose.id;
+        paints.forEach(material => material.color.set(pose.color));
+      }
       lampLevel.value = settings.theme === 'neon' ? 1.2 : settings.theme === 'sunset' || settings.theme === 'rain' ? .35 : 0;
+      car.rotation.y = pose.direction < 0 ? Math.PI / 2 : -Math.PI / 2;
+      car.position.x = pose.x;
       car.position.z = pose.z;
       wheelAngle.value = -pose.distance / .19;
-      for (const entry of materials) {
-        entry.material.opacity = entry.opacity * pose.opacity;
-        entry.material.transparent = entry.transparent || pose.opacity < .999;
-        entry.material.depthWrite = entry.depthWrite && pose.opacity >= .999;
-      }
-      footprintMaterial.opacity = .5 * pose.opacity;
+      coverage.value = pose.opacity;
     },
     dispose() {
       scene.remove(car);
       car.traverse(mesh => { if (mesh.isMesh && mesh.userData.generatedGeometry) mesh.geometry.dispose(); });
-      materials.forEach(({ material }) => { rainSurfaces?.detach(material); material.dispose(); });
+      materials.forEach(material => { rainSurfaces?.detach(material); material.dispose(); });
       footprintGeometry.dispose(); footprintMaterial.dispose();
     },
+  };
+}
+
+export function createStreetTraffic(scene, library, contactTextures, rainSurfaces, random = Math.random) {
+  const clock = createTrafficClock(random);
+  const fleet = TRAFFIC_FLEET.map(spec => createTrafficVehicle(scene, library[spec.kind], spec, contactTextures.get(spec.length), rainSurfaces));
+  return {
+    prepare() { fleet.forEach(vehicle => vehicle.prepare()); },
+    pause() {
+      clock.step(0, false);
+      let changed = false;
+      fleet.forEach(vehicle => { if (vehicle.hide()) changed = true; });
+      return changed;
+    },
+    update(dt, settings, quality, reduced, props) {
+      const poses = clock.step(dt, quality.decor && !reduced && !props.editor, props.won || props.disabled);
+      fleet.forEach((vehicle, index) => vehicle.update(poses.find(pose => pose.model === index), settings));
+    },
+    dispose() { fleet.forEach(vehicle => vehicle.dispose()); },
   };
 }

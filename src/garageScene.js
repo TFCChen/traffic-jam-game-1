@@ -1462,11 +1462,13 @@ export function createGarageScene(canvas, getProps, callbacks) {
       garage.traverse(mesh=>{if(mesh.isMesh)rainSurfaces.attach(mesh.material);});
       groundSurface = createGroundSurface(renderer, garage);
       groundSurface.setTheme(settings, quality);
-      streetTraffic = createStreetTraffic(scene, library.compact, contactTextures.get(2), rainSurfaces);
+      streetTraffic = createStreetTraffic(scene, library, contactTextures, rainSurfaces);
       updateCamera();
       sync();
+      streetTraffic.prepare();
       await renderer.compileAsync(scene, camera);
       if (!alive) return;
+      streetTraffic.pause();
       ready = true;
       canvas.dataset.ready = "true";
       callbacks.ready();
