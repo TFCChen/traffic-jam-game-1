@@ -26,7 +26,7 @@ function PlushPart({ sprite, part, id, x, y, width, height }) {
 function Animal({ character, id, index }) {
   const { kind, corner, slot, angle, tempo } = character;
   const sprite = sprites[kind];
-  return <div className={`cheering-guest ${corner} ${slot} guest-${kind}`} style={{ '--angle': `${angle}deg`, '--tempo': `${tempo}s`, '--clap-delay': `${-index * .17}s`, '--arrival': `${index * .045}s` }}>
+  return <div className={`cheering-guest ${corner} ${slot} guest-${kind}`} style={{ '--angle': `${angle}deg`, '--tempo': `${tempo}s`, '--clap-delay': `${.65 + index * .09}s`, '--arrival': `${.24 + index * .045}s` }}>
     <svg viewBox="0 0 112 128" preserveAspectRatio="xMidYMid meet" focusable="false">
       <g className="cheering-animal">
         <PlushPart sprite={sprite} part="body" id={`${id}-${kind}-body`} x={3} y={0} width={106} height={128}/>

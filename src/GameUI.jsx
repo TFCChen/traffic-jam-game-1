@@ -120,16 +120,17 @@ export function WinDialog({
 
   return (
     <div className="win-overlay has-cheering">
+      <div className="win-celebration">
       <CheeringAnimals />
       <div className="confetti" aria-hidden="true">
-        {Array.from({ length: 22 }, (_, i) => (
+        {Array.from({ length: 14 }, (_, i) => (
           <i
             key={i}
             style={{
               "--x": `${(i * 47) % 100}%`,
               "--delay": `${(i % 5) * 0.08}s`,
               "--turn": `${i * 59}deg`,
-              "--confetti-color": ["#ffc857", "#72d2bd", "#ee7f75", "#8a9df1"][
+              "--confetti-color": ["#e7c887", "#c5c5a8", "#dca9a3", "#eee0c5"][
                 i % 4
               ],
             }}
@@ -151,16 +152,9 @@ export function WinDialog({
         >
           <Icon name="close" />
         </button>
-        <div className="win-emblem" aria-hidden="true">
-          ✦
-        </div>
         <p className="eyebrow">一路暢通</p>
         <h2 id="win-title">{finale ? "四十關之旅完成！" : best != null && moves === best ? "完美出庫" : "順利出庫"}</h2>
-        <p className="win-copy">
-          {finale
-            ? "最後一台紅車已出庫，看看你的車庫收藏。"
-            : "紅車成功離開停車場。"}
-        </p>
+        {finale && <p className="win-copy">最後一台紅車已出庫，看看你的車庫收藏。</p>}
         <div className="win-stars" aria-label={`${stars} 顆星`}>
           {[1, 2, 3].map((i) => (
             <span
@@ -281,6 +275,7 @@ export function WinDialog({
         </div>
         {nextTitle && <p className="win-up-next">下一站 · {nextTitle}</p>}
       </section>
+      </div>
     </div>
   );
 }
