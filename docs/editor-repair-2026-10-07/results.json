@@ -1,0 +1,17 @@
+{
+  "freshBlank": true,
+  "freeReverseDrawing": true,
+  "automaticLengthsAndDirections": true,
+  "sameLengthReplacementPreservesPlacement": true,
+  "redCannotSwap": true,
+  "undoRedo": true,
+  "nativeTouchPlacement": true,
+  "mobileUnobscuredActions": true,
+  "all36CellsUnobscuredDesktopAndMobile": true,
+  "save": true,
+  "trialDraftReturn": true,
+  "originalGameAndViewRestored": true,
+  "lampOrigins": true,
+  "nativeCarDragAndLampTracking": true,
+  "errors": []
+}

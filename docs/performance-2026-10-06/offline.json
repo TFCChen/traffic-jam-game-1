@@ -1,0 +1,12 @@
+{
+  "title": "玩具車庫・交通解謎",
+  "offlineModelStatus": 200,
+  "hash": "3267ab774fb265362c0318288e8e48f26549848bfeaf9d04b4dcf94de48ffd6c",
+  "rejectsWrongVersion": true,
+  "progress": "level-17",
+  "caches": [
+    "traffic-jam-e243255ab206e506"
+  ],
+  "appVersion": "3cd05f46",
+  "updateCheck": "Network version matches loaded app; offline check reports unavailable"
+}

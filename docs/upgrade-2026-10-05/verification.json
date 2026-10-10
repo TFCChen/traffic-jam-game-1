@@ -1,0 +1,520 @@
+{
+  "results": [
+    "Hint preserves board projection",
+    "Invalid endpoint retains start; validation preserves projection",
+    "Undo/redo and named draft survive leave/reload",
+    "Unsaved trial returns to same draft; named save succeeds",
+    "Reload resumes board, moves and undo history",
+    "100 level switches reuse one renderer",
+    "Mobile settings targets >=44px",
+    "First-installed worker update reloads the app and preserves progress/draft",
+    "Offline reload and level 40 assets load from versioned snapshot",
+    "WebGL loss fallback and 3D retry"
+  ],
+  "memories": [
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    },
+    {
+      "geometries": 70,
+      "textures": 8
+    },
+    {
+      "geometries": 65,
+      "textures": 8
+    }
+  ],
+  "switchTimes": [
+    297.84310000000005,
+    319.4357999999993,
+    239.7561999999998,
+    270.2379000000001,
+    285.79110000000037,
+    241.1921000000002,
+    255.24179999999978,
+    268.6317999999992,
+    261.66280000000006,
+    276.2492000000002,
+    307.1792999999998,
+    257.9220999999998,
+    319.1864000000005,
+    238.77159999999822,
+    254.6293000000005,
+    255.86160000000018,
+    278.3287,
+    270.41300000000047,
+    278.04439999999886,
+    280.6738000000005,
+    299.5501000000004,
+    258.0491000000002,
+    239.1130000000012,
+    246.16519999999946,
+    248.86239999999816,
+    255.0681000000004,
+    276.8294999999998,
+    326.98509999999806,
+    294.47130000000107,
+    260.6406999999999,
+    240.2619999999988,
+    222.09549999999945,
+    275.84879999999976,
+    294.65439999999944,
+    254.85449999999764,
+    253.51810000000114,
+    312.60269999999946,
+    236.9969999999994,
+    293.9669999999969,
+    291.2930000000015,
+    273.0359000000026,
+    269.35339999999997,
+    284.28729999999996,
+    252.73409999999785,
+    239.3197,
+    256.9458000000013,
+    268.57960000000094,
+    270.96930000000066,
+    311.79799999999886,
+    242.43599999999788,
+    305.5073000000011,
+    280.1340999999993,
+    320.83710000000065,
+    237.78819999999905,
+    254.82180000000153,
+    239.01830000000336,
+    255.89490000000296,
+    253.95959999999832,
+    224.2485000000015,
+    246.83929999999964,
+    259.6823000000004,
+    224.39919999999984,
+    269.02790000000095,
+    255.92220000000088,
+    311.7615000000005,
+    238.60159999999814,
+    261.1275000000023,
+    312.51850000000195,
+    255.030399999996,
+    213.28070000000298,
+    267.9282000000021,
+    247.55799999999726,
+    282.27909999999974,
+    275.129399999998,
+    352.630799999999,
+    290.35059999999794,
+    333.9181000000026,
+    234.58170000000246,
+    337.8943999999974,
+    263.6042000000016,
+    271.07189999999537,
+    305.40009999999893,
+    277.63880000000063,
+    319.7798000000039,
+    309.6959999999963,
+    237.70330000000104,
+    253.51150000000052,
+    250.89319999999861,
+    238.40720000000147,
+    301.91879999999946,
+    266.82500000000437,
+    239.80159999999887,
+    329.63260000000446,
+    250.15200000000186,
+    249.69989999999962,
+    300.6591999999946,
+    243.4311000000016,
+    254.636599999998,
+    241.76670000000013,
+    252.2358000000022
+  ],
+  "switchP95": 320.83710000000065,
+  "switchTiming": "Includes panel button click, 100 ms test wait and readiness polling; not pure renderer time"
+}

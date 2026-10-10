@@ -1,0 +1,919 @@
+/* Shared player-facing tokens. Board dimensions never depend on status text. */
+:root {
+  --ink: #f4f1eb;
+  --muted: #b8bbc3;
+  --surface: #22252d;
+  --surface-raised: #303440;
+  --line: #525763;
+  --gold: #efc777;
+  --accent: #efc777;
+  background: #181b22;
+  color: var(--ink);
+}
+.app-shell {
+  background: radial-gradient(ellipse at 50% 25%, #343945, #181b22 80%);
+  color: var(--ink);
+}
+.workspace,
+.workspace.panel-hidden {
+  gap: 8px;
+}
+.camera-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 0 10px;
+  color: var(--muted);
+}
+.camera-zoom-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.camera-navigation button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: none;
+  font-size: 12px;
+}
+.camera-zoom-tools span {
+  min-width: 40px;
+  text-align: center;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.camera-help {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.camera-help-touch {
+  display: none;
+}
+@media (pointer: coarse) {
+  .camera-help-desktop {
+    display: none;
+  }
+  .camera-help-touch {
+    display: inline;
+  }
+}
+.game-column {
+  min-height: 0;
+  gap: 0;
+}
+.game-hud {
+  height: 88px;
+  padding: 10px 4px;
+  flex: none;
+}
+.game-hud .stage-kicker {
+  display: none;
+}
+.game-hud .stage-heading h2 {
+  font-size: 26px;
+  margin: 0;
+  color: var(--ink);
+}
+.instruction,
+.instruction.quiet {
+  position: static;
+  clip-path: none;
+  width: 100%;
+  height: 48px;
+  min-height: 48px;
+  padding: 6px 14px;
+  margin: 0;
+  overflow: auto;
+  flex: none;
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13px;
+}
+.garage-3d {
+  flex: none;
+  margin: 0;
+}
+.garage-canvas-wrap {
+  height: clamp(320px, calc(100dvh - 400px), 600px);
+  min-height: 0;
+  flex: none;
+  aspect-ratio: auto;
+  border-radius: 0 0 10px 10px;
+}
+.scene-options-bar {
+  height: 56px;
+  flex: none;
+  font-size: 13px;
+}
+.scene-options-bar > span {
+  font-size: 13px;
+  color: var(--muted);
+}
+button,
+input,
+select {
+  font: inherit;
+}
+button {
+  min-height: 44px;
+  background: var(--surface-raised);
+  border-color: var(--line);
+  color: var(--ink);
+  border-radius: 8px;
+  box-shadow: none;
+  transition:
+    background 120ms,
+    transform 120ms,
+    border-color 120ms;
+}
+button:hover {
+  background: #405b48;
+  border-color: var(--accent);
+  transform: none;
+}
+button:active {
+  transform: scale(0.97);
+  background: #596749;
+}
+button.accent {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #203529;
+  box-shadow: none;
+}
+button.accent:hover {
+  background: #ffe5a5;
+}
+button.selected,
+.tabs button.active,
+.quality-options button[aria-pressed="true"],
+.scene-themes button[aria-pressed="true"] {
+  color: var(--ink);
+  background: #425942;
+  border-color: var(--gold);
+}
+.toolbar {
+  height: 84px;
+  flex: none;
+  padding: 10px 0;
+  gap: 8px;
+}
+.toolbar button {
+  font-size: 13px;
+  border-radius: 8px;
+  min-height: 64px;
+}
+.board-footer {
+  min-height: 32px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.game-sheet {
+  padding: 24px;
+  border-radius: 18px;
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 24px 100px #0009;
+}
+.game-sheet::backdrop {
+  background: #08150fc9;
+  backdrop-filter: blur(6px);
+}
+.game-sheet .tabs {
+  background: #1b2c25;
+  border: 1px solid var(--line);
+  padding: 5px;
+  border-radius: 10px;
+}
+.game-sheet button,
+.game-sheet .tabs button {
+  min-height: 44px;
+  font-size: 13px;
+  border-radius: 8px;
+}
+.game-sheet h2,
+.game-sheet h3,
+.game-sheet b,
+.game-sheet dd {
+  color: var(--ink);
+}
+.game-sheet p,
+.game-sheet small,
+.game-sheet dt {
+  color: var(--muted);
+}
+.game-sheet .scene-settings,
+.analysis-card dl > div,
+.custom-item,
+.badge {
+  background: #1c2d26;
+  border-color: var(--line);
+  color: var(--ink);
+}
+.scene-settings {
+  background: #1c2d26;
+  border-color: var(--line);
+  padding: 16px;
+  gap: 16px;
+}
+.scene-settings label {
+  color: var(--ink);
+  font-size: 14px;
+}
+.scene-settings p,
+.scene-settings > button,
+.quality-options small,
+.scene-themes small {
+  font-size: 12px;
+  color: var(--muted);
+}
+.scene-settings input[type="range"] {
+  min-height: 44px;
+  accent-color: var(--gold);
+}
+.settings-heading small,
+.settings-label small {
+  color: var(--muted);
+  font-size: 13px;
+}
+.view-presets {
+  display: flex;
+  gap: 8px;
+  grid-column: 1/-1;
+}
+.view-presets button {
+  flex: 1;
+}
+.quality-options button {
+  font-size: 14px;
+}
+.game-sheet .scene-themes small {
+  font-size: 12px;
+}
+.level-browser h3 small {
+  display: none;
+}
+.level-grid button {
+  position: relative;
+  overflow: hidden;
+  background: #1e3229;
+  border: 1px solid var(--line);
+  min-height: 66px;
+  gap: 5px;
+  color: var(--ink);
+}
+.level-grid button.active {
+  border-color: var(--gold);
+  background: #435e40;
+}
+.level-grid button small {
+  color: var(--gold);
+}
+.badge {
+  padding: 20px 16px;
+  border-radius: 12px;
+}
+.badge.earned {
+  background: linear-gradient(145deg, #49533a, #283f31);
+  border-color: #b7b482;
+  color: var(--ink);
+}
+.badge .medal {
+  width: 60px;
+  height: 68px;
+  display: grid;
+  place-items: center;
+  background: #435545;
+  clip-path: polygon(15% 0, 85% 0, 100% 25%, 90% 80%, 50% 100%, 10% 80%, 0 25%);
+  margin: 0 auto 16px;
+  color: #a6b4a4;
+}
+.badge.earned .medal {
+  background: linear-gradient(135deg, #ffe6a2, #a77e34);
+  color: #2c3c29;
+}
+.medal svg {
+  width: 30px;
+  height: 30px;
+}
+.medal-1 {
+  rotate: 6deg;
+}
+.medal-2 {
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%) !important;
+}
+.medal-3 {
+  border-radius: 50%;
+  clip-path: none !important;
+}
+.medal-4 {
+  background: linear-gradient(135deg, #d8eee7, #7ea1a1) !important;
+}
+.vehicle-picker {
+  height: 112px;
+  overflow: auto;
+  align-content: start;
+  justify-content: flex-start;
+  padding: 8px 0;
+  gap: 6px;
+}
+.vehicle-picker button {
+  min-width: 104px;
+  min-height: 48px;
+  font-size: 12px;
+}
+.vehicle-picker .remove-selected {
+  color: #ffb79e;
+}
+.mini-car {
+  display: inline-block;
+  position: relative;
+  width: 36px;
+  height: 19px;
+  background: var(--car-color, #e85847);
+  border: 1px solid #fff4;
+  border-radius: 12px 7px 7px 12px;
+  box-shadow: 0 3px 0 #0d1b17;
+  flex: none;
+}
+.mini-car:after {
+  content: "";
+  position: absolute;
+  inset: 3px 11px 3px 8px;
+  border-radius: 4px;
+  background: #173b49;
+}
+.mini-car.coach,
+.mini-car.schoolbus,
+.mini-car.camper,
+.mini-car.delivery {
+  width: 42px;
+  height: 22px;
+  border-radius: 5px;
+}
+.mini-car.jeep,
+.mini-car.pickup {
+  border-radius: 4px;
+}
+.keyboard-help {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.editor-actions {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 0;
+}
+.editor-actions label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.editor-actions label:first-child {
+  width: 100%;
+}
+.editor-actions input {
+  flex: 1;
+  min-width: 0;
+}
+.editor-actions input,
+.editor-actions select {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #1a2b23;
+  color: var(--ink);
+}
+.editor-validation {
+  width: 100%;
+  max-height: 240px;
+  overflow: auto;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.analysis-card dl > div {
+  border-radius: 8px;
+}
+.analysis-card dd {
+  color: var(--gold);
+}
+.utility-dock {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+.utility-dock button {
+  font-size: 12px;
+  padding: 8px 12px;
+  background: transparent;
+}
+.install-app-button {
+  border-color: var(--gold) !important;
+  color: var(--gold);
+}
+.install-app-button svg {
+  width: 15px;
+  height: 15px;
+  vertical-align: -3px;
+  margin-right: 6px;
+}
+.install-guide {
+  max-width: 440px;
+  line-height: 1.75;
+}
+.install-guide-icon {
+  width: 76px;
+  height: 76px;
+  margin-bottom: 14px;
+}
+.install-guide-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 19px;
+}
+.install-guide h2 {
+  margin: 5px 0 14px;
+}
+.install-guide ol {
+  padding-left: 24px;
+}
+.install-guide li {
+  padding: 4px 0 4px 4px;
+}
+.install-guide p {
+  color: var(--muted);
+  font-size: 13px;
+}
+.install-guide button {
+  min-height: 44px;
+  margin-top: 8px;
+}
+.storage-alert {
+  padding: 14px;
+  border: 1px solid #d4a779;
+  border-radius: 10px;
+  background: #493e2b;
+  color: #ffedbc;
+  line-height: 1.6;
+  font-size: 14px;
+}
+.storage-alert button {
+  margin-left: 12px;
+}
+.win-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 18px;
+}
+.win-card h2,
+.win-card .win-score b {
+  color: var(--ink);
+}
+.win-copy,
+.win-level,
+.win-score span {
+  color: var(--muted);
+}
+.win-score {
+  background: #14271f;
+  border: 1px solid var(--line);
+  font-size: 13px;
+}
+.win-score > i {
+  background: #708c75;
+}
+.win-rewards small {
+  font-size: 11px;
+  color: #e4e9dc;
+}
+.win-emblem {
+  background: #43513b;
+  color: var(--gold);
+}
+.win-rewards span {
+  background: #374c36;
+  color: var(--gold);
+}
+.reward-notice {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--gold);
+}
+.fallback-workspace {
+  width: 100%;
+  min-height: 400px;
+}
+.scene-fallback {
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.fallback-workspace .board-viewport {
+  margin: auto;
+}
+@media (max-width: 540px) {
+  .app-shell {
+    padding: 8px;
+  }
+  .game-hud {
+    height: 70px;
+    padding: 8px 2px;
+  }
+  .game-hud .stage-heading h2 {
+    font-size: 20px;
+  }
+  .game-hud .stats span {
+    font-size: 11px;
+    padding: 0 7px;
+  }
+  .game-hud .stats b {
+    font-size: 21px;
+  }
+  .instruction,
+  .instruction.quiet {
+    height: 52px;
+    min-height: 52px;
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  .garage-canvas-wrap {
+    height: auto;
+    aspect-ratio: 1;
+    min-height: 0;
+  }
+  .scene-options-bar > span {
+    font-size: 12px;
+  }
+  .scene-tools button {
+    font-size: 12px;
+    padding: 8px;
+  }
+  .toolbar {
+    height: 78px;
+    gap: 4px;
+  }
+  .toolbar button {
+    font-size: 12px;
+    min-height: 58px;
+    padding: 8px 3px;
+  }
+  .board-footer {
+    font-size: 12px;
+  }
+  .game-sheet {
+    padding: 20px 16px;
+    border-radius: 18px 18px 0 0;
+  }
+  .scene-settings {
+    grid-template-columns: 1fr;
+  }
+  .quality-options small {
+    font-size: 11px;
+  }
+  .game-sheet .scene-themes {
+    flex-direction: column;
+  }
+  .game-sheet .scene-themes button {
+    padding: 12px;
+  }
+  .vehicle-picker button {
+    min-width: 96px;
+    min-height: 48px;
+  }
+  .badge-collection {
+    gap: 8px;
+  }
+  .badge {
+    padding: 16px 12px;
+  }
+  .utility-dock {
+    gap: 4px;
+  }
+  .utility-dock button {
+    font-size: 12px;
+    padding: 8px;
+  }
+  .editor-validation {
+    max-height: 200px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  button {
+    transition: none;
+  }
+}
+.offline-status {
+  width: min(1040px, 100%);
+  margin: 12px auto 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.offline-status button {
+  margin-left: 10px;
+}
+.level-thumbnail {
+  width: 42px;
+  height: 42px;
+  flex: none;
+}
+.level-grid button {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.level-grid button b {
+  font-size: 16px;
+}
+.scene-preview {
+  display: block;
+  height: 58px;
+  width: 130px;
+  border-radius: 8px;
+  margin-top: 8px;
+  background: linear-gradient(170deg, #b96550, #e0bb80 48%, #4d5651 49%);
+  box-shadow: inset 0 0 0 1px #fff3;
+}
+.preview-neon {
+  background: linear-gradient(170deg, #314471, #7797a0 48%, #223945 49%);
+}
+.journey-summary {
+  line-height: 1.7;
+  padding: 12px;
+  background: #1a2e24;
+  border-radius: 10px;
+  color: var(--gold);
+}
+@media (min-width: 900px) {
+  .game-column.editing {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    column-gap: 16px;
+    align-items: start;
+  }
+  .editing .game-hud {
+    grid-column: 1/-1;
+  }
+  .editing .instruction {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .editing .garage-3d {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  .editing .toolbar {
+    grid-column: 1;
+    grid-row: 4;
+  }
+  .editing .editor-actions {
+    grid-column: 2;
+    grid-row: 2/4;
+    align-content: start;
+    max-height: calc(100dvh - 240px);
+    overflow: auto;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  .editing .editor-actions label {
+    flex-wrap: wrap;
+  }
+  .editing .editor-actions label:first-child input {
+    width: 100%;
+    flex-basis: 100%;
+  }
+  .editing .editor-validation {
+    grid-column: 2;
+    grid-row: 4;
+    max-height: 220px;
+  }
+  .editing .vehicle-picker {
+    height: 62px;
+    flex-wrap: nowrap;
+    overflow: auto;
+  }
+  .editing .vehicle-picker button {
+    flex: none;
+  }
+  .editing .garage-canvas-wrap {
+    height: clamp(320px, calc(100dvh - 410px), 560px);
+  }
+}
+
+/* Scene-first layout: controls float at the edges rather than shrinking the stage. */
+.utility-menu { position: relative; margin: 12px auto; width: max-content; z-index: 12; }
+.utility-menu summary { list-style: none; cursor: pointer; padding: 12px 18px; min-height: 44px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font-size: 13px; }
+.utility-menu summary::-webkit-details-marker { display: none; }
+.utility-menu summary:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.utility-menu[open] .utility-dock { position: absolute; right: 0; top: 52px; width: 220px; display: flex; flex-direction: column; padding: 10px; border: 1px solid var(--line); border-radius: 14px; background: #22252df5; box-shadow: 0 16px 45px #0006; }
+.utility-dock button { color: var(--ink); border-color: var(--line); }
+.pwa-version { display: grid; gap: 8px; padding: 10px 4px 2px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }
+button:hover, .toolbar button:hover, .scene-tools button:hover { background: #414653; border-color: var(--gold); }
+button:active, .toolbar button:active, .scene-tools button:active { background: #535361; }
+button.selected, .tabs button.active, .quality-options button[aria-pressed="true"], .scene-themes button[aria-pressed="true"], .level-grid button.active { background: #514632; border-color: var(--gold); color: var(--ink); }
+.game-sheet .tabs, .scene-settings, .analysis-card dl > div, .custom-item, .badge, .level-grid button, .editor-actions input, .editor-actions select, .journey-summary { background: var(--surface-raised); }
+.game-sheet::backdrop { background: #101219c9; }
+
+.immersive-play { padding: 0; height: 100dvh; min-height: 480px; overflow: hidden; }
+.immersive-play .workspace, .immersive-play .workspace.panel-hidden { width: 100%; height: 100%; margin: 0; display: block; }
+.immersive-play .game-column { height: 100%; min-height: 0; display: block; }
+.immersive-play .garage-3d { position: absolute; inset: 0; margin: 0; display: block; }
+.immersive-play .garage-canvas-wrap { width: 100%; height: 100%; min-height: 0; aspect-ratio: auto; border-radius: 0; box-shadow: none; }
+.immersive-play .game-hud { position: absolute; z-index: 5; top: max(18px, env(safe-area-inset-top)); left: max(24px, env(safe-area-inset-left)); width: auto; height: auto; gap: 32px; padding: 12px 18px; border: 1px solid #ffffff20; border-radius: 16px; background: #20232de8; box-shadow: 0 8px 30px #0002; }
+.immersive-play .game-hud .stage-heading h2 { font-size: 21px; }
+.immersive-play .game-hud .stats span { min-width: 50px; font-size: 10px; padding: 0 12px; color: var(--muted); border-color: #ffffff25; }
+.immersive-play .game-hud .stats b { color: var(--gold); font-size: 22px; }
+.immersive-play .game-hud .stats span:last-child b { font-size: 13px; color: var(--ink); }
+.immersive-play .instruction { position: absolute; z-index: 5; top: max(100px, calc(env(safe-area-inset-top) + 82px)); left: 24px; width: min(460px, calc(100% - 48px)); height: auto; min-height: 0; max-height: 80px; border: 1px solid #ffffff20; border-radius: 12px; padding: 10px 14px; background: #20232ded; }
+.immersive-play .instruction.quiet { width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); }
+.immersive-play .toolbar { position: absolute; z-index: 5; width: max-content; max-width: calc(100% - 32px); height: auto; left: 50%; bottom: max(34px, calc(env(safe-area-inset-bottom) + 22px)); transform: translateX(-50%); padding: 6px; flex-wrap: nowrap; gap: 4px; background: #20232deb; border: 1px solid #ffffff25; border-radius: 18px; box-shadow: 0 8px 35px #0003; }
+.immersive-play .toolbar button { min-width: 74px; min-height: 58px; padding: 8px 12px; border: 0; border-radius: 12px; background: transparent; color: var(--ink); font-size: 11px; gap: 5px; }
+.immersive-play .toolbar button svg { color: var(--gold); width: 20px; height: 20px; }
+.immersive-play .toolbar button:hover { background: #ffffff12; }
+.immersive-play .toolbar button.selected { background: #514632; }
+.immersive-play .scene-tag { top: auto; bottom: 16px; left: 24px; background: transparent; border: 0; color: #f4f1eb; text-shadow: 0 1px 4px #000; }
+.immersive-play .scene-options-bar { position: absolute; z-index: 5; top: max(80px, calc(env(safe-area-inset-top) + 64px)); right: max(24px, env(safe-area-inset-right)); height: auto; min-height: 0; padding: 0; }
+.immersive-play .scene-options-bar > span { position: fixed; left: 24px; bottom: 46px; max-width: 240px; font-size: 12px; color: var(--ink); text-shadow: 0 1px 4px #000; pointer-events: none; }
+.immersive-play .scene-tools button, .immersive-play .camera-navigation button { background: #20232de8; color: var(--ink); border: 1px solid #ffffff25; border-radius: 12px; font-size: 12px; }
+.immersive-play .camera-navigation { position: absolute; z-index: 5; right: max(24px, env(safe-area-inset-right)); bottom: max(34px, calc(env(safe-area-inset-bottom) + 22px)); padding: 6px; background: #20232de8; border: 1px solid #ffffff25; border-radius: 14px; }
+.immersive-play .camera-navigation button { border: 0; background: transparent; }
+.immersive-play .camera-navigation button:hover { background: #ffffff12; }
+.immersive-play .camera-help { display: none; }
+.immersive-play .board-footer { position: absolute; z-index: 5; bottom: max(6px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: max-content; max-width: 100%; margin: 0; padding: 0; min-height: 20px; color: var(--ink); font-size: 11px; text-shadow: 0 1px 4px #000; }
+.immersive-play .board-footer button { background: var(--surface); color: var(--gold); }
+.immersive-play .utility-menu { position: absolute; right: max(24px, env(safe-area-inset-right)); top: max(18px, env(safe-area-inset-top)); margin: 0; }
+.immersive-play .utility-menu summary { background: #20232de8; border-color: #ffffff25; }
+.immersive-play .offline-status { position: absolute; z-index: 6; bottom: 115px; left: 24px; width: auto; max-width: calc(100% - 48px); margin: 0; padding: 5px 9px; border-radius: 8px; background: #20232de8; font-size: 11px; }
+.immersive-play .vehicle-picker { position: absolute; z-index: 6; right: 24px; top: 140px; max-width: min(360px, calc(100% - 48px)); max-height: calc(100dvh - 280px); overflow: auto; padding: 10px; border-radius: 14px; background: var(--surface); }
+.immersive-play .vehicle-picker button { background: var(--surface-raised); color: var(--ink); border-color: var(--line); }
+/* Fallback remains usable on devices without WebGL. */
+.immersive-play .fallback-workspace { position: absolute; inset: 120px 16px 130px; overflow: auto; }
+@media (max-width: 900px) {
+  .immersive-play .camera-navigation { bottom: 114px; }
+  .immersive-play .scene-options-bar > span { display: none; }
+}
+@media (max-width: 540px) {
+  .immersive-play { min-height: 440px; }
+  .immersive-play .game-hud { top: max(10px, env(safe-area-inset-top)); left: 10px; right: 74px; gap: 6px; padding: 10px; border-radius: 12px; }
+  .immersive-play .game-hud .stage-heading h2 { font-size: 16px; white-space: nowrap; }
+  .immersive-play .game-hud .stats span { min-width: 0; padding: 0 6px; font-size: 9px; }
+  .immersive-play .game-hud .stats b { font-size: 18px; }
+  .immersive-play .game-hud .stats span:last-child { display: none; }
+  .immersive-play .utility-menu { right: 10px; top: max(10px, env(safe-area-inset-top)); }
+  .immersive-play .utility-menu summary { padding: 12px; }
+  .immersive-play .instruction { top: max(76px, calc(env(safe-area-inset-top) + 66px)); left: 10px; width: calc(100% - 20px); font-size: 12px; }
+  .immersive-play .toolbar { bottom: max(32px, calc(env(safe-area-inset-bottom) + 24px)); padding: 4px; width: calc(100% - 24px); }
+  .immersive-play .toolbar button { min-width: 0; flex: 1; padding: 8px 4px; min-height: 54px; }
+  .immersive-play .scene-options-bar { top: auto; bottom: max(104px, calc(env(safe-area-inset-bottom) + 96px)); left: 12px; right: auto; }
+  .immersive-play .scene-tools { gap: 4px; }
+  .immersive-play .scene-tools button { padding: 8px; font-size: 11px; }
+  .immersive-play .scene-tools button svg { width: 16px; height: 16px; }
+  .immersive-play .camera-navigation { bottom: max(104px, calc(env(safe-area-inset-bottom) + 96px)); right: 12px; padding: 0; }
+  .immersive-play .camera-zoom-tools { gap: 0; }
+  .immersive-play .camera-navigation button { min-width: 36px; padding: 8px 4px; font-size: 11px; }
+  .immersive-play .camera-zoom-tools span { min-width: 34px; font-size: 10px; }
+  .immersive-play .scene-tag { bottom: auto; top: max(78px, calc(env(safe-area-inset-top) + 68px)); left: 12px; font-size: 9px; padding: 0; }
+  .immersive-play .vehicle-picker { top: auto; bottom: 162px; right: 12px; max-height: 35dvh; }
+  .immersive-play .offline-status { left: 12px; bottom: 160px; }
+}
+@media (max-height: 500px) and (min-width: 541px) {
+  .immersive-play { min-height: 320px; }
+  .immersive-play .game-hud { top: 10px; left: 12px; padding: 8px 12px; }
+  .immersive-play .scene-options-bar { top: 10px; right: 90px; }
+  .immersive-play .utility-menu { top: 10px; right: 12px; }
+  .immersive-play .camera-navigation { bottom: 30px; right: 12px; }
+  .immersive-play .toolbar { bottom: 30px; }
+  .immersive-play .instruction { left: 12px; top: 72px; width: calc(50% - 130px); font-size: 11px; }
+}
+@media (max-width: 540px) {
+  .immersive-play .camera-navigation button { min-width: 44px; min-height: 44px; }
+  .immersive-play .game-hud .stage-heading { width: auto; }
+}
+@media (max-width: 360px) {
+  .immersive-play .camera-navigation { bottom: max(156px, calc(env(safe-area-inset-bottom) + 148px)); }
+  .immersive-play .offline-status { bottom: 212px; }
+}
+.level-transition::after { content:''; position:fixed; z-index:40; inset:0; background:#181b22; animation:level-cover .24s ease both; pointer-events:all; }
+@keyframes level-cover { from { opacity:0; } to { opacity:1; } }
+.win-overlay { background:#11151b80; backdrop-filter:blur(3px); }
+.win-card { background:linear-gradient(150deg,#343946,#22252d 70%); border:1px solid #efc77766; box-shadow:0 26px 85px #0007; }
+.win-performance { font-size:12px; color:var(--gold); margin:14px 0; }
+.win-up-next { margin:14px 0 0; font-size:11px; color:var(--muted); }
+@media(prefers-reduced-motion:reduce) { .level-transition::after { animation:none; } }
+.win-score { background:#1f232e; border-color:#ffffff20; }.win-score > i { background:#ffffff24; }.win-emblem { background:#514632; }.win-rewards span { background:#3b3840; }
+.fallback-legal-cell,.fallback-placement-preview { position:absolute; pointer-events:none; z-index:2; border-radius:7px; }.fallback-legal-cell { background:#efc77722; border:1px solid #efc77740; }.fallback-placement-preview { opacity:.35; border:2px solid #fff9; z-index:4; }
+/* Drawing tools form one compact floating dock; the scene keeps its full viewport. */
+.editor-shell .garage-3d { inset:0; width:100%; }
+.editor-shell .editing .garage-canvas-wrap { height:100%; }
+.editor-shell .toolbar,.editor-shell .camera-navigation,.editor-shell .scene-options-bar { display:none; }
+.editor-shell .game-hud .stats span:not(:first-child) { display:none; }
+.editor-shell .editor-actions { position:absolute; z-index:7; top:auto; right:auto; left:50%; bottom:max(18px,calc(env(safe-area-inset-bottom) + 12px)); transform:translateX(-50%); width:max-content; max-width:calc(100% - 32px); height:auto; max-height:240px; padding:10px; display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:6px; background:#22252deb; border:1px solid #ffffff25; border-radius:16px; box-shadow:0 10px 40px #0003; overflow:auto; }
+.editor-shell .editor-actions > label { display:flex; align-items:center; gap:6px; color:var(--muted); font-size:11px; }
+.editor-shell .editor-actions input { width:170px; min-width:0; padding:10px; color:var(--ink); border:1px solid #ffffff25; border-radius:9px; background:#303440; }
+.editor-shell .editor-actions > button { flex:none; min-height:44px; padding:9px 12px; background:transparent; border:0; color:var(--ink); box-shadow:none; font-size:12px; border-radius:9px; }
+.editor-shell .editor-actions > button svg { color:var(--gold); }
+.editor-shell .editor-actions > button:hover { background:#ffffff12; }
+.editor-shell .editor-actions > button.accent { background:var(--gold); color:#22252d; }
+.editor-shell .editor-validation { position:static; flex-basis:100%; width:100%; margin:2px 0 0; padding:7px; background:#303440; border:0; border-radius:8px; color:var(--gold); font-size:12px; text-align:center; max-height:60px; }
+.editor-shell .vehicle-picker { position:absolute; z-index:6; top:auto; right:auto; left:50%; bottom:148px; transform:translateX(-50%); max-width:calc(100% - 32px); max-height:160px; display:flex; flex-direction:column; flex-wrap:nowrap; align-items:stretch; gap:7px; padding:8px; background:#22252deb; border:1px solid #ffffff25; border-radius:13px; overflow:visible; }
+.editor-shell .vehicle-picker { height:auto; bottom:100px; width:max-content; }
+.placed-car-list { display:flex; flex:none; gap:5px; overflow:auto; scrollbar-width:thin; }
+.editor-shell .vehicle-picker button { flex:none; min-height:44px; margin:0; padding:8px 10px; font-size:11px; background:#303440; color:var(--ink); border-color:#ffffff22; }
+.selected-car-actions { display:flex; justify-content:center; gap:6px; position:relative; }
+.vehicle-variants { position:absolute; bottom:54px; left:50%; transform:translateX(-50%); display:grid; grid-template-columns:repeat(2,1fr); gap:6px; padding:10px; background:#22252dfa; border:1px solid #efc77766; border-radius:12px; box-shadow:0 12px 30px #0004; min-width:250px; }
+.vehicle-variants button { display:flex; gap:7px; align-items:center; }
+.vehicle-variants i { width:22px; height:12px; border-radius:4px; }
+@media(max-width:700px) {
+ .editor-shell .editor-actions { width:calc(100% - 24px); max-width:none; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); padding:8px; gap:5px; max-height:220px; }
+ .editor-shell .editor-actions > label { grid-column:2/-1; min-width:0; }.editor-shell .editor-actions input { flex:1; width:0; padding:9px; }
+ .editor-shell .editor-actions > button { padding:8px 3px; font-size:11px; min-width:0; }
+ .editor-shell .editor-validation { grid-column:1/-1; }
+ .editor-shell .vehicle-picker { bottom:214px; max-width:calc(100% - 24px); }
+ .editor-shell .instruction { max-height:48px; overflow:auto; }
+}
+@media(max-height:540px) and (min-width:701px) { .editor-shell .editor-actions { bottom:10px; padding:6px; }.editor-shell .vehicle-picker { bottom:128px; } }
+@media(max-width:700px) { .editor-shell .vehicle-picker { bottom:180px; } }
+
+/* Distinct results and an intentional verify → play → save workflow. */
+.editor-shell .instruction.validation-result { justify-content:flex-start; text-align:left; gap:10px; padding:12px 16px; border-width:1px 1px 1px 4px; box-shadow:0 8px 24px #0002; }
+.validation-result::before { content:'✓'; flex:none; font-size:21px; font-weight:800; }
+.editor-shell .instruction.validation-success { background:#263e3a; color:#e6fff5; border-color:#8ddac1; }
+.editor-shell .instruction.validation-warning { background:#49372c; color:#fff0d1; border-color:#f2bc71; }
+.validation-warning::before { content:'!'; }
+.editor-exit { position:absolute; z-index:7; top:max(18px,env(safe-area-inset-top)); right:max(104px,calc(env(safe-area-inset-right) + 90px)); min-height:44px; display:flex; align-items:center; gap:7px; padding:10px 14px; color:var(--ink); background:#22252deb; border:1px solid #ffffff25; border-radius:12px; box-shadow:0 6px 20px #0002; font-size:12px; }
+.editor-exit svg { color:var(--gold); width:16px; height:16px; }
+.editor-completion { display:flex; gap:6px; align-items:center; padding-left:12px; margin-left:6px; border-left:1px solid #ffffff25; }
+.editor-completion button { min-height:44px; min-width:64px; padding:9px 12px; border-radius:9px; box-shadow:none; font-size:12px; }
+.editor-completion .accent { background:#514632; border-color:#b69b67; color:#fff0cc; }
+.editor-completion .editor-test { background:#303e4b; border-color:#8fa9bd; color:#e3f1ff; }
+.editor-completion .editor-save { background:var(--gold); border-color:var(--gold); color:#22252d; font-weight:700; }
+@media(min-width:701px) {
+ .editor-shell .editor-actions > label:first-child { width:auto; flex-wrap:nowrap; }
+ .editor-shell .editor-actions > label:first-child input { width:170px; flex-basis:auto; }
+}
+.game-sheet .custom-item,.game-sheet .custom-item.editing { background:#303440; border-color:#ffffff30; }
+.game-sheet .custom-item.editing { border-color:#c8a764; }
+.game-sheet .custom-play { background:transparent; color:#f5f2ec; }
+.game-sheet .custom-play span { color:#c2c7d3; }
+.game-sheet .custom-actions .icon-action { background:#242833; color:#ebcf94; border-color:#ffffff30; }
+.game-sheet .custom-actions .danger { color:#ffb8af; }
+@media(max-width:700px) {
+ .editor-shell .game-hud { width:auto; right:auto; gap:12px; padding:10px; }
+ .editor-shell .game-hud .stage-heading h2 { font-size:16px; }
+ .editor-shell .game-hud .stats span { min-width:30px; padding:0 6px; }
+ .editor-shell .game-hud .stats span:first-child { display:block; }
+ .editor-exit { top:max(10px,env(safe-area-inset-top)); right:max(76px,calc(env(safe-area-inset-right) + 66px)); padding:10px; font-size:11px; gap:4px; }
+ .editor-shell .editor-actions > label { grid-column:1/-1; }
+ .editor-completion { grid-column:1/-1; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); padding:6px 0 0; margin:0; border-left:0; border-top:1px solid #ffffff25; }
+ .editor-completion button { min-width:0; font-size:11px; }
+ .editor-shell .instruction.validation-result { padding:10px 12px; max-height:72px; }
+}
+@media(max-width:360px) {
+ .editor-shell .game-hud .stats { display:none; }
+ .editor-shell .game-hud .stage-heading h2 { font-size:14px; }
+}
+/* Fleet size does not change the compact selection toolbar. */
+.editor-shell .vehicle-picker { width:max-content; max-width:calc(100% - 24px); flex-direction:row; align-items:center; gap:7px; padding:7px; }
+.editor-shell .vehicle-picker .fleet-toggle { min-width:100px; white-space:nowrap; }
+.fleet-toggle span { color:var(--muted); }
+.editor-shell .placed-car-list { position:absolute; bottom:calc(100% + 8px); left:0; width:300px; max-width:calc(100vw - 24px); max-height:220px; padding:8px; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; background:#22252df7; border:1px solid #ffffff30; border-radius:13px; box-shadow:0 8px 28px #0004; overflow:auto; }
+.editor-shell .placed-car-list button { min-width:0; text-align:left; }
+.editor-shell .selected-car-actions { flex:none; position:static; }
+.editor-shell .placed-car-list,.editor-shell .vehicle-variants { left:50%; transform:translateX(-50%); }
+.editor-shell .vehicle-variants { bottom:calc(100% + 8px); }
+.fallback-hint-goal { position:absolute; pointer-events:none; z-index:5; border:3px dashed #ffe5a0; border-radius:10px; background:#ffe5a019; }
+.vehicle .hint-arrow { background:#222733; color:#fff2cf; border:1px solid #efd08b; padding:4px 8px; border-radius:7px; font-size:14px; width:max-content; }
+@media(max-width:700px) {
+ .editor-shell .vehicle-picker button { min-width:0; padding:8px 7px; font-size:10px; }
+ .editor-shell .vehicle-picker .fleet-toggle { min-width:84px; }
+}

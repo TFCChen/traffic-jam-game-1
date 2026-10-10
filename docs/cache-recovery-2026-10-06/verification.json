@@ -1,0 +1,21 @@
+{
+  "title": "玩具車庫・交通解謎",
+  "text": "第 01 關\n0\n步數\n9\n最佳\n初級\n難度\n已接續上次的停車場。\n車庫設定\n−\n100%\n＋\n重置\n\n選車後按方向鍵移動；Escape 取消拖曳。紅車從右側出口離開。\n\n復原\n重來\n提示\n關卡\n編輯器\n選單\n操作指南 · 1 / 4\n讓紅車出庫\n\n紅色跑車是主角，出口位於停車場右側的第三列。\n\n→\n出口\n略過／關閉下一步",
+  "registrations": 0,
+  "caches": [
+    "unrelated-test"
+  ],
+  "progress": "level-17",
+  "modelRequests": [
+    "http://localhost:4173/models/garage.glb?v=cb89baeb3ec477a4",
+    "http://localhost:4173/models/racer.glb?v=cb89baeb3ec477a4",
+    "http://localhost:4173/models/jeep.glb?v=cb89baeb3ec477a4",
+    "http://localhost:4173/models/pickup.glb?v=cb89baeb3ec477a4",
+    "http://localhost:4173/models/compact.glb?v=cb89baeb3ec477a4",
+    "http://localhost:4173/models/taxi.glb?v=cb89baeb3ec477a4",
+    "http://localhost:4173/models/schoolbus.glb?v=cb89baeb3ec477a4",
+    "http://localhost:4173/models/coach.glb?v=cb89baeb3ec477a4",
+    "http://localhost:4173/models/camper.glb?v=cb89baeb3ec477a4",
+    "http://localhost:4173/models/delivery.glb?v=cb89baeb3ec477a4"
+  ]
+}

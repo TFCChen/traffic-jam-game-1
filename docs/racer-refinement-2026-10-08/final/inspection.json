@@ -1,0 +1,99 @@
+{
+  "version": {
+    "version": "8b8789ef"
+  },
+  "modelUrl": "http://localhost:4173/models/racer.glb?v=f08427c29f2dde99",
+  "reports": [
+    {
+      "name": "desktop",
+      "calls": 100,
+      "performance": {
+        "frames": 152,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 1440,
+          "height": 950
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 121,
+            "median": 1.199999988079071,
+            "p95": 3.5
+          },
+          "gpuMs": {
+            "samples": 120,
+            "median": 17.183541,
+            "p95": 20.088229
+          },
+          "drawCalls": {
+            "samples": 121,
+            "median": 100,
+            "p95": 100
+          },
+          "triangles": {
+            "samples": 121,
+            "median": 406880,
+            "p95": 406880
+          },
+          "gpuTimer": true
+        }
+      }
+    },
+    {
+      "name": "mobile",
+      "calls": 100,
+      "performance": {
+        "frames": 151,
+        "shadowUpdates": 3,
+        "renderedSceneKey": "1-play",
+        "viewport": {
+          "width": 393,
+          "height": 844
+        },
+        "inputToSubmission": {
+          "count": 0,
+          "median": null,
+          "p95": null
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 120,
+            "median": 1.100000023841858,
+            "p95": 3.200000047683716
+          },
+          "gpuMs": {
+            "samples": 119,
+            "median": 12.53625,
+            "p95": 12.643906
+          },
+          "drawCalls": {
+            "samples": 120,
+            "median": 100,
+            "p95": 100
+          },
+          "triangles": {
+            "samples": 120,
+            "median": 406880,
+            "p95": 406880
+          },
+          "gpuTimer": true
+        }
+      }
+    }
+  ],
+  "errors": []
+}

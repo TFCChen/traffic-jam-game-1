@@ -1,0 +1,289 @@
+{
+  "levels": [
+    {
+      "id": 1,
+      "moves": 9,
+      "explored": 691,
+      "solveAndReplayMs": 39
+    },
+    {
+      "id": 2,
+      "moves": 9,
+      "explored": 4589,
+      "solveAndReplayMs": 268
+    },
+    {
+      "id": 3,
+      "moves": 14,
+      "explored": 775,
+      "solveAndReplayMs": 29
+    },
+    {
+      "id": 4,
+      "moves": 9,
+      "explored": 363,
+      "solveAndReplayMs": 13
+    },
+    {
+      "id": 5,
+      "moves": 9,
+      "explored": 2190,
+      "solveAndReplayMs": 149
+    },
+    {
+      "id": 6,
+      "moves": 9,
+      "explored": 1650,
+      "solveAndReplayMs": 127
+    },
+    {
+      "id": 7,
+      "moves": 13,
+      "explored": 4944,
+      "solveAndReplayMs": 240
+    },
+    {
+      "id": 8,
+      "moves": 11,
+      "explored": 2260,
+      "solveAndReplayMs": 238
+    },
+    {
+      "id": 9,
+      "moves": 12,
+      "explored": 681,
+      "solveAndReplayMs": 47
+    },
+    {
+      "id": 10,
+      "moves": 17,
+      "explored": 1900,
+      "solveAndReplayMs": 157
+    },
+    {
+      "id": 11,
+      "moves": 25,
+      "explored": 828,
+      "solveAndReplayMs": 38
+    },
+    {
+      "id": 12,
+      "moves": 17,
+      "explored": 1268,
+      "solveAndReplayMs": 53
+    },
+    {
+      "id": 13,
+      "moves": 16,
+      "explored": 8267,
+      "solveAndReplayMs": 732
+    },
+    {
+      "id": 14,
+      "moves": 17,
+      "explored": 10322,
+      "solveAndReplayMs": 680
+    },
+    {
+      "id": 15,
+      "moves": 23,
+      "explored": 525,
+      "solveAndReplayMs": 55
+    },
+    {
+      "id": 16,
+      "moves": 21,
+      "explored": 2505,
+      "solveAndReplayMs": 176
+    },
+    {
+      "id": 17,
+      "moves": 24,
+      "explored": 2125,
+      "solveAndReplayMs": 193
+    },
+    {
+      "id": 18,
+      "moves": 25,
+      "explored": 1585,
+      "solveAndReplayMs": 89
+    },
+    {
+      "id": 19,
+      "moves": 22,
+      "explored": 484,
+      "solveAndReplayMs": 21
+    },
+    {
+      "id": 20,
+      "moves": 10,
+      "explored": 1602,
+      "solveAndReplayMs": 69
+    },
+    {
+      "id": 21,
+      "moves": 21,
+      "explored": 258,
+      "solveAndReplayMs": 10
+    },
+    {
+      "id": 22,
+      "moves": 26,
+      "explored": 3587,
+      "solveAndReplayMs": 281
+    },
+    {
+      "id": 23,
+      "moves": 29,
+      "explored": 2401,
+      "solveAndReplayMs": 136
+    },
+    {
+      "id": 24,
+      "moves": 25,
+      "explored": 4278,
+      "solveAndReplayMs": 286
+    },
+    {
+      "id": 25,
+      "moves": 27,
+      "explored": 8591,
+      "solveAndReplayMs": 870
+    },
+    {
+      "id": 26,
+      "moves": 28,
+      "explored": 4808,
+      "solveAndReplayMs": 422
+    },
+    {
+      "id": 27,
+      "moves": 28,
+      "explored": 2741,
+      "solveAndReplayMs": 176
+    },
+    {
+      "id": 28,
+      "moves": 30,
+      "explored": 2068,
+      "solveAndReplayMs": 165
+    },
+    {
+      "id": 29,
+      "moves": 31,
+      "explored": 4316,
+      "solveAndReplayMs": 391
+    },
+    {
+      "id": 30,
+      "moves": 32,
+      "explored": 1164,
+      "solveAndReplayMs": 77
+    },
+    {
+      "id": 31,
+      "moves": 37,
+      "explored": 3969,
+      "solveAndReplayMs": 308
+    },
+    {
+      "id": 32,
+      "moves": 37,
+      "explored": 577,
+      "solveAndReplayMs": 46
+    },
+    {
+      "id": 33,
+      "moves": 40,
+      "explored": 4063,
+      "solveAndReplayMs": 361
+    },
+    {
+      "id": 34,
+      "moves": 43,
+      "explored": 4367,
+      "solveAndReplayMs": 387
+    },
+    {
+      "id": 35,
+      "moves": 43,
+      "explored": 3964,
+      "solveAndReplayMs": 302
+    },
+    {
+      "id": 36,
+      "moves": 44,
+      "explored": 2555,
+      "solveAndReplayMs": 208
+    },
+    {
+      "id": 37,
+      "moves": 47,
+      "explored": 1943,
+      "solveAndReplayMs": 197
+    },
+    {
+      "id": 38,
+      "moves": 48,
+      "explored": 3711,
+      "solveAndReplayMs": 269
+    },
+    {
+      "id": 39,
+      "moves": 50,
+      "explored": 3585,
+      "solveAndReplayMs": 306
+    },
+    {
+      "id": 40,
+      "moves": 51,
+      "explored": 3025,
+      "solveAndReplayMs": 292
+    }
+  ],
+  "probes": [
+    {
+      "name": "non-array",
+      "result": {
+        "valid": false,
+        "errors": [
+          "關卡需要 1 至 18 台車，且必須使用車輛陣列。"
+        ]
+      }
+    },
+    {
+      "name": "null-car",
+      "result": {
+        "valid": false,
+        "errors": [
+          "車輛資料與 id 格式不正確。",
+          "關卡必須恰好有一台紅色目標車。"
+        ]
+      }
+    },
+    {
+      "name": "fractional-coordinate",
+      "result": {
+        "valid": false,
+        "errors": [
+          "bad 座標必須是有限整數。",
+          "bad 顏色必須是六位十六進位色碼。"
+        ]
+      }
+    },
+    {
+      "name": "nonfinite-coordinate",
+      "result": {
+        "valid": false,
+        "errors": [
+          "bad 座標必須是有限整數。",
+          "bad 顏色必須是六位十六進位色碼。"
+        ]
+      }
+    }
+  ],
+  "storage": {
+    "customObjectAccepted": false,
+    "writeThrows": false
+  }
+}

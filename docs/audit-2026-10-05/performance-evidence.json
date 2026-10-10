@@ -1,0 +1,149 @@
+[
+  {
+    "name": "desktop-day",
+    "idle": {
+      "cpuMs": {
+        "samples": 67,
+        "median": 0.800000011920929,
+        "p95": 1.0999999940395355
+      },
+      "gpuMs": {
+        "samples": 66,
+        "median": 7.190729,
+        "p95": 9.126718
+      },
+      "drawCalls": {
+        "samples": 67,
+        "median": 68,
+        "p95": 70
+      },
+      "triangles": {
+        "samples": 67,
+        "median": 84744,
+        "p95": 84816
+      },
+      "gpuTimer": true
+    },
+    "active": {
+      "cpuMs": {
+        "samples": 217,
+        "median": 1.0999999940395355,
+        "p95": 1.699999988079071
+      },
+      "gpuMs": {
+        "samples": 216,
+        "median": 5.78651,
+        "p95": 6.932447
+      },
+      "drawCalls": {
+        "samples": 217,
+        "median": 124,
+        "p95": 137
+      },
+      "triangles": {
+        "samples": 217,
+        "median": 169326,
+        "p95": 169794
+      },
+      "gpuTimer": true
+    }
+  },
+  {
+    "name": "desktop-night",
+    "idle": {
+      "cpuMs": {
+        "samples": 66,
+        "median": 1,
+        "p95": 1.4000000059604645
+      },
+      "gpuMs": {
+        "samples": 65,
+        "median": 10.164895,
+        "p95": 16.265364
+      },
+      "drawCalls": {
+        "samples": 66,
+        "median": 69,
+        "p95": 71
+      },
+      "triangles": {
+        "samples": 66,
+        "median": 84752,
+        "p95": 84824
+      },
+      "gpuTimer": true
+    },
+    "active": {
+      "cpuMs": {
+        "samples": 234,
+        "median": 1.5999999940395355,
+        "p95": 2.4000000059604645
+      },
+      "gpuMs": {
+        "samples": 232,
+        "median": 9.130781,
+        "p95": 12.653697
+      },
+      "drawCalls": {
+        "samples": 234,
+        "median": 84,
+        "p95": 137
+      },
+      "triangles": {
+        "samples": 234,
+        "median": 85258,
+        "p95": 169766
+      },
+      "gpuTimer": true
+    }
+  },
+  {
+    "name": "mobile-night",
+    "idle": {
+      "cpuMs": {
+        "samples": 66,
+        "median": 1.699999988079071,
+        "p95": 2.0999999940395355
+      },
+      "gpuMs": {
+        "samples": 65,
+        "median": 8.580989,
+        "p95": 13.608906
+      },
+      "drawCalls": {
+        "samples": 66,
+        "median": 69,
+        "p95": 71
+      },
+      "triangles": {
+        "samples": 66,
+        "median": 84752,
+        "p95": 84824
+      },
+      "gpuTimer": true
+    },
+    "active": {
+      "cpuMs": {
+        "samples": 228,
+        "median": 1.7000000178813934,
+        "p95": 2.5
+      },
+      "gpuMs": {
+        "samples": 227,
+        "median": 6.876145,
+        "p95": 10.21401
+      },
+      "drawCalls": {
+        "samples": 228,
+        "median": 124,
+        "p95": 138
+      },
+      "triangles": {
+        "samples": 228,
+        "median": 169298,
+        "p95": 169802
+      },
+      "gpuTimer": true
+    }
+  }
+]

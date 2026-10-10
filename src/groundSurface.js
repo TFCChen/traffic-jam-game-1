@@ -1,0 +1,164 @@
+import * as THREE from 'three';
+import { STREET } from './streetLayout.js';
+
+export const GROUND_BOUNDS = { x: -2.2, z: -2.15, size: 12.4 };
+export const PUDDLES = [[9.77,5.4,.24,1.04],[6.79,.9,.23,.92],[5.6,5.83,.52,.26],[.45,5.4,.38,.5],[4.5,.25,.9,.3],[-.9,2.9,.36,.85],[2.8,7.2,.7,.38]];
+export const STREET_PUDDLES = Array.from({length:32},(_,i)=>i-16).filter(i=>i<0||i>1).map(i=>[
+  i%2 ? 6.79 : 9.77, i*6+2+hash(i,7)*1.6, .19+hash(i,13)*.08, .65+hash(i,23)*.65]);
+const clamp = x => Math.max(0, Math.min(1, x));
+const smooth = (a,b,x) => { const t=clamp((x-a)/(b-a));return t*t*(3-2*t); };
+function hash(x,z) { let n=Math.imul(x,374761393)^Math.imul(z,668265263)^731; n=Math.imul(n^(n>>>13),1274126177);return ((n^(n>>>16))>>>0)/4294967295; }
+function noise(x,z) {
+  const ix=Math.floor(x),iz=Math.floor(z),tx=smooth(0,1,x-ix),tz=smooth(0,1,z-iz);
+  const a=hash(ix,iz)*(1-tx)+hash(ix+1,iz)*tx,b=hash(ix,iz+1)*(1-tx)+hash(ix+1,iz+1)*tx;
+  return a*(1-tz)+b*tz;
+}
+// Local contact weathering stays on the sidewalk, away from puzzle cells.
+export function courtyardWear(x,z) {
+  let wear = 0;
+  for (const [cx,cz,rx,rz] of [[-.68,5.6,.42,.46],[5.66,-.73,.42,.46],[6,7.25,.42,.46],[-1.5,6.95,.42,.46],[-.6,2.9,.46,.79],[2.1,-.65,1.1,.36],[3.9,6.65,1.02,.35]]) {
+    const distance = Math.hypot((x-cx)/rx,(z-cz)/rz);
+    wear = Math.max(wear, (1-smooth(.6,1.65,distance)) * (.55+.45*noise(x*5,z*5)));
+  }
+  return x > 0 && x < 6 && z > 0 && z < 6 ? 0 : wear;
+}
+export function pavingTone(name,x,z) {
+  if (name === 'Recessed mortar') return [.83,.84,.82];
+  const shade = .91 + hash(Math.round(x*17),Math.round(z*17)) * .13;
+  const warmth = (noise(x*.7+9,z*.7)-.5)*.045;
+  return [shade+warmth,shade,shade-warmth];
+}
+export function groundSample(x,z) {
+  const variation=noise(x*1.7,z*1.7),broad=noise(x*.45+12,z*.45-7);
+  const lotEdge=Math.min(Math.abs(x+.09),Math.abs(x-6.09),Math.abs(z+.09),Math.abs(z-6.09));
+  const inLotRing=x>-.3&&x<6.3&&z>-.3&&z<6.3;
+  const curbEdge=Math.min(Math.abs(x-6.48),Math.abs(x-10.12));
+  const edge=inLotRing?(1-smooth(.025,.19,lotEdge)):(x>6.3?1-smooth(.025,.18,curbEdge):0);
+  const drain=Math.exp(-((x-5.6)**2/.18+(z-5.83)**2/.045));
+  const tyre=x>6.6&&x<10 ? (1-smooth(.022,.075,Math.abs(x-(7.45+.17*Math.sin(z*.7))))) * smooth(-1,1,z) * (1-smooth(7,9,z)) : 0;
+  let puddle=0;
+  for(const[cx,cz,rx,rz]of [...PUDDLES,...STREET_PUDDLES]) {
+    const distance=Math.hypot((x-cx)/rx,(z-cz)/rz)+.22*(noise(x*9,z*9)-.5);
+    puddle=Math.max(puddle,1-smooth(.40,.82,distance));
+  }
+  return { grime:clamp(.06+.14*broad+.16*edge*(.5+variation)+.17*drain+.08*tyre),
+    dampness:clamp(.16+.58*broad+.13*variation+puddle*.35),puddle };
+}
+export function groundMaps(size=384) {
+  const macro=new Uint8Array(size*size*4);
+  for(let z=0;z<size;z++)for(let x=0;x<size;x++) {
+    const s=groundSample(GROUND_BOUNDS.x+(x+.5)/size*GROUND_BOUNDS.size,GROUND_BOUNDS.z+(z+.5)/size*GROUND_BOUNDS.size);
+    const wx=GROUND_BOUNDS.x+(x+.5)/size*GROUND_BOUNDS.size,wz=GROUND_BOUNDS.z+(z+.5)/size*GROUND_BOUNDS.size;
+    macro.set([Math.round(s.grime*255),Math.round(s.dampness*255),Math.round(s.puddle*255),Math.round(courtyardWear(wx,wz)*255)],(z*size+x)*4);
+  }
+  const grain=new Uint8Array(256*256*4);
+  for(let z=0;z<256;z++)for(let x=0;x<256;x++) {
+    const n=hash(x,z),aggregate=hash(Math.floor(x/3),Math.floor(z/3));
+    const shade=Math.round(255*(.37+.38*n+.25*aggregate));
+    grain.set([shade,Math.round((.5+.5*aggregate)*255),0,255],(z*256+x)*4);
+  }
+  // Sparse sealed hairlines, masked again by a non-repeating world field.
+  for(const [sx,sz]of [[37,64],[174,198]])for(let i=0;i<62;i++){
+    const x=sx+i,z=Math.round(sz+i*.28+Math.sin(i*.18)*3);
+    if(x<256&&z<256)grain[(z*256+x)*4+2]=220;
+  }
+  return {macro,grain};
+}
+
+export function streetGroundMap(width=128,height=1024) {
+  const bytes = new Uint8Array(width*height*4);
+  for(let z=0;z<height;z++)for(let x=0;x<width;x++) {
+    const wx=6.4+(x+.5)/width*3.8,wz=STREET.min+(z+.5)/height*(STREET.max-STREET.min);
+    const s=groundSample(wx,wz);
+    bytes.set([Math.round(s.grime*255),Math.round(s.dampness*255),Math.round(s.puddle*255),0],(z*width+x)*4);
+  }
+  return bytes;
+}
+
+export function createGroundSurface(renderer,garage) {
+  const maps=groundMaps(),textures=[];
+  function texture(bytes,w,h,repeat=false) {
+    const t=new THREE.DataTexture(bytes,w,h);t.minFilter=THREE.LinearMipmapLinearFilter;t.magFilter=THREE.LinearFilter;
+    t.generateMipmaps=true;t.wrapS=t.wrapT=repeat?THREE.RepeatWrapping:THREE.ClampToEdgeWrapping;
+    t.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());t.needsUpdate=true;textures.push(t);return t;
+  }
+  const macro=texture(maps.macro,384,384),grain=texture(maps.grain,256,256,true);
+  const streetMacro=texture(streetGroundMap(),128,1024);
+  // A small sky-only environment is convolved once. Wet surfaces reflect
+  // overcast sky and receive local-light highlights with material-specific
+  // roughness. No second scene render or planar mirror is needed.
+  const skyBytes=new Float32Array(256*128*4);
+  for(let y=0;y<128;y++)for(let x=0;x<256;x++) {
+    const horizon=Math.exp(-(((y/128-.5)/.17)**2));
+    const cloud=smooth(.35,.68,noise(x/34,y/16))*.32;
+    // Equirectangular +Y maps to v=1 in Three.js. Bright cloud openings
+    // belong above the horizon, so upward road normals see the wet sky.
+    const opening=Math.exp(-(((x/256-.28)/.105)**2+((y/128-.75)/.13)**2));
+    const overcast=smooth(.44,.57,y/128)*(.7+4.5*smooth(.34,.66,noise(x/17,y/10)));
+    const c=new THREE.Color(.18+.28*horizon+cloud+opening*2.8+overcast,.28+.27*horizon+cloud+opening*2.8+overcast,.40+.23*horizon+cloud+opening*2.5+overcast);
+    skyBytes.set([c.r,c.g,c.b,1],(y*256+x)*4);
+  }
+  const sky=new THREE.DataTexture(skyBytes,256,128,THREE.RGBAFormat,THREE.FloatType);
+  sky.minFilter=sky.magFilter=THREE.LinearFilter;sky.wrapS=THREE.RepeatWrapping;
+  sky.needsUpdate=true;textures.push(sky);sky.mapping=THREE.EquirectangularReflectionMapping;
+  const pmrem=new THREE.PMREMGenerator(renderer),reflection=pmrem.fromEquirectangular(sky);pmrem.dispose();
+  const weather={value:0},items=[];
+  const kinds={'Asphalt blue slate':0,'Street asphalt':0,'Courtyard paving':1,'Courtyard stone':2,'Parking markings':3};
+  garage.traverse(mesh=>{
+    if(!mesh.isMesh||!(mesh.material.name in kinds))return;
+    const original=mesh.material,kind=kinds[original.name],material=new THREE.MeshStandardMaterial();
+    material.copy(original);
+    material.map=null;material.bumpMap=grain;material.bumpScale=kind===0?.005:.0006;material.roughnessMap=null;material.roughness=kind===0?.91:.84;
+    material.metalness=0;material.envMap=reflection.texture;material.envMapIntensity=1.1;
+    const before=original.onBeforeCompile;
+    material.onBeforeCompile=(shader,gl)=>{
+      before.call(material,shader,gl);
+      shader.uniforms.groundMacro={value:original.name==='Street asphalt'?streetMacro:macro};shader.uniforms.groundGrain={value:grain};shader.uniforms.groundWeather=weather;
+      shader.vertexShader='varying vec3 groundWorld; varying float groundFacing;\n'+shader.vertexShader;
+      shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
+        groundWorld=(modelMatrix*vec4(transformed,1.)).xyz;
+        groundFacing=abs(normalize(mat3(modelMatrix)*normal).y);`);
+      shader.fragmentShader=`varying vec3 groundWorld; varying float groundFacing; uniform sampler2D groundMacro; uniform sampler2D groundGrain; uniform float groundWeather;\n`+shader.fragmentShader;
+      shader.fragmentShader=shader.fragmentShader.replace('#include <bumpmap_pars_fragment>',THREE.ShaderChunk.bumpmap_pars_fragment.replaceAll('vBumpMapUv','(groundWorld.xz*1.3)'));
+      // The reflection sky is an optical reference, not extra ambient light.
+      // Keep its diffuse contribution low so dark wet asphalt stays asphalt.
+      shader.fragmentShader=shader.fragmentShader.replace('#include <envmap_physical_pars_fragment>',THREE.ShaderChunk.envmap_physical_pars_fragment.replace(
+        'return PI * envMapColor.rgb * envMapIntensity;',
+        'return PI * envMapColor.rgb * envMapIntensity * mix(1.,.08,groundWeather);'));
+      shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
+        vec4 groundField=texture2D(groundMacro,${original.name==='Street asphalt'?`(groundWorld.xz-vec2(6.4,${STREET.min}))/vec2(3.8,${STREET.max-STREET.min})`:'(groundWorld.xz-vec2(-2.2,-2.15))/12.4'});
+        vec4 aggregate=texture2D(groundGrain,groundWorld.xz*1.3);
+        float facing=smoothstep(.5,.95,groundFacing);
+        float exposure=${original.name==='Street asphalt'?`clamp(min(groundWorld.z-(${STREET.north}),${STREET.south}-groundWorld.z)/.6+1.,0.,1.)`:'1.'};
+        float wet=groundWeather*(.55+.45*groundField.g)*facing*exposure;
+        float pool=groundWeather*groundField.b*facing*exposure;
+        float pigment=${kind===0?'(.84+.25*aggregate.r-groundField.r*.18)':kind===3?'(1.-groundField.r*.07)':'(.93+.10*aggregate.r-groundField.r*.07)'};
+        ${kind===0?'pigment*=mix(1.,.82,aggregate.b*smoothstep(.5,.72,groundField.g));':''}
+        diffuseColor.rgb*=pigment*mix(1.,${kind===0?'.58':kind===3?'.88':'.72'},wet);
+        diffuseColor.rgb*=mix(vec3(1.),vec3(.88,.94,.97),pool*.45);
+        ${kind===1||kind===2?'diffuseColor.rgb *= mix(vec3(1.),vec3(.82,.80,.74),groundField.a*facing);':''}`);
+      shader.fragmentShader=shader.fragmentShader.replace('#include <roughnessmap_fragment>',`#include <roughnessmap_fragment>
+        roughnessFactor=clamp(roughness+(.5-aggregate.g)*.09,.72,.98);
+        roughnessFactor=mix(roughnessFactor,${kind===0?'.36':kind===1?'.25':kind===2?'.44':'.29'},wet);
+        roughnessFactor=mix(roughnessFactor,.105,pool);`);
+      shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
+        normal=normalize(mix(normal,nonPerturbedNormal,max(wet*.08,pool*.94)));
+        `);
+    };
+    material.customProgramCacheKey=()=>`courtyard-ground-v4-${kind}-${original.name==='Street asphalt'}`;
+    mesh.material=material;items.push({mesh,original,material});
+  });
+  return {
+    setTheme(settings,quality) {
+      weather.value=settings.theme==='rain'?1:0;
+      for(const {material,original}of items) {
+        const next=weather.value?reflection.texture:original.envMap;
+        if(material.envMap!==next){material.envMap=next;material.needsUpdate=true;}
+        material.envMapIntensity=weather.value?.32:1.1;
+      }
+    },
+    snapshot(){return {wet:weather.value>0,materials:items.length,reflectionPassesPerFrame:0,reflectionCaptures:0,macroSize:384,drainage:false,flowTime:0};},
+    update(){},
+    dispose(){for(const{mesh,original,material}of items){mesh.material=original;material.dispose();}textures.forEach(t=>t.dispose());reflection.dispose();},
+  };
+}

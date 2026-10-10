@@ -1,0 +1,73 @@
+{
+  "modelRevision": "2ea77007af5a6a23",
+  "results": [
+    "racer: side and front screenshots captured; clear thin-sheet optics confirmed.",
+    "jeep: side and front screenshots captured; clear thin-sheet optics confirmed.",
+    "compact: side and front screenshots captured; clear thin-sheet optics confirmed.",
+    "taxi: side and front screenshots captured; clear thin-sheet optics confirmed.",
+    "pickup: side and front screenshots captured; clear thin-sheet optics confirmed.",
+    "delivery: side and front screenshots captured; clear thin-sheet optics confirmed.",
+    "schoolbus: side and front screenshots captured; clear thin-sheet optics confirmed.",
+    "coach: side and front screenshots captured; clear thin-sheet optics confirmed.",
+    "camper: side and front screenshots captured; clear thin-sheet optics confirmed.",
+    "high: actual right-button orbit preserves full glass resolution and material clarity.",
+    "standard: actual right-button orbit preserves full glass resolution and material clarity.",
+    "Real car drag keeps clear glazing, records one move and can be undone."
+  ],
+  "performanceResults": [
+    {
+      "quality": "high",
+      "orbitFPS": 9.538702111024238,
+      "profile": {
+        "cpuMs": {
+          "samples": 61,
+          "median": 2.800000011920929,
+          "p95": 3.100000023841858
+        },
+        "gpuMs": {
+          "samples": 60,
+          "median": 20.448802,
+          "p95": 47.388645
+        },
+        "drawCalls": {
+          "samples": 61,
+          "median": 100,
+          "p95": 100
+        },
+        "triangles": {
+          "samples": 61,
+          "median": 254412,
+          "p95": 254412
+        },
+        "gpuTimer": true
+      }
+    },
+    {
+      "quality": "standard",
+      "orbitFPS": 8.585503166783955,
+      "profile": {
+        "cpuMs": {
+          "samples": 61,
+          "median": 2.899999976158142,
+          "p95": 3.299999952316284
+        },
+        "gpuMs": {
+          "samples": 60,
+          "median": 20.294635,
+          "p95": 25.992083
+        },
+        "drawCalls": {
+          "samples": 61,
+          "median": 100,
+          "p95": 100
+        },
+        "triangles": {
+          "samples": 61,
+          "median": 254412,
+          "p95": 254412
+        },
+        "gpuTimer": true
+      }
+    }
+  ]
+}

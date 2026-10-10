@@ -1,0 +1,56 @@
+[
+  {
+    "model": "racer",
+    "bytes": 1144072,
+    "wheelTriangles": 13632,
+    "fixedBrakeVertices": 136
+  },
+  {
+    "model": "compact",
+    "bytes": 895636,
+    "wheelTriangles": 13168,
+    "fixedBrakeVertices": 136
+  },
+  {
+    "model": "taxi",
+    "bytes": 888408,
+    "wheelTriangles": 13264,
+    "fixedBrakeVertices": 136
+  },
+  {
+    "model": "jeep",
+    "bytes": 915184,
+    "wheelTriangles": 12976,
+    "fixedBrakeVertices": 136
+  },
+  {
+    "model": "pickup",
+    "bytes": 828872,
+    "wheelTriangles": 12976,
+    "fixedBrakeVertices": 136
+  },
+  {
+    "model": "coach",
+    "bytes": 1187164,
+    "wheelTriangles": 12320,
+    "fixedBrakeVertices": 0
+  },
+  {
+    "model": "schoolbus",
+    "bytes": 1131864,
+    "wheelTriangles": 12320,
+    "fixedBrakeVertices": 0
+  },
+  {
+    "model": "camper",
+    "bytes": 844096,
+    "wheelTriangles": 12320,
+    "fixedBrakeVertices": 0
+  },
+  {
+    "model": "delivery",
+    "bytes": 741664,
+    "wheelTriangles": 12320,
+    "fixedBrakeVertices": 0
+  }
+]

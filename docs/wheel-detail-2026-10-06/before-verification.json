@@ -1,0 +1,113 @@
+{
+  "results": [
+    {
+      "device": "desktop",
+      "profile": {
+        "cpuMs": {
+          "samples": 40,
+          "median": 0.9000000357627869,
+          "p95": 2.600000023841858
+        },
+        "gpuMs": {
+          "samples": 39,
+          "median": 19.797291,
+          "p95": 20.279635
+        },
+        "drawCalls": {
+          "samples": 40,
+          "median": 90,
+          "p95": 90
+        },
+        "triangles": {
+          "samples": 40,
+          "median": 235678,
+          "p95": 235678
+        },
+        "gpuTimer": true
+      },
+      "calls": 90,
+      "memory": {
+        "geometries": 76,
+        "textures": 14
+      },
+      "geometryVersion": "http://localhost:4173/models/racer.glb?v=6e542d12493d4a01"
+    },
+    {
+      "device": "mobile",
+      "profile": {
+        "cpuMs": {
+          "samples": 40,
+          "median": 0.8999999761581421,
+          "p95": 2.299999952316284
+        },
+        "gpuMs": {
+          "samples": 39,
+          "median": 11.204791,
+          "p95": 11.849583
+        },
+        "drawCalls": {
+          "samples": 40,
+          "median": 90,
+          "p95": 90
+        },
+        "triangles": {
+          "samples": 40,
+          "median": 235678,
+          "p95": 235678
+        },
+        "gpuTimer": true
+      },
+      "calls": 90,
+      "memory": {
+        "geometries": 76,
+        "textures": 14
+      },
+      "geometryVersion": "http://localhost:4173/models/racer.glb?v=6e542d12493d4a01"
+    },
+    {
+      "actualDragAndUndo": true,
+      "dragPerformance": {
+        "frames": 96,
+        "shadowUpdates": 42,
+        "renderedSceneKey": "custom-wheel-detail-play",
+        "viewport": {
+          "width": 1440,
+          "height": 950
+        },
+        "inputToSubmission": {
+          "count": 24,
+          "median": 1.300000011920929,
+          "p95": 5.400000035762787
+        },
+        "pixelRatio": 1,
+        "shadowSize": 2048,
+        "shadows": true,
+        "inView": true,
+        "profile": {
+          "cpuMs": {
+            "samples": 61,
+            "median": 0.8999999761581421,
+            "p95": 1.300000011920929
+          },
+          "gpuMs": {
+            "samples": 55,
+            "median": 20.996718,
+            "p95": 23.389009
+          },
+          "drawCalls": {
+            "samples": 61,
+            "median": 27,
+            "p95": 32
+          },
+          "triangles": {
+            "samples": 61,
+            "median": 117462,
+            "p95": 173618
+          },
+          "gpuTimer": true
+        }
+      }
+    }
+  ],
+  "errors": []
+}

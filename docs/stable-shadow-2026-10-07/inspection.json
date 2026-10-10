@@ -1,0 +1,175 @@
+{
+  "reports": [
+    {
+      "name": "day",
+      "before": {
+        "pitch": 55,
+        "yaw": 35,
+        "zoom": 1.2,
+        "panX": 0,
+        "panY": 0,
+        "focusX": 0,
+        "focusZ": 0,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "day",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "after": {
+        "pitch": 58.51999999999998,
+        "yaw": 18.199999999999818,
+        "zoom": 1.3734441412215774,
+        "panX": -0.4785,
+        "panY": 0.22893357841570497,
+        "focusX": -0.02356182028421472,
+        "focusZ": 0.0009084493805886495,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "day",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "shadowUpdatesDuringMovement": 0
+    },
+    {
+      "name": "standard",
+      "before": {
+        "pitch": 45,
+        "yaw": -65,
+        "zoom": 1.2,
+        "panX": 0,
+        "panY": 0,
+        "focusX": 0,
+        "focusZ": 0,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "day",
+        "quality": "standard",
+        "motion": 1.2
+      },
+      "after": {
+        "pitch": 48.51999999999998,
+        "yaw": -81.80000000000018,
+        "zoom": 1.3734441412215774,
+        "panX": -0.4785,
+        "panY": 0.22893357841570497,
+        "focusX": 0.003499270903844831,
+        "focusZ": -0.0332101918687151,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "day",
+        "quality": "standard",
+        "motion": 1.2
+      },
+      "shadowUpdatesDuringMovement": 0
+    },
+    {
+      "name": "sunset",
+      "before": {
+        "pitch": 35,
+        "yaw": 120,
+        "zoom": 1.2,
+        "panX": 0,
+        "panY": 0,
+        "focusX": 0,
+        "focusZ": 0,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "sunset",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "after": {
+        "pitch": 38.51999999999998,
+        "yaw": 103.19999999999982,
+        "zoom": 1.3734441412215774,
+        "panX": -0.4785,
+        "panY": 0.22893357841570497,
+        "focusX": -0.001538051340162383,
+        "focusZ": 0.047846759938856565,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "sunset",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "shadowUpdatesDuringMovement": 0
+    },
+    {
+      "name": "neon",
+      "before": {
+        "pitch": 55,
+        "yaw": 35,
+        "zoom": 1.2,
+        "panX": 0,
+        "panY": 0,
+        "focusX": 0,
+        "focusZ": 0,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "neon",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "after": {
+        "pitch": 58.51999999999998,
+        "yaw": 18.199999999999818,
+        "zoom": 1.3734441412215774,
+        "panX": -0.4785,
+        "panY": 0.22893357841570497,
+        "focusX": -0.02356182028421472,
+        "focusZ": 0.0009084493805886495,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "neon",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "shadowUpdatesDuringMovement": 0
+    },
+    {
+      "name": "mobile",
+      "before": {
+        "pitch": 45,
+        "yaw": -25,
+        "zoom": 1.2,
+        "panX": 0,
+        "panY": 0,
+        "focusX": 0,
+        "focusZ": 0,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "day",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "after": {
+        "pitch": 41.48000000000002,
+        "yaw": -37,
+        "zoom": 1.3599999999999999,
+        "panX": -0.25743152222721155,
+        "panY": 0.6261338123035475,
+        "focusX": -0.028905914753572404,
+        "focusZ": -0.0003336895745178481,
+        "light": -40,
+        "intensity": 3,
+        "shadows": true,
+        "theme": "day",
+        "quality": "high",
+        "motion": 1.2
+      },
+      "shadowUpdatesDuringMovement": 0
+    }
+  ],
+  "errors": []
+}

@@ -8,6 +8,8 @@ const level = [
 ];
 
 assert.equal(validateLevel(level).valid, true);
+for(const value of [{},null,[null],[{}],[{...level[0],row:.5}],[{...level[0],row:NaN}],[{...level[0],color:'red'}]])assert.equal(validateLevel(value).valid,false);
+assert.equal(solveLevel(level,{maxStates:1}).status,'limit');
 assert.equal(legalMovesForCar(level, "block").some((move) => move.delta === 2), true);
 const moved = applyMove(level, { carId: "block", delta: 2 });
 assert.equal(moved.find((car) => car.id === "block").row, 3);
