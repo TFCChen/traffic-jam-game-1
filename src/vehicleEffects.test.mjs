@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { createVehicleLights, createExhaustSmoke, collectLampAnchors, vehicleLampState, vehicleLightPower, movingShadowRefreshDue } from './vehicleEffects.js';
-import { lowBeamProfile, HEADLIGHT_ANGLE, HEADLIGHT_DROP } from './headlightOptics.js';
+import { lowBeamProfile, HEADLIGHT_ANGLE, HEADLIGHT_BOUND_ANGLE, HEADLIGHT_DROP } from './headlightOptics.js';
 // Compare optical behavior, including additive twin-lamp road overlap. These
 // thresholds express the intended low-beam distribution, not exact texels.
 assert(lowBeamProfile(.45, -.15) > lowBeamProfile(0, .45) * 100, 'Wide road spread without an upward circular flood');
@@ -12,14 +12,15 @@ const roadLight = (distance, lateral, sourceSide) => {
   const height = .36, side = lateral - sourceSide;
   const axial = distance * Math.cos(pitch) + height * Math.sin(pitch);
   const up = distance * Math.sin(pitch) - height * Math.cos(pitch);
-  return lowBeamProfile(side / axial / tangent, up / axial / tangent) * height / (distance * distance + side * side + height * height) ** 1.5;
+  const cone = THREE.MathUtils.smoothstep(axial / Math.hypot(axial, up, side), Math.cos(HEADLIGHT_BOUND_ANGLE), Math.cos(HEADLIGHT_BOUND_ANGLE * .65));
+  return lowBeamProfile(side / axial / tangent, up / axial / tangent) * cone * height / (distance * distance + side * side + height * height) ** 1.5;
 };
 const pair = (distance, lateral) => roadLight(distance, lateral, -.3) + roadLight(distance, lateral, .3);
 assert(pair(.65, 0) > pair(1.5, 0) * .15, 'Foreground connects to the main pool instead of a detached far patch');
 assert(pair(.15, 0) < pair(.65, 0) * .05, 'No artificial light painted beneath the bumper');
 assert(pair(.5, .3) > pair(.5, 0), 'Two separate lens origins remain visible at close range');
-for (const distance of [1, 1.5, 2.5, 4]) {
-  assert(pair(distance, 0) >= Math.min(pair(distance, -.3), pair(distance, .3)) * .9, 'Overlapping fans have no dark centre seam');
+for (const distance of [.6, .65, .7, .8, 1, 1.5, 2.5, 4]) {
+  assert(pair(distance, 0) >= Math.max(pair(distance, -.3), pair(distance, .3)) * .95, 'Inner foreground corners blend without a clipped centre seam, including spotlight falloff');
 }
 assert(pair(5, 0) > pair(2, 0) * .04, 'Forward lobe continues to illuminate the distant road');
 for (let y = -1; y <= 1; y += .05) for (let x = -1; x <= 1; x += .05) {
@@ -77,6 +78,7 @@ assert.equal(scene.children.filter(o => o.isLight).length, 4);
 assert.equal(scene.children.filter(o => o.isLight && o.castShadow).length, 2, 'Only two depth maps in the fixed pool');
 const headSources = scene.children.filter(o => o.isLight && o.castShadow);
 assert(headSources.every(l => l.map?.isDataTexture) && headSources[0].map === headSources[1].map, 'Both real shadowed sources share one optical distribution');
+assert(headSources.every(l => l.angle === HEADLIGHT_BOUND_ANGLE), 'Projection texture and shadow cone use the same expanded optical bound');
 assert.equal(lights.headlights.length, 2);
 assert(lights.headlights.every(l => l.distance >= 9), 'Night beams retain useful reach beyond the previous short range');
 assert.equal(lights.taillights.length, 2);

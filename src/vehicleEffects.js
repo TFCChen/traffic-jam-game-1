@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createLowBeamTexture, HEADLIGHT_ANGLE, HEADLIGHT_DROP, HEADLIGHT_RANGE } from './headlightOptics.js';
+import { createLowBeamTexture, HEADLIGHT_BOUND_ANGLE, HEADLIGHT_DROP, HEADLIGHT_RANGE } from './headlightOptics.js';
 
 // Keep the puzzle's parked fleet dark. Activity stays lit briefly, then fades.
 export function vehicleLampState(item, theme, now) {
@@ -107,7 +107,7 @@ export function createVehicleLights(scene) {
   // The outer spotlight cone is only a bound, never a visible solid shell.
   const headGeometry = new THREE.CylinderGeometry(.006, .65, 1, 24, 1, true);
   const heads = [-1, 1].map(side => {
-    const light = new THREE.SpotLight('#fff0d6', 0, HEADLIGHT_RANGE, HEADLIGHT_ANGLE, .35, 2);
+    const light = new THREE.SpotLight('#fff0d6', 0, HEADLIGHT_RANGE, HEADLIGHT_BOUND_ANGLE, .35, 2);
     light.map = pattern;
     light.castShadow = true;
     light.shadow.mapSize.set(256, 256);
@@ -174,7 +174,7 @@ export function createVehicleLights(scene) {
         const headActivity = daylight ? state.activity : state.head;
         light.color.set(daylight ? '#e8f4ff' : '#fff0d6');
         light.distance = daylight ? .85 : HEADLIGHT_RANGE;
-        light.angle = daylight ? .65 : HEADLIGHT_ANGLE;
+        light.angle = daylight ? .65 : HEADLIGHT_BOUND_ANGLE;
         light.map = daylight ? null : pattern;
         light.intensity = item && quality.decor ? vehicleLightPower(settings.theme, headActivity > 0) * headActivity : 0;
         if (item) {
