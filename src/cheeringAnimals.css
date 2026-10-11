@@ -3,6 +3,9 @@
 .exit-skip-surface:focus-visible{outline:2px solid #efcc8460;outline-offset:-5px}
 .win-overlay.has-cheering{padding:0;background:radial-gradient(ellipse at center,#dfc89a20,transparent 65%),#171b228f}
 .win-overlay.has-retained-scene{backdrop-filter:none}
+.win-overlay.has-cheering .win-card{animation:result-settle 280ms cubic-bezier(.2,.7,.3,1) both}
+@keyframes result-settle{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.win-overlay.has-cheering .win-card{animation:none}}
 .win-scene-backdrop{position:absolute;inset:0;overflow:hidden;background:#252b30;pointer-events:none}
 .win-scene-backdrop canvas{position:absolute;filter:blur(12px) brightness(.55);transform:scale(1.04)}
 .has-retained-scene .cheering-guest{animation-delay:calc(var(--arrival) + .3s)}

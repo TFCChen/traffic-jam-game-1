@@ -947,6 +947,7 @@ function App() {
             exitFinished={exitFinished}
             exitSkipped={exitSkipped}
             onExitPresent={setExitBackdrop}
+            resultCovered={winOpen && Boolean(exitBackdrop)}
             disabled={loading || levelTransition || tutorial}
             goalIntro={tutorial && initialized && !loading}
             onIntroComplete={() => { setTutorial(false); saveTutorial(true); }}

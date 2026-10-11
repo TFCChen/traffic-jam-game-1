@@ -1481,6 +1481,19 @@ export function createGarageScene(canvas, getProps, callbacks) {
   function animate(now) {
     if (!alive) return;
     frame = requestAnimationFrame(animate);
+    const presentation = getProps();
+    // The retained result is opaque. Finish its clock without competing with
+    // the card and guests for GPU time or rebuilding invisible shadow maps.
+    if (presentation.resultCovered && presentation.won && exitCaptured) {
+      const target = groups.get('target');
+      if (escapeStart != null && now - escapeStart >= EXIT_COMPLETE_MS && target && !target.exitReported) {
+        target.exitReported = true;
+        callbacks.exitComplete?.();
+      }
+      lastTime = now;
+      dirty = true;
+      return;
+    }
     if (document.hidden || !inView) {
       lastTime = now;
       nextFrame = now;
