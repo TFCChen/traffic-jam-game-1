@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createLowBeamTexture, HEADLIGHT_ANGLE, HEADLIGHT_DROP } from './headlightOptics.js';
+import { createLowBeamTexture, HEADLIGHT_ANGLE, HEADLIGHT_DROP, HEADLIGHT_RANGE } from './headlightOptics.js';
 
 // Keep the puzzle's parked fleet dark. Activity stays lit briefly, then fades.
 export function vehicleLampState(item, theme, now) {
@@ -16,7 +16,7 @@ export function vehicleLampState(item, theme, now) {
   };
 }
 export function vehicleLightPower(theme, active) {
-  return !active ? 0 : theme === 'day' ? .65 : theme === 'neon' ? 13 : 8;
+  return !active ? 0 : theme === 'day' ? .65 : theme === 'neon' ? 18 : 8;
 }
 
 // Choose actual exterior lenses, excluding taxi signs and roof safety markers.
@@ -107,7 +107,7 @@ export function createVehicleLights(scene) {
   // The outer spotlight cone is only a bound, never a visible solid shell.
   const headGeometry = new THREE.CylinderGeometry(.006, .65, 1, 24, 1, true);
   const heads = [-1, 1].map(side => {
-    const light = new THREE.SpotLight('#fff0d6', 0, 5.5, HEADLIGHT_ANGLE, .35, 2);
+    const light = new THREE.SpotLight('#fff0d6', 0, HEADLIGHT_RANGE, HEADLIGHT_ANGLE, .35, 2);
     light.map = pattern;
     light.castShadow = true;
     light.shadow.mapSize.set(256, 256);
@@ -173,7 +173,7 @@ export function createVehicleLights(scene) {
         const daylight = settings.theme === 'day';
         const headActivity = daylight ? state.activity : state.head;
         light.color.set(daylight ? '#e8f4ff' : '#fff0d6');
-        light.distance = daylight ? .85 : 5.5;
+        light.distance = daylight ? .85 : HEADLIGHT_RANGE;
         light.angle = daylight ? .65 : HEADLIGHT_ANGLE;
         light.map = daylight ? null : pattern;
         light.intensity = item && quality.decor ? vehicleLightPower(settings.theme, headActivity > 0) * headActivity : 0;
@@ -186,7 +186,7 @@ export function createVehicleLights(scene) {
         const depth = light.shadow.map?.depthTexture;
         beam.visible = !daylight && settings.shadows && !!depth && light.intensity > 0 && quality.decor;
         if (beam.visible) {
-          const length = 4.8,
+          const length = HEADLIGHT_RANGE * .84,
             radius = Math.tan(light.angle) * length;
           tip.subVectors(light.target.position, light.position).normalize();
           beam.position.copy(light.position).addScaledVector(tip, length / 2);
@@ -195,7 +195,7 @@ export function createVehicleLights(scene) {
           beam.material.uniforms.shadowDepth.value = depth;
           beam.material.uniforms.shadowTransform.value = light.shadow.matrix;
           // Clear air barely reveals a beam; rain retains a little scattering.
-          beam.material.uniforms.power.value = state.head * (settings.theme === 'rain' ? .018 : .006);
+          beam.material.uniforms.power.value = state.head * (settings.theme === 'rain' ? .022 : .009);
         }
         const rear = tails[i].light;
         const reverse = state.reverse > 0;

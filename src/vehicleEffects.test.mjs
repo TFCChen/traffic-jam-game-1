@@ -21,6 +21,7 @@ assert(pair(.5, .3) > pair(.5, 0), 'Two separate lens origins remain visible at 
 for (const distance of [1, 1.5, 2.5, 4]) {
   assert(pair(distance, 0) >= Math.min(pair(distance, -.3), pair(distance, .3)) * .9, 'Overlapping fans have no dark centre seam');
 }
+assert(pair(5, 0) > pair(2, 0) * .04, 'Forward lobe continues to illuminate the distant road');
 for (let y = -1; y <= 1; y += .05) for (let x = -1; x <= 1; x += .05) {
   const power = lowBeamProfile(x, y);
   assert(Number.isFinite(power) && power >= 0 && power <= 1);
@@ -77,6 +78,7 @@ assert.equal(scene.children.filter(o => o.isLight && o.castShadow).length, 2, 'O
 const headSources = scene.children.filter(o => o.isLight && o.castShadow);
 assert(headSources.every(l => l.map?.isDataTexture) && headSources[0].map === headSources[1].map, 'Both real shadowed sources share one optical distribution');
 assert.equal(lights.headlights.length, 2);
+assert(lights.headlights.every(l => l.distance >= 9), 'Night beams retain useful reach beyond the previous short range');
 assert.equal(lights.taillights.length, 2);
 for (let i = 0; i < 2; i++) {
   const head = lights.headlights[i],

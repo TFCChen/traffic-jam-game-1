@@ -6,6 +6,7 @@ import * as THREE from 'three';
 // never from toeing the lamps inward. +right is the vehicle's roadside half.
 export const HEADLIGHT_ANGLE = .68;
 export const HEADLIGHT_DROP = .26;
+export const HEADLIGHT_RANGE = 9.5;
 export function lowBeamProfile(right, up) {
   const smooth = (a, b, x) => THREE.MathUtils.smoothstep(x, a, b);
   const cutoff = .035 + .035 * smooth(-.04, .22, right);
@@ -15,7 +16,10 @@ export function lowBeamProfile(right, up) {
   const spread = .30 * Math.exp(-((right / .82) ** 4) - ((up + .24) / .30) ** 2);
   // The soft lower skirt joins the bumper foreground to the main road pool.
   const foreground = .19 * Math.exp(-((right / .72) ** 4) - ((up + .54) / .30) ** 2);
-  return Math.min(1, hotspot + spread + foreground) * upper * rim;
+  // A shallow forward lobe carries light farther along the road, while the
+  // existing lower skirt keeps the foreground connected to that distant pool.
+  const reach = .90 * Math.exp(-(((right - .035) / .38) ** 2) - ((up - .008) / .052) ** 2);
+  return Math.min(1, hotspot + spread + foreground + reach) * upper * rim;
 }
 
 export function createLowBeamTexture(size = 128) {
