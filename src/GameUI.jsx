@@ -87,6 +87,8 @@ export function WinDialog({
   finale = false,
   summary,
   nextTitle,
+  backdrop = null,
+  ready = true,
 }) {
   const dialog = useRef(null);
   useEffect(() => {
@@ -96,30 +98,39 @@ export function WinDialog({
       : previous;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    dialog.current.querySelector(".win-next").focus();
+    dialog.current.focus({ preventScroll: true });
     return () => {
       document.body.style.overflow = previousOverflow;
       if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
     };
   }, []);
+  useEffect(() => {
+    if (ready && dialog.current.contains(document.activeElement)) {
+      dialog.current.querySelector('.win-next').focus({ preventScroll: true });
+    }
+  }, [ready]);
 
   function keyDown(event) {
-    if (event.key === "Escape") onClose();
+    if (event.key === "Escape" && ready) onClose();
     if (event.key !== "Tab") return;
-    const buttons = [...dialog.current.querySelectorAll("button")];
+    const buttons = [...dialog.current.querySelectorAll("button:not(:disabled)")];
+    if (!buttons.length) { event.preventDefault(); return; }
     const first = buttons[0],
       last = buttons.at(-1);
     if (event.shiftKey && document.activeElement === first) {
       event.preventDefault();
       last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
+    } else if (!event.shiftKey && (document.activeElement === last || document.activeElement === dialog.current)) {
       event.preventDefault();
       first.focus();
     }
   }
 
   return (
-    <div className="win-overlay has-cheering">
+    <div className={`win-overlay has-cheering${backdrop ? ' has-retained-scene' : ''}`}>
+      {backdrop && <div className="win-scene-backdrop" aria-hidden="true">
+        <img src={backdrop.src} alt="" style={{ left: backdrop.left, top: backdrop.top, width: backdrop.width, height: backdrop.height }} />
+      </div>}
       <div className="win-celebration">
       <CheeringAnimals />
       <div className="confetti" aria-hidden="true">
@@ -143,11 +154,14 @@ export function WinDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="win-title"
+        aria-busy={!ready}
+        tabIndex={-1}
         onKeyDown={keyDown}
       >
         <button
           className="dialog-close"
           onClick={onClose}
+          disabled={!ready}
           aria-label="關閉通關結果"
         >
           <Icon name="close" />
@@ -264,11 +278,11 @@ export function WinDialog({
           </div>
         )}
         <div className="win-actions">
-          <button onClick={onRetry}>
+          <button onClick={onRetry} disabled={!ready}>
             <Icon name="reset" />
             再玩一次
           </button>
-          <button className="accent win-next" onClick={onNext}>
+          <button className="accent win-next" onClick={onNext} disabled={!ready}>
             {nextLabel || (hasNext ? "下一關" : "選擇關卡")}
             <Icon name="arrow" />
           </button>

@@ -221,6 +221,8 @@ function App() {
   const winPresented = useRef(false);
   const [winReady, setWinReady] = useState(false);
   const [exitFinished,setExitFinished]=useState(false);
+  const [exitBackdrop, setExitBackdrop] = useState(null);
+  const [exitSkipped, setExitSkipped] = useState(false);
   const [winOpen, setWinOpen] = useState(false);
   const [levelTransition, setLevelTransition] = useState(false);
   const transitionTimer = useRef(null);
@@ -383,12 +385,14 @@ function App() {
     winPresented.current = false;
     setWinReady(false);
     setExitFinished(false);
+    setExitBackdrop(null);
+    setExitSkipped(false);
     setWinOpen(false);
   }, [won, mode, current.id]);
   useEffect(() => {
     if (
       !won ||
-      !exitFinished ||
+      (!exitFinished && !exitBackdrop) ||
       mode !== "play" ||
       panel !== "none" ||
       garageSettingsOpen ||
@@ -404,10 +408,10 @@ function App() {
         setWinReady(true);
         setWinOpen(true);
       },
-      reduced ? 0 : 100,
+      reduced || exitBackdrop ? 0 : 100,
     );
     return () => clearTimeout(timer);
-  }, [won, mode, current.id, panel, garageSettingsOpen, exitFinished]);
+  }, [won, mode, current.id, panel, garageSettingsOpen, exitFinished, exitBackdrop]);
   useEffect(()=>{
     if(!won||mode!=='play'||exitFinished)return;
     // Recovery for a lost graphics context or a suspended browser; normal 3D
@@ -941,6 +945,8 @@ function App() {
             won={mode === "play" && won}
             onExitComplete={() => setExitFinished(true)}
             exitFinished={exitFinished}
+            exitSkipped={exitSkipped}
+            onExitPresent={setExitBackdrop}
             disabled={loading || levelTransition || tutorial}
             goalIntro={tutorial && initialized && !loading}
             onIntroComplete={() => { setTutorial(false); saveTutorial(true); }}
@@ -1322,12 +1328,9 @@ function App() {
         )}
       </main>
       <OfflineStatus />
-      {mode === 'play' && won && !exitFinished && (
+      {mode === 'play' && won && !exitFinished && !winOpen && (
         <button className="exit-skip-surface" aria-label="直接查看通關結果" onClick={() => {
-          setExitFinished(true);
-          winPresented.current = true;
-          setWinReady(true);
-          setWinOpen(true);
+          setExitSkipped(true);
         }} />
       )}
       {rewardNotice && !winOpen && (
@@ -1344,6 +1347,8 @@ function App() {
       )}
       {winOpen && mode === "play" && won && (
         <WinDialog
+          backdrop={exitBackdrop}
+          ready={exitFinished}
           moves={moves}
           stars={starsForPerformance(moves, analysis?.optimalMoves)}
           best={analysis?.optimalMoves}

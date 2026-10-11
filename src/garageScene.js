@@ -4,7 +4,7 @@ cullUnlitPixels();
 import {stabilizeShadowFilter} from './stableShadowFilter.js';
 stabilizeShadowFilter();
 import { createHintGuide } from './hintGuide.js';
-import { exitPose, exitSceneFade, EXIT_COMPLETE_MS } from './exitChoreography.js';
+import { exitPose, exitSceneFade, EXIT_COMPLETE_MS, EXIT_PRESENT_MS } from './exitChoreography.js';
 import { vegetationShadowProxy, configureCourtyardSunShadow, fitCourtyardExitShadow } from './environmentShadows.js';
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { createCourtyardReflections } from './courtyardReflections.js';
@@ -179,6 +179,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
     sceneKey,
     selected,
     escapeStart,
+    exitCaptured = false,
+    exitSkipRequested = false,
     lastTime = performance.now(),
     frame;
   let dirty = true,
@@ -1170,6 +1172,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
       cancelCamera();
       editorHover = null;
       escapeStart = null;
+      exitCaptured = false;
+      exitSkipRequested = false;
       cameraFollow = 0;
       cameraFollowZ = 0;
       selected = null;
@@ -1378,6 +1382,8 @@ export function createGarageScene(canvas, getProps, callbacks) {
           );
       }
       escapeStart = null;
+      exitCaptured = false;
+      exitSkipRequested = false;
     }
     renderer.shadowMap.needsUpdate = true;
     dirty = true;
@@ -1726,8 +1732,10 @@ export function createGarageScene(canvas, getProps, callbacks) {
       reduced.matches ? 1 : 1 - Math.exp(-7 * dt),
     );
     const victoryAge = escapeStart == null ? 0 : now - escapeStart;
+    const captureExit = props.won && !exitCaptured &&
+      (exitSkipRequested || (!reduced.matches && victoryAge >= EXIT_PRESENT_MS));
     exitFadeMaterial.opacity=props.won?exitSceneFade(victoryAge,reduced.matches):0;
-    exitFade.visible=exitFadeMaterial.opacity>0;
+    exitFade.visible=!captureExit && exitFadeMaterial.opacity>0;
     const exitTarget=groups.get('target');
     const followWeight=props.won?exitPose(victoryAge,5,2.5,reduced.matches).follow:0;
     const follow=followWeight*Math.min(1.8,Math.max(0,(exitTarget?.group.position.x??5)-5));
@@ -1778,6 +1786,27 @@ export function createGarageScene(canvas, getProps, callbacks) {
     renderer.transmissionResolutionScale = 1;
     profiler.begin();
     renderer.render(scene, camera);
+    if (captureExit) {
+      exitCaptured = true;
+      // Read immediately after render: preserveDrawingBuffer can stay disabled.
+      // The opaque retained shot conceals car recycling and camera restoration.
+      try {
+        const rect = canvas.getBoundingClientRect();
+        callbacks.exitPresent?.({
+          src: canvas.toDataURL('image/png'),
+          left: `${rect.left / window.innerWidth * 100}%`,
+          top: `${rect.top / window.innerHeight * 100}%`,
+          width: `${rect.width / window.innerWidth * 100}%`,
+          height: `${rect.height / window.innerHeight * 100}%`,
+        });
+      } catch {
+        // Context loss or a non-readable canvas retains the completion fallback.
+      }
+      if (exitSkipRequested) {
+        exitSkipRequested = false;
+        callbacks.exitComplete?.();
+      }
+    }
     profiler.end(renderer.info.render);
     stats.frames++;
     stats.renderedSceneKey = sceneKey;
@@ -1791,6 +1820,11 @@ export function createGarageScene(canvas, getProps, callbacks) {
   frame = requestAnimationFrame(animate);
   return {
     sync,
+    skipExit() {
+      exitCaptured = false;
+      exitSkipRequested = true;
+      dirty = true;
+    },
     finishExit() {
       if (!getProps().won || escapeStart == null) return;
       escapeStart = performance.now() - EXIT_COMPLETE_MS - 800;

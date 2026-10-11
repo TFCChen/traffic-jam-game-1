@@ -111,6 +111,7 @@ export default function Board(props) {
             select: setSelected,
             feedback: setFeedback,
             exitComplete: () => latest.current.onExitComplete?.(),
+            exitPresent: (backdrop) => latest.current.onExitPresent?.(backdrop),
             cameraChange: (view) =>
               setSettings((current) => ({ ...current, ...view })),
           });
@@ -153,6 +154,11 @@ export default function Board(props) {
   useEffect(() => {
     if (props.won && props.exitFinished) engine.current?.finishExit();
   }, [props.won, props.exitFinished]);
+  useEffect(() => {
+    if (!props.won || !props.exitSkipped) return;
+    if (engine.current) engine.current.skipExit();
+    else latest.current.onExitComplete?.();
+  }, [props.won, props.exitSkipped]);
   useEffect(() => {
     engine.current?.settings({ ...settings, theme });
     try {

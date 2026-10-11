@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict';
-import {exitPose,exitSceneFade,EXIT_COMPLETE_MS,EXIT_TIME_SCALE} from './exitChoreography.js';
+import {exitPose,exitSceneFade,EXIT_COMPLETE_MS,EXIT_PRESENT_MS,EXIT_TIME_SCALE} from './exitChoreography.js';
+assert.equal(exitSceneFade(EXIT_PRESENT_MS),0,'Retain a clear street before the concealed cut');
+assert(exitPose(EXIT_PRESENT_MS).visible && Math.abs(exitPose(EXIT_PRESENT_MS).yaw)>1,'Result follows the visible turn');
+assert(EXIT_COMPLETE_MS-EXIT_PRESENT_MS>=700,'Card and guests have time to arrive before camera restoration');
 assert(EXIT_COMPLETE_MS>=3800&&EXIT_COMPLETE_MS<=4300,'Exit sequence finishes in approximately four seconds');
 let prior=exitPose(0),turned=false,maxSteering=0;
 for(let age=12*EXIT_TIME_SCALE;age<=EXIT_COMPLETE_MS;age+=12*EXIT_TIME_SCALE){

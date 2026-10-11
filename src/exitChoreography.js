@@ -1,5 +1,7 @@
 export const EXIT_TIME_SCALE = .72;
 export const EXIT_COMPLETE_MS = 5650 * EXIT_TIME_SCALE;
+// Present the result while the car is still driving, before the concealed cut.
+export const EXIT_PRESENT_MS = 4500 * EXIT_TIME_SCALE;
 export function exitSceneFade(age,reduced=false){
   age /= EXIT_TIME_SCALE;
   return reduced?0:smooth((age-4850)/500)*(1-smooth((age-5800)/450));
