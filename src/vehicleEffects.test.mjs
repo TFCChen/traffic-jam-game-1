@@ -2,6 +2,29 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { createVehicleLights, createExhaustSmoke, collectLampAnchors, vehicleLampState, vehicleLightPower, movingShadowRefreshDue } from './vehicleEffects.js';
+import { lowBeamProfile, HEADLIGHT_ANGLE, HEADLIGHT_DROP } from './headlightOptics.js';
+// Compare optical behavior, including additive twin-lamp road overlap. These
+// thresholds express the intended low-beam distribution, not exact texels.
+assert(lowBeamProfile(.45, -.15) > lowBeamProfile(0, .45) * 100, 'Wide road spread without an upward circular flood');
+assert(lowBeamProfile(.2, .05) > lowBeamProfile(-.2, .05) * 10, 'Cutoff rises gently on the roadside half');
+const pitch = Math.atan(HEADLIGHT_DROP / 4), tangent = Math.tan(HEADLIGHT_ANGLE);
+const roadLight = (distance, lateral, sourceSide) => {
+  const height = .36, side = lateral - sourceSide;
+  const axial = distance * Math.cos(pitch) + height * Math.sin(pitch);
+  const up = distance * Math.sin(pitch) - height * Math.cos(pitch);
+  return lowBeamProfile(side / axial / tangent, up / axial / tangent) * height / (distance * distance + side * side + height * height) ** 1.5;
+};
+const pair = (distance, lateral) => roadLight(distance, lateral, -.3) + roadLight(distance, lateral, .3);
+assert(pair(.65, 0) > pair(1.5, 0) * .15, 'Foreground connects to the main pool instead of a detached far patch');
+assert(pair(.15, 0) < pair(.65, 0) * .05, 'No artificial light painted beneath the bumper');
+assert(pair(.5, .3) > pair(.5, 0), 'Two separate lens origins remain visible at close range');
+for (const distance of [1, 1.5, 2.5, 4]) {
+  assert(pair(distance, 0) >= Math.min(pair(distance, -.3), pair(distance, .3)) * .9, 'Overlapping fans have no dark centre seam');
+}
+for (let y = -1; y <= 1; y += .05) for (let x = -1; x <= 1; x += .05) {
+  const power = lowBeamProfile(x, y);
+  assert(Number.isFinite(power) && power >= 0 && power <= 1);
+}
 assert.equal(movingShadowRefreshDue(true,116,100),false,'Normal updates retain their shadow budget');
 assert.equal(movingShadowRefreshDue(true,116,100,true),true,'Cinematic motion cannot reuse depth from the preceding pose');
 assert.equal(movingShadowRefreshDue(false,116,100,true),false,'Unchanged shadows remain cached even in cinematic mode');
@@ -51,6 +74,8 @@ assert(lighting.update(car, settings, {
 let lights = lighting.snapshot();
 assert.equal(scene.children.filter(o => o.isLight).length, 4);
 assert.equal(scene.children.filter(o => o.isLight && o.castShadow).length, 2, 'Only two depth maps in the fixed pool');
+const headSources = scene.children.filter(o => o.isLight && o.castShadow);
+assert(headSources.every(l => l.map?.isDataTexture) && headSources[0].map === headSources[1].map, 'Both real shadowed sources share one optical distribution');
 assert.equal(lights.headlights.length, 2);
 assert.equal(lights.taillights.length, 2);
 for (let i = 0; i < 2; i++) {
@@ -59,6 +84,7 @@ for (let i = 0; i < 2; i++) {
   origin.x += .012;
   assert(new THREE.Vector3(...head.position).distanceTo(origin) < 1e-8, 'Beam starts at the actual lens');
   assert(head.target[0] > head.position[0]);
+  assert(Math.abs(head.target[2] - head.position[2]) < 1e-8, 'Lamps remain parallel, without an X-shaped inward aim');
   assert(head.shadow && head.decay === 2);
 }
 assert(lights.headlights[0].position[2] < lights.headlights[1].position[2], 'Two distinct exterior lenses');

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createLowBeamTexture, HEADLIGHT_ANGLE, HEADLIGHT_DROP } from './headlightOptics.js';
 
 // Keep the puzzle's parked fleet dark. Activity stays lit briefly, then fades.
 export function vehicleLampState(item, theme, now) {
@@ -61,7 +62,7 @@ export function collectLampAnchors(group, len) {
     tail: choose('tail')
   };
 }
-function beamMaterial() {
+function beamMaterial(pattern) {
   return new THREE.ShaderMaterial({
     glslVersion: THREE.GLSL3,
     transparent: true,
@@ -69,6 +70,7 @@ function beamMaterial() {
     side: THREE.DoubleSide,
     blending: THREE.AdditiveBlending,
     uniforms: {
+      pattern: { value: pattern },
       shadowDepth: {
         value: null
       },
@@ -84,13 +86,14 @@ function beamMaterial() {
     },
     vertexShader: `varying vec3 worldPoint;varying vec3 beamNormal;varying float along;
       void main(){worldPoint=(modelMatrix*vec4(position,1.)).xyz;beamNormal=normalize(mat3(modelMatrix)*normal);along=.5-position.y;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-    fragmentShader: `uniform sampler2DShadow shadowDepth;uniform mat4 shadowTransform;uniform float power;uniform vec3 tint;
+    fragmentShader: `uniform sampler2DShadow shadowDepth;uniform sampler2D pattern;uniform mat4 shadowTransform;uniform float power;uniform vec3 tint;
       varying vec3 worldPoint;varying vec3 beamNormal;varying float along;out vec4 beamColor;
       void main(){vec4 s=shadowTransform*vec4(worldPoint,1.);vec3 p=s.xyz/s.w;
         float lit=all(greaterThanEqual(p,vec3(0.)))&&all(lessThanEqual(p,vec3(1.)))?texture(shadowDepth,vec3(p.xy,p.z-.002)):0.;
         float edge=pow(abs(dot(normalize(beamNormal),normalize(cameraPosition-worldPoint))),1.4);
         float fade=pow(1.-clamp(along,0.,1.),1.6)*smoothstep(0.,.035,along);
-        beamColor=vec4(tint,power*edge*fade*lit);}`
+        float distribution=texture(pattern,p.xy).r;
+        beamColor=vec4(tint,power*edge*fade*lit*distribution);}`
   });
 }
 // A moving receiver must never sample its own depth at an older pose.
@@ -99,9 +102,13 @@ export function movingShadowRefreshDue(changed,now,last,continuous=false,hz=20) 
   return changed && (continuous || now-last>=1000/hz-.5);
 }
 export function createVehicleLights(scene) {
-  const headGeometry = new THREE.CylinderGeometry(.006, 1, 1, 12, 1, true);
+  const pattern = createLowBeamTexture();
+  // A faint inner scattering envelope, masked by the same optical projection.
+  // The outer spotlight cone is only a bound, never a visible solid shell.
+  const headGeometry = new THREE.CylinderGeometry(.006, .65, 1, 24, 1, true);
   const heads = [-1, 1].map(side => {
-    const light = new THREE.SpotLight('#fff0d6', 0, 5.5, .40, .50, 2);
+    const light = new THREE.SpotLight('#fff0d6', 0, 5.5, HEADLIGHT_ANGLE, .35, 2);
+    light.map = pattern;
     light.castShadow = true;
     light.shadow.mapSize.set(256, 256);
     light.shadow.camera.near = .025;
@@ -109,7 +116,7 @@ export function createVehicleLights(scene) {
     light.shadow.normalBias = .006;
     light.shadow.autoUpdate = false;
     light.shadow.needsUpdate = true;
-    const beam = new THREE.Mesh(headGeometry, beamMaterial());
+    const beam = new THREE.Mesh(headGeometry, beamMaterial(pattern));
     beam.visible = false;
     beam.frustumCulled = false;
     beam.raycast = () => {};
@@ -167,16 +174,17 @@ export function createVehicleLights(scene) {
         const headActivity = daylight ? state.activity : state.head;
         light.color.set(daylight ? '#e8f4ff' : '#fff0d6');
         light.distance = daylight ? .85 : 5.5;
-        light.angle = daylight ? .65 : .40;
+        light.angle = daylight ? .65 : HEADLIGHT_ANGLE;
+        light.map = daylight ? null : pattern;
         light.intensity = item && quality.decor ? vehicleLightPower(settings.theme, headActivity > 0) * headActivity : 0;
         if (item) {
           origin(item, 'head', i, light.position);
           light.target.position.copy(light.position).addScaledVector(forward, 4);
-          light.target.position.y -= .23;
+          light.target.position.y -= HEADLIGHT_DROP;
           light.target.updateMatrixWorld();
         }
         const depth = light.shadow.map?.depthTexture;
-        beam.visible = !daylight && !!depth && light.intensity > 0 && quality.decor;
+        beam.visible = !daylight && settings.shadows && !!depth && light.intensity > 0 && quality.decor;
         if (beam.visible) {
           const length = 4.8,
             radius = Math.tan(light.angle) * length;
@@ -186,7 +194,8 @@ export function createVehicleLights(scene) {
           beam.scale.set(radius, length, radius);
           beam.material.uniforms.shadowDepth.value = depth;
           beam.material.uniforms.shadowTransform.value = light.shadow.matrix;
-          beam.material.uniforms.power.value = state.head * (settings.theme === 'neon' ? .065 : .035);
+          // Clear air barely reveals a beam; rain retains a little scattering.
+          beam.material.uniforms.power.value = state.head * (settings.theme === 'rain' ? .018 : .006);
         }
         const rear = tails[i].light;
         const reverse = state.reverse > 0;
@@ -255,6 +264,7 @@ export function createVehicleLights(scene) {
         beam.material.dispose();
       }
       headGeometry.dispose();
+      pattern.dispose();
     }
   };
 }
