@@ -8,16 +8,32 @@ export function createStreetBlocks(garage) {
   const palette = {
     'Street masonry':['#c4c1b2',.87,0], 'Street roof':['#62716a',.94,0],
     'Street tunnel':['#636c68',.91,0], 'Street fittings':['#37484b',.48,.32],
-    'Street timber':['#967e60',.83,0], 'Street terrace':['#c8c5b6',.88,0],
     'Street glazing':['#49626a',.13,.28], 'Streetlamp glow passage':['#ffe1ac',.35,0],
-    'Street planting':['#697765',.91,0],
   };
+  function piece(name,geometry,seed=0) {
+    for(const key of Object.keys(geometry.attributes)) if(!['position','normal'].includes(key))geometry.deleteAttribute(key);
+    if(name==='Street masonry') {
+      const tone=.97+.035*Math.sin(seed),colors=new Float32Array(geometry.attributes.position.count*3).fill(tone);
+      geometry.setAttribute('color',new THREE.BufferAttribute(colors,3));
+    }
+    if(!pieces.has(name))pieces.set(name,[]);
+    pieces.get(name).push(geometry);
+  }
   function box(name,x,y,z,w,h,d,r=.015) {
     const geometry = r ? new RoundedBoxGeometry(w,h,d,1,Math.min(r,w/4,h/4,d/4)) : new THREE.BoxGeometry(w,h,d).toNonIndexed();
     geometry.translate(x,y,z);
-    for(const key of Object.keys(geometry.attributes)) if(!['position','normal'].includes(key))geometry.deleteAttribute(key);
-    if(!pieces.has(name))pieces.set(name,[]);
-    pieces.get(name).push(geometry);
+    piece(name,geometry,x*11+y*19+z*7);
+  }
+  function wing(x,front,sign) {
+    // Solid sloping return wall: full height at the portal, low at the curb.
+    // It stays outside the lane, and is never needed to hide a spawn point.
+    const geometry=new THREE.BoxGeometry(.22,1,.64).toNonIndexed(),p=geometry.attributes.position;
+    for(let i=0;i<p.count;i++) {
+      const z=front-sign*(.32+p.getZ(i));
+      const t=(front-z)/sign/.64;
+      p.setXYZ(i,x+p.getX(i),p.getY(i)>0?1.45-1.15*t:.035,z);
+    }
+    geometry.computeVertexNormals();piece('Street masonry',geometry,x*11+front*7);
   }
   // Structural shell exactly matches the visibility volumes. Thin bevelled
   // finishes sit outside it, so an opening never reveals an empty facade.
@@ -32,26 +48,34 @@ export function createStreetBlocks(garage) {
     const north=sign<0;
     box('Street masonry',8.295,-.24,middle,4.5,.48,depth,.025);
     for(const x of [6.12,10.47]) {
-      box('Street masonry',x,.74,middle,.20,1.48,depth,.018);
-      box('Street masonry',x,1.64,middle,.26,.08,depth+.04,.012);
-      const outside=x+(x<8?-.105:.105);
-      if(north) {
-        for(let y=.36;y<1.4;y+=.36)box('Street roof',outside,y,middle,.006,.006,depth-.04,0);
-      } else {
-        for(let i=1;i<6;i++)box('Street roof',outside,.74,front+sign*i,.006,1.43,.006,0);
+      // Actual narrow joints reveal the opaque backing, without coplanar
+      // dark lines that shimmer as the camera orbits.
+      const span=north?.88:1.04;
+      for(let row=0;row<4;row++)for(let a=-(row%2)*span/2;a<depth;a+=span) {
+        const lo=Math.max(0,a),hi=Math.min(depth,a+span);
+        if(hi-lo<.025)continue;
+        box('Street masonry',x,.185+row*.37,front+sign*(lo+hi)/2,.20,.362,hi-lo-.008,.005);
       }
+      box('Street masonry',x,1.64,middle,.26,.08,depth+.04,.012);
+      wing(x,front,sign);
     }
     box('Street roof',8.295,1.599,middle,4.08,.035,depth-.16,.008);
     if(north) {
-      for(const x of [7.3,8.3,9.3])box('Street fittings',x,1.619,middle,.006,.004,depth-.32,0);
+      for(const x of [7.3,8.3,9.3])box('Street roof',x,1.627,middle,.014,.012,depth-.32,.003);
     } else {
-      for(let i=1;i<6;i++)box('Street fittings',8.295,1.619,front+sign*i,3.96,.004,.006,0);
+      for(let i=1;i<6;i++)box('Street roof',8.295,1.627,front+sign*i,3.96,.012,.014,.003);
     }
     for(const z of [front,back]) {
       box('Street masonry',8.295,1.65,z,4.43,.18,.16,.015);
       box('Street fittings',8.295,1.49,z-sign*.035,3.91,.018,.03,.004);
     }
-    box('Street masonry',8.295,.74,back+sign*.025,4.43,1.48,.08,.018);
+    for(let row=0;row<4;row++)for(let a=-(row%2)*.43;a<4.43;a+=.86) {
+      const lo=Math.max(0,a),hi=Math.min(4.43,a+.86);
+      if(hi-lo<.025)continue;
+      box('Street masonry',6.08+(lo+hi)/2,.185+row*.37,back+sign*.045,hi-lo-.008,.362,.08,.005);
+    }
+    // Narrow stone jambs make the portal read clearly from either side.
+    for(const x of [6.21,10.38])box('Street masonry',x,.74,front-sign*.045,.25,1.48,.14,.012);
     // Thin inset entry band keeps the original legible portal and warm light.
     box('Street glazing',8.295,1.64,front-sign*.086,3.1,.06,.018,.004);
     for(let x=6.75;x<10;x+=north?.62:.78)box('Street fittings',x,1.64,front-sign*.099,.016,.08,.018,.003);
@@ -69,7 +93,7 @@ export function createStreetBlocks(garage) {
   for(const [name,list]of pieces) {
     const geometry=mergeGeometries(list);list.forEach(g=>g.dispose());
     const [color,roughness,metalness]=palette[name];
-    const material=new THREE.MeshStandardMaterial({name,color,roughness,metalness});
+    const material=new THREE.MeshStandardMaterial({name,color,roughness,metalness,vertexColors:name==='Street masonry'});
     const mesh=new THREE.Mesh(geometry,material);mesh.name=name;mesh.userData.generatedGeometry=true;
     mesh.raycast=()=>{};garage.add(mesh);geometries.push(geometry);materials.push(material);
   }
