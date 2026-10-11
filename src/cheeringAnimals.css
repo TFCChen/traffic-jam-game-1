@@ -4,7 +4,7 @@
 .win-overlay.has-cheering{padding:0;background:radial-gradient(ellipse at center,#dfc89a20,transparent 65%),#171b228f}
 .win-overlay.has-retained-scene{backdrop-filter:none}
 .win-scene-backdrop{position:absolute;inset:0;overflow:hidden;background:#252b30;pointer-events:none}
-.win-scene-backdrop img{position:absolute;object-fit:fill;filter:blur(12px) brightness(.55);transform:scale(1.04)}
+.win-scene-backdrop canvas{position:absolute;filter:blur(12px) brightness(.55);transform:scale(1.04)}
 .has-retained-scene .cheering-guest{animation-delay:calc(var(--arrival) + .3s)}
 .has-retained-scene .cheering-animal,.has-retained-scene .cheering-paw,.has-retained-scene .cheering-clap{animation-delay:calc(var(--clap-delay) + .3s)}
 .win-celebration{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%;isolation:isolate}

@@ -1788,12 +1788,19 @@ export function createGarageScene(canvas, getProps, callbacks) {
     renderer.render(scene, camera);
     if (captureExit) {
       exitCaptured = true;
-      // Read immediately after render: preserveDrawingBuffer can stay disabled.
+      // Copy immediately after render: preserveDrawingBuffer can stay disabled.
       // The opaque retained shot conceals car recycling and camera restoration.
       try {
+        const retained = document.createElement('canvas');
+        // This shot is blurred in the result. Keep its raster bounded and avoid
+        // synchronous full-resolution PNG encoding and subsequent image decode.
+        const scale = Math.min(1, 640 / Math.max(canvas.width, canvas.height));
+        retained.width = Math.max(1, Math.round(canvas.width * scale));
+        retained.height = Math.max(1, Math.round(canvas.height * scale));
+        retained.getContext('2d', { alpha: false }).drawImage(canvas, 0, 0, retained.width, retained.height);
         const rect = canvas.getBoundingClientRect();
         callbacks.exitPresent?.({
-          src: canvas.toDataURL('image/png'),
+          canvas: retained,
           left: `${rect.left / window.innerWidth * 100}%`,
           top: `${rect.top / window.innerHeight * 100}%`,
           width: `${rect.width / window.innerWidth * 100}%`,

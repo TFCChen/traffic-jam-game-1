@@ -1,0 +1,20 @@
+[
+  {
+    "level": "info",
+    "message": "[win-direct-copy-cost] {\"copyMs\":0.7000000476837158,\"source\":[1600,900],\"retained\":[640,360]}",
+    "timestamp": "2026-10-11T09:00:25.131Z",
+    "url": "http://127.0.0.23:4173/assets/garageScene-DBOcxJmF.js"
+  },
+  {
+    "level": "info",
+    "message": "[win-direct-copy-cost] {\"copyMs\":0.30000007152557373,\"source\":[1600,900],\"retained\":[640,360]}",
+    "timestamp": "2026-10-11T09:01:35.795Z",
+    "url": "http://127.0.0.23:4173/assets/garageScene-DBOcxJmF.js"
+  },
+  {
+    "level": "info",
+    "message": "[win-direct-copy-cost] {\"copyMs\":0.3999999761581421,\"source\":[390,844],\"retained\":[296,640]}",
+    "timestamp": "2026-10-11T09:02:25.191Z",
+    "url": "http://127.0.0.23:4173/assets/garageScene-DBOcxJmF.js"
+  }
+]

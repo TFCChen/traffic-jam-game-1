@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
 import CheeringAnimals from './CheeringAnimals.jsx';
 
 const paths = {
@@ -73,6 +73,17 @@ export function Icon({ name }) {
   );
 }
 
+function RetainedSceneBackdrop({ backdrop }) {
+  const host = useRef(null);
+  useLayoutEffect(() => {
+    const { canvas, left, top, width, height } = backdrop;
+    Object.assign(canvas.style, { left, top, width, height });
+    host.current.appendChild(canvas);
+    return () => canvas.remove();
+  }, [backdrop]);
+  return <div className="win-scene-backdrop" ref={host} aria-hidden="true" />;
+}
+
 export function WinDialog({
   moves,
   stars,
@@ -128,9 +139,7 @@ export function WinDialog({
 
   return (
     <div className={`win-overlay has-cheering${backdrop ? ' has-retained-scene' : ''}`}>
-      {backdrop && <div className="win-scene-backdrop" aria-hidden="true">
-        <img src={backdrop.src} alt="" style={{ left: backdrop.left, top: backdrop.top, width: backdrop.width, height: backdrop.height }} />
-      </div>}
+      {backdrop && <RetainedSceneBackdrop backdrop={backdrop} />}
       <div className="win-celebration">
       <CheeringAnimals />
       <div className="confetti" aria-hidden="true">

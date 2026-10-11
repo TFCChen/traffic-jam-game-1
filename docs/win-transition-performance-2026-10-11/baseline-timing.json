@@ -1,0 +1,14 @@
+[
+  {
+    "level": "info",
+    "message": "[win-capture-cost] {\"pngMs\":272.2000000476837,\"directCopyMs\":1,\"source\":[1600,900],\"retained\":[640,360]}",
+    "timestamp": "2026-10-11T08:56:19.358Z",
+    "url": "http://127.0.0.23:4173/assets/garageScene-hguL6CGK.js"
+  },
+  {
+    "level": "info",
+    "message": "[win-capture-cost] {\"pngMs\":262.60000002384186,\"directCopyMs\":0.3999999761581421,\"source\":[1600,900],\"retained\":[640,360]}",
+    "timestamp": "2026-10-11T08:58:14.171Z",
+    "url": "http://127.0.0.23:4173/assets/garageScene-hguL6CGK.js"
+  }
+]
