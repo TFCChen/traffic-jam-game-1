@@ -34,9 +34,6 @@ import { createRenderProfiler } from "./renderProfiler.js";
 import { cacheLocalTransforms } from "./sceneTransforms.js";
 import { createCourtyardAtmosphere } from './courtyardAtmosphere.js';
 import { createGroundSurface, pavingTone } from './groundSurface.js';
-import { createStreetTraffic } from './streetTraffic.js';
-import { extendStreetRoad } from './streetApproaches.js';
-import { createStreetBlocks } from './streetBlocks.js';
 import { createRainSurfaces } from './rainSurfaces.js';
 import { configureVehiclePaint, vehicleTrimSurface } from './vehicleFinish.js';
 import { VEHICLE_GROUND_HEIGHT, CONTACT_PLANE_OFFSET } from './contactShadow.js';
@@ -196,8 +193,6 @@ export function createGarageScene(canvas, getProps, callbacks) {
   let vegetationShadows;
   let atmosphere;
   let groundSurface;
-  let streetBlocks;
-  let streetTraffic;
   const rainSurfaces=createRainSurfaces();
   const stats = { frames: 0, shadowUpdates: 0, movingFrames: 0, movingShadowFrames: 0, renderedSceneKey: null };
   const inputSamples = [];
@@ -582,7 +577,6 @@ export function createGarageScene(canvas, getProps, callbacks) {
     atmosphere?.setTheme(settings, quality);
     groundSurface?.setTheme(settings, quality);
     rainSurfaces.setTheme(settings,quality);
-    streetBlocks?.setTheme(settings,quality);
     lightPools.visible = settings.theme !== "day";
     glowMaterial.color.set("#ffd199");
     glowMaterial.opacity = settings.theme === "neon" ? 0.28 : 0.15;
@@ -1394,7 +1388,6 @@ export function createGarageScene(canvas, getProps, callbacks) {
       if (!alive) return;
       library = models;
       const garage = library.garage.clone(true);
-      extendStreetRoad(garage).forEach(geometry => ownedGeometries.add(geometry));
       // Keep the fence independently inspectable after the shadow isolation
       // test. Its normal shadows are restored once the slab overlap is fixed.
       const fenceBatch=batchColoredMeshes(garage,mesh=>mesh.material.name.startsWith('Fence '),{
@@ -1444,8 +1437,6 @@ export function createGarageScene(canvas, getProps, callbacks) {
         },
       );
       ownedGeometries.add(streetBatch.geometry);
-      streetBlocks=createStreetBlocks(garage);
-      streetBlocks.geometries.forEach(geometry=>ownedGeometries.add(geometry));
       garage.traverse((o) => {
         if (o.isMesh) {
           if (!o.userData.generatedGeometry) o.material = o.material.clone();
@@ -1470,13 +1461,10 @@ export function createGarageScene(canvas, getProps, callbacks) {
       garage.traverse(mesh=>{if(mesh.isMesh)rainSurfaces.attach(mesh.material);});
       groundSurface = createGroundSurface(renderer, garage);
       groundSurface.setTheme(settings, quality);
-      streetTraffic = createStreetTraffic(scene, library, contactTextures, rainSurfaces, Math.random, camera);
       updateCamera();
       sync();
-      streetTraffic.prepare();
       await renderer.compileAsync(scene, camera);
       if (!alive) return;
-      streetTraffic.pause();
       ready = true;
       canvas.dataset.ready = "true";
       callbacks.ready();
@@ -1505,7 +1493,6 @@ export function createGarageScene(canvas, getProps, callbacks) {
     // Cap high-refresh displays too; retain ambient life without rendering at 120/144 Hz.
     // Reset ambient poses before reduced motion suppresses static frames.
     if ((reduced.matches || !quality.decor) && atmosphere?.pause()) dirty = true;
-    if ((reduced.matches || !quality.decor) && streetTraffic?.pause()) dirty = true;
     const budget = 1000 / (active ? quality.activeFPS : quality.idleFPS);
     if (
       !dirty &&
@@ -1761,7 +1748,6 @@ export function createGarageScene(canvas, getProps, callbacks) {
     const synchronousMovingShadows = shadowChanged;
     if (vehicleLights.update(props.editor?null:litCar,settings,quality,now,shadowChanged||renderer.shadowMap.needsUpdate,synchronousMovingShadows)) renderer.shadowMap.needsUpdate=true;
     atmosphere?.update(dt, settings, quality, reduced.matches, props.editor);
-    streetTraffic?.update(dt, settings, quality, reduced.matches, props);
     groundSurface?.update(dt,settings,quality,reduced.matches,props.editor);
     exhaustSmoke.update(dt,now,camera,!reduced.matches&&quality.decor&&!props.editor,settings.theme);
     particles.forEach((p) => {
@@ -1996,7 +1982,6 @@ export function createGarageScene(canvas, getProps, callbacks) {
       reflections?.dispose();
 
       atmosphere?.dispose();
-      streetTraffic?.dispose();
       groundSurface?.dispose();
       rainSurfaces.dispose();
       placementCells.dispose(); placementGhost.dispose();

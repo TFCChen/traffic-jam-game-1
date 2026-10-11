@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { STREET } from './streetLayout.js';
 
 export function configureCourtyardSunShadow(shadow) {
   // A 500-unit depth range made small normalized offsets large relative to
@@ -20,7 +19,7 @@ export function fitCourtyardExitShadow(light) {
   const camera=light.shadow.camera, point=new THREE.Vector3();
   let left=-8,right=8,bottom=-8,top=8;
   let near=1,far=32;
-  for(const x of [5.95,10.65])for(const y of [-.5,2.3])for(const z of [STREET.min,STREET.max]) {
+  for(const x of [5.95,10.65])for(const y of [-.5,2.3])for(const z of [-2.15,10.6]) {
     point.set(x,y,z).applyMatrix4(camera.matrixWorldInverse);
     left=Math.min(left,point.x-.8);right=Math.max(right,point.x+.8);
     bottom=Math.min(bottom,point.y-.8);top=Math.max(top,point.y+.8);
