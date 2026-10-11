@@ -9,6 +9,7 @@ export function createStreetBlocks(garage) {
     'Street masonry':['#c4c1b2',.87,0], 'Street roof':['#62716a',.94,0],
     'Street tunnel':['#636c68',.91,0], 'Street fittings':['#37484b',.48,.32],
     'Street glazing':['#49626a',.13,.28], 'Streetlamp glow passage':['#ffe1ac',.35,0],
+    'Street planting':['#697765',.91,0],
   };
   function piece(name,geometry,seed=0) {
     for(const key of Object.keys(geometry.attributes)) if(!['position','normal'].includes(key))geometry.deleteAttribute(key);
@@ -71,6 +72,32 @@ export function createStreetBlocks(garage) {
     }
     for(let x=6.65;x<10.2;x+=.13) box('Street fittings',x,.044,front-sign*.16,.065,.014,.13,.003);
     for(const x of [6.07,10.52])box('Street fittings',x,.72,front+sign*.58,.035,1.4,.035,.006);
+    // Small wall-mounted neighbourhood details share the courtyard palette.
+    // Brackets attach the planter to the wall; nothing stands beyond the slab.
+    const detailZ=front+sign*1.3;
+    if(north) {
+      box('Street fittings',5.91,.43,detailZ,.24,.20,1.25,.018);
+      for(const dz of [-.44,.44])box('Street fittings',5.99,.32,detailZ+dz,.09,.24,.06,.006);
+      for(let i=0;i<9;i++) {
+        const leaf=new THREE.SphereGeometry(1,8,5);
+        leaf.scale(.12,.12+(i%3)*.025,.15);
+        leaf.translate(5.91,.60+(i%2)*.025,detailZ-.52+i*.13);
+        piece('Street planting',leaf);
+      }
+      // A compact service plaque mounted flush above the planter.
+      box('Street fittings',5.995,.97,detailZ,.05,.18,.36,.008);
+      box('Street masonry',5.965,.97,detailZ,.016,.12,.29,.003);
+      for(const dz of [-.055,.055])box('Street fittings',5.953,.97,detailZ+dz,.012,.055,.018,.002);
+    } else {
+      // Framed neighbourhood map and a low ventilation grille.
+      box('Street fittings',5.98,.94,detailZ,.08,.56,.88,.014);
+      box('Street masonry',5.932,.94,detailZ,.018,.48,.80,.005);
+      box('Street roof',5.916,.96,detailZ-.14,.014,.30,.35,.003);
+      for(const y of [.87,.96,1.05])box('Street masonry',5.905,y,detailZ-.14,.012,.018,.28,.002);
+      for(const y of [.89,.99,1.09])box('Street fittings',5.916,y,detailZ+.23,.014,.018,.17,.002);
+      box('Street fittings',5.995,.35,detailZ,.05,.22,.62,.008);
+      for(let i=0;i<4;i++)box('Street roof',5.962,.28+i*.045,detailZ,.025,.018,.53,.003);
+    }
     const light=new THREE.PointLight('#ffcf8d',0,2.8,2);
     light.name='Passage entry light';
     light.position.set(8.295,1.42,front+sign*.25);garage.add(light);lights.push(light);
