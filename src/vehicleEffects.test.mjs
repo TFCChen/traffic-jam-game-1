@@ -125,7 +125,18 @@ lighting.update(car, settings, {
   decor: true
 }, 710);
 assert.equal(lighting.snapshot().rear.color, 'ef3024');
-assert.equal(lighting.snapshot().rear.intensity, 2);
+const brakingRear = lighting.snapshot().rear;
+assert.equal(brakingRear.intensity, .7);
+assert.equal(brakingRear.distance, .85, 'Brake spill stays close to the bumper');
+assert.equal(brakingRear.angle, 1.15, 'Brake spill spreads widely rather than projecting a narrow pool');
+assert(Math.abs(brakingRear.position[1] - brakingRear.target[1] - .42) < 1e-8, 'Brake wash reaches the nearby ground instead of aiming beyond its range');
+assert(scene.children.filter(o => o.isSpotLight && !o.castShadow).every(l => l.penumbra === 1), 'Brake wash has a fully feathered edge');
+car.braking = false;
+lighting.update(car, settings, {decor: true}, 720);
+assert.equal(lighting.snapshot().rear.distance, 1.2, 'Ordinary tail lights recover their original distribution after braking');
+assert.equal(lighting.snapshot().rear.angle, .95);
+assert(Math.abs(lighting.snapshot().rear.position[1] - lighting.snapshot().rear.target[1] - .18) < 1e-8);
+car.braking = true;
 const off = {
   isDrag: false,
   velocity: 0,

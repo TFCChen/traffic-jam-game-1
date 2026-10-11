@@ -199,12 +199,18 @@ export function createVehicleLights(scene) {
         }
         const rear = tails[i].light;
         const reverse = state.reverse > 0;
+        const brakeSpill = !reverse && state.brake > 0;
         rear.color.set(reverse ? '#eef4ff' : '#ef3024');
-        rear.intensity = item && quality.decor ? reverse ? .22 : state.brake ? 2.0 : state.park * 1.8 : 0;
+        // Brake lenses carry the signal. Their road spill is a soft, nearby
+        // wash, rather than a brighter copy of a rear-facing driving light.
+        rear.distance = brakeSpill ? .85 : 1.2;
+        rear.angle = brakeSpill ? 1.15 : .95;
+        rear.penumbra = brakeSpill ? 1 : .9;
+        rear.intensity = item && quality.decor ? reverse ? .22 : brakeSpill ? .7 : state.park * 1.8 : 0;
         if (item) {
           origin(item, reverse ? 'reverse' : 'tail', i, rear.position);
           rear.target.position.copy(rear.position).addScaledVector(forward, -1);
-          rear.target.position.y -= .18;
+          rear.target.position.y -= brakeSpill ? .42 : .18;
           rear.target.updateMatrixWorld();
         }
       }
