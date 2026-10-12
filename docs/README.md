@@ -11,6 +11,7 @@
 - [出庫遮罩追查](exit-fade-investigation-2026-10-11/README.md)、[結算銜接](win-transition-2026-10-11/README.md)、[畫面擷取效能](win-transition-performance-2026-10-11/README.md)、[手機結算穩定化](win-settle-2026-10-11/README.md)
 - [穩定陰影](stable-shadow-2026-10-07/README.md)、[編輯器修復](editor-repair-2026-10-07/README.md)
 - [PWA 安裝與更新](PWA-INSTALL.md)
+- [瀏覽器 CI 修復與驗證範圍](ci-repair-2026-10-12.md)
 
 ## 清理紀錄
 
