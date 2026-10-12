@@ -35,7 +35,7 @@ async function mouseClick(point) {
   await sleep(100);
 }
 async function selectCar(id) {
-  const point = await evaluate(`(()=>{const g=document.querySelector('.garage-canvas').garageInspection,c=g.snapshot().cars.find(c=>c.id===${JSON.stringify(id)});for(const h of [.55,.8,.35,1]){const p=g.project(c.col+(c.dir==='H'?c.len/2:.5),h,c.row+(c.dir==='V'?c.len/2:.5));if(g.pick(p.x,p.y)===c.id)return p}return null})()`);
+  const point = await evaluate(`(()=>{const g=document.querySelector('.garage-canvas').garageInspection,c=g.snapshot().cars.find(c=>c.id===${JSON.stringify(id)});for(const h of [.55,.8,.35,1]){const p=g.project(c.position[0],h,c.position[2]);if(g.pick(p.x,p.y)===c.id)return p}return null})()`);
   assert.ok(point, `Car ${id} must be selectable by pointer`);
   await mouseClick(point);
 }

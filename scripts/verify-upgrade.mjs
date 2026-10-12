@@ -154,6 +154,7 @@ try {
     "河畔試車場",
   );
   await click("返回編輯器");
+  await until("!!document.querySelector('.editor-actions input')");
   await ready();
   assert.equal(await evaluate("document.querySelector('.editor-actions input').value"),'河畔試車場');
   assert.equal(
@@ -187,8 +188,9 @@ try {
     ),
     move = solveLevel(raw.cars).moves[0];
   const fromTo = await evaluate(
-    `(()=>{const a=document.querySelector('.garage-canvas').garageInspection,c=a.snapshot().cars.find(c=>c.id===${JSON.stringify(move.carId)}),[x,,z]=c.position;return {from:a.project(x,.55,z),to:a.project(x+(c.dir==='H'?${move.delta}:0),.55,z+(c.dir==='V'?${move.delta}:0))};})()`,
+    `(()=>{const a=document.querySelector('.garage-canvas').garageInspection,c=a.snapshot().cars.find(c=>c.id===${JSON.stringify(move.carId)}),[x,,z]=c.position;for(const h of [.55,.8,.35,1]){const from=a.project(x,h,z);if(a.pick(from.x,from.y)===c.id)return {from,to:a.project(x+(c.dir==='H'?${move.delta}:0),h,z+(c.dir==='V'?${move.delta}:0))}}return null;})()`,
   );
+  assert.ok(fromTo, 'First legal move must start on its visible car');
   await send("Input.dispatchMouseEvent", {
     type: "mousePressed",
     ...fromTo.from,
@@ -342,7 +344,7 @@ try {
   await ready();
   results.push("WebGL loss fallback and 3D retry");
   writeFileSync(
-    new URL("verification.json", dir),
+    new URL("upgrade-verification.json", dir),
     JSON.stringify(
       {
         results,

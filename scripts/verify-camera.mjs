@@ -406,7 +406,7 @@ try {
     "Editor camera gestures do not place a car; mobile controls fit and remain >=44 px",
   );
   writeFileSync(
-    new URL("verification.json", dir),
+    new URL("camera-verification.json", dir),
     JSON.stringify({ results, initial, rotated, pinched, panned }, null, 2),
   );
   console.log(results.join("\n"));
