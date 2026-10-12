@@ -100,7 +100,7 @@ try {
     const started=Date.now();
     const child = spawn(process.execPath, [`scripts/${script}`, url], {
       stdio: "inherit",
-      env:{...process.env,GARAGE_EVIDENCE_DIR:evidence},
+      env:{...process.env,GARAGE_EVIDENCE_DIR:evidence,GARAGE_BROWSER_CI:'1'},
     });
     const code = await new Promise((resolve,reject) => {child.on('error',reject);child.on('exit',resolve);});
     appendFileSync(join(evidence,'stages.jsonl'),JSON.stringify({script,code,durationMs:Date.now()-started})+'\n');

@@ -225,6 +225,12 @@ try {
     "document.querySelector('.garage-canvas').garageInspection.snapshot().instanceId",
   );
   assert.ok(Number.isInteger(instance));
+  if(process.env.GARAGE_BROWSER_CI==='1') {
+    await click('車庫設定');
+    await evaluate("[...document.querySelectorAll('.quality-options button')].find(b=>b.textContent.trim().startsWith('省電')).click()");
+    await click('關閉車庫設定');
+    await ready();
+  }
   const memories = [];
   const switchTimes = [];
   for (let i = 0; i < 100; i++) {

@@ -73,6 +73,7 @@ const saved = await evaluate(
 );
 const limit = Number(process.argv[3] ?? 40);
 const first = Number(process.argv[4] ?? 1);
+const softwareCI = process.env.GARAGE_BROWSER_CI === '1';
 assert.ok(Number.isInteger(limit) && limit >= 1 && limit <= 40);
 assert.ok(Number.isInteger(first) && first >= 1 && first <= limit);
 const catalog = JSON.parse(
@@ -101,14 +102,14 @@ try {
     "(async()=>{for(const reg of await navigator.serviceWorker.getRegistrations())await reg.unregister();for(const k of await caches.keys())if(k.startsWith('traffic-jam-'))await caches.delete(k);localStorage.removeItem('traffic-jam-session-v1');localStorage.setItem('traffic-jam-tutorial-v1','true');})()",
   );
   await send("Emulation.setDeviceMetricsOverride", {
-    width: 1280,
-    height: 900,
+    width: softwareCI ? 800 : 1280,
+    height: softwareCI ? 600 : 900,
     deviceScaleFactor: 1,
     mobile: false,
   });
   const previousOrigin = await evaluate("performance.timeOrigin");
   await evaluate(
-    `localStorage.setItem('traffic-jam-progress-v2',JSON.stringify(${JSON.stringify(fixtureProgress)}));localStorage.setItem('traffic-jam-scene',JSON.stringify({pitch:60,yaw:-12,theme:'day',quality:'standard',motion:1.2}));location.reload()`,
+    `localStorage.setItem('traffic-jam-progress-v2',JSON.stringify(${JSON.stringify(fixtureProgress)}));localStorage.setItem('traffic-jam-scene',JSON.stringify({pitch:60,yaw:-12,theme:'day',quality:${JSON.stringify(softwareCI ? 'saver' : 'standard')},motion:1.2}));location.reload()`,
   );
   await until(
     `performance.timeOrigin!==${previousOrigin}`,
