@@ -66,6 +66,7 @@ async function mouseClick(p) {
 }
 async function level(id) {
   await click("關卡");
+  await until(`!!document.querySelector('.level-grid button[aria-label^="第 ${id} 關"]')`);
   await evaluate(
     `document.querySelector('.level-grid button[aria-label^="第 ${id} 關"]').click()`,
   );

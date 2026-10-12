@@ -3,63 +3,12 @@ import assert from "node:assert/strict";
 import { readFileSync, writeFileSync } from "node:fs";
 import { solveLevel } from "../src/gameEngine.js";
 import { evidenceDir } from './ci-evidence.mjs';
-const ws = new WebSocket(process.argv[2]);
-await new Promise((r, j) => {
-  ws.onopen = r;
-  ws.onerror = j;
-});
-let sequence = 0,
-  session;
-const pending = new Map();
-ws.onmessage = (e) => {
-  const r = JSON.parse(e.data),
-    p = pending.get(r.id);
-  if (p) {
-    pending.delete(r.id);
-    r.error ? p.reject(Error(r.error.message)) : p.resolve(r.result);
-  }
-};
-const send = (method, params = {}, attached = true) =>
-  new Promise((resolve, reject) => {
-    const id = ++sequence;
-    pending.set(id, { resolve, reject });
-    ws.send(
-      JSON.stringify({
-        id,
-        method,
-        params,
-        ...(attached ? { sessionId: session } : {}),
-      }),
-    );
-  });
-const targets = await send("Target.getTargets", {}, false),
-  page = targets.targetInfos.find(
-    (t) => t.type === "page" && t.url.startsWith("http://localhost:4173"),
-  );
-assert.ok(page);
-session = (
-  await send(
-    "Target.attachToTarget",
-    { targetId: page.targetId, flatten: true },
-    false,
-  )
-).sessionId;
-async function evaluate(expression) {
-  const r = await send("Runtime.evaluate", {
-    expression,
-    returnByValue: true,
-    awaitPromise: true,
-  });
-  if (r.exceptionDetails) throw Error(JSON.stringify(r.exceptionDetails));
-  return r.result.value;
-}
+import { connect } from './cdp-test.mjs';
+const {send,evaluate,close,until:poll}=await connect(process.argv[2]);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function until(expression, label) {
-  for (let i = 0; i < 300; i++) {
-    if (await evaluate(expression)) return;
-    await sleep(100);
-  }
-  throw Error(label);
+  try {await poll(expression);}
+  catch(error){throw Error(`${label}: ${error.message}`);}
 }
 const keys = [
   "traffic-jam-progress-v2",
@@ -117,13 +66,13 @@ try {
   );
   if (first > 1) {
     await until(
-      "document.querySelector('.game-column')?.getAttribute('aria-busy')==='false'",
+      "document.querySelector('.game-column')?.getAttribute('aria-busy')==='false'&&document.querySelector('.garage-canvas')?.garageInspection?.snapshot().ready",
       "Initial load",
     );
     await evaluate(
       "[...document.querySelectorAll('.toolbar button')].find(b=>b.textContent.trim()==='關卡').click()",
     );
-    await until("!!document.querySelector('.level-grid')", "Level selector");
+    await until(`!!document.querySelector('.level-grid button[aria-label^="第 ${first} 關"]')`, "Requested level selector");
     await evaluate(
       `document.querySelector('.level-grid button[aria-label^="第 ${first} 關"]').click()`,
     );
@@ -253,5 +202,5 @@ try {
     `(()=>{for(const [k,v]of Object.entries(${JSON.stringify(saved)}))v==null?localStorage.removeItem(k):localStorage.setItem(k,v);location.reload()})()`,
   );
   await send("Emulation.clearDeviceMetricsOverride");
-  ws.close();
+  close();
 }

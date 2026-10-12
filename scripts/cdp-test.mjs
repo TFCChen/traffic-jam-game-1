@@ -60,7 +60,10 @@ export async function connect(url, origin = 'http://localhost:4173') {
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const until = async (expression) => {
     for (let i = 0; i < 200; i++) {
-      if (await evaluate(expression)) return;
+      try { if (await evaluate(expression)) return; }
+      catch(error) {
+        if(!/Execution context was destroyed|Cannot find context|Inspected target navigated/.test(error.message))throw error;
+      }
       await sleep(100);
     }
     throw Error(`Timed out: ${expression}`);
@@ -76,6 +79,7 @@ export async function connect(url, origin = 'http://localhost:4173') {
     listeners.get(method).add(listener);
     return () => listeners.get(method).delete(listener);
   };
+  await until(`location.origin===${JSON.stringify(origin)}&&document.readyState==='complete'&&!!document.querySelector('.garage-canvas')?.garageInspection?.snapshot().ready&&document.querySelector('.game-column')?.getAttribute('aria-busy')==='false'&&!!navigator.serviceWorker.controller`);
   return {
     send,
     evaluate,
