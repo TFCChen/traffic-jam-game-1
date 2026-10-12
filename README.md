@@ -28,7 +28,7 @@ npm.cmd run preview
 
 開發服務預設 5173；preview 預設 4173，讀取 dist，修改程式後要重新 build。build 包含 40 關解答重播與離線資源產生。17 組測試涵蓋規則、模型、鏡頭、編輯器、車身／燈光、出庫、陰影及雨景。人工驗證仍需實際拖曳、通關與查看畫面。
 
-GitHub Actions 在 main／feature/game-feel 推送及 pull request 時執行 test/build，並以四個獨立工作驗證編輯器／離線更新、存檔備援、鏡頭手勢及四十關實際拖曳。完整狀態以 [GitHub Actions](https://github.com/TFCChen/traffic-jam-game-1/actions/workflows/ci.yml) 為準；[啟動與過期測試修復紀錄](docs/ci-repair-2026-10-12.md)。CI 大量重播採省電畫質，不代表實體手機效能測量。Three.js bundle 仍有 Vite 500 KB 提醒。
+GitHub Actions 在 main／feature/game-feel 推送及 pull request 時執行 test/build，並以四類獨立工作驗證編輯器／離線更新、存檔備援、鏡頭手勢及四十關實際拖曳。四十關各自驗證，避免軟體 WebGL 的長時間重播集中在同一工作。完整狀態以 [GitHub Actions](https://github.com/TFCChen/traffic-jam-game-1/actions/workflows/ci.yml) 為準；[啟動與過期測試修復紀錄](docs/ci-repair-2026-10-12.md)。CI 大量重播採省電畫質，不代表實體手機效能測量。Three.js bundle 仍有 Vite 500 KB 提醒。
 
 電腦右鍵旋轉，中鍵或 Shift＋右鍵平移，滾輪縮放；手機在停車場外單指旋轉、雙指平移與捏合縮放，車身單指移車。預設正上方 90°／yaw 0°／100%，可調俯仰 30–90°、縮放 65–400%。已存偏好保留。
 

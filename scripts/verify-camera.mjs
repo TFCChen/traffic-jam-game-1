@@ -37,10 +37,13 @@ const rect = () =>
   );
 const shot = async (name) => {
   await sleep(200);
+  const clip=process.env.GARAGE_BROWSER_CI==='1'
+    ? await evaluate("({x:0,y:0,width:innerWidth,height:innerHeight,scale:.5})")
+    : undefined;
   writeFileSync(
     new URL(name + ".png", dir),
     Buffer.from(
-      (await send("Page.captureScreenshot", { format: "png" })).data,
+      (await send("Page.captureScreenshot", { format: "png", clip, optimizeForSpeed:true })).data,
       "base64",
     ),
   );

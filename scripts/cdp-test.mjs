@@ -22,7 +22,8 @@ export async function connect(url, origin = 'http://localhost:4173') {
   const send = (method, params = {}, attached = true) =>
     new Promise((resolve, reject) => {
       const key = ++id;
-      const timer=setTimeout(()=>{pending.delete(key);reject(Error(`CDP command timed out after 30s: ${method}`));},30000);
+      const timeout=method==='Page.captureScreenshot'?120000:30000;
+      const timer=setTimeout(()=>{pending.delete(key);reject(Error(`CDP command timed out after ${timeout/1000}s: ${method}`));},timeout);
       pending.set(key, { resolve, reject, timer });
       ws.send(
         JSON.stringify({
