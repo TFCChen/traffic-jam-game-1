@@ -14,7 +14,7 @@ const fixture = new URL("import-fixture.json", evidenceDir);
 const results = [];
 const ready = () =>
   until(
-    "(()=>{const c=document.querySelector('.garage-canvas'),s=c?.garageInspection?.snapshot(),r=c?.getBoundingClientRect();return s?.ready&&s.sceneKey===s.performance.renderedSceneKey&&s.performance.viewport?.width===r.width&&s.performance.viewport?.height===r.height&&document.querySelector('.game-column')?.getAttribute('aria-busy')==='false'})()",
+    "(()=>{const c=document.querySelector('.garage-canvas'),s=c?.garageInspection?.snapshot(),r=c?.getBoundingClientRect();return !document.querySelector('.level-transition')&&s?.ready&&s.sceneKey===s.performance.renderedSceneKey&&s.performance.viewport?.width===r.width&&s.performance.viewport?.height===r.height&&document.querySelector('.game-column')?.getAttribute('aria-busy')==='false'})()",
   );
 async function upload(data) {
   writeFileSync(fixture, JSON.stringify(data));

@@ -25,7 +25,7 @@ function assertSameCenter(before, after) {
 }
 const ready = () =>
   until(
-    "(()=>{const c=document.querySelector('.garage-canvas'),s=c?.garageInspection?.snapshot(),r=c?.getBoundingClientRect();return s?.ready&&s.sceneKey===s.performance.renderedSceneKey&&s.performance.viewport?.width===r.width&&s.performance.viewport?.height===r.height&&document.querySelector('.stage-heading h2')?.textContent==='第 01 關'&&document.querySelector('.game-column')?.getAttribute('aria-busy')==='false'})()",
+    "(()=>{const c=document.querySelector('.garage-canvas'),s=c?.garageInspection?.snapshot(),r=c?.getBoundingClientRect();return !document.querySelector('.level-transition')&&s?.ready&&s.sceneKey===s.performance.renderedSceneKey&&s.performance.viewport?.width===r.width&&s.performance.viewport?.height===r.height&&document.querySelector('.stage-heading h2')?.textContent==='第 01 關'&&document.querySelector('.game-column')?.getAttribute('aria-busy')==='false'})()",
   );
 const rect = () =>
   evaluate(
