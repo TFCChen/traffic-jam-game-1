@@ -150,6 +150,18 @@ try {
   );
   await sleep(200);
   const initial = await snapshot();
+  await click('放大場景');
+  await until("document.querySelector('.garage-canvas').garageInspection.snapshot().settings.zoom>1");
+  await sleep(200);
+  const buttonZoom = await snapshot();
+  assert.deepEqual(buttonZoom.cars.map(c=>c.glazing), initial.cars.map(c=>c.glazing),
+    'Camera buttons preserve glass material versions and optical hooks');
+  assert.equal(buttonZoom.lighting.reflections.builds, initial.lighting.reflections.builds);
+  assert.equal(buttonZoom.performance.shadowSize, initial.performance.shadowSize);
+  assert.equal(buttonZoom.performance.pixelRatio, initial.performance.pixelRatio);
+  await click('重置視角');
+  await until("document.querySelector('.garage-canvas').garageInspection.snapshot().settings.zoom===1");
+  results.push('Camera buttons change framing without invalidating glass or rebuilding reflection resources');
   await mouseDrag("right", 100, -45);
   const rotated = await snapshot();
   assert.notEqual(rotated.settings.yaw, initial.settings.yaw);

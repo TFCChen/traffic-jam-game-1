@@ -228,6 +228,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
     touchBlocked = false,
     cameraPending = false;
   let quality = QUALITY.high;
+  let settingsApplied = false;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const motionChanged = () => {
     dirty = true;
@@ -1870,34 +1871,50 @@ export function createGarageScene(canvas, getProps, callbacks) {
     },
     cancelInput,
     settings(next) {
+      const normalized = { ...settings, ...next };
+      Object.assign(normalized, normalizeView(normalized));
+      const changed = (key) => !Object.is(settings[key], normalized[key]);
       if (
-        Object.entries(next).every(([key, value]) =>
-          Object.is(settings[key], value),
-        )
+        settingsApplied && Object.keys(normalized).every((key) => !changed(key))
       )
         return;
+      const qualityChanged = !settingsApplied || changed('quality');
+      const lightingChanged = !settingsApplied ||
+        ['theme', 'light', 'intensity', 'shadows'].some(changed);
+      const viewChanged = Object.keys(DEFAULT_VIEW).some(changed);
       cancelCamera(false);
       if (drag) finish({ pointerId: drag.pointerId }, true);
-      Object.assign(settings, next);
-      Object.assign(settings, normalizeView(settings));
+      Object.assign(settings, normalized);
+      settingsApplied = true;
       quality = QUALITY[settings.quality] ?? QUALITY.high;
-      for (const item of groups.values())
-        for (const paint of item.paints) {
-          configureVehiclePaint(paint, item.model, settings.quality, item.car.color);
+      if (qualityChanged || lightingChanged)
+        renderer.shadowMap.enabled = settings.shadows && quality.decor;
+      // Camera buttons and motion preferences must not rebuild optical hooks,
+      // resize the framebuffer or invalidate unchanged world-space shadows.
+      if (qualityChanged) {
+        for (const item of groups.values())
+          for (const paint of item.paints) {
+            configureVehiclePaint(paint, item.model, settings.quality, item.car.color);
+          }
+        for (const item of groups.values())
+          for (const glass of item.windows) {
+            configureVehicleGlass(glass, settings.quality);
+            rainSurfaces.attach(glass);
+          }
+        renderer.setPixelRatio(Math.min(devicePixelRatio, quality.pixelRatio));
+        if (sun.shadow.mapSize.x !== quality.shadow) {
+          sun.shadow.map?.dispose();
+          sun.shadow.map = null;
+          sun.shadow.mapSize.set(quality.shadow, quality.shadow);
         }
-      for (const item of groups.values())
-        for (const glass of item.windows) {
-          configureVehicleGlass(glass, settings.quality);
-          rainSurfaces.attach(glass);
-        }
-      renderer.setPixelRatio(Math.min(devicePixelRatio, quality.pixelRatio));
-      renderer.shadowMap.enabled = settings.shadows && quality.decor;
-      if (sun.shadow.mapSize.x !== quality.shadow) {
-        sun.shadow.map?.dispose();
-        sun.shadow.map = null;
-        sun.shadow.mapSize.set(quality.shadow, quality.shadow);
+        resize();
+      } else if (lightingChanged) {
+        updateCamera();
+      } else if (viewChanged) {
+        updateCamera(true);
+      } else {
+        dirty = true;
       }
-      resize();
     },
     select(id) {
       selected = id;
@@ -1954,6 +1971,7 @@ export function createGarageScene(canvas, getProps, callbacks) {
             roughness: m.roughness, metalness: m.metalness,
             clearcoat: m.clearcoat, clearcoatRoughness: m.clearcoatRoughness })),
           glazing: i.windows.map((m) => ({
+            version: m.version,
             physical: m.isMeshPhysicalMaterial === true,
             transmission: m.transmission,
             opacity: m.opacity,

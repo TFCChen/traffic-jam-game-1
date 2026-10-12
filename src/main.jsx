@@ -655,7 +655,9 @@ function App() {
     setMessage(
       savedCustom
         ? `正在編輯「${savedCustom.title}」。修改後請按「更新關卡」。`
-        : "點兩個空格，自動判斷方向與 2／3 格車長。先在出口列放置紅車。",
+        : (resume ? editorCars : level?.cars ?? []).some(car => car.id === 'target')
+          ? "點兩個空格新增車輛；點車輛可移動、換車或移除。"
+          : "先在出口列點相鄰兩格放紅車，再點兩端新增車輛。",
     );
   }
 

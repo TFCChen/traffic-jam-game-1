@@ -859,7 +859,7 @@ button.selected, .tabs button.active, .quality-options button[aria-pressed="true
  .editor-shell .editor-actions > button { padding:8px 3px; font-size:11px; min-width:0; }
  .editor-shell .editor-validation { grid-column:1/-1; }
  .editor-shell .vehicle-picker { bottom:214px; max-width:calc(100% - 24px); }
- .editor-shell .instruction { max-height:48px; overflow:auto; }
+ .editor-shell .instruction { max-height:60px; overflow:auto; scrollbar-width:thin; }
 }
 @media(max-height:540px) and (min-width:701px) { .editor-shell .editor-actions { bottom:10px; padding:6px; }.editor-shell .vehicle-picker { bottom:128px; } }
 @media(max-width:700px) { .editor-shell .vehicle-picker { bottom:180px; } }

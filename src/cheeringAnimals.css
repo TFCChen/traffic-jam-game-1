@@ -76,5 +76,16 @@
   .cheering-guest.top-left.friend,.cheering-guest.top-right.friend{top:-35px}
   .cheering-guest.bottom-left.friend,.cheering-guest.bottom-right.friend{bottom:-35px}
   .win-overlay.has-cheering .win-card{padding:22px 28px;max-height:calc(100dvh - 40px)}
+  .win-overlay.has-cheering .win-card h2{font-size:28px}
+  .win-overlay.has-cheering .win-card .eyebrow{margin:0 0 4px}
+  .win-overlay.has-cheering .win-stars{margin:10px 0}
+  .win-overlay.has-cheering .win-stars span{font-size:32px}
+  .win-overlay.has-cheering .win-score{padding:6px 8px}
+  .win-overlay.has-cheering .win-level{margin:6px 0 4px}
+  .win-overlay.has-cheering .win-performance{margin:4px 0 10px}
+  .win-overlay.has-cheering .win-up-next{margin:8px 0 0}
+  .win-overlay.has-cheering .win-copy{margin:6px 0;font-size:12px}
+  .win-overlay.has-cheering .journey-summary{margin:6px 0;padding:6px;font-size:12px}
+  .win-overlay.has-cheering .win-actions{position:sticky;bottom:0;z-index:2;padding:6px 0 0;background:#f5eee2}
 }
 @media(prefers-reduced-motion:reduce){.cheering-corners *{animation:none!important}.cheering-clap{opacity:0}.cheering-paw-left{transform:translate(14px,-3px)}.cheering-paw-right{transform:translate(-14px,-3px)}}

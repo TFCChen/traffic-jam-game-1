@@ -178,6 +178,21 @@ try {
       );
     }
     await until("document.querySelector('.win-card')?.getAttribute('aria-busy')==='false'&&!document.querySelector('.win-next')?.disabled",`Level ${meta.id}: exit must finish before next action`);
+    if (meta.id === 1 || meta.id === 40) {
+      const viewport = await evaluate('({width:innerWidth,height:innerHeight})');
+      for (const size of [{width:844,height:390},{width:667,height:375}]) {
+        await send('Emulation.setDeviceMetricsOverride', {...size,deviceScaleFactor:1,mobile:false});
+        await sleep(350);
+        const buttons = await evaluate(`(()=>{const card=document.querySelector('.win-card').getBoundingClientRect();return [...document.querySelectorAll('.win-actions button')].map(b=>{const r=b.getBoundingClientRect();return {text:b.textContent.trim(),height:r.height,visible:r.top>=card.top&&r.bottom<=card.bottom&&r.bottom<=innerHeight&&r.left>=0&&r.right<=innerWidth}})})()`);
+        assert.equal(buttons.length,2);
+        for (const button of buttons) {
+          assert.ok(button.visible, `Level ${meta.id} ${size.width}×${size.height}: ${button.text} visible without scrolling`);
+          assert.ok(button.height>=44, 'Result actions retain touch target height');
+        }
+      }
+      await send('Emulation.setDeviceMetricsOverride', {...viewport,deviceScaleFactor:1,mobile:false});
+      await sleep(350);
+    }
     if (meta.id < limit)
       await evaluate("document.querySelector('.win-next').click()");
   }

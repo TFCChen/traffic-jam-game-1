@@ -158,6 +158,8 @@ try {
   await until("!!document.querySelector('.editor-actions input')");
   await ready();
   assert.equal(await evaluate("document.querySelector('.editor-actions input').value"),'河畔試車場');
+  assert.ok(!(await evaluate("document.querySelector('.instruction').textContent")).includes('先在出口列'),
+    'Returning to a draft with a red car must not instruct the player to place it again');
   assert.equal(
     await evaluate(
       "document.querySelector('.garage-canvas').garageInspection.snapshot().cars.length",
