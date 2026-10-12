@@ -1,5 +1,7 @@
 # Vehicle lighting and exhaust — 2026-10-06
 
+> 2026-10-12 清理註記：本報告屬歷史版本。原始逐格圖／錄影及部分舊截圖已按核准清單清理；仍存在的拼圖／代表圖保留。下文的原檔名稱與 JSON 路徑僅為當時量測記錄，不能當成目前可開啟的檔案或重播輸入。
+
 The active/selected car (the target car by default) now owns real front and rear SpotLights. The two visible headlamp lenses share a merged forward cone: 63° full angle, 5.5 grid units of reach, inverse-square attenuation and a soft cutoff. A separate red rear light has a broader, shorter cone (115° / 1.6 units); braking increases its power. Tail lenses remain red while reversing. Dusk/night increase headlight power; actual road and vehicle materials receive the lighting, with shadow-map occlusion.
 
 The previous flat additive headlight decals have been removed. A fixed two-light pool prevents every parked vehicle from adding lights and shadow passes. Each map is 256×256, cached while stationary and updated at most 20 Hz during motion. Sun shadows are cached independently so headlight refreshes do not force redundant sun-map rendering. Saver mode disables these decorative effects.

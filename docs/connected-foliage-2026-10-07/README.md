@@ -1,5 +1,7 @@
 # Connected, dense courtyard plants — 2026-10-07
 
+> 2026-10-12 清理註記：本報告屬歷史版本。原始逐格圖／錄影及部分舊截圖已按核准清單清理；仍存在的拼圖／代表圖保留。下文的原檔名稱與 JSON 路徑僅為當時量測記錄，不能當成目前可開啟的檔案或重播輸入。
+
 The previous asset randomized leaf locations but left the original straight trunk and five regular spokes. Leaves sampled inside volumes were not actually attached to branches. This produced the user's sparse, floating-leaf and coat-rack observations, including in the planter shrubs.
 
 Plant generation now builds the skeleton first: a tapered, slightly bent leader, major forks from staggered heights, curved secondary branches, terminal twigs and inner shoots. Each leaf's narrow base is placed on one of those modeled twigs. Inner shoots fill the centre of each tree crown. Shrubs grow from stems rooted inside the planting soil and split into overlapping leafy fans. Leaf outlines are six-sided folded almonds with smooth normals.

@@ -1,5 +1,7 @@
 # Racer detail refinement — 2026-10-08
 
+> 2026-10-12 清理註記：本報告屬歷史版本。原始逐格圖／錄影及部分舊截圖已按核准清單清理；仍存在的拼圖／代表圖保留。下文的原檔名稱與 JSON 路徑僅為當時量測記錄，不能當成目前可開啟的檔案或重播輸入。
+
 Final build: `8b8789ef`. Baseline asset: commit `34c772c` (`f8890f63`).
 
 The rear engine panel formerly intersected the sculpted shell, exposing only fragments of flat louvres. It now has a rounded pocket, a conforming dark floor and six curved inset blades. The floor and blades sample the actual deck, including its center, so the floor cannot bridge over and hide the blades. Bonnet and door seams are thinner. Twin exhaust tips have rolled metal lips and recessed dark bores. The previously hidden rear number plate now sits in front of its mounting frame and coachwork.

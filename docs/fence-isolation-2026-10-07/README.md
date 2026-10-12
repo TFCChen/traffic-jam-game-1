@@ -1,5 +1,7 @@
 # Fence shadow isolation — 2026-10-07
 
+> 2026-10-12 清理註記：本報告屬歷史版本。原始逐格圖／錄影及部分舊截圖已按核准清單清理；仍存在的拼圖／代表圖保留。下文的原檔名稱與 JSON 路徑僅為當時量測記錄，不能當成目前可開啟的檔案或重播輸入。
+
 Build `0607156e`. The user reports that the preceding depth-bias and stable-PCF changes did not improve the flickering on their phone. The cause is therefore still unresolved on that device. This version directly removes fence shadow casting and receiving to isolate that hypothesis, rather than treating another filter adjustment as a confirmed solution.
 
 The fence formerly shared material batches with street furniture and foundations. Its 32 shoes, 32 posts, 32 caps and 10 rails now have dedicated fence materials, combined into one visible `Courtyard fence` mesh. The fence was rebuilt from the generator's original dimensions, bevels and weighted normals; paint/metal responses remain unchanged. The saved Blender courtyard and GLB match the generator. The fence mesh has 4,664 triangles, `castShadow=false` and `receiveShadow=false`. It retains ordinary PBR illumination, but does not project shadows on the ground and does not receive shadows from other objects. Vehicles and other scene objects retain their existing shadow policy.

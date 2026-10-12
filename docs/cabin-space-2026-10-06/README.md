@@ -1,5 +1,7 @@
 # Recessed passenger cells and credible cabin spacing
 
+> 2026-10-12 清理註記：本報告屬歷史版本。原始逐格圖／錄影及部分舊截圖已按核准清單清理；仍存在的拼圖／代表圖保留。下文的原檔名稱與 JSON 路徑僅為當時量測記錄，不能當成目前可開啟的檔案或重播輸入。
+
 The previous interior placed carpet almost at cushion height while leaving solid exterior coachwork underneath. More props could not fix this structural problem. Passenger cars and the motorhome now have a carved interior tub; the truck cab and bus passenger shell also have real recessed cavities. Carpet and individual foot mats sit 0.12–0.15 model units below the front cushions. Narrow seat runners and separate mounting pedestals support each seat, leaving space around the bases. Footwells include sloped toe boards and driver pedals, with a narrow central transmission tunnel.
 
 Door cards, handles and armrests are lower, so they no longer read as a thick plank obstructing the coupe's side window. The dashboard gains a layered passenger insert, glovebox, smaller satin fascia, stitched brow and falling centre stack. Existing gauges, vents and steering-wheel details remain. Bus passenger seats now have pedestals and a continuous carpeted aisle rather than sitting inside a solid body shell.

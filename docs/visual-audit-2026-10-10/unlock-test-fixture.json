@@ -1,0 +1,108 @@
+{
+  "version": 1,
+  "created": "2026-10-10T00:00:00Z",
+  "progress": {
+    "11": {
+      "stars": 3,
+      "bestMoves": 25,
+      "completed": true
+    },
+    "4": {
+      "stars": 3,
+      "bestMoves": 9,
+      "completed": true
+    },
+    "14": {
+      "stars": 3,
+      "bestMoves": 17,
+      "completed": true
+    },
+    "20": {
+      "stars": 3,
+      "bestMoves": 10,
+      "completed": true
+    },
+    "8": {
+      "stars": 3,
+      "bestMoves": 11,
+      "completed": true
+    },
+    "13": {
+      "stars": 3,
+      "bestMoves": 16,
+      "completed": true
+    },
+    "16": {
+      "stars": 3,
+      "bestMoves": 21,
+      "completed": true
+    },
+    "19": {
+      "stars": 3,
+      "bestMoves": 22,
+      "completed": true
+    },
+    "12": {
+      "stars": 3,
+      "bestMoves": 17,
+      "completed": true
+    },
+    "2": {
+      "stars": 3,
+      "bestMoves": 9,
+      "completed": true
+    },
+    "7": {
+      "stars": 3,
+      "bestMoves": 13,
+      "completed": true
+    },
+    "5": {
+      "stars": 3,
+      "bestMoves": 9,
+      "completed": true
+    },
+    "15": {
+      "stars": 3,
+      "bestMoves": 23,
+      "completed": true
+    },
+    "6": {
+      "stars": 3,
+      "bestMoves": 9,
+      "completed": true
+    },
+    "18": {
+      "stars": 3,
+      "bestMoves": 25,
+      "completed": true
+    },
+    "10": {
+      "stars": 3,
+      "bestMoves": 17,
+      "completed": true
+    },
+    "17": {
+      "stars": 3,
+      "bestMoves": 24,
+      "completed": true
+    },
+    "9": {
+      "stars": 3,
+      "bestMoves": 12,
+      "completed": true
+    },
+    "3": {
+      "stars": 3,
+      "bestMoves": 14,
+      "completed": true
+    },
+    "1": {
+      "stars": 3,
+      "bestMoves": 9,
+      "completed": true
+    }
+  },
+  "customLevels": [],
+  "format": "traffic-jam-backup"
+}

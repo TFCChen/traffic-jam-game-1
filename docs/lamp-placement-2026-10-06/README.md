@@ -1,5 +1,7 @@
 # Lens placement and lamp timing — 2026-10-06
 
+> 2026-10-12 清理註記：本報告屬歷史版本。原始逐格圖／錄影及部分舊截圖已按核准清單清理；仍存在的拼圖／代表圖保留。下文的原檔名稱與 JSON 路徑僅為當時量測記錄，不能當成目前可開啟的檔案或重播輸入。
+
 The moving lane marker is removed from gameplay. Editor placement/conflict markers remain available.
 
 Each model has two actual headlight and two tail-lens anchors. GLTF combines same-material surfaces into single meshes; anchors are extracted from exterior lens vertices on each side, rather than the material mesh's combined bounding-box center. Roof signs, safety markers and interior red buckles are excluded. Points follow the body, suspension and vehicle rotation. Headlights now emit individually from those lenses. Two soft visible cone meshes sample the real headlight depth maps so obstacles also interrupt the visible beams. These are lightweight atmospheric approximations, not volumetric ray marching.

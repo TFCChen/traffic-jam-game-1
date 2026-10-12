@@ -1,5 +1,7 @@
 # Tailored vehicle cabins and low-angle camera repair
 
+> 2026-10-12 清理註記：本報告屬歷史版本。原始逐格圖／錄影及部分舊截圖已按核准清單清理；仍存在的拼圖／代表圖保留。下文的原檔名稱與 JSON 路徑僅為當時量測記錄，不能當成目前可開啟的檔案或重播輸入。
+
 New scene settings default to high (精緻) quality. Existing saved manual quality choices remain intact.
 
 All nine editable vehicles have contoured upholstered seats, fitted centre inserts, piping, cushion tailoring, supported headrests and seatbelt buckles. Passenger cars also gain padded door inserts, armrests, release handles, window switches and speaker grilles. The cockpit contains a swept dashboard, inset louvred vents, instrument hood and gauges, infotainment glass, climate dials, a three-spoke steering wheel, cupholder recesses and a padded console. Rear benches, bus passenger seats and the motorhome lounge receive matching upholstery; colours distinguish sporty, utility and commercial interiors. Duplicate old delivery-truck cushions were removed.

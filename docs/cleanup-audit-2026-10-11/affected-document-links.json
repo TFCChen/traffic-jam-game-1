@@ -1,0 +1,502 @@
+[
+  {
+    "from": "docs/camera-2026-10-05/REPORT.md",
+    "to": "docs/camera-2026-10-05/01-desktop-detail.png",
+    "exists": true
+  },
+  {
+    "from": "docs/camera-2026-10-05/REPORT.md",
+    "to": "docs/camera-2026-10-05/02-mobile-detail.png",
+    "exists": true
+  },
+  {
+    "from": "docs/exit-cut-2026-10-07/README.md",
+    "to": "docs/exit-cut-2026-10-07/low-angle-street.png",
+    "exists": true
+  },
+  {
+    "from": "docs/exit-cut-2026-10-07/README.md",
+    "to": "docs/exit-cut-2026-10-07/desktop-transition.png",
+    "exists": true
+  },
+  {
+    "from": "docs/exit-cut-2026-10-07/README.md",
+    "to": "docs/exit-cut-2026-10-07/low-angle-result.png",
+    "exists": true
+  },
+  {
+    "from": "docs/exit-fade-investigation-2026-10-11/README.md",
+    "to": "docs/exit-fade-investigation-2026-10-11/replay-20.png",
+    "exists": true
+  },
+  {
+    "from": "docs/exit-fade-investigation-2026-10-11/README.md",
+    "to": "docs/exit-fade-investigation-2026-10-11/replay-21.png",
+    "exists": true
+  },
+  {
+    "from": "docs/fence-shadow-2026-10-07/README.md",
+    "to": "docs/fence-shadow-2026-10-07/old-artifact.png",
+    "exists": true
+  },
+  {
+    "from": "docs/fence-shadow-2026-10-07/README.md",
+    "to": "docs/fence-shadow-2026-10-07/fixed-same-view.png",
+    "exists": true
+  },
+  {
+    "from": "docs/headlight-blend-2026-10-11/README.md",
+    "to": "docs/headlight-blend-2026-10-11/before-top.png",
+    "exists": true
+  },
+  {
+    "from": "docs/headlight-blend-2026-10-11/README.md",
+    "to": "docs/headlight-blend-2026-10-11/after-top.png",
+    "exists": true
+  },
+  {
+    "from": "docs/headlight-blend-2026-10-11/README.md",
+    "to": "docs/headlight-blend-2026-10-11/after-angle.png",
+    "exists": true
+  },
+  {
+    "from": "docs/headlight-blend-2026-10-11/README.md",
+    "to": "docs/headlight-blend-2026-10-11/low-reverse.png",
+    "exists": true
+  },
+  {
+    "from": "docs/headlight-blend-2026-10-11/README.md",
+    "to": "docs/headlight-blend-2026-10-11/rain-angle.png",
+    "exists": true
+  },
+  {
+    "from": "docs/headlight-blend-2026-10-11/README.md",
+    "to": "docs/headlight-blend-2026-10-11/official-obstacles.png",
+    "exists": true
+  },
+  {
+    "from": "docs/headlight-blend-2026-10-11/README.md",
+    "to": "docs/headlight-blend-2026-10-11/day.png",
+    "exists": true
+  },
+  {
+    "from": "docs/headlight-reach-2026-10-11/README.md",
+    "to": "docs/headlight-reach-2026-10-11/night-top.png",
+    "exists": true
+  },
+  {
+    "from": "docs/headlight-reach-2026-10-11/README.md",
+    "to": "docs/headlight-reach-2026-10-11/night-angle.png",
+    "exists": true
+  },
+  {
+    "from": "docs/headlight-reach-2026-10-11/README.md",
+    "to": "docs/headlight-reach-2026-10-11/rain.png",
+    "exists": true
+  },
+  {
+    "from": "docs/headlight-reach-2026-10-11/README.md",
+    "to": "docs/headlight-reach-2026-10-11/day.png",
+    "exists": true
+  },
+  {
+    "from": "docs/headlight-reach-2026-10-11/README.md",
+    "to": "docs/headlights-2026-10-11/final-open-angle.png",
+    "exists": true
+  },
+  {
+    "from": "docs/headlights-2026-10-11/README.md",
+    "to": "docs/headlights-2026-10-11/win.png",
+    "exists": true
+  },
+  {
+    "from": "docs/headlights-2026-10-11/README.md",
+    "to": "docs/headlights-2026-10-11/next.png",
+    "exists": true
+  },
+  {
+    "from": "docs/headlights-2026-10-11/README.md",
+    "to": "docs/headlights-2026-10-11/final-open-top.png",
+    "exists": true
+  },
+  {
+    "from": "docs/headlights-2026-10-11/README.md",
+    "to": "docs/headlights-2026-10-11/final-open-angle.png",
+    "exists": true
+  },
+  {
+    "from": "docs/headlights-2026-10-11/README.md",
+    "to": "docs/headlights-2026-10-11/before-top.png",
+    "exists": true
+  },
+  {
+    "from": "docs/headlights-2026-10-11/README.md",
+    "to": "docs/headlights-2026-10-11/after-top.png",
+    "exists": true
+  },
+  {
+    "from": "docs/stable-shadow-2026-10-07/README.md",
+    "to": "docs/stable-shadow-2026-10-07/mobile-orbit-1.png",
+    "exists": true
+  },
+  {
+    "from": "docs/stable-shadow-2026-10-07/README.md",
+    "to": "docs/stable-shadow-2026-10-07/mobile-orbit-8.png",
+    "exists": true
+  },
+  {
+    "from": "docs/steering-2026-10-07/README.md",
+    "to": "docs/steering-2026-10-07/low-angle-street.png",
+    "exists": true
+  },
+  {
+    "from": "docs/steering-2026-10-07/README.md",
+    "to": "docs/steering-2026-10-07/art/night.png",
+    "exists": true
+  },
+  {
+    "from": "docs/street-polish-2026-10-10/README.md",
+    "to": "docs/street-polish-2026-10-10/01-small-mobile.png",
+    "exists": true
+  },
+  {
+    "from": "docs/street-polish-2026-10-10/README.md",
+    "to": "docs/street-polish-2026-10-10/02-small-dense.png",
+    "exists": true
+  },
+  {
+    "from": "docs/street-polish-2026-10-10/README.md",
+    "to": "docs/street-polish-2026-10-10/03-landscape.png",
+    "exists": true
+  },
+  {
+    "from": "docs/street-polish-2026-10-10/README.md",
+    "to": "docs/street-polish-2026-10-10/04-day-showcase.png",
+    "exists": true
+  },
+  {
+    "from": "docs/street-polish-2026-10-10/README.md",
+    "to": "docs/street-polish-2026-10-10/05-rain-showcase.png",
+    "exists": true
+  },
+  {
+    "from": "docs/street-polish-2026-10-10/README.md",
+    "to": "docs/street-polish-2026-10-10/06-saver.png",
+    "exists": true
+  },
+  {
+    "from": "docs/street-polish-2026-10-10/README.md",
+    "to": "docs/street-polish-2026-10-10/07-mobile.png",
+    "exists": true
+  },
+  {
+    "from": "docs/street-polish-2026-10-10/README.md",
+    "to": "docs/street-polish-2026-10-10/08-landscape-hint.png",
+    "exists": true
+  },
+  {
+    "from": "docs/street-polish-2026-10-10/README.md",
+    "to": "docs/street-polish-2026-10-10/09-editor-return-small.png",
+    "exists": true
+  },
+  {
+    "from": "docs/street-polish-2026-10-10/README.md",
+    "to": "docs/street-polish-2026-10-10/10-win.png",
+    "exists": true
+  },
+  {
+    "from": "docs/street-polish-2026-10-10/README.md",
+    "to": "docs/street-polish-2026-10-10/08-landscape-hint.png",
+    "exists": true
+  },
+  {
+    "from": "docs/street-polish-2026-10-10/README.md",
+    "to": "docs/street-polish-2026-10-10/04-day-showcase.png",
+    "exists": true
+  },
+  {
+    "from": "docs/street-restore-2026-10-11/README.md",
+    "to": "docs/street-restore-2026-10-11/win.png",
+    "exists": true
+  },
+  {
+    "from": "docs/street-restore-2026-10-11/README.md",
+    "to": "docs/street-restore-2026-10-11/next.png",
+    "exists": true
+  },
+  {
+    "from": "docs/street-restore-2026-10-11/README.md",
+    "to": "docs/street-restore-2026-10-11/mobile-rain.png",
+    "exists": true
+  },
+  {
+    "from": "docs/street-restore-2026-10-11/README.md",
+    "to": "docs/street-restore-2026-10-11/restored.png",
+    "exists": true
+  },
+  {
+    "from": "docs/upgrade-2026-10-05/REPORT.md",
+    "to": "docs/upgrade-2026-10-05/01-play.png",
+    "exists": true
+  },
+  {
+    "from": "docs/upgrade-2026-10-05/REPORT.md",
+    "to": "docs/upgrade-2026-10-05/02-editor.png",
+    "exists": true
+  },
+  {
+    "from": "docs/upgrade-2026-10-05/REPORT.md",
+    "to": "docs/upgrade-2026-10-05/model-pickup.png",
+    "exists": true
+  },
+  {
+    "from": "docs/upgrade-2026-10-05/REPORT.md",
+    "to": "docs/upgrade-2026-10-05/model-taxi.png",
+    "exists": true
+  },
+  {
+    "from": "docs/upgrade-2026-10-05/REPORT.md",
+    "to": "docs/upgrade-2026-10-05/model-camper.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/01-day-overhead.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/26-goal-intro.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/02-settings.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/03-day-showcase.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/04-rain-showcase.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/05-rain-close.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/06-sunset.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/07-neon.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/23-neon-low-reverse.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/08-hint.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/09-exit.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/10-win-desktop.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/11-win-mobile.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/12-mobile-play.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/13-mobile-levels.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/14-mobile-dense.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/15-mobile-settings.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/16-small-mobile.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/17-landscape.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/18-landscape-editor.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/19-editor-empty.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/20-editor-valid.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/21-trial-win.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/22-returned-draft.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/24-collection.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/25-analysis.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/27-next-level.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/17-landscape.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/03-day-showcase.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/23-neon-low-reverse.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/22-returned-draft.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/02-settings.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/13-mobile-levels.png",
+    "exists": true
+  },
+  {
+    "from": "docs/visual-audit-2026-10-10/README.md",
+    "to": "docs/visual-audit-2026-10-10/24-collection.png",
+    "exists": true
+  },
+  {
+    "from": "docs/win-transition-2026-10-11/README.md",
+    "to": "docs/win-transition-2026-10-11/rain-24.png",
+    "exists": true
+  },
+  {
+    "from": "docs/win-transition-2026-10-11/README.md",
+    "to": "docs/win-transition-2026-10-11/mobile-final.png",
+    "exists": true
+  },
+  {
+    "from": "docs/win-transition-2026-10-11/README.md",
+    "to": "docs/win-transition-2026-10-11/mobile-skip.png",
+    "exists": true
+  },
+  {
+    "from": "docs/win-transition-2026-10-11/README.md",
+    "to": "docs/win-transition-2026-10-11/mobile-resize.png",
+    "exists": true
+  },
+  {
+    "from": "docs/win-transition-2026-10-11/README.md",
+    "to": "docs/win-transition-2026-10-11/next-level.png",
+    "exists": true
+  },
+  {
+    "from": "docs/win-transition-performance-2026-10-11/README.md",
+    "to": "docs/win-transition-performance-2026-10-11/final-result.png",
+    "exists": true
+  },
+  {
+    "from": "docs/win-transition-performance-2026-10-11/README.md",
+    "to": "docs/win-transition-performance-2026-10-11/final-skip.png",
+    "exists": true
+  },
+  {
+    "from": "docs/win-transition-performance-2026-10-11/README.md",
+    "to": "docs/win-transition-performance-2026-10-11/reopened-rain.png",
+    "exists": true
+  },
+  {
+    "from": "docs/win-transition-performance-2026-10-11/README.md",
+    "to": "docs/win-transition-performance-2026-10-11/mobile-resize.png",
+    "exists": true
+  },
+  {
+    "from": "docs/win-transition-performance-2026-10-11/README.md",
+    "to": "docs/win-transition-performance-2026-10-11/measured-mobile-final.png",
+    "exists": true
+  },
+  {
+    "from": "HANDOFF.md",
+    "to": "docs/traffic-offscreen-2026-10-11/README.md",
+    "exists": true
+  },
+  {
+    "from": "HANDOFF.md",
+    "to": "docs/traffic-variety-2026-10-11/README.md",
+    "exists": true
+  },
+  {
+    "from": "HANDOFF.md",
+    "to": "docs/traffic-night-2026-10-10/README.md",
+    "exists": true
+  },
+  {
+    "from": "HANDOFF.md",
+    "to": "docs/celebration-cohesion-review/README.md",
+    "exists": true
+  }
+]

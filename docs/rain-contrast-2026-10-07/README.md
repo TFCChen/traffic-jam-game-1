@@ -1,5 +1,7 @@
 # More visible rain-after surfaces
 
+> 2026-10-12 清理註記：本報告屬歷史版本。原始逐格圖／錄影及部分舊截圖已按核准清單清理；仍存在的拼圖／代表圖保留。下文的原檔名稱與 JSON 路徑僅為當時量測記錄，不能當成目前可開啟的檔案或重播輸入。
+
 Version `82c632c5`. Follow-up to the visually understated first rain-after pass.
 
 - The whole wet surface has a stronger baseline wetness, with variable damp patches layered over it. Asphalt darkens more than pale paving and painted markings.

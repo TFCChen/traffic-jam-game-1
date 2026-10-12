@@ -1,5 +1,7 @@
 # Overlapping perimeter surfaces — 2026-10-07
 
+> 2026-10-12 清理註記：本報告屬歷史版本。原始逐格圖／錄影及部分舊截圖已按核准清單清理；仍存在的拼圖／代表圖保留。下文的原檔名稱與 JSON 路徑僅為當時量測記錄，不能當成目前可開啟的檔案或重播輸入。
+
 Build `7048d170`. Fence shadow isolation did not improve the user's physical-phone result. Asset inspection then found an actual depth conflict in the same exposed ring: both the dark basalt foundation and the light limestone reveal had a top surface at world Y = 0. Their different triangles and vertex colours compete for the same depth-buffer values as the view changes. Shadow flags cannot repair this geometry conflict.
 
 | Layer | Previous top | Repaired top |

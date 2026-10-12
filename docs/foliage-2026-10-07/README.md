@@ -1,5 +1,7 @@
 # Natural courtyard foliage — 2026-10-07
 
+> 2026-10-12 清理註記：本報告屬歷史版本。原始逐格圖／錄影及部分舊截圖已按核准清單清理；仍存在的拼圖／代表圖保留。下文的原檔名稱與 JSON 路徑僅為當時量測記錄，不能當成目前可開啟的檔案或重播輸入。
+
 The previous generator placed large leaves on Fibonacci sphere surfaces (`angle = index × 2.39996`). From close viewpoints their spacing and tangent alignment revealed concentric spiral bands. The six overlapping spherical clusters also made each tree look like the same solid clipped ball.
 
 The new Blender generator uses independent seeded samples throughout irregular ellipsoidal branch volumes. Each tree combines a filled core with seven uneven terminal masses at different heights. Leaves are smaller, have varied orientation and clustered colour variation. The resulting crown has an uneven outline and visible internal gaps rather than an ordered outer shell. Planter foliage uses the same unordered distribution.

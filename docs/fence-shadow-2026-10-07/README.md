@@ -1,12 +1,14 @@
 # Fence perimeter shadow repair — 2026-10-07
 
+> 2026-10-12 清理註記：本報告屬歷史版本。原始逐格圖／錄影及部分舊截圖已按核准清單清理；仍存在的拼圖／代表圖保留。下文的原檔名稱與 JSON 路徑僅為當時量測記錄，不能當成目前可開啟的檔案或重播輸入。
+
 Build: `a7b56334`.
 
 The original camera orbit reproduced shifting dark hatch marks around the lot's fence, although the shadow update counter stayed unchanged. Disabling shadows removed them. The directional light used Three's default 0.5–500 depth range and a negative depth bias: a normalized -0.0002 offset corresponds to roughly -0.1 world units, large relative to the 0.022-unit rails.
 
 The sun now uses a fixed 1–32 depth range, positive 0.00015 bias (0.00465 world units) and 0.008 normal bias. Shadow texture sizes and refresh cadence remain unchanged. Four corners also had duplicate shoes, posts and caps: 12 overlapping components were removed from the Blender source and exported GLB; the generator now shares endpoint posts.
 
-- [Original orbit artifact](old-artifact.png) / [fixed identical camera](fixed-same-view.png).
+- Original orbit artifact（原始驗證檔已清理） / fixed identical camera（原始驗證檔已清理）.
 - Native browser input: right-button orbit, middle-button pan and wheel zoom in day/high, day/standard, sunset/high and neon/high. [Inspection](inspection.json) records actual changed camera settings; all four runs had zero shadow updates during camera movement.
 - Two-finger pan/pinch at 390×844 also passed with zero shadow updates. This is Chrome device emulation, not a physical iPhone/Android test.
 - Screenshots before/orbit/after were reviewed for fence bands and retained vehicle/street shadows. No browser runtime or console errors.

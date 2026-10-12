@@ -1,0 +1,76 @@
+{
+  "timestamp": "2026-10-12T00:11:44.992Z",
+  "protectedFilesChecked": 408,
+  "changedProtectedFiles": [],
+  "remainingTargets": [],
+  "brokenLinks": [],
+  "total": {
+    "files": 4698,
+    "bytes": 1412590784
+  },
+  "top": [
+    {
+      "name": ".git",
+      "files": 354,
+      "bytes": 1099747125
+    },
+    {
+      "name": ".browser-checks",
+      "files": 193,
+      "bytes": 128027665
+    },
+    {
+      "name": "node_modules",
+      "files": 3587,
+      "bytes": 69922138
+    },
+    {
+      "name": "art",
+      "files": 8,
+      "bytes": 48069794
+    },
+    {
+      "name": "docs",
+      "files": 271,
+      "bytes": 21450050
+    },
+    {
+      "name": "dist",
+      "files": 74,
+      "bytes": 16465543
+    },
+    {
+      "name": "public",
+      "files": 68,
+      "bytes": 15320880
+    },
+    {
+      "name": ".codex-remote-attachments",
+      "files": 3,
+      "bytes": 12548116
+    },
+    {
+      "name": "src",
+      "files": 66,
+      "bytes": 538838
+    },
+    {
+      "name": "scripts",
+      "files": 63,
+      "bytes": 421456
+    },
+    {
+      "name": "(root)",
+      "files": 10,
+      "bytes": 78592
+    },
+    {
+      "name": ".github",
+      "files": 1,
+      "bytes": 587
+    }
+  ],
+  "skippedLinks": [
+    ".browser-checks/baseline/node_modules"
+  ]
+}

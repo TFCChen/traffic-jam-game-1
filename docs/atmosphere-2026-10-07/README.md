@@ -1,5 +1,7 @@
 # Quiet courtyard atmosphere — 2026-10-07
 
+> 2026-10-12 清理註記：本報告屬歷史版本。原始逐格圖／錄影及部分舊截圖已按核准清單清理；仍存在的拼圖／代表圖保留。下文的原檔名稱與 JSON 路徑僅為當時量測記錄，不能當成目前可開啟的檔案或重播輸入。
+
 The courtyard foliage now responds to a gentle shared breeze with small local variations. Trunks and the cached vegetation shadow proxy remain fixed. Vertex displacement uses precomputed world-space profiles and a few shared uniforms; it does not rebuild foliage geometry or sun shadows each frame.
 
 Eight reusable folded leaf particles replace the old four rectangular particles. Only a few are visible together. They descend beside the trees, settle without sliding, then fade. Their entire paths stay outside the playable 6×6 grid. Saver quality, reduced motion and editor mode disable ambient motion.

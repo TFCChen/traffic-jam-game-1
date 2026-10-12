@@ -1,5 +1,7 @@
 # Clear moving glazing and credible window structures
 
+> 2026-10-12 清理註記：本報告屬歷史版本。原始逐格圖／錄影及部分舊截圖已按核准清單清理；仍存在的拼圖／代表圖保留。下文的原檔名稱與 JSON 路徑僅為當時量測記錄，不能當成目前可開啟的檔案或重播輸入。
+
 ## Rendering
 
 Camera gestures and vehicle dragging previously reduced the transmission buffer

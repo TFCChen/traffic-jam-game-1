@@ -1,5 +1,7 @@
 # 通關瞬間卡頓修正 — 2026-10-11
 
+> 2026-10-12 清理註記：本報告屬歷史版本。原始逐格圖／錄影及部分舊截圖已按核准清單清理；仍存在的拼圖／代表圖保留。下文的原檔名稱與 JSON 路徑僅為當時量測記錄，不能當成目前可開啟的檔案或重播輸入。
+
 正式版本 `ddb2e82d`，原分支 `feature/game-feel`。
 
 上一版為保留街景，在renderer.render後同步呼叫全解析度canvas.toDataURL('image/png')。實際通關量測兩次為272.2／262.6ms（1600×900），會阻塞主執行緒，符合使用者描述的停頓；之後還需由img解碼PNG。
@@ -24,13 +26,13 @@
 ## 截圖
 
 - [正式版連續畫面](final-rain-contact.jpg)
-- [正式版結果](final-result.png)
-- [正式版跳過](final-skip.png)
+- 正式版結果（原始驗證檔已清理）
+- 正式版跳過（原始驗證檔已清理）
 - [診斷夜景連續畫面](measured-night-contact.jpg)
 - [診斷雨景連續畫面](measured-rain-contact.jpg)
 - [診斷手機連續畫面](measured-mobile-contact.jpg)
-- [重開雨景結果](reopened-rain.png)
-- [結果期間手機重排](mobile-resize.png)
-- [手機結果](measured-mobile-final.png)
+- 重開雨景結果（原始驗證檔已清理）
+- 結果期間手機重排（原始驗證檔已清理）
+- 手機結果（原始驗證檔已清理）
 
 原始逐張PNG保留本機；僅提交contact sheets與代表圖。部署狀態與SHA另記根目錄HANDOFF.md。

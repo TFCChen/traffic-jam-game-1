@@ -1,5 +1,7 @@
 # Glass, cabin and mirror review — 2026-10-05
 
+> 2026-10-12 清理註記：本報告屬歷史版本。原始逐格圖／錄影及部分舊截圖已按核准清單清理；仍存在的拼圖／代表圖保留。下文的原檔名稱與 JSON 路徑僅為當時量測記錄，不能當成目前可開啟的檔案或重播輸入。
+
 Vehicle windows now use physical transmission, a refractive index of 1.48, subtle blue tint and low roughness. Standard and high quality share one transmission buffer. During vehicle/camera movement the buffer renders at reduced resolution; it returns to a sharper setting while inspecting the scene. Saver mode keeps transparent reflective windows without a transmission pass.
 
 All nine editable Blender vehicles now contain cabin geometry. Passenger cars have carpeted floors, shaped seats and head restraints, dashboards, consoles, gear selectors and open steering rims. Commercial vehicles retain passenger seating and gain driver seat backs/head restraints and a dashboard/steering rim. Vehicle mirror lenses use a separate metallic material and stay out of the matte trim batch. The coupe mirror mounts sit outside the glazing on exterior sail panels.

@@ -1,5 +1,7 @@
 # Compact fleet controls and actionable hints
 
+> 2026-10-12 清理註記：本報告屬歷史版本。原始逐格圖／錄影及部分舊截圖已按核准清單清理；仍存在的拼圖／代表圖保留。下文的原檔名稱與 JSON 路徑僅為當時量測記錄，不能當成目前可開啟的檔案或重播輸入。
+
 The editor keeps a compact selection button showing the selected model and total vehicle count. The full fleet is a bounded, scrollable two-column popup; it closes after selection, on an outside press or Escape. Only the selected car's replacement/removal actions remain visible. Its size no longer grows with the number of placed cars. Replacement and fleet popups share a centered position that fits narrow viewports.
 
 The 3D hint includes a dark-backed gold route, one waypoint per moved cell, a visible arrow tip, the full final vehicle footprint and a numeric distance label. The label faces the camera and stays approximately 112 screen pixels wide through zoom and viewport changes. It sits along the route so it does not obscure the arrow tip. The guide is visual-only and does not take pointer input. Committing a move clears it through the existing hint lifecycle. The 2.5D fallback also gains a destination frame and explicit distance.

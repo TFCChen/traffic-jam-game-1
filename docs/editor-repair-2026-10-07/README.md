@@ -1,5 +1,7 @@
 # Editor workflow and integrated racer lamps
 
+> 2026-10-12 清理註記：本報告屬歷史版本。原始逐格圖／錄影及部分舊截圖已按核准清單清理；仍存在的拼圖／代表圖保留。下文的原檔名稱與 JSON 路徑僅為當時量測記錄，不能當成目前可開啟的檔案或重播輸入。
+
 The editor opens with an empty draft. Two endpoints determine horizontal/vertical placement and a two/three-cell length, in either drawing direction. The red target remains a horizontal two-cell vehicle in the exit row. Placement previews now describe the endpoints rather than a preset vehicle tool. Invalid endpoints and repeated origins cancel selection; Escape also clears the origin.
 
 Editing tools occupy one floating dock, with a compact placed-vehicle list above it. Selecting a non-target vehicle offers replacement by another model of the same length, preserving its ID, direction and position. The target only offers removal. The old model/orientation tray and redundant editor/level buttons are removed. A temporary aligned editor view leaves the game's saved view intact. Trial play retains the draft, and leaving the editor restores the previous actual game state.

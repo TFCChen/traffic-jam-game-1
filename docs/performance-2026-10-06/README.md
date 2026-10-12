@@ -1,5 +1,7 @@
 # Thin vehicle glass render optimization
 
+> 2026-10-12 清理註記：本報告屬歷史版本。原始逐格圖／錄影及部分舊截圖已按核准清單清理；仍存在的拼圖／代表圖保留。下文的原檔名稱與 JSON 路徑僅為當時量測記錄，不能當成目前可開啟的檔案或重播輸入。
+
 The previous transmission material rendered every opaque object twice to build a screen-space refraction buffer for four-millimetre vehicle panes. Thin-sheet glass now blends over the existing opaque scene. It retains physical direct/environment specular reflection, Fresnel reflection at grazing angles, angle-dependent tint absorption, two visible optical faces and clear views of the existing cabin. Its tiny refractive image displacement is approximated by a straight-through view. It does not blur or lower resolution during camera/vehicle motion.
 
 The refractive reference path is retained only for development diagnostics. The development inspection hook can switch glass modes or temporarily hide panes without changing persisted player settings. The production UI continues to use the same quality levels.

@@ -1,5 +1,7 @@
 # Editor completion flow polish
 
+> 2026-10-12 清理註記：本報告屬歷史版本。原始逐格圖／錄影及部分舊截圖已按核准清單清理；仍存在的拼圖／代表圖保留。下文的原檔名稱與 JSON 路徑僅為當時量測記錄，不能當成目前可開啟的檔案或重播輸入。
+
 - Validation results remain in the shared status location, with a mint border/check for success and amber border/exclamation for invalid or unsolvable boards. Text continues to announce through the existing polite live region. Ordinary editing messages keep their subdued appearance.
 - Return to game is an independent top-right action, away from name entry and undo. Narrow mobile widths reserve its space rather than overlapping the title.
 - The completion group always orders Verify → Trial → Save/Update. Save is the filled gold endpoint; the other two actions use contrasting outlined treatments.
