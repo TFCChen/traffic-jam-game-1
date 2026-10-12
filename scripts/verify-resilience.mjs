@@ -35,7 +35,7 @@ async function mouseClick(point) {
   await sleep(100);
 }
 async function selectCar(id) {
-  const point = await evaluate(`(()=>{const g=document.querySelector('.garage-canvas').garageInspection,c=g.snapshot().cars.find(c=>c.id===${JSON.stringify(id)});for(const h of [.55,.8,.35,1]){const p=g.project(c.col+(c.dir==='H'?c.len/2:.5),h,c.row+(c.dir==='V'?c.len/2:.5));if(g.pick(p.x,p.y)?.carId===c.id)return p}return null})()`);
+  const point = await evaluate(`(()=>{const g=document.querySelector('.garage-canvas').garageInspection,c=g.snapshot().cars.find(c=>c.id===${JSON.stringify(id)});for(const h of [.55,.8,.35,1]){const p=g.project(c.col+(c.dir==='H'?c.len/2:.5),h,c.row+(c.dir==='V'?c.len/2:.5));if(g.pick(p.x,p.y)===c.id)return p}return null})()`);
   assert.ok(point, `Car ${id} must be selectable by pointer`);
   await mouseClick(point);
 }
@@ -263,7 +263,7 @@ try {
   await ready();
   assert.equal(await evaluate("document.querySelector('.vehicle-picker')===null"), true);
   const firstLevel=JSON.parse(readFileSync(new URL('../public/levels/level-001.json',import.meta.url),'utf8'));
-  const firstMove=solveLevel(firstLevel).moves[0];
+  const firstMove=solveLevel(firstLevel.cars).moves[0];
   const firstCar=firstLevel.cars.find(c=>c.id===firstMove.carId);
   await selectCar(firstMove.carId);
   assert.ok(
