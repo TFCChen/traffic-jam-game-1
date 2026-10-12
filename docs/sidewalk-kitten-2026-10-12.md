@@ -8,6 +8,8 @@
 
 先前小貓程式的CI38209551587現已completed/success；這只證明技術測試通過，無法取代使用者的美術否決。
 
+撤回提交fa94ffc8，Vercel dpl_3TdNyCr6t3qvA79nkcxq867M3SSQ已READY，固定測試網址version.json=6ac96b60；main未更動。本機夜景、雨後與日景確認貓咪撤下，保留第03關0步與原存檔。撤回後[CI38214658815](https://github.com/TFCChen/traffic-jam-game-1/actions/runs/38214658815)已排程，交付時尚未完成，不宣稱本輪43項全通過。
+
 使用者同意先做一隻小貓與一小處路邊活動區，再看實際效果決定是否擴充。這是待使用者評估的第一版，不代表模型／動作已獲最終接受。手機發熱調整暫緩，沒有修改原有畫質或幀率設定。
 
 `src/courtyardCat.js`建立橘白虎斑骨架模型：24骨頭、一個頂點色SkinnedMesh；另外一片落葉與一張程序柔和接觸陰影，共三個繪製物件。沒有下載第三方動物、增加相依套件、改寫garage.glb或任何Blend。來源直接由程式生成，後續可獨立調整。
