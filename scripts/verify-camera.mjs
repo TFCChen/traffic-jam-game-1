@@ -263,7 +263,7 @@ try {
     b = { id: 2, x: r.x + r.w * 0.66, y: r.y + r.h * 0.5 };
   const beforeTouch = await snapshot();
   const street = await evaluate(
-    "(()=>{const c=document.querySelector('.garage-canvas'),r=c.getBoundingClientRect(),a=c.garageInspection;for(const x of [-1,-.4,6.4,7])for(const z of [-1,0,1,2,3,4,5,6,7]){const p=a.project(x,.055,z);if(p.x>r.left+40&&p.x<r.right-40&&p.y>r.top+40&&p.y<r.bottom-40&&!a.pick(p.x,p.y))return p;}return null})()",
+    "(()=>{const c=document.querySelector('.garage-canvas'),r=c.getBoundingClientRect(),a=c.garageInspection;for(const x of [-1,-.4,6.4,7])for(const z of [-1,0,1,2,3,4,5,6,7]){const p=a.project(x,.055,z);if(p.x>r.left+12&&p.x<r.right-40&&p.y>r.top+40&&p.y<r.bottom-40&&!a.pick(p.x,p.y)&&document.elementFromPoint(p.x,p.y)===c)return p;}return null})()",
   );
   assert.ok(street, "Visible street supports one-finger orbit");
   await touch("touchStart", [{ id: 8, ...street }]);
