@@ -7,7 +7,7 @@
 - 工作目錄：C:/Projects/traffic-jam-game；持續在 **feature/game-feel** 開發。
 - 遊戲版本：**95b93f5f**（路邊小貓試作）；上一輪修正6ac96b60；原穩定里程碑為1b806bc4／9e6ad3e72dd9c778d7f7d2b40eed8c2911768a7e。
 - main／origin/main 已依使用者要求快轉同步到上述提交，作為穩定里程碑；後續推送 feature/game-feel，原測試網址不變。舊「不要合併 main」記錄已被本安排取代；下一次同步 main 再依使用者要求。
-- [固定測試網址](https://traffic-jam-game-1-git-feature-game-feel-tfcc-hen-s-projects.vercel.app) 已部署程式提交0c72c483，Vercel dpl_EbHoPaHTfQVi1dAo25G9buYP35PJ為READY，version.json及瀏覽器選單皆確認6ac96b60；透過PWA更新後原第01關0步保留。[正式網址](https://traffic-jam-game-1.vercel.app)仍為main穩定版1b806bc4。
+- [固定測試網址](https://traffic-jam-game-1-git-feature-game-feel-tfcc-hen-s-projects.vercel.app) 已部署小貓程式提交ff6abdbb，Vercel dpl_7QmLaN6aYB2mTLQ8nDtBUYW6m4sz為READY，version.json=95b93f5f；透過PWA更新保留原第01關0步。[正式網址](https://traffic-jam-game-1.vercel.app)仍為main穩定版1b806bc4。最新小貓遠端CI見報告，不以過往43項全通過當作本輪結果。
 - localhost:4173 是 **Vite preview，讀取 dist**，不是熱更新服務。保持服務可用；src 改動後必須 build。
 - 使用者確認手機自然出庫後先前結算卡頓／像跳兩次的問題目前未再出現；開發端僅做桌面瀏覽器及手機尺寸驗證，不代表所有實體手機已測。
 - 2026-10-12 CI 修復完成：程式提交02e0b19的 [完整工作38198686693](https://github.com/TFCChen/traffic-jam-game-1/actions/runs/38198686693) 四十三項全部成功：17組測試／build、40關共1,029次實際拖曳、100次切換、編輯器、PWA／離線／WebGL備援、存檔備援與桌面／手機尺寸鏡頭手勢。已修正 Chrome 啟動探測、過期 UI／鏡頭斷言及轉場／視窗／首次載入等待，未改遊戲程式。[CI 修復紀錄](docs/ci-repair-2026-10-12.md)。推送 feature/game-feel 現在也會驗證，40關各自獨立，CI大量重播採省電畫質，鏡頭仍驗證精緻畫質。軟體WebGL工作可能耗時十數分鐘；完整結果仍須查看最新GitHub Actions，不以歷史失敗或截圖代替。gh 讀 job 日誌可能403，但 GitHub connector 可在工作完成後讀取。最後紀錄提交只改文件，以 [skip ci] 避免重複整批測試。

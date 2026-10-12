@@ -10,4 +10,8 @@
 
 版本95b93f5f，本機18組測試及build通過。新增測試讀取現用garage.glb檢查實際鋪面／灰縫高度；完整105秒週期逐0.1秒檢查骨架變形後所有頂點不陷入鋪面、活動區界線、循環銜接、前爪尖確實接近落葉、雨後行為、靜態偏好、編輯器停模擬與資源釋放。這不代表已量測真機GPU／耗電。
 
-視覺證據存於忽略追蹤的`.browser-checks/kitten-2026-10-12/`。部署與遠端CI以實際最後結果補記。
+視覺證據存於忽略追蹤的`.browser-checks/kitten-2026-10-12/`。06-mobile-final.jpg確認390×844正常俯視可見，07-editor-final.jpg確認編輯器隱藏；12起為最終95b93f5f雨景／夜景／日景。前五張為最初左側活動區，保留作本輪比較，不代表最後位置。檢查控制台未見warn/error。原第03關0步保留，未清除玩家資料；本機驗證使用隔離來源127.0.0.23。
+
+部署程式提交ff6abdbb，Vercel dpl_7QmLaN6aYB2mTLQ8nDtBUYW6m4sz已READY；[原固定測試網址](https://traffic-jam-game-1-git-feature-game-feel-tfcc-hen-s-projects.vercel.app)的version.json=95b93f5f。實際瀏覽器透過PWA更新，原第01關0步保留。main沒有變更。最後文件提交使用[skip ci]。
+
+[本輪遠端CI 38209551587](https://github.com/TFCChen/traffic-jam-game-1/actions/runs/38209551587)尚在執行，交付時不能宣稱43項已全部通過。本機18組測試及build已完成。先前兩次小貓提交的CI會依既有分支concurrency設定被後續修正取代，不是本輪完成證據。
