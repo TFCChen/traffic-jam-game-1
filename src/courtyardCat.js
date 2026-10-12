@@ -3,7 +3,7 @@ import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 
 // A small, self-contained street resident. One skinned draw, no fur shells,
 // extra lights, physics loop, textures to download or animated sun shadow pass.
-const HOME = [-1.34, .109, 3.48];
+const HOME = [-.35, .109, 6.66];
 const clamp = x => Math.max(0, Math.min(1, x));
 const ease = x => { const t=clamp(x); return t*t*(3-2*t); };
 const pulse = (t,a,b,c,d) => ease((t-a)/(b-a))*(1-ease((t-c)/(d-c)));

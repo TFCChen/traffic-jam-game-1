@@ -10,12 +10,12 @@ asset.scene.updateMatrixWorld(true);
 // Check the real shipped paving, rather than assuming a floating floor datum.
 for(let t=0;t<105;t+=.1) {
   const p=catPose(t);
-  assert(p.x<-.9&&p.x>-1.6&&p.z>3.1&&p.z<4.2,'Resident must stay in its sidewalk bay, away from puzzle and exit');
+  assert(p.x>=-.350001&&p.x<=-.249999&&p.z>=6.659999&&p.z<=7.10,'Resident must stay in its front sidewalk bay, away from puzzle and exit');
   const ray=new THREE.Raycaster(new THREE.Vector3(p.x,.30,p.z),new THREE.Vector3(0,-1,0));
   const hit=ray.intersectObject(asset.scene,true)[0];
   assert(hit&&hit.point.y>=.099&&hit.point.y<=.108,'Paws must use the actual paving / recessed mortar height');
   const wet=catPose(t,true);
-  assert.equal(wet.hop,0);assert.equal(wet.reach,0);assert.equal(wet.z,3.48,'Rain behavior must not chase across wet paving');
+  assert.equal(wet.hop,0);assert.equal(wet.reach,0);assert.equal(wet.z,6.66,'Rain behavior must not chase across wet paving');
 }
 for(const t of [32,70,105]) {
   const a=catPose(t-1e-6),b=catPose(t+1e-6);

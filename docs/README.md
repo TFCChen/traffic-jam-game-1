@@ -13,6 +13,7 @@
 - [PWA 安裝與更新](PWA-INSTALL.md)
 - [瀏覽器 CI 修復與驗證範圍](ci-repair-2026-10-12.md)
 - [手機精緻畫質體驗巡檢與效能改善候選](experience-audit-2026-10-12.md)
+- [路邊小貓試作與驗證](sidewalk-kitten-2026-10-12.md)
 
 ## 清理紀錄
 
