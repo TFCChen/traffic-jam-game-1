@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {createRainMotion,courtyardWind} from './rainMotion.js';
+import {createCourtyardCat} from './courtyardCat.js';
 
 // World-space tree anchors. Each path stays on the surrounding sidewalks.
 export const TREE_ANCHORS = [[-.68, 5.6], [5.66, -.73], [6, 7.25], [-1.5, 6.95]];
@@ -100,14 +101,17 @@ export function createCourtyardAtmosphere(scene, garage) {
   const rainMotion=createRainMotion(scene,garage,TREE_ANCHORS);
   const cafeLight = new THREE.PointLight('#ffc17b', 0, 1.5, 2);
   cafeLight.name = 'Cafe window spill'; cafeLight.position.set(-.55, .63, 1.08); scene.add(cafeLight);
+  const cat = createCourtyardCat(scene);
 
   return {
     setTheme(settings, quality) {
+      cat.setTheme(settings,quality);
       cafeGlow.value = settings.theme === 'neon' ? .8 : settings.theme === 'sunset' ? .23 : settings.theme === 'rain' ? .12 : .018;
       cafeLight.intensity = quality.decor ? (settings.theme === 'neon' ? .4 : settings.theme === 'sunset' ? .15 : settings.theme === 'rain' ? .08 : 0) : 0;
       cafeLight.visible = cafeLight.intensity > 0;
     },
     update(dt, settings, quality, reduced, editor) {
+      cat.update(dt,settings,quality,reduced,editor);
       enabled = quality.decor && !reduced && !editor;
       leaves.visible = enabled;
       rainMotion.update(dt,enabled&&settings.theme==='rain',time+Math.min(dt,.1));
@@ -125,11 +129,12 @@ export function createCourtyardAtmosphere(scene, garage) {
       }
       leaves.instanceMatrix.needsUpdate = true; fade.needsUpdate = true;
     },
-    snapshot() { const rain=rainMotion.snapshot();return { enabled, activeLeaves, leafCapacity: 8, residualDrips:rain.visible, dripCapacity:rain.capacity, rainMotion:rain, wind: wind.value.toArray(), cafeGlow: cafeGlow.value, cafeLight: cafeLight.intensity, animatedShadowUpdates: 0 }; },
+    snapshot() { const rain=rainMotion.snapshot();return { enabled, activeLeaves, leafCapacity: 8, residualDrips:rain.visible, dripCapacity:rain.capacity, rainMotion:rain, cat:cat.snapshot(), wind: wind.value.toArray(), cafeGlow: cafeGlow.value, cafeLight: cafeLight.intensity, animatedShadowUpdates: 0 }; },
     pause() {
       const wasEnabled = enabled;
       enabled = false; activeLeaves = 0; leaves.visible = false; wind.value.set(0, 0, 0, 0);
       rainMotion.pause();
+      cat.pause();
       return wasEnabled;
     },
     dispose() {
@@ -137,6 +142,7 @@ export function createCourtyardAtmosphere(scene, garage) {
       geometries.forEach(g => g.dispose()); scene.remove(leaves, cafeLight);
       leaves.dispose(); geometry.dispose(); material.dispose(); cafeLight.dispose();
       rainMotion.dispose();
+      cat.dispose();
     },
   };
 }

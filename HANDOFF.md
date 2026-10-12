@@ -5,7 +5,7 @@
 ## 目前狀態
 
 - 工作目錄：C:/Projects/traffic-jam-game；持續在 **feature/game-feel** 開發。
-- 遊戲版本：**6ac96b60**（本輪修正後）；原穩定里程碑為1b806bc4／9e6ad3e72dd9c778d7f7d2b40eed8c2911768a7e。
+- 遊戲版本：**134c3773**（路邊小貓試作）；上一輪修正6ac96b60；原穩定里程碑為1b806bc4／9e6ad3e72dd9c778d7f7d2b40eed8c2911768a7e。
 - main／origin/main 已依使用者要求快轉同步到上述提交，作為穩定里程碑；後續推送 feature/game-feel，原測試網址不變。舊「不要合併 main」記錄已被本安排取代；下一次同步 main 再依使用者要求。
 - [固定測試網址](https://traffic-jam-game-1-git-feature-game-feel-tfcc-hen-s-projects.vercel.app) 已部署程式提交0c72c483，Vercel dpl_EbHoPaHTfQVi1dAo25G9buYP35PJ為READY，version.json及瀏覽器選單皆確認6ac96b60；透過PWA更新後原第01關0步保留。[正式網址](https://traffic-jam-game-1.vercel.app)仍為main穩定版1b806bc4。
 - localhost:4173 是 **Vite preview，讀取 dist**，不是熱更新服務。保持服務可用；src 改動後必須 build。
@@ -13,6 +13,8 @@
 - 2026-10-12 CI 修復完成：程式提交02e0b19的 [完整工作38198686693](https://github.com/TFCChen/traffic-jam-game-1/actions/runs/38198686693) 四十三項全部成功：17組測試／build、40關共1,029次實際拖曳、100次切換、編輯器、PWA／離線／WebGL備援、存檔備援與桌面／手機尺寸鏡頭手勢。已修正 Chrome 啟動探測、過期 UI／鏡頭斷言及轉場／視窗／首次載入等待，未改遊戲程式。[CI 修復紀錄](docs/ci-repair-2026-10-12.md)。推送 feature/game-feel 現在也會驗證，40關各自獨立，CI大量重播採省電畫質，鏡頭仍驗證精緻畫質。軟體WebGL工作可能耗時十數分鐘；完整結果仍須查看最新GitHub Actions，不以歷史失敗或截圖代替。gh 讀 job 日誌可能403，但 GitHub connector 可在工作完成後讀取。最後紀錄提交只改文件，以 [skip ci] 避免重複整批測試。
 
 ## 已接受方向與不可恢復方案
+
+2026-10-12使用者回報iPhone長玩較熱、S22 Ultra未明顯發熱且基本不卡頓；明確暫不調整發熱設定，接著同意[一隻路邊小貓試作](docs/sidewalk-kitten-2026-10-12.md)。courtyardCat.js獨立生成24骨頭橘白虎斑模型，由courtyardAtmosphere管理；長椅外側有限活動，觀察／撥葉／短跳／舔爪；雨後不追葉；編輯器隱藏，省電與縮減動態靜態。未改原街景模型、畫質、幀率或關卡，沒有新增依賴。此版外觀／動作待使用者驗收，不要擅自擴充小狗。18組本機測試與build通過；新增真實鋪面與完整骨架週期貼地測試。最新部署／CI結果見該報告。
 
 2026-10-12[手機精緻畫質巡檢](docs/experience-audit-2026-10-12.md)發現的三項已依使用者同意修正：低高度結算縮減留白並讓操作區保持可見；settings按實際變更分流，純鏡頭／動態偏好不重設車材質／雨水shader／畫布／世界陰影；有紅車草稿返回後顯示繼續編輯提示，空白提示縮短。844×390結算兩按鈕完整可見且高47px，390×844直式與試玩返回、雨後省電→精緻及陰影關／開、夜景展示角度已本機驗證。17組測試與build通過。程式提交0c72c483的[本輪CI 38203903176](https://github.com/TFCChen/traffic-jam-game-1/actions/runs/38203903176)已43／43全部成功：40關實際拖曳、100次切換、更新／離線／保存與備援；新增鏡頭操作材質版本／反射資源不變、編輯提示及第1／40關844×390與667×375橫式結果檢查皆通過。最後文件提交使用[skip ci]，遊戲程式維持上述完整驗證內容。真機FPS／GPU耗時尚未量測。
 
