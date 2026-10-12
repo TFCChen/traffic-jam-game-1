@@ -23,6 +23,10 @@ function assertSameCenter(before, after) {
     "Orbit keeps the current viewport center fixed in world space",
   );
 }
+function assertSameProjection(before, after) {
+  for (const key of ['width', 'height', 'near', 'far'])
+    assert.equal(after.cameraFrustum[key], before.cameraFrustum[key], `Orbit preserves projection ${key}`);
+}
 const ready = () =>
   until(
     "(()=>{const c=document.querySelector('.garage-canvas'),s=c?.garageInspection?.snapshot(),r=c?.getBoundingClientRect();return !document.querySelector('.level-transition')&&s?.ready&&s.sceneKey===s.performance.renderedSceneKey&&s.performance.viewport?.width===r.width&&s.performance.viewport?.height===r.height&&document.querySelector('.stage-heading h2')?.textContent==='第 01 關'&&document.querySelector('.game-column')?.getAttribute('aria-busy')==='false'})()",
@@ -148,7 +152,8 @@ try {
   assert.notEqual(rotated.settings.yaw, initial.settings.yaw);
   assert.equal(rotated.settings.yaw, initial.settings.yaw - 30);
   assert.ok(rotated.settings.pitch < initial.settings.pitch);
-  assert.deepEqual(rotated.cameraFrustum, initial.cameraFrustum);
+  assertSameProjection(initial, rotated);
+  assert.notDeepEqual(rotated.cameraFrustum.position, initial.cameraFrustum.position);
   assert.equal(rotated.settings.zoom, initial.settings.zoom);
   assertSameCenter(initial, rotated);
   assert.equal(
@@ -263,7 +268,7 @@ try {
   await touch("touchEnd", []);
   assert.notEqual((await snapshot()).settings.yaw, beforeTouch.settings.yaw);
   assert.ok((await snapshot()).settings.pitch < beforeTouch.settings.pitch);
-  assert.deepEqual((await snapshot()).cameraFrustum, beforeTouch.cameraFrustum);
+  assertSameProjection(beforeTouch, await snapshot());
   assertSameCenter(beforeTouch, await snapshot());
   results.push("One-finger street drag rotates the camera without moving cars");
   await click("重置視角");
