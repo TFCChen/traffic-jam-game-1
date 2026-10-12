@@ -253,11 +253,11 @@ try {
     enabled: true,
     maxTouchPoints: 5,
   });
-  await sleep(200);
+  await ready();
   await evaluate(
     "document.querySelector('.garage-canvas').scrollIntoView({block:'center'})",
   );
-  await sleep(100);
+  await ready();
   r = await rect();
   const a = { id: 1, x: r.x + r.w * 0.34, y: r.y + r.h * 0.5 },
     b = { id: 2, x: r.x + r.w * 0.66, y: r.y + r.h * 0.5 };
