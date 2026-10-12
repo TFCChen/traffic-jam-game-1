@@ -8,6 +8,9 @@ writeFileSync(join(evidence,'chrome.log'),'');
 const profile = mkdtempSync(join(realpathSync(tmpdir()), 'garage-ci-'));
 const origin = 'http://localhost:4173';
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+const checks = ["verify-upgrade.mjs", "verify-resilience.mjs", "verify-camera.mjs", "verify-all-levels.mjs"];
+const requested = process.argv.slice(2);
+if(requested.some(script=>!checks.includes(script)))throw Error('Unknown browser check');
 let launchError;
 const preview =
   process.env.GARAGE_PREVIEW_RUNNING === "1"
@@ -92,12 +95,7 @@ try {
   if(!ready)throw Error(`Browser/preview readiness exceeded 60s: ${lastProbeError}`);
   console.log('Chrome DevTools and Vite preview ready.');
   await rootCommand(url,'Target.createTarget',{url:origin});
-  for (const script of [
-    "verify-upgrade.mjs",
-    "verify-resilience.mjs",
-    "verify-camera.mjs",
-    "verify-all-levels.mjs",
-  ]) {
+  for (const script of requested.length ? requested : checks) {
     console.log(`::group::${script}`);
     const started=Date.now();
     const child = spawn(process.execPath, [`scripts/${script}`, url], {

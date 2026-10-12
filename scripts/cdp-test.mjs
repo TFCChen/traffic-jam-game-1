@@ -13,6 +13,7 @@ export async function connect(url, origin = 'http://localhost:4173') {
       p = pending.get(r.id);
     if (p) {
       pending.delete(r.id);
+      clearTimeout(p.timer);
       r.error ? p.reject(Error(r.error.message)) : p.resolve(r.result);
     }
     if (r.method && r.sessionId === session)
@@ -21,7 +22,8 @@ export async function connect(url, origin = 'http://localhost:4173') {
   const send = (method, params = {}, attached = true) =>
     new Promise((resolve, reject) => {
       const key = ++id;
-      pending.set(key, { resolve, reject });
+      const timer=setTimeout(()=>{pending.delete(key);reject(Error(`CDP command timed out after 30s: ${method}`));},30000);
+      pending.set(key, { resolve, reject, timer });
       ws.send(
         JSON.stringify({
           id: key,
