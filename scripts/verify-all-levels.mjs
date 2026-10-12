@@ -135,7 +135,7 @@ try {
     const route = solveLevel(level.cars);
     assert.ok(route.solvable);
     await until(
-      `document.querySelector('.stage-heading h2')?.textContent==='第 ${String(meta.id).padStart(2, "0")} 關'&&document.querySelector('.garage-canvas')?.garageInspection?.snapshot().ready&&!document.querySelector('.toolbar button:nth-child(3)')?.disabled`,
+      `(()=>{const s=document.querySelector('.garage-canvas')?.garageInspection?.snapshot();return document.querySelector('.stage-heading h2')?.textContent==='第 ${String(meta.id).padStart(2, "0")} 關'&&!document.querySelector('.level-transition')&&!document.querySelector('.workspace')?.inert&&document.querySelector('.game-column')?.getAttribute('aria-busy')==='false'&&s?.ready&&s.sceneKey==='${meta.id}-play'&&s.performance.renderedSceneKey===s.sceneKey})()`,
       `Level ${meta.id} did not become playable`,
     );
     for (const move of route.moves) {

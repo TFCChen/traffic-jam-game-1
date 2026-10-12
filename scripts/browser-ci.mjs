@@ -11,6 +11,8 @@ const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 const checks = ["verify-upgrade.mjs", "verify-resilience.mjs", "verify-camera.mjs", "verify-all-levels.mjs"];
 const requested = process.argv.slice(2);
 if(requested.some(script=>!checks.includes(script)))throw Error('Unknown browser check');
+const level=Number(process.env.GARAGE_LEVEL||0);
+if(!Number.isInteger(level)||level<0||level>40)throw Error('Invalid isolated level');
 let launchError;
 const preview =
   process.env.GARAGE_PREVIEW_RUNNING === "1"
@@ -98,7 +100,7 @@ try {
   for (const script of requested.length ? requested : checks) {
     console.log(`::group::${script}`);
     const started=Date.now();
-    const child = spawn(process.execPath, [`scripts/${script}`, url], {
+    const child = spawn(process.execPath, [`scripts/${script}`, url, ...(script==='verify-all-levels.mjs'&&level ? [String(level),String(level)] : [])], {
       stdio: "inherit",
       env:{...process.env,GARAGE_EVIDENCE_DIR:evidence,GARAGE_BROWSER_CI:'1'},
     });
