@@ -1,19 +1,17 @@
 import assert from "node:assert/strict";
-import { writeFileSync, unlinkSync, mkdirSync } from "node:fs";
+import { writeFileSync, unlinkSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { connect } from "./cdp-test.mjs";
+import { evidenceDir } from "./ci-evidence.mjs";
+import { solveLevel } from "../src/gameEngine.js";
 const { send, evaluate, until, click, sleep, onEvent, close } = await connect(
   process.argv[2],
 );
 const saved = await evaluate(
   "Object.fromEntries(Object.keys(localStorage).filter(k=>k.startsWith('traffic-jam-')).map(k=>[k,localStorage.getItem(k)]))",
 );
-const fixture = new URL(
-  "../.browser-checks/import-fixture.json",
-  import.meta.url,
-);
+const fixture = new URL("import-fixture.json", evidenceDir);
 const results = [];
-mkdirSync(new URL("../.browser-checks/", import.meta.url), { recursive: true });
 const ready = () =>
   until(
     "(()=>{const c=document.querySelector('.garage-canvas'),s=c?.garageInspection?.snapshot(),r=c?.getBoundingClientRect();return s?.ready&&s.sceneKey===s.performance.renderedSceneKey&&s.performance.viewport?.width===r.width&&s.performance.viewport?.height===r.height&&document.querySelector('.game-column')?.getAttribute('aria-busy')==='false'})()",
@@ -30,6 +28,20 @@ async function upload(data) {
     files: [fileURLToPath(fixture)],
   });
   await sleep(200);
+}
+async function mouseClick(point) {
+  await send("Input.dispatchMouseEvent", {type:"mousePressed", ...point, button:"left", clickCount:1});
+  await send("Input.dispatchMouseEvent", {type:"mouseReleased", ...point, button:"left", clickCount:1});
+  await sleep(100);
+}
+async function selectCar(id) {
+  const point = await evaluate(`(()=>{const g=document.querySelector('.garage-canvas').garageInspection,c=g.snapshot().cars.find(c=>c.id===${JSON.stringify(id)});for(const h of [.55,.8,.35,1]){const p=g.project(c.col+(c.dir==='H'?c.len/2:.5),h,c.row+(c.dir==='V'?c.len/2:.5));if(g.pick(p.x,p.y)?.carId===c.id)return p}return null})()`);
+  assert.ok(point, `Car ${id} must be selectable by pointer`);
+  await mouseClick(point);
+}
+async function pressKey(key, code) {
+  await send("Input.dispatchKeyEvent", {type:"keyDown", key, code:key, windowsVirtualKeyCode:code});
+  await send("Input.dispatchKeyEvent", {type:"keyUp", key, code:key, windowsVirtualKeyCode:code});
 }
 try {
   const initialOrigin = await evaluate("performance.timeOrigin");
@@ -96,12 +108,16 @@ try {
     await evaluate("document.querySelector('.instruction').textContent"),
     /備份已合併/,
   );
+  assert.equal(await evaluate("JSON.parse(localStorage.getItem('traffic-jam-draft-v1')).data.title"), "匯入草稿");
   await click("編輯器");
   await ready();
   assert.equal(
     await evaluate("document.querySelector('.editor-actions input').value"),
-    "匯入草稿",
+    "",
   );
+  assert.equal(await evaluate("document.querySelector('.garage-canvas').garageInspection.snapshot().cars.length"), 0);
+  for(const col of [.5,1.5]) await mouseClick(await evaluate(`document.querySelector('.garage-canvas').garageInspection.project(${col},.055,2.5)`));
+  await until("document.querySelector('.garage-canvas').garageInspection.snapshot().cars.length===1");
   const start = await evaluate(
     "document.querySelector('.garage-canvas').garageInspection.project(1,.7,2.5)",
   );
@@ -137,7 +153,7 @@ try {
     0,
   );
   results.push(
-    "Real file import restores named draft; existing-car drag and editor undo work",
+    "File import preserves its named draft; a new editor starts blank, and existing-car drag supports undo",
   );
   const blankStart = await evaluate(
     "document.querySelector('.garage-canvas').garageInspection.project(.5,.055,.5)",
@@ -190,7 +206,10 @@ try {
     "Quota failure reports unsaved work without false success or overwriting creations",
   );
   await click("返回遊戲");
-  await click("操作指南");
+  await ready();
+  await evaluate("document.querySelector('.utility-menu').open=true");
+  await click("通關演示");
+  await until("document.querySelector('.goal-intro')?.open===true");
   await send("Input.dispatchKeyEvent", {
     type: "keyDown",
     key: "Escape",
@@ -206,10 +225,6 @@ try {
   assert.equal(
     await evaluate("document.querySelector('dialog')?.open??false"),
     false,
-  );
-  assert.equal(
-    await evaluate("document.activeElement.textContent.trim()"),
-    "操作指南",
   );
   await send("Emulation.setDeviceMetricsOverride", {
     width: 640,
@@ -238,25 +253,19 @@ try {
       "[...document.querySelectorAll('dialog button')].filter(b=>!b.disabled).every(b=>b.getBoundingClientRect().height>=44)",
     ),
   );
-  await click("關閉車庫設定");
+  await pressKey("Escape", 27);
+  await until("!document.querySelector('dialog')?.open");
+  assert.equal(await evaluate("document.activeElement.getAttribute('aria-label')||document.activeElement.textContent.trim()"), "車庫設定");
   results.push(
-    "Guide Escape returns focus; 200%-equivalent viewport retains controls and 44 px targets",
+    "Demonstration closes with Escape; settings restore focus and a 200%-equivalent viewport retains controls and 44 px targets",
   );
-  await click("選車");
-  await evaluate("document.querySelector('.vehicle-picker button').focus()");
-  await send("Input.dispatchKeyEvent", {
-    type: "keyDown",
-    key: "Enter",
-    code: "Enter",
-    windowsVirtualKeyCode: 13,
-    text: "\r",
-  });
-  await send("Input.dispatchKeyEvent", {
-    type: "keyUp",
-    key: "Enter",
-    code: "Enter",
-    windowsVirtualKeyCode: 13,
-  });
+  await send("Emulation.clearDeviceMetricsOverride");
+  await ready();
+  assert.equal(await evaluate("document.querySelector('.vehicle-picker')===null"), true);
+  const firstLevel=JSON.parse(readFileSync(new URL('../public/levels/level-001.json',import.meta.url),'utf8'));
+  const firstMove=solveLevel(firstLevel).moves[0];
+  const firstCar=firstLevel.cars.find(c=>c.id===firstMove.carId);
+  await selectCar(firstMove.carId);
   assert.ok(
     await evaluate(
       "!!document.querySelector('.garage-canvas').garageInspection.snapshot()",
@@ -265,25 +274,8 @@ try {
   const movesBefore = await evaluate(
     "Number(document.querySelector('.stats b').textContent)",
   );
-  console.log(
-    JSON.stringify(
-      await evaluate(
-        "({selected:[...document.querySelectorAll('.vehicle-picker button')].filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>b.getAttribute('aria-label')),active:document.activeElement.className,cars:document.querySelector('.garage-canvas').garageInspection.snapshot().cars.map(c=>c.id),heading:document.querySelector('.stage-heading h2').textContent})",
-      ),
-    ),
-  );
-  await send("Input.dispatchKeyEvent", {
-    type: "keyDown",
-    key: "ArrowRight",
-    code: "ArrowRight",
-    windowsVirtualKeyCode: 39,
-  });
-  await send("Input.dispatchKeyEvent", {
-    type: "keyUp",
-    key: "ArrowRight",
-    code: "ArrowRight",
-    windowsVirtualKeyCode: 39,
-  });
+  const key=firstCar.dir==='H'?(firstMove.delta>0?'ArrowRight':'ArrowLeft'):(firstMove.delta>0?'ArrowDown':'ArrowUp');
+  await pressKey(key, {ArrowLeft:37,ArrowUp:38,ArrowRight:39,ArrowDown:40}[key]);
   await until(
     `Number(document.querySelector('.stats b').textContent)===${movesBefore + 1}`,
   );
@@ -292,7 +284,7 @@ try {
     await evaluate("Number(document.querySelector('.stats b').textContent)"),
     movesBefore,
   );
-  results.push("Keyboard picker activation, arrow movement and undo work");
+  results.push("Selecting a car on the board enables keyboard movement and undo");
   const beforeFailure = await evaluate(
     "localStorage.getItem('traffic-jam-progress-v2')",
   );
@@ -320,14 +312,11 @@ try {
     await until(
       "document.querySelector('.stage-heading h2')?.textContent==='暫時車庫'",
     );
-    await click("選車");
     for (const [carId, key, code] of [
       ["block", "ArrowUp", 38],
       ...Array.from({ length: 4 }, () => ["target", "ArrowRight", 39]),
     ]) {
-      await evaluate(
-        `(()=>{const buttons=[...document.querySelectorAll('.vehicle-picker button')];const index=${carId === "target" ? 0 : 1};buttons[index].focus();buttons[index].click()})()`,
-      );
+      await selectCar(carId);
       await send("Input.dispatchKeyEvent", {
         type: "keyDown",
         key,
@@ -356,7 +345,7 @@ try {
     await send("Network.setBypassServiceWorker", { bypass: false });
   }
   writeFileSync(
-    new URL("../docs/upgrade-2026-10-05/resilience.json", import.meta.url),
+    new URL("resilience.json", evidenceDir),
     JSON.stringify({ results }, null, 2),
   );
   console.log(results.join("\n"));

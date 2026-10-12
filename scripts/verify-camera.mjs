@@ -2,13 +2,14 @@ import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { legalMovesForCar } from "../src/gameEngine.js";
 import { connect } from "./cdp-test.mjs";
+import { evidenceDir } from './ci-evidence.mjs';
 const { send, evaluate, sleep, until, click, close } = await connect(
   process.argv[2],
 );
 const saved = await evaluate(
   "Object.fromEntries(Object.keys(localStorage).filter(k=>k.startsWith('traffic-jam-')).map(k=>[k,localStorage.getItem(k)]))",
 );
-const dir = new URL("../docs/camera-2026-10-05/", import.meta.url);
+const dir = evidenceDir;
 mkdirSync(dir, { recursive: true });
 const results = [];
 const snapshot = () =>
@@ -142,11 +143,11 @@ try {
   );
   await sleep(200);
   const initial = await snapshot();
-  await mouseDrag("right", 100, 45);
+  await mouseDrag("right", 100, -45);
   const rotated = await snapshot();
   assert.notEqual(rotated.settings.yaw, initial.settings.yaw);
   assert.equal(rotated.settings.yaw, initial.settings.yaw - 30);
-  assert.ok(rotated.settings.pitch > initial.settings.pitch);
+  assert.ok(rotated.settings.pitch < initial.settings.pitch);
   assert.deepEqual(rotated.cameraFrustum, initial.cameraFrustum);
   assert.equal(rotated.settings.zoom, initial.settings.zoom);
   assertSameCenter(initial, rotated);
@@ -258,10 +259,10 @@ try {
   );
   assert.ok(street, "Visible street supports one-finger orbit");
   await touch("touchStart", [{ id: 8, ...street }]);
-  await touch("touchMove", [{ id: 8, x: street.x + 30, y: street.y + 15 }]);
+  await touch("touchMove", [{ id: 8, x: street.x + 30, y: street.y - 15 }]);
   await touch("touchEnd", []);
   assert.notEqual((await snapshot()).settings.yaw, beforeTouch.settings.yaw);
-  assert.ok((await snapshot()).settings.pitch > beforeTouch.settings.pitch);
+  assert.ok((await snapshot()).settings.pitch < beforeTouch.settings.pitch);
   assert.deepEqual((await snapshot()).cameraFrustum, beforeTouch.cameraFrustum);
   assertSameCenter(beforeTouch, await snapshot());
   results.push("One-finger street drag rotates the camera without moving cars");

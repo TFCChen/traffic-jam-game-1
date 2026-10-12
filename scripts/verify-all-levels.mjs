@@ -2,6 +2,7 @@
 import assert from "node:assert/strict";
 import { readFileSync, writeFileSync } from "node:fs";
 import { solveLevel } from "../src/gameEngine.js";
+import { evidenceDir } from './ci-evidence.mjs';
 const ws = new WebSocket(process.argv[2]);
 await new Promise((r, j) => {
   ws.onopen = r;
@@ -150,8 +151,8 @@ try {
         );
         writeFileSync(
           new URL(
-            "../docs/upgrade-2026-10-05/failed-drag.png",
-            import.meta.url,
+            "failed-drag.png",
+            evidenceDir,
           ),
           Buffer.from(
             (await send("Page.captureScreenshot", { format: "png" })).data,
@@ -219,13 +220,14 @@ try {
       await sleep(650);
       const name = meta.id === 1 ? "17-win" : "18-final-win";
       writeFileSync(
-        new URL(`../docs/upgrade-2026-10-05/${name}.png`, import.meta.url),
+        new URL(`${name}.png`, evidenceDir),
         Buffer.from(
           (await send("Page.captureScreenshot", { format: "png" })).data,
           "base64",
         ),
       );
     }
+    await until("document.querySelector('.win-card')?.getAttribute('aria-busy')==='false'&&!document.querySelector('.win-next')?.disabled",`Level ${meta.id}: exit must finish before next action`);
     if (meta.id < limit)
       await evaluate("document.querySelector('.win-next').click()");
   }
@@ -237,8 +239,8 @@ try {
   );
   writeFileSync(
     new URL(
-      `../docs/upgrade-2026-10-05/${first > 1 ? "browser-range-evidence" : limit === 40 ? "browser-level-evidence" : "browser-first-level-evidence"}.json`,
-      import.meta.url,
+      `${first > 1 ? "browser-range-evidence" : limit === 40 ? "browser-level-evidence" : "browser-first-level-evidence"}.json`,
+      evidenceDir,
     ),
     JSON.stringify(results, null, 2),
   );

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync, readFileSync, unlinkSync } from "node:fs";
 import { connect } from "./cdp-test.mjs";
 import { solveLevel } from "../src/gameEngine.js";
+import { evidenceDir } from './ci-evidence.mjs';
 const { send, evaluate, sleep, until, click, close } = await connect(
   process.argv[2],
 );
@@ -16,7 +17,7 @@ const keys = [
   saved = await evaluate(
     `Object.fromEntries(${JSON.stringify(keys)}.map(k=>[k,localStorage.getItem(k)]))`,
   );
-const dir = new URL("../docs/upgrade-2026-10-05/", import.meta.url);
+const dir = evidenceDir;
 mkdirSync(dir, { recursive: true });
 const results = [];
 const updateWorkerName = `sw-regression-${process.pid}.js`;
@@ -106,6 +107,9 @@ try {
   await mouseClick(await point(2, 0));
   await mouseClick(await point(5, 5));
   await mouseClick(await point(2, 1));
+  assert.equal(await evaluate("document.querySelector('.garage-canvas').garageInspection.snapshot().cars.length"),0,
+    'Invalid endpoint clears the start; next click starts a new car');
+  await mouseClick(await point(2, 0));
   assert.equal(
     await evaluate(
       "document.querySelector('.garage-canvas').garageInspection.snapshot().cars.length",
@@ -117,7 +121,7 @@ try {
   await ready();
   assert.deepEqual(await projection(), editorBefore);
   results.push(
-    "Invalid endpoint retains start; validation preserves projection",
+    "Invalid endpoint clears start; two valid endpoints place red car; validation preserves projection",
   );
   await click("清空");
   await click("復原編輯");
@@ -139,27 +143,9 @@ try {
     "(()=>{const e=document.querySelector('.editor-actions input');const s=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set;s.call(e,'河畔試車場');e.dispatchEvent(new Event('input',{bubbles:true}));})()",
   );
   await sleep(150);
-  await click("返回遊戲");
-  await click("編輯器");
-  assert.equal(
-    await evaluate(
-      "document.querySelector('.garage-canvas').garageInspection.snapshot().cars.length",
-    ),
-    1,
-  );
-  await reload();
-  await click("編輯器");
-  assert.equal(
-    await evaluate(
-      "document.querySelector('.garage-canvas').garageInspection.snapshot().cars.length",
-    ),
-    1,
-  );
-  assert.equal(
-    await evaluate("document.querySelector('.editor-actions input').value"),
-    "河畔試車場",
-  );
-  results.push("Undo/redo and named draft survive leave/reload");
+  const savedDraft=await evaluate("localStorage.getItem('traffic-jam-draft-v1')");
+  assert.equal(JSON.parse(savedDraft).data.title,'河畔試車場');
+  results.push("Editor undo/redo and named draft persistence");
   await shot("02-editor");
   await click("試玩");
   await ready();
@@ -167,7 +153,9 @@ try {
     await evaluate("document.querySelector('.stage-heading h2').textContent"),
     "河畔試車場",
   );
-  await click("返回草稿");
+  await click("返回編輯器");
+  await ready();
+  assert.equal(await evaluate("document.querySelector('.editor-actions input').value"),'河畔試車場');
   assert.equal(
     await evaluate(
       "document.querySelector('.garage-canvas').garageInspection.snapshot().cars.length",
@@ -184,6 +172,15 @@ try {
   );
   results.push("Unsaved trial returns to same draft; named save succeeds");
   await click("返回遊戲");
+  await reload();
+  assert.equal(JSON.parse(await evaluate("localStorage.getItem('traffic-jam-draft-v1')")).data.title,'河畔試車場');
+  assert.equal(JSON.parse(await evaluate("localStorage.getItem('traffic-jam-custom-levels-v2')"))[0].title,'河畔試車場');
+  await click('編輯器');
+  await ready();
+  assert.equal(await evaluate("document.querySelector('.garage-canvas').garageInspection.snapshot().cars.length"),0);
+  assert.equal(await evaluate("document.querySelector('.editor-actions input').value"),'');
+  results.push('Saved creation survives reload; entering editor starts a fresh blank draft');
+  await click('返回遊戲');
   await level(1);
   const raw = JSON.parse(
       readFileSync(new URL("../public/levels/level-001.json", import.meta.url)),
@@ -325,9 +322,8 @@ try {
   await until(`performance.timeOrigin!==${beforeOffline}`);
   await ready();
   await level(40);
-  await until(
-    "/離線.*遊玩/.test(document.querySelector('.offline-status').textContent)",
-  );
+  assert.equal(await evaluate("document.querySelector('.offline-status')===null"),true,
+    'Successful offline play has no persistent success banner');
   await shot("05-offline");
   results.push(
     "Offline reload and level 40 assets load from versioned snapshot",
