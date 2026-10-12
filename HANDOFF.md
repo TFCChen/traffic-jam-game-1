@@ -5,7 +5,7 @@
 ## 目前狀態
 
 - 工作目錄：C:/Projects/traffic-jam-game；持續在 **feature/game-feel** 開發。
-- 遊戲版本：**9d2ee68e**（路邊小貓試作）；上一輪修正6ac96b60；原穩定里程碑為1b806bc4／9e6ad3e72dd9c778d7f7d2b40eed8c2911768a7e。
+- 遊戲版本：**95b93f5f**（路邊小貓試作）；上一輪修正6ac96b60；原穩定里程碑為1b806bc4／9e6ad3e72dd9c778d7f7d2b40eed8c2911768a7e。
 - main／origin/main 已依使用者要求快轉同步到上述提交，作為穩定里程碑；後續推送 feature/game-feel，原測試網址不變。舊「不要合併 main」記錄已被本安排取代；下一次同步 main 再依使用者要求。
 - [固定測試網址](https://traffic-jam-game-1-git-feature-game-feel-tfcc-hen-s-projects.vercel.app) 已部署程式提交0c72c483，Vercel dpl_EbHoPaHTfQVi1dAo25G9buYP35PJ為READY，version.json及瀏覽器選單皆確認6ac96b60；透過PWA更新後原第01關0步保留。[正式網址](https://traffic-jam-game-1.vercel.app)仍為main穩定版1b806bc4。
 - localhost:4173 是 **Vite preview，讀取 dist**，不是熱更新服務。保持服務可用；src 改動後必須 build。

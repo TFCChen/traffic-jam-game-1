@@ -26,11 +26,12 @@ export function catPose(time, rain=false, still=false) {
   const steps=playing?pulse(p,22,22.2,24.8,25)*Math.sin((p-22)*Math.PI*6):0;
   const blink=still?0:Math.max(pulse(t,3.1,3.18,3.26,3.36),pulse(p,15,15.08,15.16,15.26));
   return {
-    x:HOME[0]+visit*.10, y:HOME[1]+hop*.105, z:HOME[2]+visit*.43,
+    x:HOME[0]+visit*.06, y:HOME[1]+hop*.105, z:HOME[2]+visit*.22,
     yaw:.24, reach, hop, grooming, look, steps, blink,
     breath:still?0:Math.sin(time*2.1)*.002,
     tail:still?.18:Math.sin(time*1.45)*.18+look*.22,
     ears:still?0:Math.sin(time*.77)*.045+look*.12,
+    investigate:playing?pulse(p,12,13,16,17):0,
     activity:still?'rest':rain?'watch rain':hop>0?'pounce':reach>0?'paw leaf':grooming>0?'groom':visit>0?'investigate':'watch',
     leaf:playing?pulse(p,9,9.3,11.5,13):0,
   };
@@ -186,7 +187,7 @@ export function createCourtyardCat(scene) {
     group.position.set(pose.x,pose.y,pose.z);group.rotation.y=pose.yaw;
     group.scale.setScalar(.86);
     rig.body.position.y+=pose.breath-pose.reach*.014;
-    rig.head.rotation.set(pose.look*.2+pose.grooming*.32,Math.sin(time*.42)*.08-pose.grooming*.4,-pose.look*.10);
+    rig.head.rotation.set(pose.look*.2+pose.grooming*.32+pose.investigate*.25,Math.sin(time*.42)*.08-pose.grooming*.4,-pose.look*.10);
     for(let i=0;i<rig.ears.length;i++)rig.ears[i].rotation.z=(i?1:-1)*pose.ears;
     for(const eye of rig.eyes)eye.scale.y=1-pose.blink*.92;
     rig.tails.forEach((b,i)=>{b.rotation.y=pose.tail*(.45+i*.12);b.rotation.x=Math.sin(time*1.1-i*.6)*.06;});
@@ -195,7 +196,7 @@ export function createCourtyardCat(scene) {
       leg.upper.rotation.x=gait*.16+pose.hop*(leg.rear?-.35:.28);
       leg.lower.rotation.x=-gait*.1-pose.hop*.2;
       if(!leg.rear&&leg.side===-1) {
-        leg.upper.rotation.x+=pose.reach*-.65+pose.grooming*-2.4;
+        leg.upper.rotation.x+=pose.reach*-.45+pose.grooming*-2.4;
         leg.lower.rotation.x+=pose.reach*.5+pose.grooming*1.4;
         leg.paw.rotation.x-=pose.grooming*.4;
       }
@@ -203,7 +204,7 @@ export function createCourtyardCat(scene) {
     group.updateMatrixWorld(true);
     shadow.position.set(pose.x,.1105,pose.z-.025);shadow.rotation.z=-pose.yaw;
     shadow.scale.setScalar(1+pose.hop*.22);shadowMaterial.uniforms.opacity.value=(theme==='neon'?.16:.22)-pose.hop*.09;
-    leaf.position.set(HOME[0]+.12+pose.leaf*.08,.116+Math.sin(pose.leaf*Math.PI)*.025,HOME[2]+.37+pose.leaf*.12);
+    leaf.position.set(HOME[0]-.025+pose.leaf*.05,.116+Math.sin(pose.leaf*Math.PI)*.025,HOME[2]+.225+pose.leaf*.22);
     leaf.rotation.y=.6+pose.leaf*2;
     moving=pose.hop>0||pose.reach>0||pose.grooming>0||Math.abs(pose.steps)>.01;
   }

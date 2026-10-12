@@ -38,6 +38,12 @@ for(let frame=0;frame<1050;frame++) {
     minY=Math.min(minY,position.y);
   }
   assert(minY>.103,`Posed limbs must not sink through paving: ${minY}`);
+  if(frame===89) {
+    const paw=mesh.skeleton.bones.find(b=>b.name==='Front leg -1').children[0].children[0];
+    const toe=paw.localToWorld(new THREE.Vector3(0,-.02,.05));
+    const leaf=scene.getObjectByName('Kitten fallen leaf').position;
+    assert(toe.distanceTo(leaf)<.07,'Paw swipe must actually reach the fallen leaf');
+  }
 }
 const clock=cat.snapshot().time;
 cat.update(20,{theme:'day'},{decor:true},true,false);assert.equal(cat.snapshot().time,clock);
